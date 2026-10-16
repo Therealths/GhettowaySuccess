@@ -39,22 +39,38 @@ const RADIO_EVENTS = [
   }
 ];
 
+function checkRoomReady(room) {
+  if (!room) return false;
+  const isFull = room.players.length === room.maxPlayers;
+  const allPicked = room.players.every(p => p.caidId !== null);
+  return isFull && allPicked;
+}
+
+function broadcastTurnState(roomId) {
+  const room = rooms[roomId];
+  if (!room || !room.players.length) return;
+
+  const activePlayer = room.players[room.currentTurnIndex];
+  io.to(roomId).emit('turn_state_updated', {
+    activePlayerToken: activePlayer ? activePlayer.playerToken : null,
+    activePlayerName: activePlayer ? activePlayer.name : '',
+    activeCaidName: activePlayer ? activePlayer.caidName : '',
+    activeSocketId: activePlayer ? activePlayer.socketId : null,
+    alliedTokens: room.currentTurnAlliedTokens || []
+  });
+}
+
 io.on('connection', (socket) => {
   socket.emit('rooms_list', getAvailableRooms());
 
-  // 0. Tentative de reconnexion automatique d'un joueur existant
+  // Reconnexion persistante
   socket.on('reconnect_player', ({ roomId, playerToken }) => {
     const room = rooms[roomId];
-    if (!room) {
-      return socket.emit('reconnect_failed');
-    }
+    if (!room) return socket.emit('reconnect_failed');
 
     const existingPlayer = room.players.find(p => p.playerToken === playerToken);
-    if (!existingPlayer) {
-      return socket.emit('reconnect_failed');
-    }
+    if (!existingPlayer) return socket.emit('reconnect_failed');
 
-    // Réassigner le socket à ce joueur
     existingPlayer.socketId = socket.id;
     socket.join(roomId);
     socket.roomId = roomId;
@@ -65,13 +81,22 @@ io.on('connection', (socket) => {
       player: existingPlayer,
       gameStarted: room.gameStarted || false,
       round: room.round,
-      radio: room.currentRadio
+      radio: room.currentRadio,
+      isReady: checkRoomReady(room)
     });
 
-    io.to(roomId).emit('update_room_players', room.players);
+    io.to(roomId).emit('update_room_players', {
+      players: room.players,
+      isReady: checkRoomReady(room),
+      maxPlayers: room.maxPlayers
+    });
+
+    if (room.gameStarted) {
+      broadcastTurnState(roomId);
+    }
   });
 
-  // 1. Création d'un salon (Hôte) [1]
+  // Création de salon
   socket.on('create_room', ({ gameName, playerName, maxPlayers, playerToken }) => {
     const roomId = 'GW_' + Math.random().toString(36).substring(2, 7).toUpperCase();
     rooms[roomId] = {
@@ -80,6 +105,8 @@ io.on('connection', (socket) => {
       maxPlayers: Math.min(4, Math.max(2, parseInt(maxPlayers) || 4)),
       hostSocketId: socket.id,
       round: 1,
+      currentTurnIndex: 0,
+      currentTurnAlliedTokens: [],
       gameStarted: false,
       currentRadio: RADIO_EVENTS[0],
       players: []
@@ -90,7 +117,7 @@ io.on('connection', (socket) => {
       playerToken: playerToken,
       name: playerName || 'Grand Caïd',
       caidId: null,
-      caidName: 'En attente',
+      caidName: null,
       isHost: true,
       hearts: 3,
       pocketCash: 5000,
@@ -109,14 +136,11 @@ io.on('connection', (socket) => {
     io.emit('rooms_list', getAvailableRooms());
   });
 
-  // 2. Rejoindre un salon existant [1]
+  // Rejoindre un salon
   socket.on('join_room', ({ roomId, playerName, playerToken }) => {
     const room = rooms[roomId];
-    if (!room) {
-      return socket.emit('error_msg', 'Salon introuvable ou fermé.');
-    }
+    if (!room) return socket.emit('error_msg', 'Salon introuvable ou fermé.');
 
-    // Si le joueur est déjà enregistré dans cette salle, on le reconnecte
     const existing = room.players.find(p => p.playerToken === playerToken);
     if (existing) {
       existing.socketId = socket.id;
@@ -128,13 +152,18 @@ io.on('connection', (socket) => {
         player: existing,
         gameStarted: room.gameStarted || false,
         round: room.round,
-        radio: room.currentRadio
+        radio: room.currentRadio,
+        isReady: checkRoomReady(room)
       });
-      return io.to(roomId).emit('update_room_players', room.players);
+      return io.to(roomId).emit('update_room_players', {
+        players: room.players,
+        isReady: checkRoomReady(room),
+        maxPlayers: room.maxPlayers
+      });
     }
 
     if (room.players.length >= room.maxPlayers) {
-      return socket.emit('error_msg', 'Ce salon est complet (maximum 4 joueurs).');
+      return socket.emit('error_msg', 'Ce salon est complet.');
     }
 
     const joiner = {
@@ -142,7 +171,7 @@ io.on('connection', (socket) => {
       playerToken: playerToken,
       name: playerName || 'Rival',
       caidId: null,
-      caidName: 'En attente',
+      caidName: null,
       isHost: false,
       hearts: 3,
       pocketCash: 5000,
@@ -158,11 +187,15 @@ io.on('connection', (socket) => {
     socket.roomId = roomId;
 
     socket.emit('room_joined', { roomId, room, player: joiner });
-    io.to(roomId).emit('update_room_players', room.players);
+    io.to(roomId).emit('update_room_players', {
+      players: room.players,
+      isReady: checkRoomReady(room),
+      maxPlayers: room.maxPlayers
+    });
     io.emit('rooms_list', getAvailableRooms());
   });
 
-  // 3. Attribution du Caïd tiré avec verrouillage strict anti-doublon
+  // Attribution du Caïd (unique par partie)
   socket.on('assign_caid', ({ caidId, caidName, startCash, startDrug, startHearts, unarmedAtk }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -180,26 +213,123 @@ io.on('connection', (socket) => {
       p.drugs = startDrug;
       p.hearts = startHearts;
       p.atk = unarmedAtk;
-      io.to(socket.roomId).emit('update_room_players', room.players);
-    }
-  });
 
-  // 4. Lancement de la partie par l'Hôte [1]
-  socket.on('start_game', () => {
-    const room = rooms[socket.roomId];
-    if (room && room.hostSocketId === socket.id) {
-      room.gameStarted = true;
-      room.round = 1;
-      room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
-      io.to(socket.roomId).emit('game_started', {
-        round: room.round,
-        radio: room.currentRadio,
-        players: room.players
+      io.to(socket.roomId).emit('update_room_players', {
+        players: room.players,
+        isReady: checkRoomReady(room),
+        maxPlayers: room.maxPlayers
       });
     }
   });
 
-  // 5. Synchronisation de l'état d'un joueur en direct
+  // Démarrage de partie (Strictement conditionné au statut Prêt de tous)
+  socket.on('start_game', () => {
+    const room = rooms[socket.roomId];
+    if (!room) return;
+    if (room.hostSocketId !== socket.id) {
+      return socket.emit('error_msg', "Seul l'Hôte peut démarrer la partie.");
+    }
+    if (!checkRoomReady(room)) {
+      return socket.emit('error_msg', "Impossible de lancer : tous les Caïds doivent être connectés et prêts !");
+    }
+
+    room.gameStarted = true;
+    room.round = 1;
+    room.currentTurnIndex = 0;
+    room.currentTurnAlliedTokens = [];
+    room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
+
+    io.to(socket.roomId).emit('game_started', {
+      round: room.round,
+      radio: room.currentRadio,
+      players: room.players
+    });
+
+    broadcastTurnState(socket.roomId);
+  });
+
+  // Passer au tour suivant
+  socket.on('next_player_turn', () => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.gameStarted) return;
+
+    const activePlayer = room.players[room.currentTurnIndex];
+    if (!activePlayer || activePlayer.socketId !== socket.id) {
+      return; // Seul le joueur actif peut clore son tour
+    }
+
+    // Réinitialisation des alliances pour le nouveau tour
+    room.currentTurnAlliedTokens = [];
+
+    // Passage au joueur suivant
+    room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
+
+    // Si la boucle est complète, on avance d'une manche avec nouveau Flash Radio
+    if (room.currentTurnIndex === 0) {
+      room.round++;
+      room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
+      io.to(socket.roomId).emit('new_round_started', {
+        round: room.round,
+        radio: room.currentRadio
+      });
+    }
+
+    broadcastTurnState(socket.roomId);
+  });
+
+  // Proposition d'Alliance
+  socket.on('propose_alliance', ({ targetSocketId, senderName, musclesCount }) => {
+    const room = rooms[socket.roomId];
+    if (!room) return;
+    const sender = room.players.find(p => p.socketId === socket.id);
+    if (!sender) return;
+
+    io.to(targetSocketId).emit('alliance_request_received', {
+      senderSocketId: socket.id,
+      senderToken: sender.playerToken,
+      senderName: sender.name,
+      senderCaid: sender.caidName,
+      musclesCount: musclesCount || 0
+    });
+  });
+
+  // Réponse à la demande d'Alliance
+  socket.on('respond_alliance', ({ accepted, senderSocketId, senderToken }) => {
+    const room = rooms[socket.roomId];
+    if (!room) return;
+    const responder = room.players.find(p => p.socketId === socket.id);
+    if (!responder) return;
+
+    if (accepted) {
+      // Les deux joueurs deviennent autorisés à agir simultanément pendant ce tour
+      if (!room.currentTurnAlliedTokens.includes(responder.playerToken)) {
+        room.currentTurnAlliedTokens.push(responder.playerToken);
+      }
+      if (!room.currentTurnAlliedTokens.includes(senderToken)) {
+        room.currentTurnAlliedTokens.push(senderToken);
+      }
+
+      io.to(senderSocketId).emit('alliance_confirmed', {
+        allyName: responder.name,
+        allyCaid: responder.caidName,
+        musclesCount: responder.musclesCount || 0
+      });
+
+      socket.emit('alliance_confirmed', {
+        allyName: room.players.find(p => p.socketId === senderSocketId)?.name || 'Allié',
+        allyCaid: room.players.find(p => p.socketId === senderSocketId)?.caidName || 'Caïd',
+        musclesCount: room.players.find(p => p.socketId === senderSocketId)?.musclesCount || 0
+      });
+
+      broadcastTurnState(socket.roomId);
+    } else {
+      io.to(senderSocketId).emit('alliance_declined', {
+        declinerName: responder.name
+      });
+    }
+  });
+
+  // Synchronisation de fiche joueur
   socket.on('sync_player', (updatedData) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -210,7 +340,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 6. Combat en direct contre un rival connecté [1]
+  // Combat direct
   socket.on('execute_combat', ({ targetSocketId, dmg, totalAtk }) => {
     io.to(targetSocketId).emit('received_attack', {
       attackerSocketId: socket.id,
@@ -219,22 +349,12 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 7. Proposition et confirmation d'alliance [1]
-  socket.on('propose_alliance', ({ targetSocketId, senderName, musclesCount }) => {
-    io.to(targetSocketId).emit('alliance_received', {
-      senderSocketId: socket.id,
-      senderName,
-      musclesCount
-    });
-  });
-
-  // 8. Quitter explicitement une partie
+  // Quitter la partie
   socket.on('leave_room', () => {
     handlePlayerDisconnect(socket);
   });
 
   socket.on('disconnect', () => {
-    // Ne supprime pas immédiatement le joueur pour lui laisser le temps de se reconnecter
     const room = rooms[socket.roomId];
     if (room && !room.gameStarted) {
       handlePlayerDisconnect(socket);
@@ -253,7 +373,11 @@ function handlePlayerDisconnect(socket) {
         room.hostSocketId = room.players[0].socketId;
         room.players[0].isHost = true;
       }
-      io.to(socket.roomId).emit('update_room_players', room.players);
+      io.to(socket.roomId).emit('update_room_players', {
+        players: room.players,
+        isReady: checkRoomReady(room),
+        maxPlayers: room.maxPlayers
+      });
     }
     io.emit('rooms_list', getAvailableRooms());
   }
@@ -271,6 +395,4 @@ function getAvailableRooms() {
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Serveur Ghettoway opérationnel sur le port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Serveur Ghettoway opérationnel sur le port ${PORT}`));
