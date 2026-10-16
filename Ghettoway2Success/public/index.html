@@ -65,9 +65,7 @@
       border-radius: 28px;
     }
     @media (max-width: 480px) {
-      #app-container {
-        border-radius: 0;
-      }
+      #app-container { border-radius: 0; }
     }
     .screen-view {
       display: none !important;
@@ -80,9 +78,7 @@
       padding-bottom: max(16px, env(safe-area-inset-bottom));
       animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .screen-view.active {
-      display: flex !important;
-    }
+    .screen-view.active { display: flex !important; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -131,9 +127,7 @@
       box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7);
     }
     .ghetto-home-bg {
-      background-image:
-        linear-gradient(to bottom, rgba(5,6,9,0) 0%, rgba(5,6,9,0.3) 45%, rgba(5,6,9,0.95) 85%),
-        url('wallpaper.jpg');
+      background-image: linear-gradient(to bottom, rgba(5,6,9,0) 0%, rgba(5,6,9,0.3) 45%, rgba(5,6,9,0.95) 85%), url('wallpaper.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -145,7 +139,7 @@
 <body>
   <div id="app-container">
 
-    <!-- ================= PAGE 1 : ACCUEIL ================= -->
+    <!-- PAGE 1 : ACCUEIL -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full flex-shrink-0">
         <button onclick="navTo('page-2')" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 active:scale-95 transition">
@@ -157,7 +151,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 2 : CRÉER ================= -->
+    <!-- PAGE 2 : CRÉER -->
     <div id="page-2" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-5">
@@ -196,7 +190,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 3 : REJOINDRE ================= -->
+    <!-- PAGE 3 : REJOINDRE -->
     <div id="page-3" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-4">
@@ -224,7 +218,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 4 : CARROUSEL DE TIRAGE ================= -->
+    <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex-col justify-between h-full">
       <div class="flex items-center justify-between w-full pt-1 flex-shrink-0 mb-1">
         <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
@@ -269,7 +263,7 @@
       <div class="space-y-2 mt-2 flex-shrink-0 w-full">
         <button type="button" id="btnSpinWheel" onclick="startCarouselDraw()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
           <i class="ph-bold ph-dice-five text-xl"></i>
-          <span>Tirage au sort (Suspense garanti)</span>
+          <span>Tirage au sort (Caïds disponibles)</span>
         </button>
         <button type="button" id="btnProceedLobby" onclick="navTo('page-lobby')" class="hidden w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20">
           <span>Rejoindre la Salle d'Attente</span>
@@ -278,7 +272,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE LOBBY : SALLE D'ATTENTE ================= -->
+    <!-- PAGE LOBBY : SALLE D'ATTENTE -->
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center justify-between pt-1 mb-3">
@@ -298,27 +292,27 @@
       </div>
 
       <div class="space-y-3 mt-4 flex-shrink-0 w-full">
-        <p id="waitingMessage" class="text-center text-[11px] text-slate-400 font-mono italic animate-pulse">
-          En attente du lancement par l'Hôte...
-        </p>
-        <button type="button" id="btnStartGame" onclick="emitStartGame()" class="hidden w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+        <div id="lobbyReadinessBanner" class="p-3 glass-panel rounded-2xl text-center border-amber-500/30">
+          <p id="waitingMessage" class="text-xs font-mono font-bold text-amber-300">
+            En attente que tous les Caïds soient prêts...
+          </p>
+          <span id="waitingSubMessage" class="text-[10px] text-slate-400 font-mono block mt-0.5">
+            Chaque joueur doit avoir effectué son tirage.
+          </span>
+        </div>
+
+        <button type="button" id="btnStartGame" onclick="emitStartGame()" disabled class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl active:scale-95 transition flex items-center justify-center gap-2 opacity-30 cursor-not-allowed">
           <i class="ph-bold ph-play text-base"></i>
-          <span>Commencer La Partie (Hôte)</span>
+          <span id="btnStartGameText">En attente des Caïds...</span>
         </button>
       </div>
     </div>
 
-    <!-- ================= PAGE 5 : FLASH RADIO ================= -->
+    <!-- PAGE 5 : FLASH RADIO -->
     <div id="page-5" class="screen-view p-5 justify-between bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
       <div class="pt-1 text-center flex-shrink-0">
-        <div class="flex items-center justify-between mb-2">
-          <button onclick="navTo('page-lobby')" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
-            <i class="ph-bold ph-caret-left text-base"></i>
-          </button>
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 border border-rose-500/40 text-rose-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
-            <i class="ph-bold ph-broadcast animate-pulse text-base"></i> Phase 1 : Flash Radio
-          </div>
-          <div class="w-9"></div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 border border-rose-500/40 text-rose-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full mb-2">
+          <i class="ph-bold ph-broadcast animate-pulse text-base"></i> Phase 1 : Flash Radio
         </div>
         <h2 class="text-2xl font-black text-white uppercase tracking-tight font-mono">Manche <span id="radioRoundNumber">1</span></h2>
         <p class="text-xs text-slate-400 mt-0.5">Alerte métropolitaine instantanée.</p>
@@ -342,8 +336,30 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 6 : FICHE CAÏD ================= -->
-    <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between">
+    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) -->
+    <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between relative">
+
+      <!-- CALQUE GRISÉ DE BLOCAGE TOUR PAR TOUR -->
+      <div id="turnBlockerOverlay" class="hidden absolute inset-0 bg-black/75 backdrop-blur-[3px] z-40 flex flex-col items-center justify-center p-5 text-center">
+        <div class="glass-panel p-6 rounded-3xl border border-white/15 shadow-2xl max-w-xs w-full space-y-3 animate-fadeIn">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-300 mx-auto flex items-center justify-center text-2xl animate-pulse">
+            <i class="ph-bold ph-hourglass-high"></i>
+          </div>
+          <div>
+            <span class="text-[9px] font-mono uppercase tracking-widest text-slate-400 block font-bold">Tour Par Tour</span>
+            <h3 class="text-sm font-black text-white uppercase mt-0.5">
+              Tour de <span id="blockerCaidName" class="text-ghetto-gold">...</span>
+            </h3>
+            <p id="blockerPlayerSub" class="text-[11px] text-slate-300 mt-1 leading-snug">
+              Patientez pendant que ce Caïd effectue ses actions...
+            </p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono text-slate-400">
+            Interface verrouillée jusqu'à votre tour (ou jusqu'à scellement d'une alliance).
+          </div>
+        </div>
+      </div>
+
       <div class="flex flex-col h-full justify-between space-y-1.5">
 
         <div class="flex items-center justify-between gap-2 flex-shrink-0 pt-0.5">
@@ -412,7 +428,7 @@
           </div>
         </div>
 
-        <!-- ONGLETS AVEC TITRES HAUTS EN CONTRASTE -->
+        <!-- ONGLETS -->
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex items-end gap-1.5 px-1 pt-1 flex-shrink-0">
             <button id="mainTabInteractions" onclick="switchMainCaidTab('interactions')" class="flex-1 py-2 px-2 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-amber-300 bg-[#141622] border-t-2 border-amber-400 shadow-lg">
@@ -492,6 +508,32 @@
       </div>
     </div>
 
+    <!-- MODALE DEMANDE D'ALLIANCE REÇUE EN DIRECT -->
+    <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
+      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 shadow-2xl max-w-sm mx-auto w-full text-center">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-300 mx-auto flex items-center justify-center text-2xl border border-purple-400/40">
+          <i class="ph-bold ph-handshake"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white uppercase tracking-wider">Demande d'Alliance</h3>
+          <p class="text-xs text-slate-300 mt-1">
+            <strong id="allianceReqSenderName" class="text-purple-300">Un rival</strong> vous propose une alliance pour ce tour.
+          </p>
+          <span class="text-[10px] text-slate-400 font-mono block mt-2">
+            Si vous acceptez, vos deux interfaces seront déverrouillées pour jouer simultanément vos braquages !
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button onclick="respondToAllianceRequest(true)" class="py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-xl text-xs shadow-lg active:scale-95 transition">
+            Accepter
+          </button>
+          <button onclick="respondToAllianceRequest(false)" class="py-3 glass-panel text-slate-400 font-bold uppercase rounded-xl text-xs hover:text-white transition">
+            Refuser
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODALE TRANSFERT QG -->
     <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
@@ -533,9 +575,9 @@
           <h3 class="text-sm font-black text-purple-400 uppercase">Sceller une Alliance</h3>
           <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-        <p class="text-xs text-slate-300">L'allié compte comme +1 membre et ses Gros Bras s'additionnent aux vôtres pour ce tour !</p>
+        <p class="text-xs text-slate-300">L'allié reçoit une demande de confirmation. S'il accepte, ses Gros Bras s'additionnent aux vôtres et son écran se débloque pour jouer avec vous !</p>
         <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold"></select>
-        <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs">Sceller le Pacte</button>
+        <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs">Envoyer la Demande</button>
         <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
@@ -554,7 +596,7 @@
           <button onclick='processQrPayload({"t":"gb","lvl":1,"p":1500,"atk":1})' class="p-2 glass-panel rounded-xl text-left text-sky-300">💪 Gros Bras L1 (+1)</button>
           <button onclick='processQrPayload({"t":"gb","lvl":2,"p":3000,"atk":2})' class="p-2 glass-panel rounded-xl text-left text-sky-400">💪 Gros Bras L2 (+2)</button>
           <button onclick='processQrPayload({"t":"pr","lvl":1,"p":2000,"rev":1000})' class="p-2 glass-panel rounded-xl text-left text-pink-300">👠 Prostituée L1</button>
-          <button onclick='processQrPayload({"t":"pr","lvl":2,"p":4000,"rev":2500})' class="p-2.5 glass-panel rounded-xl text-left text-pink-400">👠 Prostituée L2</button>
+          <button onclick='processQrPayload({"t":"pr","lvl":2,"p":4000,"rev":2500})' class="p-2 glass-panel rounded-xl text-left text-pink-400">👠 Prostituée L2</button>
           <button onclick='processQrPayload({"t":"yen","n":"Client VIP","d":2,"c":4000})' class="p-2 glass-panel rounded-xl text-left text-emerald-300">🤝 Yencli (2kg&rarr;4k€)</button>
           <button onclick='processQrPayload({"t":"brq","n":"Bijouterie","req":3,"m":2,"c":8000,"d":0})' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (Req: 3Atk/2M)</button>
         </div>
@@ -575,7 +617,7 @@
   </div>
 
   <script>
-    // --- GESTION DU JETON PERSISTANT ---
+    // --- JETON PERSISTANT PAR NAVIGATEUR ---
     function getOrCreatePlayerToken() {
       let token = localStorage.getItem('g2s_player_token');
       if (!token) {
@@ -635,12 +677,13 @@
     let currentTransferResource = 'cash';
     let connectedRivals = [];
     let takenCaidsInGame = [];
+    let pendingAllianceRequest = null;
+    let isMyTurnToPlay = false;
 
-    // --- SOCKET.IO MULTIJOUEUR AVEC RECONNEXION ---
+    // --- SOCKET.IO TEMPS RÉEL ---
     const socket = typeof io !== 'undefined' ? io() : null;
 
     if (socket) {
-      // Reconnexion automatique au démarrage si un salon est mémorisé
       socket.on('connect', () => {
         const savedRoomId = localStorage.getItem('g2s_room_id');
         if (savedRoomId) {
@@ -651,7 +694,7 @@
         }
       });
 
-      socket.on('reconnect_success', ({ roomId, room, player, gameStarted, round, radio }) => {
+      socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, isReady }) => {
         localStorage.setItem('g2s_room_id', roomId);
         localPlayer = Object.assign(localPlayer, player);
 
@@ -711,34 +754,58 @@
         navTo('page-4');
       });
 
-      socket.on('update_room_players', (players) => {
+      // Synchronisation du salon et validation de démarrage
+      socket.on('update_room_players', ({ players, isReady, maxPlayers }) => {
         connectedRivals = players.filter(p => p.playerToken !== myPlayerToken);
         takenCaidsInGame = players.filter(p => p.caidId).map(p => p.caidId);
 
         const countEl = document.getElementById('lobbyPlayerCount');
-        if (countEl) countEl.innerText = `${players.length} / 4 Joueurs connectés`;
+        if (countEl) countEl.innerText = `${players.length} / ${maxPlayers} Joueurs connectés`;
 
         const container = document.getElementById('lobbyPlayersContainer');
         if (container) {
           container.innerHTML = '';
           players.forEach(p => {
+            const hasPicked = p.caidId !== null;
             container.innerHTML += `
               <div class="p-3 glass-panel rounded-2xl flex items-center justify-between">
-                <span class="font-black text-white text-xs">${p.name} (${p.caidName || 'En tirage'})</span>
-                <span class="text-[10px] text-emerald-400 font-mono font-bold">Connecté</span>
+                <div>
+                  <span class="font-black text-white text-xs block">${p.name}</span>
+                  <span class="text-[10px] font-mono text-slate-400">${p.caidName || 'Tirage en cours...'}</span>
+                </div>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${hasPicked ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
+                  ${hasPicked ? 'Prêt' : 'En attente'}
+                </span>
               </div>
             `;
           });
         }
 
+        // Gestion de l'état du bouton Commencer
         const btnStart = document.getElementById('btnStartGame');
+        const btnText = document.getElementById('btnStartGameText');
         const waitMsg = document.getElementById('waitingMessage');
-        if (localPlayer.isHost) {
-          if (btnStart) btnStart.classList.remove('hidden');
-          if (waitMsg) waitMsg.innerText = "Tous les joueurs sont en salle d'attente. Lancez dès que vous êtes prêts !";
+        const waitSub = document.getElementById('waitingSubMessage');
+
+        if (isReady) {
+          if (localPlayer.isHost) {
+            btnStart.disabled = false;
+            btnStart.classList.remove('opacity-30', 'cursor-not-allowed');
+            btnStart.classList.add('hover:brightness-110');
+            btnText.innerText = "Commencer La Partie";
+            waitMsg.innerText = "Tous les Caïds sont prêts !";
+            waitSub.innerText = "L'Hôte peut maintenant lancer les hostilités.";
+          } else {
+            waitMsg.innerText = "Tous les Caïds sont prêts !";
+            waitSub.innerText = "En attente que l'Hôte clique sur Commencer...";
+          }
         } else {
-          if (btnStart) btnStart.classList.add('hidden');
-          if (waitMsg) waitMsg.innerText = "En attente que l'Hôte lance la partie...";
+          btnStart.disabled = true;
+          btnStart.classList.add('opacity-30', 'cursor-not-allowed');
+          btnStart.classList.remove('hover:brightness-110');
+          btnText.innerText = `En attente (${players.filter(p=>p.caidId).length}/${maxPlayers} prêts)`;
+          waitMsg.innerText = "En attente que tous les joueurs soient prêts...";
+          waitSub.innerText = `Chaque joueur doit rejoindre et choisir son Caïd (${players.length}/${maxPlayers} connectés).`;
         }
 
         if (document.getElementById('page-4').classList.contains('active') && !localPlayer.caidId) {
@@ -752,6 +819,56 @@
         currentSession.round = round;
         currentSession.currentRadioEvent = radio;
         startRoundPhase1();
+      });
+
+      socket.on('new_round_started', ({ round, radio }) => {
+        currentSession.round = round;
+        currentSession.currentRadioEvent = radio;
+        localPlayer.specialUsedThisTurn = false;
+        localPlayer.allianceActive = false;
+        localPlayer.activeAlly = null;
+        startRoundPhase1();
+      });
+
+      // Gestion du tour par tour et déblocage de l'overlay
+      socket.on('turn_state_updated', ({ activePlayerToken, activePlayerName, activeCaidName, alliedTokens }) => {
+        const isMyTurn = (activePlayerToken === myPlayerToken);
+        const isAlliedWithActive = (alliedTokens && alliedTokens.includes(myPlayerToken));
+        isMyTurnToPlay = isMyTurn || isAlliedWithActive;
+
+        const blocker = document.getElementById('turnBlockerOverlay');
+        const blockerCaidName = document.getElementById('blockerCaidName');
+        const blockerPlayerSub = document.getElementById('blockerPlayerSub');
+
+        if (isMyTurnToPlay) {
+          blocker.classList.add('hidden');
+        } else {
+          blocker.classList.remove('hidden');
+          blockerCaidName.innerText = activeCaidName ? `${activeCaidName} (${activePlayerName})` : activePlayerName;
+          blockerPlayerSub.innerText = "Veuillez patienter pendant que ce Caïd effectue ses actions...";
+        }
+      });
+
+      // Demande d'alliance reçue d'un autre joueur
+      socket.on('alliance_request_received', (data) => {
+        pendingAllianceRequest = data;
+        document.getElementById('allianceReqSenderName').innerText = `${data.senderName} (${data.senderCaid})`;
+        document.getElementById('modalAllianceRequestReceived').classList.remove('hidden');
+      });
+
+      socket.on('alliance_confirmed', ({ allyName, allyCaid, musclesCount }) => {
+        localPlayer.allianceActive = true;
+        localPlayer.activeAlly = {
+          name: allyName,
+          caid: allyCaid,
+          grosBrasCount: musclesCount || 0,
+          bonusAtk: (musclesCount || 0) * 2
+        };
+        alert(`🤝 Alliance confirmée avec ${allyName} ! Vos interfaces sont déverrouillées pour jouer ensemble ce tour.`);
+      });
+
+      socket.on('alliance_declined', ({ declinerName }) => {
+        alert(`❌ ${declinerName} a décliné votre proposition d'alliance.`);
       });
 
       socket.on('player_updated', (updatedPlayer) => {
@@ -787,10 +904,20 @@
 
     function emitStartGame() {
       if (socket) socket.emit('start_game');
-      else {
-        currentSession.round = 1;
-        startRoundPhase1();
+    }
+
+    function respondToAllianceRequest(accepted) {
+      document.getElementById('modalAllianceRequestReceived').classList.add('hidden');
+      if (!pendingAllianceRequest) return;
+
+      if (socket) {
+        socket.emit('respond_alliance', {
+          accepted,
+          senderSocketId: pendingAllianceRequest.senderSocketId,
+          senderToken: pendingAllianceRequest.senderToken
+        });
       }
+      pendingAllianceRequest = null;
     }
 
     function syncMultiplayerTargets() {
@@ -868,7 +995,7 @@
       });
     }
 
-    // --- CARROUSEL AVEC SUSPENSE ET EXCLUSION DES CAÏDS PRIS ---
+    // --- CARROUSEL AVEC SUSPENSE & SÉLECTION UNIQUE ---
     function getAvailableCaids() {
       return CAID_ROSTER.filter(c => !takenCaidsInGame.includes(c.id));
     }
@@ -909,7 +1036,6 @@
         track.appendChild(card);
       });
 
-      // Aucun surlignage actif au départ pour ne pas spoiler
       centerCarouselIndex(1, false, false);
     }
 
@@ -943,7 +1069,7 @@
       const btnSpin = document.getElementById('btnSpinWheel');
       if (btnSpin) btnSpin.disabled = true;
 
-      // Retirer toute surbrillance pendant la rotation pour le suspense
+      // Retirer toute surbrillance pendant le roulement
       const allCards = document.querySelectorAll('.carousel-card');
       allCards.forEach(c => c.classList.remove('is-active'));
 
@@ -951,10 +1077,9 @@
       const chosenCaid = available[chosenCaidIndex];
       const finalIndex = available.length + chosenCaidIndex;
 
-      // Animer sans surligner la cible en avance
       centerCarouselIndex(finalIndex, true, false);
 
-      // Le suspense : mise en valeur seulement une fois l'animation terminée (3,3s)
+      // Surbrillance et révélation à la fin des 3,3 secondes d'animation
       setTimeout(() => {
         const cardsAfter = document.querySelectorAll('.carousel-card');
         if (cardsAfter[finalIndex]) {
@@ -1001,7 +1126,7 @@
       }, 3300);
     }
 
-    // --- LOGIQUE METIER & COMBAT ---
+    // --- GAMEPLAY & ACTIONS ---
     function startRoundPhase1() {
       const ev = currentSession.currentRadioEvent || { title: "Descente massive", desc: "La police avance de +2 cases." };
       document.getElementById('radioRoundNumber').innerText = currentSession.round;
@@ -1017,7 +1142,6 @@
     }
 
     function acknowledgeRadioCard() {
-      localPlayer.specialUsedThisTurn = false;
       navTo('page-6');
     }
 
@@ -1040,11 +1164,13 @@
     }
 
     function cyclePlayerHearts() {
+      if (!isMyTurnToPlay) return;
       localPlayer.hearts = localPlayer.hearts <= 1 ? 3 : localPlayer.hearts - 1;
       refreshHud();
     }
 
     function clickMuscleSlot(idx) {
+      if (!isMyTurnToPlay) return;
       if (localPlayer.musclesOnPerson[idx]) {
         const item = localPlayer.musclesOnPerson[idx];
         if (confirm(`Libérer ce Gros Bras (${item.name}) et le renvoyer dans l'Inventaire ?`)) {
@@ -1074,6 +1200,7 @@
     }
 
     function depositProstituteToSafe() {
+      if (!isMyTurnToPlay) return;
       if (!localPlayer.prostituteInTransit) return;
       localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
       localPlayer.prostituteInTransit = null;
@@ -1082,6 +1209,7 @@
     }
 
     function triggerSpecialPower() {
+      if (!isMyTurnToPlay) return;
       if (localPlayer.specialUsedThisTurn) {
         alert("Capacité spéciale déjà déclenchée durant ce tour !");
         return;
@@ -1118,6 +1246,7 @@
     }
 
     function triggerPoliceInspection() {
+      if (!isMyTurnToPlay) return;
       const vehKey = localPlayer.equipped.vehicle ? (localPlayer.equipped.vehicle.key || 'veh') : 'none';
       const hasVehicle = vehKey !== 'none';
       const promptMsg = hasVehicle
@@ -1221,8 +1350,7 @@
     }
 
     function endCurrentPlayerTurn() {
-      localPlayer.allianceActive = false;
-      localPlayer.activeAlly = null;
+      if (!isMyTurnToPlay) return;
       document.getElementById('modalPatrolDice').classList.remove('hidden');
       setTimeout(() => {
         const val = Math.floor(Math.random() * 6) + 1;
@@ -1233,11 +1361,14 @@
 
     function skipPatrolWait() {
       closeModal('modalPatrolDice');
-      startRoundPhase1();
+      if (socket) {
+        socket.emit('next_player_turn');
+      }
     }
 
     // --- MODALES & ACTIONS ---
     function openTransferModal(mode) {
+      if (!isMyTurnToPlay) return;
       currentTransferMode = mode;
       document.getElementById('modalTransfer').classList.remove('hidden');
     }
@@ -1249,6 +1380,7 @@
     }
 
     function confirmTransferAction() {
+      if (!isMyTurnToPlay) return;
       const amt = parseInt(document.getElementById('transferAmountInput').value) || 0;
       if (currentTransferResource === 'cash') {
         if (currentTransferMode === 'deposit') {
@@ -1268,6 +1400,7 @@
     }
 
     function openCombatModal() {
+      if (!isMyTurnToPlay) return;
       document.getElementById('arenaPlayerAtk').innerText = getTotalAtk();
       document.getElementById('modalCombat').classList.remove('hidden');
     }
@@ -1279,6 +1412,7 @@
     }
 
     function resolveStreetFight() {
+      if (!isMyTurnToPlay) return;
       const sel = document.getElementById('combatTargetSelect');
       const target = connectedRivals.find(r => r.socketId === sel.value);
       if (!target) return alert("Sélectionnez une cible adverse.");
@@ -1291,24 +1425,29 @@
     }
 
     function openAllianceModal() {
+      if (!isMyTurnToPlay) return;
       document.getElementById('modalAlliance').classList.remove('hidden');
     }
 
     function confirmAlliance() {
+      if (!isMyTurnToPlay) return;
       const sel = document.getElementById('allianceTargetSelect');
       const target = connectedRivals.find(r => r.socketId === sel.value);
       if (!target) return alert("Choisissez un Caïd connecté.");
-      localPlayer.allianceActive = true;
-      localPlayer.activeAlly = {
-        name: target.name,
-        grosBrasCount: target.musclesCount || 1,
-        bonusAtk: (target.musclesCount || 1) * 2
-      };
-      alert(`🤝 Alliance conclue avec ${target.name} pour 1 tour !`);
+
+      if (socket) {
+        socket.emit('propose_alliance', {
+          targetSocketId: target.socketId,
+          senderName: localPlayer.name,
+          musclesCount: localPlayer.musclesOnPerson.length
+        });
+      }
+      alert(`Demande d'alliance envoyée à ${target.name}. En attente de sa réponse...`);
       closeModal('modalAlliance');
     }
 
     async function openQrScannerModal() {
+      if (!isMyTurnToPlay) return;
       document.getElementById('modalQrScanner').classList.remove('hidden');
       if (typeof Html5Qrcode !== 'undefined') {
         try {
@@ -1331,6 +1470,7 @@
     }
 
     function processQrPayload(payload) {
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'effectuer des achats ou des missions !");
       let data = payload;
       if (typeof payload === 'string' && payload.startsWith('{')) {
         try { data = JSON.parse(payload); } catch(e){}
@@ -1388,6 +1528,7 @@
     }
 
     function equipItem(idx) {
+      if (!isMyTurnToPlay) return;
       const it = localPlayer.inventory.splice(idx, 1)[0];
       if (it.type === 'WEAPON') localPlayer.equipped.weapon = it;
       if (it.type === 'ARMOR') localPlayer.equipped.armor = it;
