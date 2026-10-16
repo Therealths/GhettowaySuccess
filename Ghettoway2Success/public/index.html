@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ghettoway 2 Success — Companion Multijoueur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <!-- Socket.io client fourni par le serveur Node -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"Space Grotesk"', 'monospace']
+                    },
+                    colors: {
+                        ghetto: {
+                            gold: '#facc15',
+                            neon: '#10b981',
+                            red: '#f43f5e',
+                            purple: '#c084fc',
+                            cyan: '#38bdf8',
+                            surface: '#090a10',
+                            card: '#12141d',
+                            glass: 'rgba(18, 20, 29, 0.75)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #030407;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 860px;
+            aspect-ratio: 9 / 16;
+            background-color: #090a10;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.98), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+        }
+
+        @media (max-width: 480px) {
+            #app-container {
+                border-radius: 0;
+                max-height: 100vh;
+            }
+        }
+
+        .screen-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .screen-view.active {
+            display: flex !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .glass-panel {
+            background: rgba(18, 20, 29, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-input {
+            background: rgba(8, 9, 14, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            padding: 4px 0;
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 16px;
+            transition: transform 0.1s linear;
+            will-change: transform;
+        }
+
+        .carousel-card {
+            flex: 0 0 190px;
+            height: 240px;
+            border-radius: 22px;
+            overflow: hidden;
+            position: relative;
+            background: #11131c;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0.35;
+            transform: scale(0.92);
+            filter: grayscale(40%);
+        }
+
+        .carousel-card.is-active {
+            opacity: 1;
+            transform: scale(1.04);
+            filter: grayscale(0%);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .ghetto-home-bg {
+            background-image: linear-gradient(to bottom, rgba(5, 6, 9, 0) 0%, rgba(5, 6, 9, 0.3) 45%, rgba(5, 6, 9, 0.95) 85%), url('wallpaper.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app-container">
+        <!-- PAGE 1 : ACCUEIL -->
+        <div id="page-1" class="screen-view active justify-end p-6 ghetto-home-bg">
+            <div class="space-y-3 mb-4 w-full flex-shrink-0">
+                <button onclick="navTo('page-2')"
+                    class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 active:scale-95 transition">
+                    <i class="ph-bold ph-plus-circle text-lg"></i> Créer une partie [1]
+                </button>
+                <button onclick="navTo('page-3')"
+                    class="w-full py-4 glass-panel hover:bg-white/10 text-white font-bold uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+                    <i class="ph-bold ph-sign-in text-lg text-slate-300"></i> Rejoindre une partie [1]
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE 2 : CRÉER -->
+        <div id="page-2" class="screen-view p-6 justify-between bg-ghetto-surface">
+            <div class="flex-shrink-0">
+                <div class="flex items-center gap-3 pt-2 mb-6">
+                    <button onclick="navTo('page-1')"
+                        class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
+                        <i class="ph-bold ph-caret-left text-lg"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-base font-black text-white uppercase tracking-wider">Créer un salon [1]</h2>
+                        <p class="text-[10px] text-slate-400">Configurez votre empire [1]</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-1.5">Nom de
+                            la partie [1]</label>
+                        <input type="text" id="createGameName" placeholder="Ex: Cartel du Bronx" value="Ghetto War #1"
+                            class="w-full glass-input text-white px-4 py-3 rounded-xl text-sm font-semibold focus:border-ghetto-gold outline-none transition">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-1.5">Votre
+                            Pseudo [1]</label>
+                        <input type="text" id="createPlayerName" placeholder="Ex: Tony" value="Grand Caïd"
+                            class="w-full glass-input text-white px-4 py-3 rounded-xl text-sm font-semibold focus:border-ghetto-gold outline-none transition">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-2">Nombre
+                            de Caïds (Max 4) [1]</label>
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <button type="button" onclick="selectPlayerCount(2)" id="btnCount-2"
+                                class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">2
+                                Caïds [1]</button>
+                            <button type="button" onclick="selectPlayerCount(3)" id="btnCount-3"
+                                class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">3
+                                Caïds [1]</button>
+                            <button type="button" onclick="selectPlayerCount(4)" id="btnCount-4"
+                                class="count-btn py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold shadow-lg shadow-yellow-500/10 transition">4
+                                Caïds [1]</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4 flex-shrink-0">
+                <button type="button" onclick="emitCreateGame()"
+                    class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>Créer & Lancer le Tirage</span>
+                    <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE 3 : REJOINDRE -->
+        <div id="page-3" class="screen-view p-6 justify-between bg-ghetto-surface">
+            <div class="flex-shrink-0">
+                <div class="flex items-center gap-3 pt-2 mb-4">
+                    <button onclick="navTo('page-1')"
+                        class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
+                        <i class="ph-bold ph-caret-left text-lg"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-base font-black text-white uppercase tracking-wider">Rejoindre [1]</h2>
+                        <p class="text-[10px] text-slate-400">Salons multijoueurs actifs [1]</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-1.5">Votre
+                        Pseudo [1]</label>
+                    <input type="text" id="joinPlayerName" placeholder="Ex: Scarface" value="Rival"
+                        class="w-full glass-input text-white px-4 py-2.5 rounded-xl text-sm font-semibold focus:border-ghetto-cyan outline-none">
+                </div>
+                <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+                    <span class="text-[10px] tracking-wider uppercase">Salons détectés en direct [1]</span>
+                </div>
+                <div id="gamesListContainer" class="space-y-2 overflow-y-auto max-h-[280px]"></div>
+            </div>
+        </div>
+
+        <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
+        <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex flex-col justify-between h-full">
+            <div class="pt-1 flex-shrink-0"></div>
+            <div class="flex flex-col items-center justify-center flex-shrink-0 w-full overflow-hidden my-auto">
+                <div class="text-slate-300 text-xl -mb-1 z-20 drop-shadow animate-bounce">
+                    <i class="ph-fill ph-caret-down"></i>
+                </div>
+                <div class="carousel-wrapper" id="carouselWrapper">
+                    <div class="carousel-track" id="carouselTrack"></div>
+                </div>
+            </div>
+            <div id="revealedCaidBox"
+                class="w-full max-w-[340px] h-[190px] glass-panel p-3.5 rounded-2xl text-left flex flex-col justify-between shadow-2xl flex-shrink-0 mx-auto my-auto">
+                <div class="flex items-center justify-between border-b border-white/10 pb-1 flex-shrink-0">
+                    <span id="revealedName"
+                        class="font-black text-sm text-slate-400 uppercase tracking-wide truncate">Caïd non déterminé
+                        [1]</span>
+                    <span id="revealedIdBadge"
+                        class="text-[9px] px-2 py-0.5 rounded-md font-mono font-bold bg-white/5 text-slate-500 flex-shrink-0">En
+                        attente [1]</span>
+                </div>
+                <div class="min-h-[28px] flex items-start gap-2 pt-0.5">
+                    <span
+                        class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Bonus
+                        [1]</span>
+                    <span id="revealedBonusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—
+                        [1]</span>
+                </div>
+                <div class="min-h-[28px] flex items-start gap-2">
+                    <span
+                        class="px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Malus
+                        [1]</span>
+                    <span id="revealedMalusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—
+                        [1]</span>
+                </div>
+                <div class="min-h-[30px] flex items-start gap-2 pt-0.5 border-t border-white/5">
+                    <span
+                        class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Capacité
+                        [1]</span>
+                    <span id="revealedSkill" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—
+                        [1]</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-white/10 font-mono flex-shrink-0">
+                    <div id="revealedCash" class="text-slate-400 font-bold">Cash: — € [1]</div>
+                    <div id="revealedDrug" class="text-slate-400 font-bold">Drogue: — kg [1]</div>
+                </div>
+            </div>
+            <div class="space-y-2 mb-3 flex-shrink-0 w-full">
+                <button type="button" id="btnSpinWheel" onclick="startCarouselDraw()"
+                    class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-dice-five text-xl"></i>
+                    <span>Tirage au sort [1]</span>
+                </button>
+                <button type="button" id="btnProceedLobby" onclick="navTo('page-lobby')"
+                    class="hidden w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20">
+                    <span>Rejoindre la Salle d'Attente [1]</span>
+                    <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE LOBBY : SALLE D'ATTENTE -->
+        <div id="page-lobby" class="screen-view p-6 justify-between bg-ghetto-surface">
+            <div class="flex-shrink-0">
+                <div class="text-center pt-2 mb-4">
+                    <div
+                        class="inline-block px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full mb-1">
+                        Salon Ouvert [1]
+                    </div>
+                    <h2 id="lobbyGameTitle" class="text-lg font-black text-white uppercase tracking-wider">Partie
+                        Urbaine [1]</h2>
+                    <span id="lobbyPlayerCount" class="text-xs text-slate-400 font-mono">1 / 4 Joueurs connectés
+                        [1]</span>
+                </div>
+                <div id="lobbyPlayersContainer" class="space-y-2 mt-4"></div>
+            </div>
+            <div class="space-y-3 mb-4 flex-shrink-0 w-full">
+                <p id="waitingMessage" class="text-center text-[11px] text-slate-400 font-mono italic animate-pulse">
+                    En attente du lancement par l'Hôte...
+                </p>
+                <button type="button" id="btnStartGame" onclick="emitStartGame()"
+                    class="hidden w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-play text-base"></i>
+                    <span>Commencer La Partie (Hôte) [1]</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE 5 : FLASH RADIO -->
+        <div id="page-5" class="screen-view p-6 justify-between bg-cover bg-center"
+            style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
+            <div class="pt-2 text-center flex-shrink-0">
+                <div
+                    class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 border border-rose-500/40 text-rose-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full mb-2">
+                    <i class="ph-bold ph-broadcast animate-pulse text-base"></i> Phase 1 : Flash Radio [1]
+                </div>
+                <h2 class="text-2xl font-black text-white uppercase tracking-tight font-mono">Manche <span
+                        id="radioRoundNumber">1</span> [1]</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Alerte métropolitaine instantanée. [1]</p>
+            </div>
+            <div
+                class="glass-panel p-5 rounded-2xl text-left space-y-3 my-auto flex-shrink-0 shadow-2xl border-rose-500/20">
+                <div class="flex items-center gap-2 text-rose-400 font-mono text-xs uppercase font-bold">
+                    <i class="ph-bold ph-siren text-lg"></i> Fréquence 93.4 Ghetto FM [1]
+                </div>
+                <h3 id="radioCardTitle" class="text-base font-black text-white leading-tight">Descente de Police massive
+                    [1]</h3>
+                <p id="radioCardEffect" class="text-xs text-slate-300 leading-relaxed">
+                    La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds. [1]
+                </p>
+            </div>
+            <div class="mb-4 flex-shrink-0">
+                <button type="button" onclick="acknowledgeRadioCard()"
+                    class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>Passer à l'action des Caïds [1]</span>
+                    <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE 6 : FICHE CAÏD -->
+        <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between">
+            <div class="flex flex-col h-full justify-between space-y-1.5">
+                <div id="caidTopBannerContainer"
+                    class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
+                    <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Visage Caïd" class="w-full h-full object-cover">
+                </div>
+                <div
+                    class="w-full py-3.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
+                    <div class="flex items-center justify-center border-r border-white/10">
+                        <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none"
+                            onclick="cyclePlayerHearts()">❤️❤️❤️ [1]</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-2 border-r border-white/10">
+                        <i class="ph-bold ph-sword text-rose-400 text-base"></i>
+                        <span id="hudAtk" class="text-base font-black text-white">1</span> [1]
+                    </div>
+                    <div class="flex items-center justify-center gap-2 border-r border-white/10">
+                        <i class="ph-bold ph-shield text-sky-400 text-base"></i>
+                        <span id="hudDef" class="text-base font-black text-white">0</span> [1]
+                    </div>
+                    <div class="flex items-center justify-center gap-2">
+                        <span id="hudVehicleIcon" class="text-emerald-400 text-base"><i
+                                class="ph-bold ph-person-simple-walk"></i></span>
+                        <span id="hudCurrentPm" class="text-base font-black text-white">8</span> [1]
+                    </div>
+                </div>
+
+                <!-- 2 BOÎTES : GROS BRAS & PROSTITUÉE -->
+                <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
+                    <div
+                        class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 shadow-lg flex items-center justify-between gap-1">
+                        <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl flex-shrink-0"><i
+                                class="ph-bold ph-barbell"></i></div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <div onclick="clickMuscleSlot(0)" id="muscleSlot_0"
+                                class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer">
+                                <span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+                            <div onclick="clickMuscleSlot(1)" id="muscleSlot_1"
+                                class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer">
+                                <span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+                            <div onclick="clickMuscleSlot(2)" id="muscleSlot_2"
+                                class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer">
+                                <span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+                        </div>
+                    </div>
+                    <div
+                        class="col-span-5 py-1.5 px-2 rounded-2xl bg-rose-950/25 border-2 border-rose-400/60 shadow-lg flex items-center justify-between gap-1">
+                        <div class="w-8 h-8 flex items-center justify-center text-rose-400 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.2" class="w-6 h-6">
+                                <path d="M4 6h16v1.5c-2.5 0-5 3.5-7 9.5a1.5 1.5 0 0 1-2 0C9 11 6.5 7.5 4 7.5V6z" />
+                                <path d="M4 6c0 4 3 8 7 11" />
+                                <path d="M20 6c0 4-3 8-7 11" />
+                            </svg>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot"
+                                class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer">
+                                <span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+                            <button onclick="depositProstituteToSafe()" id="btnTransferProstituteQG"
+                                class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center gap-0.5 active:scale-95 transition"><span
+                                    class="text-[9px] font-mono font-black uppercase">QG [1]</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="w-full py-2 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 shadow-sm flex-shrink-0">
+                    <div
+                        class="w-7 h-7 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-sm">
+                        <i class="ph-bold ph-radio animate-pulse"></i></div>
+                    <div class="overflow-hidden flex-1 min-w-0 flex flex-col justify-center">
+                        <div class="flex items-center gap-1.5 leading-none mb-1">
+                            <span class="text-[8px] font-mono uppercase font-black text-rose-400 tracking-wider">Flash
+                                Radio [1]</span>
+                            <span class="text-[8px] text-slate-500 font-mono">• Manche <span
+                                    id="hudRadioRoundTag">1</span> [1]</span>
+                        </div>
+                        <div class="flex items-baseline gap-1.5 overflow-hidden text-xs truncate">
+                            <h4 id="hudRadioReminderTitle" class="font-black text-white truncate flex-shrink-0">Canicule
+                                Urbaine [1]</h4>
+                            <p id="hudRadioReminderDesc" class="text-[11px] text-slate-300 truncate">les véhicules
+                                motorisés perdent -2 PM [1]</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ONGLETS -->
+                <div class="flex-1 flex flex-col min-h-0">
+                    <div class="flex items-end gap-1.5 px-1 pt-0.5 flex-shrink-0">
+                        <button id="mainTabInteractions" onclick="switchMainCaidTab('interactions')"
+                            class="flex-1 py-1.5 px-1 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all"><i
+                                class="ph-bold ph-lightning text-sm"></i><span>Actions [1]</span></button>
+                        <button id="mainTabEquipment" onclick="switchMainCaidTab('equipment')"
+                            class="flex-1 py-1.5 px-1 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all"><i
+                                class="ph-bold ph-shield-chevron text-sm"></i><span>Équip. (<span
+                                    id="hudEquipCount">0/3</span>) [1]</span></button>
+                        <button id="mainTabInventory" onclick="switchMainCaidTab('inventory')"
+                            class="flex-1 py-1.5 px-1 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all"><i
+                                class="ph-bold ph-backpack text-sm"></i><span>Sac (<span id="hudItemCount">0</span>)
+                                [1]</span></button>
+                    </div>
+
+                    <div id="mainTabsContentContainer"
+                        class="flex-1 px-1 py-2 bg-gradient-to-b from-[#141622] via-[#0d0f17] to-[#090a10] border-t-2 border-b-2 border-x-0 border-white/10 shadow-2xl flex flex-col justify-center overflow-hidden">
+                        <!-- VOLET ACTIONS -->
+                        <div id="panelInteractions"
+                            class="flex-1 flex flex-col justify-center space-y-3 my-auto py-1 overflow-y-auto">
+                            <button id="btnSpecialPower" onclick="triggerSpecialPower()"
+                                class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
+                                <div class="flex items-start gap-2 flex-1 min-w-0">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 flex-shrink-0 text-base mt-0.5">
+                                        <i class="ph-bold ph-sparkle animate-pulse"></i></div>
+                                    <div class="flex-1 min-w-0">
+                                        <span
+                                            class="text-[9px] font-mono uppercase tracking-wider text-purple-300 font-black">Capacité
+                                            Spéciale [1]</span>
+                                        <h4 id="hudSpecialPowerName"
+                                            class="text-xs font-black text-white leading-tight">Boule de Graisse [1]
+                                        </h4>
+                                        <p id="hudSpecialPowerDesc"
+                                            class="text-[10px] text-slate-300 mt-0.5 leading-snug">Roule jusqu'à 5 cases
+                                            de distance. [1]</p>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0 self-center"><span id="hudSpecialActionBtnLabel"
+                                        class="text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block shadow">Activer
+                                        [1]</span></div>
+                            </button>
+                            <div class="w-full grid grid-cols-2 gap-2.5">
+                                <button onclick="openQrScannerModal()"
+                                    class="rounded-xl py-3 px-3 bg-gradient-to-r from-yellow-500/10 to-yellow-950/20 border border-yellow-500/35 hover:border-yellow-400 text-ghetto-gold flex items-center justify-center gap-2 active:scale-95 transition"><i
+                                        class="ph-bold ph-qr-code"></i><span
+                                        class="text-xs font-black uppercase text-white">Scanner [1]</span></button>
+                                <button onclick="openCombatModal()"
+                                    class="rounded-xl py-3 px-3 bg-gradient-to-r from-rose-500/10 to-rose-950/20 border border-rose-500/35 hover:border-rose-400 text-rose-400 flex items-center justify-center gap-2 active:scale-95 transition"><i
+                                        class="ph-bold ph-sword"></i><span
+                                        class="text-xs font-black uppercase text-white">Combat [1]</span></button>
+                                <button onclick="openAllianceModal()"
+                                    class="rounded-xl py-3 px-3 bg-gradient-to-r from-purple-500/10 to-purple-950/20 border border-purple-500/35 hover:border-purple-400 text-purple-400 flex items-center justify-center gap-2 active:scale-95 transition"><i
+                                        class="ph-bold ph-handshake"></i><span
+                                        class="text-xs font-black uppercase text-white">Alliance [1]</span></button>
+                                <button onclick="triggerPoliceInspection()"
+                                    class="rounded-xl py-3 px-3 bg-gradient-to-r from-sky-500/10 to-sky-950/20 border border-sky-500/35 hover:border-sky-400 text-sky-400 flex items-center justify-center gap-2 active:scale-95 transition"><i
+                                        class="ph-bold ph-siren"></i><span
+                                        class="text-xs font-black uppercase text-white">Contrôle [1]</span></button>
+                            </div>
+                        </div>
+
+                        <!-- VOLET ÉQUIPEMENT -->
+                        <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
+                            <div class="p-2.5 bg-black/40 rounded-xl border border-rose-500/30">
+                                <div class="flex items-center justify-between mb-1"><span
+                                        class="text-[9px] font-mono uppercase text-rose-400 font-bold">Slot Arme
+                                        Principale [1]</span><span id="slotWeaponBadge"
+                                        class="text-[8px] font-mono px-2 py-0.5 rounded-md bg-black/60 text-slate-400">Vide
+                                        [1]</span></div>
+                                <div id="slotWeaponBody"
+                                    class="flex items-center justify-between mt-1 pt-1 border-t border-white/5"><span
+                                        class="text-xs text-slate-500 italic">Mains nues [1]</span></div>
+                            </div>
+                            <div class="p-2.5 bg-black/40 rounded-xl border border-sky-500/30">
+                                <div class="flex items-center justify-between mb-1"><span
+                                        class="text-[9px] font-mono uppercase text-sky-400 font-bold">Slot Protection /
+                                        Gilet [1]</span><span id="slotArmorBadge"
+                                        class="text-[8px] font-mono px-2 py-0.5 rounded-md bg-black/60 text-slate-400">Vide
+                                        [1]</span></div>
+                                <div id="slotArmorBody"
+                                    class="flex items-center justify-between mt-1 pt-1 border-t border-white/5"><span
+                                        class="text-xs text-slate-500 italic">Aucune protection équipée [1]</span></div>
+                            </div>
+                            <div class="p-2.5 bg-black/40 rounded-xl border border-amber-500/30">
+                                <div class="flex items-center justify-between mb-1"><span
+                                        class="text-[9px] font-mono uppercase text-amber-400 font-bold">Slot Véhicule
+                                        Actif [1]</span><span id="slotVehicleBadge"
+                                        class="text-[8px] font-mono px-2 py-0.5 rounded-md bg-black/60 text-slate-400">Vide
+                                        [1]</span></div>
+                                <div id="slotVehicleBody"
+                                    class="flex items-center justify-between mt-1 pt-1 border-t border-white/5"><span
+                                        class="text-xs text-slate-500 italic">À pied (8 PM) [1]</span></div>
+                            </div>
+                        </div>
+
+                        <!-- VOLET INVENTAIRE -->
+                        <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
+                            <div
+                                class="w-full p-2 rounded-xl bg-black/40 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
+                                <div
+                                    class="p-2 rounded-lg bg-amber-500/5 border border-amber-500/25 flex flex-col justify-between">
+                                    <span class="text-[8px] text-amber-400 font-bold uppercase">En Poche [1]</span>
+                                    <div class="my-1 flex items-center justify-between gap-1"><span id="hudPocketCash"
+                                            class="text-xs font-black text-amber-300">5 000 € [1]</span><span
+                                            id="hudDrugs" class="text-xs font-black text-emerald-400">🌿 5 kg [1]</span>
+                                    </div>
+                                    <button onclick="openTransferModal('deposit')"
+                                        class="w-full py-1 bg-amber-500/15 text-amber-300 text-[8px] font-bold rounded uppercase">Déposer
+                                        au QG [1]</button>
+                                </div>
+                                <div
+                                    class="p-2 rounded-lg bg-sky-500/5 border border-sky-500/25 flex flex-col justify-between">
+                                    <span class="text-[8px] text-sky-400 font-bold uppercase">Planque / QG [1]</span>
+                                    <div class="my-1 flex items-center justify-between gap-1"><span id="hudSafeCash"
+                                            class="text-xs font-black text-sky-300">0 € [1]</span><span
+                                            id="hudSafeDrugs" class="text-xs font-black text-sky-200/90">📦 0 kg
+                                            [1]</span></div>
+                                    <button onclick="openTransferModal('withdraw')"
+                                        class="w-full py-1 bg-sky-500/15 text-sky-300 text-[8px] font-bold rounded uppercase">Récupérer
+                                        du QG [1]</button>
+                                </div>
+                            </div>
+                            <div id="inventoryItemsList" class="space-y-1.5 pt-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-shrink-0 pt-1 border-t border-white/10">
+                    <button id="btnEndTurn" onclick="endCurrentPlayerTurn()"
+                        class="w-full py-3 bg-gradient-to-r from-[#161822] via-[#24171d] to-[#450a0a] border border-rose-950/60 text-white font-bold tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span
+                            class="uppercase font-black text-[11px]">Tour Terminé [1]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALE TRANSFERT QG -->
+        <div id="modalTransfer"
+            class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
+            <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
+                <h3 id="transferModalTitle" class="text-sm font-black text-ghetto-gold uppercase">Coffre du QG [1]</h3>
+                <div class="grid grid-cols-2 gap-1.5 p-1 bg-black/60 rounded-2xl font-mono text-xs">
+                    <button id="transferTabCash" onclick="switchTransferResource('cash')"
+                        class="py-2.5 rounded-xl font-bold bg-yellow-400 text-black">Argent (€) [1]</button>
+                    <button id="transferTabDrugs" onclick="switchTransferResource('drugs')"
+                        class="py-2.5 rounded-xl font-bold text-slate-400">Drogue (kg) [1]</button>
+                </div>
+                <input type="number" id="transferAmountInput" value="1000"
+                    class="w-full glass-input text-white px-4 py-3 rounded-xl text-sm font-mono font-bold">
+                <button id="transferConfirmBtn" onclick="confirmTransferAction()"
+                    class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs">Confirmer
+                    le Transfert [1]</button>
+                <button onclick="closeModal('modalTransfer')"
+                    class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler [1]</button>
+            </div>
+        </div>
+
+        <!-- MODALE COMBAT -->
+        <div id="modalCombat"
+            class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
+            <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
+                <h3 class="text-sm font-black text-rose-500 uppercase">Combat de Rue [1]</h3>
+                <select id="combatTargetSelect" onchange="syncCombatTargetView()"
+                    class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold"></select>
+                <div class="grid grid-cols-2 gap-2 text-center font-mono">
+                    <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30"><span
+                            class="text-[9px] text-rose-400 uppercase">Votre Assaut [1]</span>
+                        <div class="text-xl font-black text-white" id="arenaPlayerAtk">1 [1]</div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-sky-500/10 border border-sky-500/30"><span
+                            class="text-[9px] text-sky-400 uppercase">Défense Cible [1]</span>
+                        <div class="text-xl font-black text-white" id="arenaTargetDef">0 [1]</div>
+                    </div>
+                </div>
+                <button id="btnExecuteFight" onclick="resolveStreetFight()"
+                    class="w-full py-4 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs">Attaquer
+                    [1]</button>
+                <button onclick="closeModal('modalCombat')"
+                    class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Fermer [1]</button>
+            </div>
+        </div>
+
+        <!-- MODALE ALLIANCE -->
+        <div id="modalAlliance"
+            class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
+            <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
+                <h3 class="text-sm font-black text-purple-400 uppercase">Sceller une Alliance [1]</h3>
+                <p class="text-xs text-slate-300">L'allié compte comme +1 membre et ses Gros Bras s'additionnent aux
+                    vôtres pour ce tour !</p>
+                <select id="allianceTargetSelect"
+                    class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold"></select>
+                <button onclick="confirmAlliance()"
+                    class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs">Sceller
+                    le Pacte [1]</button>
+                <button onclick="closeModal('modalAlliance')"
+                    class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler [1]</button>
+            </div>
+        </div>
+
+        <!-- MODALE SCANNER -->
+        <div id="modalQrScanner"
+            class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-6 flex flex-col justify-between">
+            <div class="pt-2">
+                <h3 class="text-sm font-black text-ghetto-gold uppercase mb-2">Scanner d'Article [1]</h3>
+                <div id="qr-reader" class="w-full h-44 bg-black rounded-2xl overflow-hidden border border-white/10">
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                    <button onclick='processQrPayload({"t":"eq","sl":"arme","n":"Revolver","p":3000,"atk":2})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-rose-300">🔫 Revolver (+2 Atk) [1]</button>
+                    <button onclick='processQrPayload({"t":"eq","sl":"prot","n":"Kevlar","p":3500,"def":2})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-sky-300">🦺 Kevlar (+2 Def) [1]</button>
+                    <button onclick='processQrPayload({"t":"gb","lvl":1,"p":1500,"atk":1})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-sky-300">💪 Gros Bras L1 (+1 Atk)</button>
+                    <button onclick='processQrPayload({"t":"gb","lvl":2,"p":3000,"atk":2})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-sky-400">💪 Gros Bras L2 (+2 Atk)</button>
+                    <button onclick='processQrPayload({"t":"pr","lvl":1,"p":2000,"rev":1000})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-pink-300">👠 Prostituée L1</button>
+                    <button onclick='processQrPayload({"t":"pr","lvl":2,"p":4000,"rev":2500})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-pink-400">👠 Prostituée L2</button>
+                    <button onclick='processQrPayload({"t":"yen","n":"Client VIP","d":2,"c":4000})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-emerald-300">🤝 Yencli (2kg→4k€)</button>
+                    <button onclick='processQrPayload({"t":"brq","n":"Bijouterie","req":3,"m":2,"c":8000,"d":0})'
+                        class="p-2.5 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (Req: 3Atk /
+                        2M)</button>
+                </div>
+            </div>
+            <button onclick="closeQrScannerModal()"
+                class="w-full py-3.5 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-2">Fermer
+                [1]</button>
+        </div>
+
+        <!-- MODALE PATROUILLE -->
+        <div id="modalPatrolDice"
+            class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
+            <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
+                <h3 class="text-base font-black text-white uppercase">Patrouille de Police [1]</h3>
+                <div id="patrolDiceVisual"
+                    class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">
+                    ? [1]</div>
+                <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé
+                    roule... [1]</span>
+                <button onclick="skipPatrolWait()"
+                    class="py-2 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl">Passer &rarr;
+                    [1]</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GESTION DU SOCKET TEMPS RÉEL ---
+        const socket = io();
+        let currentRoomId = null;
+        let connectedRivals = [];
+
+        socket.on('rooms_list', (list) => {
+            const container = document.getElementById('gamesListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!list.length) {
+                container.innerHTML = '<p class="text-xs text-slate-500 italic p-3 text-center">Aucun salon actif détecté.</p>';
+                return;
+            }
+            list.forEach(r => {
+                const div = document.createElement('div');
+                div.className = "p-3.5 glass-panel rounded-2xl flex items-center justify-between cursor-pointer hover:border-cyan-400/40 transition";
+                div.onclick = () => {
+                    const pName = document.getElementById('joinPlayerName').value || 'Rival';
+                    socket.emit('join_room', { roomId: r.id, playerName: pName });
+                };
+                div.innerHTML = `
+          <div>
+            <h4 class="font-black text-xs text-white uppercase">${r.name}</h4>
+            <span class="text-[10px] text-slate-400 font-mono">${r.connectedCount} / ${r.maxPlayers} Caïds connectés</span>
+          </div>
+          <span class="text-[10px] font-bold text-ghetto-cyan bg-cyan-950/60 px-3 py-1 rounded-lg border border-cyan-500/30">Rejoindre</span>
+        `;
+                container.appendChild(div);
+            });
+        });
+
+        socket.on('room_created', ({ roomId, room, player }) => {
+            currentRoomId = roomId;
+            localPlayer.isHost = true;
+            navTo('page-4');
+        });
+
+        socket.on('room_joined', ({ roomId, room, player }) => {
+            currentRoomId = roomId;
+            localPlayer.isHost = false;
+            navTo('page-4');
+        });
+
+        socket.on('update_room_players', (players) => {
+            connectedRivals = players.filter(p => p.socketId !== socket.id);
+            document.getElementById('lobbyPlayerCount').innerText = `${players.length} / 4 Joueurs connectés`;
+            const container = document.getElementById('lobbyPlayersContainer');
+            container.innerHTML = '';
+            players.forEach(p => {
+                container.innerHTML += `
+          <div class="p-3 glass-panel rounded-2xl flex items-center justify-between">
+            <span class="font-black text-white text-xs">${p.name} (${p.caidName || 'En tirage'})</span>
+            <span class="text-[10px] text-emerald-400 font-mono font-bold">Connecté</span>
+          </div>
+        `;
+            });
+            const btnStart = document.getElementById('btnStartGame');
+            if (localPlayer.isHost) {
+                btnStart.classList.remove('hidden');
+                document.getElementById('waitingMessage').innerText = "Tous les joueurs sont en salle d'attente. Lancez dès que vous êtes prêts !";
+            } else {
+                btnStart.classList.add('hidden');
+                document.getElementById('waitingMessage').innerText = "En attente que l'Hôte lance la partie...";
+            }
+            syncMultiplayerTargets();
+        });
+
+        socket.on('game_started', ({ round, radio, players }) => {
+            currentSession.round = round;
+            currentSession.currentRadioEvent = radio;
+            startRoundPhase1();
+        });
+
+        socket.on('player_updated', (updatedPlayer) => {
+            const idx = connectedRivals.findIndex(p => p.socketId === updatedPlayer.socketId);
+            if (idx >= 0) connectedRivals[idx] = updatedPlayer;
+            syncMultiplayerTargets();
+        });
+
+        socket.on('received_attack', ({ attackerSocketId, dmg, totalAtk }) => {
+            localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+            alert(`💥 AGRESSION DE RUE !\nUn rival vous a attaqué avec ${totalAtk} d'Assaut.\nVous perdez 1 Cœur !`);
+            refreshHud();
+        });
+
+        socket.on('error_msg', (msg) => alert(msg));
+
+        function emitCreateGame() {
+            const gName = document.getElementById('createGameName').value || 'Ghetto War';
+            const pName = document.getElementById('createPlayerName').value || 'Grand Caïd';
+            localPlayer.name = pName;
+            socket.emit('create_room', { gameName: gName, playerName: pName, maxPlayers: selectedPlayerCount });
+        }
+
+        function emitStartGame() {
+            socket.emit('start_game');
+        }
+
+        function syncMultiplayerTargets() {
+            const combatSel = document.getElementById('combatTargetSelect');
+            const allySel = document.getElementById('allianceTargetSelect');
+            if (!combatSel || !allySel) return;
+            combatSel.innerHTML = '';
+            allySel.innerHTML = '';
+            connectedRivals.forEach(r => {
+                combatSel.innerHTML += `<option value="${r.socketId}">${r.name} (${r.pocketCash}€ / ${r.drugs}kg / Def: ${r.def})</option>`;
+                allySel.innerHTML += `<option value="${r.socketId}">${r.name} (+${r.musclesCount || 0} Gros Bras)</option>`;
+            });
+            syncCombatTargetView();
+        }
+
+        // --- LOGIQUE METIER COMPLETE DU CLIENT ---
+        const CAID_ROSTER = [
+            { id: 'caid_1', name: 'Burger Queen', imageFile: 'bleu.jpg', bannerFile: 'bandeau-bleu.jpg', hex: '#3b82f6', bonus: 'Démarre avec 1 Kebab.', malus: 'Tour 1 avec 0 PM.', skillName: 'Boule de Graisse', skillDesc: 'Roule jusqu\'à 5 cases.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'kebab_1', type: 'CONSUMABLE', name: 'Kebab (Soin 1 PV)' }], unarmedAtk: 1 },
+            { id: 'caid_2', name: 'Joint Dujardin', imageFile: 'rouge.jpg', bannerFile: 'bandeau-rouge.jpg', hex: '#ef4444', bonus: '+2 000 € au départ.', malus: '0 kg de drogue.', skillName: 'Tour de Passe-Passe', skillDesc: 'Échange sa position.', startCash: 7000, startDrug: 0, startHearts: 3, startItems: [], unarmedAtk: 1 },
+            { id: 'caid_3', name: 'Nelson Sativa', imageFile: 'vert.jpg', bannerFile: 'bandeau-vert.jpg', hex: '#22c55e', bonus: '+2 kg de drogue.', malus: '0 € en cash.', skillName: 'La Grosse Sieste', skillDesc: 'Récupère 1 Cœur.', startCash: 0, startDrug: 7, startHearts: 3, startItems: [], unarmedAtk: 1 },
+            { id: 'caid_4', name: 'Mary J Blunt', imageFile: 'rose.jpg', bannerFile: 'bandeau-rose.jpg', hex: '#ec4899', bonus: '1ère Prostituée L1 gratuite.', malus: 'Commence avec 1 seul Cœur.', skillName: 'Danse Lascive', skillDesc: '-3 Atk à un rival.', startCash: 5000, startDrug: 5, startHearts: 1, startItems: [], unarmedAtk: 1 },
+            { id: 'caid_5', name: 'J-Lo Gramme', imageFile: 'violet.jpg', bannerFile: 'bandeau-violet.jpg', hex: '#a855f7', bonus: 'Démarre à l\'Église.', malus: '5 premiers kg coûtent le double.', skillName: 'Prière Miraculeuse', skillDesc: '50% d\'annuler un contrôle.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [], unarmedAtk: 1 },
+            { id: 'caid_6', name: 'Tonteushi Kitano', imageFile: 'jaune.jpg', bannerFile: 'bandeau-jaune.jpg', hex: '#eab308', bonus: 'Attaque à mains nues = 3.', malus: '1ère arme coûte le double.', skillName: 'Tir de Shuriken', skillDesc: '-3 Def à une cible.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [], unarmedAtk: 3 },
+            { id: 'caid_7', name: 'Jamel Pépouze', imageFile: 'orange.jpg', bannerFile: 'bandeau-orange.jpg', hex: '#f97316', bonus: '2 cartes Objets en main.', malus: 'Commence au Commissariat.', skillName: 'Vol à la Tire', skillDesc: 'Dérobe 1 carte Objet.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'armor_jamel', type: 'ARMOR', name: 'Gilet pare-balles usagé', bonusVal: 1, bonusLabel: '+1 Def' }], unarmedAtk: 1 },
+            { id: 'caid_8', name: 'Weed-Nesday', imageFile: 'noir.jpg', bannerFile: 'bandeau-noir.jpg', hex: '#64748b', bonus: 'Poing Américain équipé.', malus: 'Commence avec 2 Cœurs.', skillName: 'Siphon Vital', skillDesc: 'Aspire 1 Cœur adverse.', startCash: 5000, startDrug: 5, startHearts: 2, startItems: [{ id: 'weapon_poing', type: 'WEAPON', name: 'Poing Américain', bonusVal: 1, bonusLabel: '+1 Atk' }], unarmedAtk: 1 }
+        ];
+
+        const VEHICLES_DEF = {
+            none: { name: 'À pied', bonusPm: 0 },
+            scooter: { name: 'Scooter', bonusPm: 4 },
+            moto: { name: 'Moto', bonusPm: 6 }
+        };
+
+        let currentSession = { round: 1, currentRadioEvent: null };
+        let localPlayer = {
+            name: 'Grand Caïd',
+            caidId: null,
+            isHost: false,
+            pocketCash: 5000,
+            safeCash: 0,
+            drugs: 5,
+            safeDrugs: 0,
+            hearts: 3,
+            baseAtk: 1,
+            baseDef: 0,
+            equipped: { weapon: null, armor: null, vehicle: null },
+            musclesOnPerson: [],
+            prostituteInTransit: null,
+            prostitutesAtSafeList: [],
+            freeProstituteClaimed: false,
+            inventory: [],
+            specialUsedThisTurn: false,
+            allianceActive: false,
+            activeAlly: null
+        };
+
+        let selectedPlayerCount = 4;
+        let carouselItems = [];
+        let isDrawingCarousel = false;
+        let html5QrScannerInstance = null;
+        let currentTransferMode = 'deposit';
+        let currentTransferResource = 'cash';
+
+        function navTo(pageId) {
+            document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            if (pageId === 'page-4') initCarouselDOM();
+            if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
+        }
+
+        function switchMainCaidTab(tabKey) {
+            document.getElementById('panelInteractions').classList.add('hidden');
+            document.getElementById('panelEquipment').classList.add('hidden');
+            document.getElementById('panelInventory').classList.add('hidden');
+            if (tabKey === 'interactions') document.getElementById('panelInteractions').classList.remove('hidden');
+            else if (tabKey === 'equipment') { document.getElementById('panelEquipment').classList.remove('hidden'); renderEquipmentSlotsView(); }
+            else if (tabKey === 'inventory') { document.getElementById('panelInventory').classList.remove('hidden'); renderInventoryList(); }
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function getTotalAtk() {
+            let atk = localPlayer.baseAtk;
+            if (localPlayer.equipped.weapon) atk += localPlayer.equipped.weapon.bonusVal;
+            localPlayer.musclesOnPerson.forEach(m => { atk += m.bonusVal; });
+            return atk;
+        }
+
+        function getTotalDef() {
+            let def = localPlayer.baseDef;
+            if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
+            return def;
+        }
+
+        function getTotalPm() {
+            const v = localPlayer.equipped.vehicle;
+            return 8 + (v ? v.bonusVal : 0);
+        }
+
+        function cyclePlayerHearts() {
+            localPlayer.hearts = localPlayer.hearts <= 1 ? 3 : localPlayer.hearts - 1;
+            refreshHud();
+        }
+
+        function clickMuscleSlot(idx) {
+            if (localPlayer.musclesOnPerson[idx]) {
+                localPlayer.inventory.push(localPlayer.musclesOnPerson[idx]);
+                localPlayer.musclesOnPerson.splice(idx, 1);
+            } else {
+                const inInv = localPlayer.inventory.findIndex(i => i.type === 'MUSCLE');
+                if (inInv >= 0) localPlayer.musclesOnPerson.push(localPlayer.inventory.splice(inInv, 1)[0]);
+            }
+            refreshHud();
+        }
+
+        function clickProstituteTransitSlot() {
+            if (localPlayer.prostituteInTransit) {
+                alert(`${localPlayer.prostituteInTransit.name} voyage avec vous. Déposez-la au QG pour sécuriser sa rente.`);
+            }
+        }
+
+        function depositProstituteToSafe() {
+            if (!localPlayer.prostituteInTransit) return;
+            localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
+            localPlayer.prostituteInTransit = null;
+            alert("Prostituée installée au QG ! Sa rente sera versée au début de chaque manche.");
+            refreshHud();
+        }
+
+        function openTransferModal(mode) {
+            currentTransferMode = mode;
+            document.getElementById('modalTransfer').classList.remove('hidden');
+        }
+
+        function switchTransferResource(res) {
+            currentTransferResource = res;
+        }
+
+        function confirmTransferAction() {
+            const amt = parseInt(document.getElementById('transferAmountInput').value) || 0;
+            if (currentTransferResource === 'cash') {
+                if (currentTransferMode === 'deposit') {
+                    if (amt <= localPlayer.pocketCash) { localPlayer.pocketCash -= amt; localPlayer.safeCash += amt; }
+                } else {
+                    if (amt <= localPlayer.safeCash) { localPlayer.safeCash -= amt; localPlayer.pocketCash += amt; }
+                }
+            } else {
+                if (currentTransferMode === 'deposit') {
+                    if (amt <= localPlayer.drugs) { localPlayer.drugs -= amt; localPlayer.safeDrugs += amt; }
+                } else {
+                    if (amt <= localPlayer.safeDrugs) { localPlayer.safeDrugs -= amt; localPlayer.drugs += amt; }
+                }
+            }
+            closeModal('modalTransfer');
+            refreshHud();
+        }
+
+        function selectPlayerCount(count) {
+            selectedPlayerCount = count;
+            [2, 3, 4].forEach(c => {
+                const btn = document.getElementById(`btnCount-${c}`);
+                if (btn) btn.className = c === count ? "count-btn py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold" : "count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400";
+            });
+        }
+
+        function initCarouselDOM() {
+            const track = document.getElementById('carouselTrack');
+            carouselItems = [];
+            for (let i = 0; i < 4; i++) carouselItems = carouselItems.concat(CAID_ROSTER);
+            track.innerHTML = '';
+            carouselItems.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'carousel-card flex flex-col justify-between p-3 select-none';
+                card.innerHTML = `<img src="${c.imageFile}" class="w-full h-40 object-cover rounded-xl" onerror="this.src='';"><h4 class="text-xs font-black text-white text-center">${c.name}</h4>`;
+                track.appendChild(card);
+            });
+        }
+
+        function startCarouselDraw() {
+            if (isDrawingCarousel) return;
+            isDrawingCarousel = true;
+            const idx = Math.floor(Math.random() * CAID_ROSTER.length);
+            const chosen = CAID_ROSTER[idx];
+            setTimeout(() => {
+                localPlayer.caidId = chosen.id;
+                localPlayer.pocketCash = chosen.startCash;
+                localPlayer.drugs = chosen.startDrug;
+                localPlayer.hearts = chosen.startHearts;
+                localPlayer.baseAtk = chosen.unarmedAtk;
+                localPlayer.inventory = JSON.parse(JSON.stringify(chosen.startItems));
+
+                document.getElementById('revealedName').innerText = chosen.name;
+                document.getElementById('revealedBonusText').innerText = chosen.bonus;
+                document.getElementById('revealedMalusText').innerText = chosen.malus;
+                document.getElementById('revealedSkill').innerText = `${chosen.skillName} : ${chosen.skillDesc}`;
+                document.getElementById('revealedCash').innerText = `Cash: ${chosen.startCash} €`;
+                document.getElementById('revealedDrug').innerText = `Drogue: ${chosen.startDrug} kg`;
+
+                document.getElementById('btnSpinWheel').classList.add('hidden');
+                document.getElementById('btnProceedLobby').classList.remove('hidden');
+
+                socket.emit('assign_caid', {
+                    caidId: chosen.id,
+                    caidName: chosen.name,
+                    startCash: chosen.startCash,
+                    startDrug: chosen.startDrug,
+                    startHearts: chosen.startHearts,
+                    unarmedAtk: chosen.unarmedAtk
+                });
+            }, 1000);
+        }
+
+        function startRoundPhase1() {
+            const ev = currentSession.currentRadioEvent || { title: "Descente massive", desc: "La police avance de +2 cases." };
+            document.getElementById('radioRoundNumber').innerText = currentSession.round;
+            document.getElementById('radioCardTitle').innerText = ev.title;
+            document.getElementById('radioCardEffect').innerText = ev.desc;
+
+            if (localPlayer.prostitutesAtSafeList.length > 0) {
+                const income = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || 1000), 0);
+                localPlayer.safeCash += income;
+                alert(`💰 Rente QG perçue : +${income.toLocaleString()} € versés au coffre.`);
+            }
+            navTo('page-5');
+        }
+
+        function acknowledgeRadioCard() {
+            localPlayer.specialUsedThisTurn = false;
+            navTo('page-6');
+        }
+
+        function triggerSpecialPower() {
+            if (localPlayer.specialUsedThisTurn) return alert("Capacité déjà utilisée ce tour.");
+            localPlayer.specialUsedThisTurn = true;
+            alert("Capacité Spéciale activée !");
+            refreshHud();
+        }
+
+        function refreshHud() {
+            let heartsStr = '';
+            for (let i = 0; i < localPlayer.hearts; i++) heartsStr += '❤️';
+            for (let i = localPlayer.hearts; i < 3; i++) heartsStr += '🖤';
+            document.getElementById('hudHearts').innerText = heartsStr;
+            document.getElementById('hudAtk').innerText = getTotalAtk();
+            document.getElementById('hudDef').innerText = getTotalDef();
+            document.getElementById('hudCurrentPm').innerText = getTotalPm();
+
+            for (let i = 0; i < 3; i++) {
+                const slotEl = document.getElementById(`muscleSlot_${i}`);
+                if (localPlayer.musclesOnPerson[i]) {
+                    slotEl.innerHTML = `<span class="text-xs font-black text-sky-300">L${localPlayer.musclesOnPerson[i].level || 1}</span>`;
+                } else {
+                    slotEl.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span>`;
+                }
+            }
+
+            const pSlot = document.getElementById('prostituteTransitSlot');
+            if (localPlayer.prostituteInTransit) {
+                pSlot.innerHTML = `<span class="text-xs font-black text-rose-300 font-mono">L${localPlayer.prostituteInTransit.level || 1}</span>`;
+            } else {
+                pSlot.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span>`;
+            }
+
+            document.getElementById('hudPocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} € [1]`;
+            document.getElementById('hudSafeCash').innerText = `${localPlayer.safeCash.toLocaleString()} € [1]`;
+            document.getElementById('hudDrugs').innerText = `🌿 ${localPlayer.drugs} kg [1]`;
+            document.getElementById('hudSafeDrugs').innerText = `📦 ${localPlayer.safeDrugs} kg [1]`;
+
+            socket.emit('sync_player', {
+                pocketCash: localPlayer.pocketCash,
+                safeCash: localPlayer.safeCash,
+                drugs: localPlayer.drugs,
+                hearts: localPlayer.hearts,
+                atk: getTotalAtk(),
+                def: getTotalDef(),
+                musclesCount: localPlayer.musclesOnPerson.length
+            });
+        }
+
+        function endCurrentPlayerTurn() {
+            localPlayer.allianceActive = false;
+            localPlayer.activeAlly = null;
+            document.getElementById('modalPatrolDice').classList.remove('hidden');
+            setTimeout(() => {
+                const val = Math.floor(Math.random() * 6) + 1;
+                document.getElementById('patrolDiceVisual').innerText = val;
+                document.getElementById('patrolDiceMoveLabel').innerText = `Déplacement : ${val} case(s)`;
+            }, 700);
+        }
+
+        function skipPatrolWait() {
+            closeModal('modalPatrolDice');
+            startRoundPhase1();
+        }
+
+        function triggerPoliceInspection() {
+            alert("Contrôle de police effectué.");
+        }
+
+        function openCombatModal() {
+            document.getElementById('arenaPlayerAtk').innerText = getTotalAtk();
+            document.getElementById('modalCombat').classList.remove('hidden');
+        }
+
+        function syncCombatTargetView() {
+            const sel = document.getElementById('combatTargetSelect');
+            const target = connectedRivals.find(r => r.socketId === sel.value);
+            document.getElementById('arenaTargetDef').innerText = target ? target.def : 0;
+        }
+
+        function resolveStreetFight() {
+            const sel = document.getElementById('combatTargetSelect');
+            const target = connectedRivals.find(r => r.socketId === sel.value);
+            if (!target) return alert("Sélectionnez une cible valide.");
+            const dmg = Math.max(0, getTotalAtk() - (target.def || 0));
+            socket.emit('execute_combat', { targetSocketId: target.socketId, dmg, totalAtk: getTotalAtk() });
+            alert(`Attaque lancée contre ${target.name} ! Dégâts infligés : ${dmg}`);
+            closeModal('modalCombat');
+        }
+
+        function openAllianceModal() {
+            document.getElementById('modalAlliance').classList.remove('hidden');
+        }
+
+        function confirmAlliance() {
+            const sel = document.getElementById('allianceTargetSelect');
+            const target = connectedRivals.find(r => r.socketId === sel.value);
+            if (!target) return alert("Choisissez un Caïd connecté.");
+            localPlayer.allianceActive = true;
+            localPlayer.activeAlly = {
+                name: target.name,
+                grosBrasCount: target.musclesCount || 1,
+                bonusAtk: (target.musclesCount || 1) * 2
+            };
+            socket.emit('propose_alliance', { targetSocketId: target.socketId, senderName: localPlayer.name, musclesCount: localPlayer.musclesOnPerson.length });
+            alert(`🤝 Alliance conclue avec ${target.name} pour 1 tour !`);
+            closeModal('modalAlliance');
+        }
+
+        async function openQrScannerModal() {
+            document.getElementById('modalQrScanner').classList.remove('hidden');
+            if (typeof Html5Qrcode !== 'undefined') {
+                try {
+                    if (!html5QrScannerInstance) html5QrScannerInstance = new Html5Qrcode("qr-reader");
+                    await html5QrScannerInstance.start({ facingMode: "environment" }, { fps: 10, qrbox: 200 }, (t) => { processQrPayload(t); closeQrScannerModal(); }, () => { });
+                } catch (e) { }
+            }
+        }
+
+        async function closeQrScannerModal() {
+            if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
+                try { await html5QrScannerInstance.stop(); } catch (e) { }
+            }
+            closeModal('modalQrScanner');
+        }
+
+        function processQrPayload(payload) {
+            let data = payload;
+            if (typeof payload === 'string' && payload.startsWith('{')) {
+                try { data = JSON.parse(payload); } catch (e) { }
+            }
+            const type = data.t;
+            if (type === 'eq') {
+                localPlayer.inventory.push({ id: 'item_' + Date.now(), type: data.sl === 'arme' ? 'WEAPON' : 'ARMOR', name: data.n, bonusVal: data.atk || data.def || 1 });
+                localPlayer.pocketCash -= (data.p || 0);
+                alert(`${data.n} ajouté à l'inventaire !`);
+            } else if (type === 'gb') {
+                if (localPlayer.musclesOnPerson.length >= 3) return alert("3 Gros Bras max sur le terrain.");
+                localPlayer.musclesOnPerson.push({ id: 'gb_' + Date.now(), type: 'MUSCLE', level: data.lvl || 1, name: `Gros Bras L${data.lvl || 1}`, bonusVal: data.atk || 1 });
+                localPlayer.pocketCash -= (data.p || 0);
+                alert("Gros Bras recruté !");
+            } else if (type === 'pr') {
+                if (localPlayer.prostituteInTransit) return alert("1 seule prostituée en transit possible !");
+                localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée L${data.lvl || 1}`, revenue: data.rev || 1000 };
+                localPlayer.pocketCash -= (data.p || 0);
+                alert("Prostituée avec vous en transit. Déposez-la au QG.");
+            } else if (type === 'yen') {
+                if (localPlayer.drugs < data.d) return alert("Drogue insuffisante !");
+                localPlayer.drugs -= data.d;
+                localPlayer.pocketCash += data.c;
+                alert(`Deal réussi : +${data.c} € !`);
+            } else if (type === 'brq') {
+                let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
+                let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
+                if (teamAtk < data.req || members < data.m) return alert(`Échec : Requis ${data.req} Atk et ${data.m} membres.`);
+                localPlayer.pocketCash += data.c;
+                localPlayer.drugs += (data.d || 0);
+                alert(`🏆 Braquage Réussi : +${data.c} € !`);
+            }
+            refreshHud();
+        }
+
+        function renderInventoryList() {
+            const c = document.getElementById('inventoryItemsList');
+            c.innerHTML = '';
+            localPlayer.inventory.forEach((item, idx) => {
+                c.innerHTML += `<div class="p-2 bg-black/40 rounded-xl flex justify-between text-xs"><span>${item.name}</span><button onclick="equipItem(${idx})" class="text-ghetto-gold font-bold">Équiper</button></div>`;
+            });
+        }
+
+        function renderEquipmentSlotsView() {
+            document.getElementById('slotWeaponBadge').innerText = localPlayer.equipped.weapon ? localPlayer.equipped.weapon.name : 'Vide';
+            document.getElementById('slotArmorBadge').innerText = localPlayer.equipped.armor ? localPlayer.equipped.armor.name : 'Vide';
+            document.getElementById('slotVehicleBadge').innerText = localPlayer.equipped.vehicle ? localPlayer.equipped.vehicle.name : 'À pied';
+        }
+
+        function equipItem(idx) {
+            const it = localPlayer.inventory.splice(idx, 1)[0];
+            if (it.type === 'WEAPON') localPlayer.equipped.weapon = it;
+            if (it.type === 'ARMOR') localPlayer.equipped.armor = it;
+            refreshHud();
+        }
+    </script>
+</body>
+
+</html>
