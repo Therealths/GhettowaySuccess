@@ -7,13 +7,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
-// Distribution des fichiers statiques (index.html, images, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Stockage en mémoire vive des salons de jeu
 const rooms = {};
 
-// Événements Flash Radio de la Phase 1 [1]
 const RADIO_EVENTS = [
   {
     title: "Descente de Police massive",
@@ -43,11 +40,39 @@ const RADIO_EVENTS = [
 ];
 
 io.on('connection', (socket) => {
-  // Envoi de la liste des salons disponibles au nouveau client
   socket.emit('rooms_list', getAvailableRooms());
 
+  // 0. Tentative de reconnexion automatique d'un joueur existant
+  socket.on('reconnect_player', ({ roomId, playerToken }) => {
+    const room = rooms[roomId];
+    if (!room) {
+      return socket.emit('reconnect_failed');
+    }
+
+    const existingPlayer = room.players.find(p => p.playerToken === playerToken);
+    if (!existingPlayer) {
+      return socket.emit('reconnect_failed');
+    }
+
+    // Réassigner le socket à ce joueur
+    existingPlayer.socketId = socket.id;
+    socket.join(roomId);
+    socket.roomId = roomId;
+
+    socket.emit('reconnect_success', {
+      roomId,
+      room,
+      player: existingPlayer,
+      gameStarted: room.gameStarted || false,
+      round: room.round,
+      radio: room.currentRadio
+    });
+
+    io.to(roomId).emit('update_room_players', room.players);
+  });
+
   // 1. Création d'un salon (Hôte) [1]
-  socket.on('create_room', ({ gameName, playerName, maxPlayers }) => {
+  socket.on('create_room', ({ gameName, playerName, maxPlayers, playerToken }) => {
     const roomId = 'GW_' + Math.random().toString(36).substring(2, 7).toUpperCase();
     rooms[roomId] = {
       id: roomId,
@@ -55,12 +80,14 @@ io.on('connection', (socket) => {
       maxPlayers: Math.min(4, Math.max(2, parseInt(maxPlayers) || 4)),
       hostSocketId: socket.id,
       round: 1,
+      gameStarted: false,
       currentRadio: RADIO_EVENTS[0],
       players: []
     };
 
     const hostPlayer = {
       socketId: socket.id,
+      playerToken: playerToken,
       name: playerName || 'Grand Caïd',
       caidId: null,
       caidName: 'En attente',
@@ -83,17 +110,36 @@ io.on('connection', (socket) => {
   });
 
   // 2. Rejoindre un salon existant [1]
-  socket.on('join_room', ({ roomId, playerName }) => {
+  socket.on('join_room', ({ roomId, playerName, playerToken }) => {
     const room = rooms[roomId];
     if (!room) {
       return socket.emit('error_msg', 'Salon introuvable ou fermé.');
     }
+
+    // Si le joueur est déjà enregistré dans cette salle, on le reconnecte
+    const existing = room.players.find(p => p.playerToken === playerToken);
+    if (existing) {
+      existing.socketId = socket.id;
+      socket.join(roomId);
+      socket.roomId = roomId;
+      socket.emit('reconnect_success', {
+        roomId,
+        room,
+        player: existing,
+        gameStarted: room.gameStarted || false,
+        round: room.round,
+        radio: room.currentRadio
+      });
+      return io.to(roomId).emit('update_room_players', room.players);
+    }
+
     if (room.players.length >= room.maxPlayers) {
       return socket.emit('error_msg', 'Ce salon est complet (maximum 4 joueurs).');
     }
 
     const joiner = {
       socketId: socket.id,
+      playerToken: playerToken,
       name: playerName || 'Rival',
       caidId: null,
       caidName: 'En attente',
@@ -121,7 +167,6 @@ io.on('connection', (socket) => {
     const room = rooms[socket.roomId];
     if (!room) return;
 
-    // Vérification : aucun autre joueur ne doit posséder cet identifiant de Caïd
     const alreadyTaken = room.players.some(p => p.socketId !== socket.id && p.caidId === caidId);
     if (alreadyTaken) {
       return socket.emit('error_msg', `Le Caïd ${caidName} est déjà pris par un autre joueur.`);
@@ -135,8 +180,6 @@ io.on('connection', (socket) => {
       p.drugs = startDrug;
       p.hearts = startHearts;
       p.atk = unarmedAtk;
-
-      // Diffusion de la mise à jour à l'ensemble du salon
       io.to(socket.roomId).emit('update_room_players', room.players);
     }
   });
@@ -145,6 +188,7 @@ io.on('connection', (socket) => {
   socket.on('start_game', () => {
     const room = rooms[socket.roomId];
     if (room && room.hostSocketId === socket.id) {
+      room.gameStarted = true;
       room.round = 1;
       room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
       io.to(socket.roomId).emit('game_started', {
@@ -155,11 +199,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 5. Synchronisation de l'état d'un joueur en direct (inventaire, stats, PV, cash)
+  // 5. Synchronisation de l'état d'un joueur en direct
   socket.on('sync_player', (updatedData) => {
     const room = rooms[socket.roomId];
     if (!room) return;
-
     const p = room.players.find(x => x.socketId === socket.id);
     if (p) {
       Object.assign(p, updatedData);
@@ -185,37 +228,48 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 8. Gestion des déconnexions et réattribution du rôle d'Hôte
-  socket.on('disconnect', () => {
-    const room = rooms[socket.roomId];
-    if (room) {
-      room.players = room.players.filter(x => x.socketId !== socket.id);
+  // 8. Quitter explicitement une partie
+  socket.on('leave_room', () => {
+    handlePlayerDisconnect(socket);
+  });
 
-      if (room.players.length === 0) {
-        delete rooms[socket.roomId];
-      } else {
-        if (room.hostSocketId === socket.id) {
-          room.hostSocketId = room.players[0].socketId;
-          room.players[0].isHost = true;
-        }
-        io.to(socket.roomId).emit('update_room_players', room.players);
-      }
-      io.emit('rooms_list', getAvailableRooms());
+  socket.on('disconnect', () => {
+    // Ne supprime pas immédiatement le joueur pour lui laisser le temps de se reconnecter
+    const room = rooms[socket.roomId];
+    if (room && !room.gameStarted) {
+      handlePlayerDisconnect(socket);
     }
   });
 });
 
-// Récupération des salons non complets pour affichage public
-function getAvailableRooms() {
-  return Object.values(rooms).map(r => ({
-    id: r.id,
-    name: r.name,
-    maxPlayers: r.maxPlayers,
-    connectedCount: r.players.length
-  }));
+function handlePlayerDisconnect(socket) {
+  const room = rooms[socket.roomId];
+  if (room) {
+    room.players = room.players.filter(x => x.socketId !== socket.id);
+    if (room.players.length === 0) {
+      delete rooms[socket.roomId];
+    } else {
+      if (room.hostSocketId === socket.id) {
+        room.hostSocketId = room.players[0].socketId;
+        room.players[0].isHost = true;
+      }
+      io.to(socket.roomId).emit('update_room_players', room.players);
+    }
+    io.emit('rooms_list', getAvailableRooms());
+  }
 }
 
-// Démarrage du serveur sur le port attribué par Render ou 3000 en local
+function getAvailableRooms() {
+  return Object.values(rooms)
+    .filter(r => !r.gameStarted && r.players.length < r.maxPlayers)
+    .map(r => ({
+      id: r.id,
+      name: r.name,
+      maxPlayers: r.maxPlayers,
+      connectedCount: r.players.length
+    }));
+}
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Serveur Ghettoway opérationnel sur le port ${PORT}`);
