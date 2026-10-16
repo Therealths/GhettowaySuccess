@@ -227,7 +227,7 @@
     <!-- ================= PAGE 4 : CARROUSEL DE TIRAGE ================= -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex-col justify-between h-full">
       <div class="flex items-center justify-between w-full pt-1 flex-shrink-0 mb-1">
-        <button onclick="confirmLeaveDraw()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
+        <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
           <i class="ph-bold ph-caret-left text-base"></i>
         </button>
         <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">Sélection du Caïd</span>
@@ -269,7 +269,7 @@
       <div class="space-y-2 mt-2 flex-shrink-0 w-full">
         <button type="button" id="btnSpinWheel" onclick="startCarouselDraw()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
           <i class="ph-bold ph-dice-five text-xl"></i>
-          <span>Tirage au sort (Caïds disponibles)</span>
+          <span>Tirage au sort (Suspense garanti)</span>
         </button>
         <button type="button" id="btnProceedLobby" onclick="navTo('page-lobby')" class="hidden w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20">
           <span>Rejoindre la Salle d'Attente</span>
@@ -282,8 +282,8 @@
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center justify-between pt-1 mb-3">
-          <button onclick="navTo('page-4')" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
-            <i class="ph-bold ph-caret-left text-lg"></i>
+          <button onclick="confirmLeaveGame()" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter le salon">
+            <i class="ph-bold ph-sign-out text-lg text-rose-400"></i>
           </button>
           <div class="inline-block px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
             Salon Ouvert
@@ -346,23 +346,20 @@
     <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between">
       <div class="flex flex-col h-full justify-between space-y-1.5">
 
-        <!-- En-tête avec bouton retour -->
         <div class="flex items-center justify-between gap-2 flex-shrink-0 pt-0.5">
           <button onclick="navTo('page-5')" class="w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Retour au Flash Radio">
             <i class="ph-bold ph-caret-left text-sm"></i>
           </button>
           <span id="headerPlayerTitle" class="text-xs font-black uppercase tracking-wider text-slate-300 truncate flex-1 text-center font-mono">Fiche Caïd</span>
-          <button onclick="confirmLeaveDraw()" class="w-8 h-8 rounded-xl bg-red-950/40 border border-red-500/30 text-rose-400 flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
+          <button onclick="confirmLeaveGame()" class="w-8 h-8 rounded-xl bg-red-950/40 border border-red-500/30 text-rose-400 flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
             <i class="ph-bold ph-sign-out text-sm"></i>
           </button>
         </div>
 
-        <!-- Visage Caïd -->
         <div id="caidTopBannerContainer" class="w-full h-16 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Visage Caïd" class="w-full h-full object-cover">
         </div>
 
-        <!-- Stats Centrées -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10">
             <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️</span>
@@ -381,7 +378,6 @@
           </div>
         </div>
 
-        <!-- Gros Bras & Prostituée -->
         <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
           <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 shadow-lg flex items-center justify-between gap-1">
             <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl flex-shrink-0"><i class="ph-bold ph-barbell"></i></div>
@@ -402,7 +398,6 @@
           </div>
         </div>
 
-        <!-- Flash Radio Compact -->
         <div class="w-full py-1.5 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 shadow-sm flex-shrink-0">
           <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
           <div class="overflow-hidden flex-1 min-w-0 flex flex-col justify-center">
@@ -432,7 +427,6 @@
           </div>
 
           <div id="mainTabsContentContainer" class="flex-1 px-1 py-2 bg-gradient-to-b from-[#141622] via-[#0d0f17] to-[#090a10] border-t-2 border-b-2 border-x-0 border-amber-400 shadow-2xl flex flex-col justify-center overflow-hidden">
-
             <!-- VOLET 1 : ACTIONS -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
               <button id="btnSpecialPower" onclick="triggerSpecialPower()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
@@ -490,7 +484,6 @@
           </div>
         </div>
 
-        <!-- BOUTON DU BAS PINNÉ -->
         <div class="flex-shrink-0 pt-1 pb-1 border-t border-white/10">
           <button id="btnEndTurn" onclick="endCurrentPlayerTurn()" class="w-full py-3 bg-gradient-to-r from-[#161822] via-[#24171d] to-[#450a0a] border border-rose-950/60 text-white font-bold tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition shadow-lg">
             <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé (Dé Patrouille)</span>
@@ -561,7 +554,7 @@
           <button onclick='processQrPayload({"t":"gb","lvl":1,"p":1500,"atk":1})' class="p-2 glass-panel rounded-xl text-left text-sky-300">💪 Gros Bras L1 (+1)</button>
           <button onclick='processQrPayload({"t":"gb","lvl":2,"p":3000,"atk":2})' class="p-2 glass-panel rounded-xl text-left text-sky-400">💪 Gros Bras L2 (+2)</button>
           <button onclick='processQrPayload({"t":"pr","lvl":1,"p":2000,"rev":1000})' class="p-2 glass-panel rounded-xl text-left text-pink-300">👠 Prostituée L1</button>
-          <button onclick='processQrPayload({"t":"pr","lvl":2,"p":4000,"rev":2500})' class="p-2 glass-panel rounded-xl text-left text-pink-400">👠 Prostituée L2</button>
+          <button onclick='processQrPayload({"t":"pr","lvl":2,"p":4000,"rev":2500})' class="p-2.5 glass-panel rounded-xl text-left text-pink-400">👠 Prostituée L2</button>
           <button onclick='processQrPayload({"t":"yen","n":"Client VIP","d":2,"c":4000})' class="p-2 glass-panel rounded-xl text-left text-emerald-300">🤝 Yencli (2kg&rarr;4k€)</button>
           <button onclick='processQrPayload({"t":"brq","n":"Bijouterie","req":3,"m":2,"c":8000,"d":0})' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (Req: 3Atk/2M)</button>
         </div>
@@ -582,6 +575,17 @@
   </div>
 
   <script>
+    // --- GESTION DU JETON PERSISTANT ---
+    function getOrCreatePlayerToken() {
+      let token = localStorage.getItem('g2s_player_token');
+      if (!token) {
+        token = 'tok_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+        localStorage.setItem('g2s_player_token', token);
+      }
+      return token;
+    }
+    const myPlayerToken = getOrCreatePlayerToken();
+
     // --- ROSTER OFFICIEL ---
     const CAID_ROSTER = [
       { id: 'caid_1', name: 'Burger Queen', imageFile: 'bleu.jpg', bannerFile: 'bandeau-bleu.jpg', hex: '#3b82f6', bonus: 'Démarre avec 1 Kebab en inventaire (soigne 1 Cœur).', malus: 'Démarrage poussif : commence le tour 1 avec 0 PM.', skillName: 'Boule de Graisse', skillDesc: 'Se met en boule et roule sur une distance allant jusqu\'à 5 cases.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'kebab_1', type: 'CONSUMABLE', name: 'Kebab (Soin 1 PV)' }], unarmedAtk: 1 },
@@ -632,10 +636,41 @@
     let connectedRivals = [];
     let takenCaidsInGame = [];
 
-    // --- SOCKET.IO MULTIJOUEUR ---
+    // --- SOCKET.IO MULTIJOUEUR AVEC RECONNEXION ---
     const socket = typeof io !== 'undefined' ? io() : null;
 
     if (socket) {
+      // Reconnexion automatique au démarrage si un salon est mémorisé
+      socket.on('connect', () => {
+        const savedRoomId = localStorage.getItem('g2s_room_id');
+        if (savedRoomId) {
+          socket.emit('reconnect_player', {
+            roomId: savedRoomId,
+            playerToken: myPlayerToken
+          });
+        }
+      });
+
+      socket.on('reconnect_success', ({ roomId, room, player, gameStarted, round, radio }) => {
+        localStorage.setItem('g2s_room_id', roomId);
+        localPlayer = Object.assign(localPlayer, player);
+
+        if (gameStarted) {
+          currentSession.round = round || 1;
+          currentSession.currentRadioEvent = radio;
+          navTo('page-6');
+          refreshHud();
+        } else if (localPlayer.caidId) {
+          navTo('page-lobby');
+        } else {
+          navTo('page-4');
+        }
+      });
+
+      socket.on('reconnect_failed', () => {
+        localStorage.removeItem('g2s_room_id');
+      });
+
       socket.on('rooms_list', (list) => {
         const container = document.getElementById('gamesListContainer');
         if (!container) return;
@@ -650,7 +685,8 @@
           div.onclick = () => {
             const pName = document.getElementById('joinPlayerName').value || 'Rival';
             localPlayer.name = pName;
-            socket.emit('join_room', { roomId: r.id, playerName: pName });
+            localStorage.setItem('g2s_room_id', r.id);
+            socket.emit('join_room', { roomId: r.id, playerName: pName, playerToken: myPlayerToken });
           };
           div.innerHTML = `
             <div>
@@ -663,19 +699,20 @@
         });
       });
 
-      socket.on('room_created', () => {
+      socket.on('room_created', ({ roomId }) => {
+        localStorage.setItem('g2s_room_id', roomId);
         localPlayer.isHost = true;
         navTo('page-4');
       });
 
-      socket.on('room_joined', () => {
+      socket.on('room_joined', ({ roomId }) => {
+        localStorage.setItem('g2s_room_id', roomId);
         localPlayer.isHost = false;
         navTo('page-4');
       });
 
       socket.on('update_room_players', (players) => {
-        connectedRivals = players.filter(p => p.socketId !== socket.id);
-        // Synchroniser les Caïds déjà choisis pour bloquer les doublons
+        connectedRivals = players.filter(p => p.playerToken !== myPlayerToken);
         takenCaidsInGame = players.filter(p => p.caidId).map(p => p.caidId);
 
         const countEl = document.getElementById('lobbyPlayerCount');
@@ -704,7 +741,6 @@
           if (waitMsg) waitMsg.innerText = "En attente que l'Hôte lance la partie...";
         }
 
-        // Si on est sur l'écran du carrousel, recalculer les disponibles
         if (document.getElementById('page-4').classList.contains('active') && !localPlayer.caidId) {
           initCarouselDOM();
         }
@@ -719,7 +755,7 @@
       });
 
       socket.on('player_updated', (updatedPlayer) => {
-        const idx = connectedRivals.findIndex(p => p.socketId === updatedPlayer.socketId);
+        const idx = connectedRivals.findIndex(p => p.playerToken === updatedPlayer.playerToken);
         if (idx >= 0) connectedRivals[idx] = updatedPlayer;
         syncMultiplayerTargets();
       });
@@ -738,7 +774,12 @@
       const pName = document.getElementById('createPlayerName').value || 'Grand Caïd';
       localPlayer.name = pName;
       if (socket) {
-        socket.emit('create_room', { gameName: gName, playerName: pName, maxPlayers: selectedPlayerCount });
+        socket.emit('create_room', {
+          gameName: gName,
+          playerName: pName,
+          maxPlayers: selectedPlayerCount,
+          playerToken: myPlayerToken
+        });
       } else {
         navTo('page-4');
       }
@@ -774,8 +815,10 @@
       if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
     }
 
-    function confirmLeaveDraw() {
-      if (confirm("Quitter la session en cours et retourner à l'accueil ?")) {
+    function confirmLeaveGame() {
+      if (confirm("Voulez-vous vraiment quitter définitivement cette partie ?")) {
+        localStorage.removeItem('g2s_room_id');
+        if (socket) socket.emit('leave_room');
         window.location.reload();
       }
     }
@@ -825,7 +868,7 @@
       });
     }
 
-    // --- CARROUSEL AVEC EXCLUSION STRICTE DES CAÏDS DÉJÀ PRIS ---
+    // --- CARROUSEL AVEC SUSPENSE ET EXCLUSION DES CAÏDS PRIS ---
     function getAvailableCaids() {
       return CAID_ROSTER.filter(c => !takenCaidsInGame.includes(c.id));
     }
@@ -865,10 +908,12 @@
         `;
         track.appendChild(card);
       });
-      centerCarouselIndex(1, false);
+
+      // Aucun surlignage actif au départ pour ne pas spoiler
+      centerCarouselIndex(1, false, false);
     }
 
-    function centerCarouselIndex(index, animate = true) {
+    function centerCarouselIndex(index, animate = true, applyActive = false) {
       const track = document.getElementById('carouselTrack');
       const wrapper = document.getElementById('carouselWrapper');
       if (!track || !wrapper) return;
@@ -878,9 +923,10 @@
       const targetOffset = (index * (cardWidth + gap)) - (wrapperWidth / 2) + (cardWidth / 2);
       track.style.transition = animate ? 'transform 3.2s cubic-bezier(0.12, 0.88, 0.18, 1)' : 'none';
       track.style.transform = `translateX(-${targetOffset}px)`;
+
       const allCards = track.querySelectorAll('.carousel-card');
       allCards.forEach((c, idx) => {
-        if (idx === index) c.classList.add('is-active');
+        if (applyActive && idx === index) c.classList.add('is-active');
         else c.classList.remove('is-active');
       });
     }
@@ -897,13 +943,24 @@
       const btnSpin = document.getElementById('btnSpinWheel');
       if (btnSpin) btnSpin.disabled = true;
 
-      // Tirage au sort strictement parmi les Caïds disponibles
+      // Retirer toute surbrillance pendant la rotation pour le suspense
+      const allCards = document.querySelectorAll('.carousel-card');
+      allCards.forEach(c => c.classList.remove('is-active'));
+
       const chosenCaidIndex = Math.floor(Math.random() * available.length);
       const chosenCaid = available[chosenCaidIndex];
-      const finalIndex = (available.length) + chosenCaidIndex;
-      centerCarouselIndex(finalIndex, true);
+      const finalIndex = available.length + chosenCaidIndex;
 
+      // Animer sans surligner la cible en avance
+      centerCarouselIndex(finalIndex, true, false);
+
+      // Le suspense : mise en valeur seulement une fois l'animation terminée (3,3s)
       setTimeout(() => {
+        const cardsAfter = document.querySelectorAll('.carousel-card');
+        if (cardsAfter[finalIndex]) {
+          cardsAfter[finalIndex].classList.add('is-active');
+        }
+
         localPlayer.caidId = chosenCaid.id;
         localPlayer.pocketCash = chosenCaid.startCash;
         localPlayer.drugs = chosenCaid.startDrug;
@@ -929,7 +986,6 @@
         btnSpin.classList.add('hidden');
         document.getElementById('btnProceedLobby').classList.remove('hidden');
 
-        // Mettre à jour la liste des Caïds pris en local et sur le serveur
         takenCaidsInGame.push(chosenCaid.id);
 
         if (socket) {
