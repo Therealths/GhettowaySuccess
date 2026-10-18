@@ -11,6 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
+// Événements Flash Radio de la Phase 1 [1]
 const RADIO_EVENTS = [
   {
     title: "Descente de Police massive",
@@ -39,6 +40,7 @@ const RADIO_EVENTS = [
   }
 ];
 
+// Vérifie que tous les Caïds requis sont connectés et ont validé leur tirage
 function checkRoomReady(room) {
   if (!room) return false;
   const isFull = room.players.length === room.maxPlayers;
@@ -46,6 +48,7 @@ function checkRoomReady(room) {
   return isFull && allPicked;
 }
 
+// Diffuse l'état du tour actif et les Caïds autorisés à agir (joueur actif + alliés)
 function broadcastTurnState(roomId) {
   const room = rooms[roomId];
   if (!room || !room.players.length) return;
@@ -53,7 +56,6 @@ function broadcastTurnState(roomId) {
   const activePlayer = room.players[room.currentTurnIndex];
   io.to(roomId).emit('turn_state_updated', {
     activePlayerToken: activePlayer ? activePlayer.playerToken : null,
-    activePlayerName: activePlayer ? activePlayer.name : '',
     activeCaidName: activePlayer ? activePlayer.caidName : '',
     activeSocketId: activePlayer ? activePlayer.socketId : null,
     alliedTokens: room.currentTurnAlliedTokens || []
@@ -63,7 +65,7 @@ function broadcastTurnState(roomId) {
 io.on('connection', (socket) => {
   socket.emit('rooms_list', getAvailableRooms());
 
-  // Reconnexion persistante
+  // 1. Reconnexion automatique par jeton persistant
   socket.on('reconnect_player', ({ roomId, playerToken }) => {
     const room = rooms[roomId];
     if (!room) return socket.emit('reconnect_failed');
@@ -96,12 +98,12 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Création de salon
-  socket.on('create_room', ({ gameName, playerName, maxPlayers, playerToken }) => {
+  // 2. Création de salon (sans obligation de pseudo) [1]
+  socket.on('create_room', ({ gameName, maxPlayers, playerToken }) => {
     const roomId = 'GW_' + Math.random().toString(36).substring(2, 7).toUpperCase();
     rooms[roomId] = {
       id: roomId,
-      name: gameName || 'Ghetto War',
+      name: gameName || 'Ghetto War #1',
       maxPlayers: Math.min(4, Math.max(2, parseInt(maxPlayers) || 4)),
       hostSocketId: socket.id,
       round: 1,
@@ -115,7 +117,6 @@ io.on('connection', (socket) => {
     const hostPlayer = {
       socketId: socket.id,
       playerToken: playerToken,
-      name: playerName || 'Grand Caïd',
       caidId: null,
       caidName: null,
       isHost: true,
@@ -136,8 +137,8 @@ io.on('connection', (socket) => {
     io.emit('rooms_list', getAvailableRooms());
   });
 
-  // Rejoindre un salon
-  socket.on('join_room', ({ roomId, playerName, playerToken }) => {
+  // 3. Rejoindre un salon [1]
+  socket.on('join_room', ({ roomId, playerToken }) => {
     const room = rooms[roomId];
     if (!room) return socket.emit('error_msg', 'Salon introuvable ou fermé.');
 
@@ -169,7 +170,6 @@ io.on('connection', (socket) => {
     const joiner = {
       socketId: socket.id,
       playerToken: playerToken,
-      name: playerName || 'Rival',
       caidId: null,
       caidName: null,
       isHost: false,
@@ -195,7 +195,7 @@ io.on('connection', (socket) => {
     io.emit('rooms_list', getAvailableRooms());
   });
 
-  // Attribution du Caïd (unique par partie)
+  // 4. Attribution unique du Caïd
   socket.on('assign_caid', ({ caidId, caidName, startCash, startDrug, startHearts, unarmedAtk }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -222,7 +222,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Démarrage de partie (Strictement conditionné au statut Prêt de tous)
+  // 5. Démarrage de la partie [1]
   socket.on('start_game', () => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -230,7 +230,7 @@ io.on('connection', (socket) => {
       return socket.emit('error_msg', "Seul l'Hôte peut démarrer la partie.");
     }
     if (!checkRoomReady(room)) {
-      return socket.emit('error_msg', "Impossible de lancer : tous les Caïds doivent être connectés et prêts !");
+      return socket.emit('error_msg', "Impossible de lancer : tous les Caïds doivent être prêts !");
     }
 
     room.gameStarted = true;
@@ -248,23 +248,20 @@ io.on('connection', (socket) => {
     broadcastTurnState(socket.roomId);
   });
 
-  // Passer au tour suivant
+  // 6. Tour par tour : fin de tour et passage au joueur suivant [1]
   socket.on('next_player_turn', () => {
     const room = rooms[socket.roomId];
     if (!room || !room.gameStarted) return;
 
     const activePlayer = room.players[room.currentTurnIndex];
     if (!activePlayer || activePlayer.socketId !== socket.id) {
-      return; // Seul le joueur actif peut clore son tour
+      return;
     }
 
-    // Réinitialisation des alliances pour le nouveau tour
     room.currentTurnAlliedTokens = [];
-
-    // Passage au joueur suivant
     room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
 
-    // Si la boucle est complète, on avance d'une manche avec nouveau Flash Radio
+    // Nouvelle manche si la table a fini son tour
     if (room.currentTurnIndex === 0) {
       room.round++;
       room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
@@ -277,7 +274,36 @@ io.on('connection', (socket) => {
     broadcastTurnState(socket.roomId);
   });
 
-  // Proposition d'Alliance
+  // 7. Capacités Spéciales Ciblées
+  socket.on('apply_special_to_target', ({ targetSocketId, effectType, senderCaid }) => {
+    io.to(targetSocketId).emit('received_special_effect', {
+      effectType,
+      senderCaid,
+      senderSocketId: socket.id
+    });
+  });
+
+  socket.on('stolen_item_transferred', ({ targetSocketId, item }) => {
+    io.to(targetSocketId).emit('gain_stolen_item', { item });
+  });
+
+  // 8. Combats de rue en direct [1]
+  socket.on('execute_combat', ({ targetSocketId, attackerCaid, totalAtk }) => {
+    io.to(targetSocketId).emit('received_attack', {
+      attackerCaid,
+      totalAtk,
+      attackerSocketId: socket.id
+    });
+  });
+
+  socket.on('combat_result_feedback', ({ attackerSocketId, success, dmgNet }) => {
+    io.to(attackerSocketId).emit('combat_result_ack', {
+      success,
+      dmgNet
+    });
+  });
+
+  // 9. Alliances en direct [1]
   socket.on('propose_alliance', ({ targetSocketId, senderName, musclesCount }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -287,13 +313,11 @@ io.on('connection', (socket) => {
     io.to(targetSocketId).emit('alliance_request_received', {
       senderSocketId: socket.id,
       senderToken: sender.playerToken,
-      senderName: sender.name,
-      senderCaid: sender.caidName,
+      senderCaid: sender.caidName || senderName,
       musclesCount: musclesCount || 0
     });
   });
 
-  // Réponse à la demande d'Alliance
   socket.on('respond_alliance', ({ accepted, senderSocketId, senderToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -301,7 +325,6 @@ io.on('connection', (socket) => {
     if (!responder) return;
 
     if (accepted) {
-      // Les deux joueurs deviennent autorisés à agir simultanément pendant ce tour
       if (!room.currentTurnAlliedTokens.includes(responder.playerToken)) {
         room.currentTurnAlliedTokens.push(responder.playerToken);
       }
@@ -310,26 +333,22 @@ io.on('connection', (socket) => {
       }
 
       io.to(senderSocketId).emit('alliance_confirmed', {
-        allyName: responder.name,
         allyCaid: responder.caidName,
         musclesCount: responder.musclesCount || 0
       });
 
       socket.emit('alliance_confirmed', {
-        allyName: room.players.find(p => p.socketId === senderSocketId)?.name || 'Allié',
         allyCaid: room.players.find(p => p.socketId === senderSocketId)?.caidName || 'Caïd',
         musclesCount: room.players.find(p => p.socketId === senderSocketId)?.musclesCount || 0
       });
 
       broadcastTurnState(socket.roomId);
     } else {
-      io.to(senderSocketId).emit('alliance_declined', {
-        declinerName: responder.name
-      });
+      io.to(senderSocketId).emit('alliance_declined');
     }
   });
 
-  // Synchronisation de fiche joueur
+  // 10. Synchronisation des profils joueurs (vie, ressources, stats) [1]
   socket.on('sync_player', (updatedData) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -340,16 +359,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Combat direct
-  socket.on('execute_combat', ({ targetSocketId, dmg, totalAtk }) => {
-    io.to(targetSocketId).emit('received_attack', {
-      attackerSocketId: socket.id,
-      dmg,
-      totalAtk
-    });
-  });
-
-  // Quitter la partie
+  // 11. Déconnexion et sortie
   socket.on('leave_room', () => {
     handlePlayerDisconnect(socket);
   });
@@ -395,4 +405,6 @@ function getAvailableRooms() {
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Serveur Ghettoway opérationnel sur le port ${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Serveur Ghettoway opérationnel sur le port ${PORT}`);
+});
