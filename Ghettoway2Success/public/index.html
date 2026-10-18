@@ -132,7 +132,6 @@
       background-position: center;
       background-repeat: no-repeat;
     }
-    /* Slider Range personnalisé */
     input[type=range] {
       -webkit-appearance: none;
       width: 100%;
@@ -163,7 +162,7 @@
 <body>
   <div id="app-container">
 
-    <!-- ================= PAGE 1 : ACCUEIL ================= -->
+    <!-- PAGE 1 : ACCUEIL -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full flex-shrink-0">
         <button onclick="navTo('page-2')" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 active:scale-95 transition">
@@ -175,7 +174,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 2 : CRÉER UN SALON (SANS PSEUDO) ================= -->
+    <!-- PAGE 2 : CRÉER -->
     <div id="page-2" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-5">
@@ -210,7 +209,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 3 : REJOINDRE (SANS PSEUDO) ================= -->
+    <!-- PAGE 3 : REJOINDRE -->
     <div id="page-3" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-4">
@@ -234,10 +233,10 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 4 : CARROUSEL DE TIRAGE ================= -->
+    <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex-col justify-between h-full">
       <div class="flex items-center justify-between w-full pt-1 flex-shrink-0 mb-1">
-        <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
+        <button onclick="navTo('page-1')" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
           <i class="ph-bold ph-caret-left text-base"></i>
         </button>
         <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">Sélection du Caïd</span>
@@ -288,12 +287,12 @@
       </div>
     </div>
 
-    <!-- ================= PAGE LOBBY : SALLE D'ATTENTE ================= -->
+    <!-- PAGE LOBBY : SALLE D'ATTENTE -->
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center justify-between pt-1 mb-3">
-          <button onclick="confirmLeaveGame()" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter le salon">
-            <i class="ph-bold ph-sign-out text-lg text-rose-400"></i>
+          <button onclick="navTo('page-4')" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
+            <i class="ph-bold ph-caret-left text-lg"></i>
           </button>
           <div class="inline-block px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
             Salon Ouvert
@@ -324,7 +323,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 5 : FLASH RADIO ================= -->
+    <!-- PAGE 5 : FLASH RADIO -->
     <div id="page-5" class="screen-view p-5 justify-between bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
       <div class="pt-1 text-center flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
@@ -358,7 +357,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 6 : FICHE CAÏD (DASHBOARD) ================= -->
+    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD AVEC BOUTON RETOUR DIRECT SUR BANDEAU) -->
     <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between relative">
 
       <!-- CALQUE GRISÉ DE BLOCAGE TOUR PAR TOUR -->
@@ -382,20 +381,15 @@
         </div>
       </div>
 
-      <div class="flex flex-col h-full justify-between space-y-1.5">
+      <div class="flex flex-col h-full justify-between space-y-2">
 
-        <div class="flex items-center justify-between gap-2 flex-shrink-0 pt-0.5">
-          <button onclick="navTo('page-5')" class="w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Retour au Flash Radio">
+        <!-- BANDEAU VISUEL AVEC BOUTON RETOUR SUPERPOSÉ EN HAUT À GAUCHE (AUCUN TEXTE NI BOUTON QUITTER) -->
+        <div id="caidTopBannerContainer" class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
+          <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
+          <!-- Bouton retour superposé à gauche sur l'image -->
+          <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition z-10 shadow-md hover:bg-black/40" title="Retour au Flash Radio">
             <i class="ph-bold ph-caret-left text-sm"></i>
           </button>
-          <span id="headerPlayerTitle" class="text-xs font-black uppercase tracking-wider text-slate-200 truncate flex-1 text-center font-mono">Caïd</span>
-          <button onclick="confirmLeaveGame()" class="w-8 h-8 rounded-xl bg-red-950/40 border border-red-500/30 text-rose-400 flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
-            <i class="ph-bold ph-sign-out text-sm"></i>
-          </button>
-        </div>
-
-        <div id="caidTopBannerContainer" class="w-full h-16 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
-          <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Visage Caïd" class="w-full h-full object-cover">
         </div>
 
         <!-- STATS DU JOUEUR -->
@@ -471,7 +465,8 @@
 
             <!-- VOLET 1 : ACTIONS -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
-              <button id="btnSpecialPower" onclick="triggerSpecialPower()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
+              <!-- Bouton Capacité Spéciale (avec verrouillage et grisement automatique) -->
+              <button id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
                 <div class="flex items-start gap-2 flex-1 min-w-0">
                   <div class="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 flex-shrink-0 text-sm mt-0.5"><i class="ph-bold ph-sparkle animate-pulse"></i></div>
                   <div class="flex-1 min-w-0">
@@ -491,9 +486,8 @@
               </div>
             </div>
 
-            <!-- VOLET 2 : ÉQUIPEMENT (GROS FORMAT GAUCHE / STATUT SIMPLE DROITE) -->
+            <!-- VOLET 2 : ÉQUIPEMENT -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
-              <!-- Slot 1 : Arme -->
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale</span>
@@ -505,7 +499,6 @@
                 </div>
               </div>
 
-              <!-- Slot 2 : Protection -->
               <div class="p-3 bg-black/50 rounded-2xl border border-sky-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet</span>
@@ -517,7 +510,6 @@
                 </div>
               </div>
 
-              <!-- Slot 3 : Véhicule Actif -->
               <div class="p-3 bg-black/50 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif</span>
@@ -560,6 +552,27 @@
       </div>
     </div>
 
+    <!-- MODALE CIBLAGE DE CAPACITÉ SPÉCIALE -->
+    <div id="modalTargetSpecial" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
+      <div class="glass-panel p-5 rounded-3xl space-y-4 border-purple-500/40 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <h3 class="text-sm font-black text-purple-300 uppercase flex items-center gap-1.5">
+            <i class="ph-bold ph-sparkle text-base"></i> Déclencher l'Attaque Spéciale
+          </h3>
+          <button onclick="closeModal('modalTargetSpecial')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
+        </div>
+        <div>
+          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
+          <select id="specialTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
+        </div>
+        <p id="specialTargetDesc" class="text-xs text-slate-300 italic"></p>
+        <button onclick="executeTargetedSpecialPower()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-purple-500/20">
+          Lancer l'Effet sur la Cible
+        </button>
+        <button onclick="closeModal('modalTargetSpecial')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
+      </div>
+    </div>
+
     <!-- MODALE ALLIANCE REÇUE -->
     <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 shadow-2xl max-w-sm mx-auto w-full text-center">
@@ -586,7 +599,7 @@
       </div>
     </div>
 
-    <!-- MODALE TRANSFERT QG (AVEC SLIDER / JAUGE / PRESETS) -->
+    <!-- MODALE TRANSFERT QG -->
     <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -616,7 +629,6 @@
           </div>
         </div>
 
-        <!-- Section Slider et Presets -->
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs font-mono">
             <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer :</span>
@@ -628,7 +640,6 @@
             <span id="transferUnitSuffix" class="text-xs font-mono text-slate-400 absolute right-3">€</span>
           </div>
 
-          <!-- Slider / Barre de progression interactive -->
           <div class="space-y-1 pt-1">
             <input type="range" id="transferRangeSlider" min="0" max="100" value="0" oninput="syncTransferSliderToInput()" class="w-full">
             <div class="flex justify-between text-[10px] font-mono text-slate-400">
@@ -638,7 +649,6 @@
             </div>
           </div>
 
-          <!-- Presets 0%, 50%, 100% (Tout) -->
           <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
             <button onclick="setTransferPercentage(0)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">0 %</button>
             <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 %</button>
@@ -652,7 +662,7 @@
       </div>
     </div>
 
-    <!-- MODALE COMBAT (CONFIDENTIALITÉ TOTALE DES ADVERSAIRES) -->
+    <!-- MODALE COMBAT -->
     <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -684,7 +694,7 @@
       </div>
     </div>
 
-    <!-- MODALE ALLIANCE (CONFIDENTIALITÉ TOTALE DES ADVERSAIRES) -->
+    <!-- MODALE ALLIANCE -->
     <div id="modalAlliance" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -707,7 +717,7 @@
       </div>
     </div>
 
-    <!-- MODALE SCANNER (CAMÉRA ROBUSTE & FALLBACK PHOTO) -->
+    <!-- MODALE SCANNER -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-5 flex flex-col justify-between">
       <div class="pt-1">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
@@ -720,7 +730,6 @@
         <div id="qr-reader" class="w-full h-48 bg-black rounded-2xl overflow-hidden border border-white/15 relative"></div>
         <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1">Démarrage du capteur vidéo...</div>
 
-        <!-- Bouton de fallback si caméra refusée -->
         <div class="mt-2 text-center">
           <label class="px-3 py-1.5 glass-panel rounded-xl text-[10px] font-mono text-slate-300 cursor-pointer inline-flex items-center gap-1 hover:text-white">
             <i class="ph-bold ph-image text-xs"></i> Scanner depuis une photo
@@ -755,7 +764,6 @@
   </div>
 
   <script>
-    // --- GESTION DU JETON PERSISTANT ---
     function getOrCreatePlayerToken() {
       let token = localStorage.getItem('g2s_player_token');
       if (!token) {
@@ -766,7 +774,6 @@
     }
     const myPlayerToken = getOrCreatePlayerToken();
 
-    // --- ROSTER OFFICIEL ---
     const CAID_ROSTER = [
       { id: 'caid_1', name: 'Burger Queen', imageFile: 'bleu.jpg', bannerFile: 'bandeau-bleu.jpg', hex: '#3b82f6', bonus: 'Démarre avec 1 Kebab en inventaire (soigne 1 Cœur).', malus: 'Démarrage poussif : commence le tour 1 avec 0 PM.', skillName: 'Boule de Graisse', skillDesc: 'Se met en boule et roule sur une distance allant jusqu\'à 5 cases.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'kebab_1', type: 'CONSUMABLE', name: 'Kebab', desc: 'Restaure immédiatement 1 Cœur de Vie' }], unarmedAtk: 1 },
       { id: 'caid_2', name: 'Joint Dujardin', imageFile: 'rouge.jpg', bannerFile: 'bandeau-rouge.jpg', hex: '#ef4444', bonus: '+2 000 € au départ (7 000 € cash en poche).', malus: '0 kg de drogue au départ (au lieu de 5 kg).', skillName: 'Tour de Passe-Passe', skillDesc: 'Échange instantanément sa position avec un rival situé à 5 cases maximum.', startCash: 7000, startDrug: 0, startHearts: 3, startItems: [], unarmedAtk: 1 },
@@ -794,6 +801,8 @@
       hearts: 3,
       baseAtk: 1,
       baseDef: 0,
+      tempAtkMalus: 0,
+      tempDefMalus: 0,
       equipped: { weapon: null, armor: null, vehicle: null },
       musclesOnPerson: [],
       prostituteInTransit: null,
@@ -817,7 +826,7 @@
     let pendingAllianceRequest = null;
     let isMyTurnToPlay = false;
 
-    // --- SOCKET.IO TEMPS RÉEL ---
+    // --- SOCKET.IO EN DIRECT ---
     const socket = typeof io !== 'undefined' ? io() : null;
 
     if (socket) {
@@ -958,6 +967,8 @@
         currentSession.round = round;
         currentSession.currentRadioEvent = radio;
         localPlayer.specialUsedThisTurn = false;
+        localPlayer.tempAtkMalus = 0;
+        localPlayer.tempDefMalus = 0;
         localPlayer.allianceActive = false;
         localPlayer.activeAlly = null;
         startRoundPhase1();
@@ -981,6 +992,75 @@
         }
       });
 
+      // RÉCEPTION D'ATTAQUE COMBAT (LE CŒUR N'EST PERDU QU'EN CAS DE DÉFAITE NETTE) [1]
+      socket.on('received_attack', ({ attackerCaid, totalAtk, attackerSocketId }) => {
+        const myDef = getTotalDef();
+        const dmgNet = totalAtk - myDef;
+
+        if (dmgNet > 0) {
+          // La cible perd un cœur [1]
+          localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+          checkHospitalStatus();
+          alert(`💥 AGRESSION RÉUSSIE DE ${attackerCaid || 'UN RIVAL'} !\nAssaut adverse : ${totalAtk} vs Votre Défense : ${myDef}.\nVous perdez 1 Cœur de Vie !`);
+          socket.emit('combat_result_feedback', {
+            attackerSocketId,
+            success: true,
+            dmgNet
+          });
+        } else {
+          // Attaque repoussée : AUCUN CŒUR PERDU PAR LA CIBLE !
+          alert(`🛡️ AGRESSION REPOUSSÉE !\n${attackerCaid || 'Un rival'} vous a attaqué avec ${totalAtk} d'Assaut.\nVotre Défense (${myDef}) a totalement bloqué l'attaque ! Vous ne perdez aucun cœur.`);
+          socket.emit('combat_result_feedback', {
+            attackerSocketId,
+            success: false,
+            dmgNet: 0
+          });
+        }
+        refreshHud();
+      });
+
+      socket.on('combat_result_ack', ({ success, dmgNet }) => {
+        if (success) {
+          alert(`🏆 VICTOIRE ÉCRASANTE !\nVotre attaque a percé la défense adverse (Dégâts : ${dmgNet}). La cible perd 1 Cœur !`);
+        } else {
+          // L'attaque a échoué : l'attaquant perd un cœur lors du retour de flamme
+          localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+          checkHospitalStatus();
+          alert(`🛑 ATTAQUE ÉCHOUÉE !\nLa défense adverse était trop solide. Vous subissez une contre-attaque et perdez 1 Cœur !`);
+        }
+        refreshHud();
+      });
+
+      // RÉCEPTION D'EFFET DE CAPACITÉ SPÉCIALE CIBLÉE
+      socket.on('received_special_effect', ({ effectType, senderCaid, senderSocketId }) => {
+        if (effectType === 'siphon') {
+          localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+          checkHospitalStatus();
+          alert(`🩸 SIPHON VITAL de ${senderCaid} !\nIl vous vole 1 Cœur de Vie !`);
+        } else if (effectType === 'shuriken') {
+          localPlayer.tempDefMalus = 3;
+          alert(`⭐ SHURIKEN de ${senderCaid} !\nVotre Défense est réduite de 3 points ce tour !`);
+        } else if (effectType === 'danse') {
+          localPlayer.tempAtkMalus = 3;
+          alert(`💃 DANSE LASCIVE de ${senderCaid} !\nVotre Attaque est réduite de 3 points ce tour !`);
+        } else if (effectType === 'steal_item') {
+          if (localPlayer.inventory.length > 0) {
+            const stolen = localPlayer.inventory.pop();
+            alert(`🦹 VOL À LA TIRE de ${senderCaid} !\nIl vous a dérobé votre objet : ${stolen.name} !`);
+            socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });
+          } else {
+            alert(`🦹 Tentative de vol de ${senderCaid}, mais votre sac était vide !`);
+          }
+        }
+        refreshHud();
+      });
+
+      socket.on('gain_stolen_item', ({ item }) => {
+        localPlayer.inventory.push(item);
+        alert(`🎁 Butin dérobé : ${item.name} a été ajouté à votre Sac !`);
+        refreshHud();
+      });
+
       socket.on('alliance_request_received', (data) => {
         pendingAllianceRequest = data;
         document.getElementById('allianceReqSenderName').innerText = `${data.senderCaid || 'Un rival'}`;
@@ -997,7 +1077,7 @@
         alert(`🤝 Alliance confirmée avec ${allyCaid} ! Vos interfaces sont déverrouillées pour jouer ensemble ce tour.`);
       });
 
-      socket.on('alliance_declined', ({ declinerName }) => {
+      socket.on('alliance_declined', () => {
         alert(`❌ Le Caïd adverse a décliné votre proposition d'alliance.`);
       });
 
@@ -1007,13 +1087,14 @@
         syncMultiplayerTargets();
       });
 
-      socket.on('received_attack', ({ totalAtk }) => {
-        localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-        alert(`💥 AGRESSION DE RUE !\nUn rival vous a attaqué avec ${totalAtk} d'Assaut.\nVous perdez 1 Cœur !`);
-        refreshHud();
-      });
-
       socket.on('error_msg', (msg) => alert(msg));
+    }
+
+    function checkHospitalStatus() {
+      if (localPlayer.hearts <= 0) {
+        alert("🚑 URGENCE MÉDICALE — TRANSFERT À L'HÔPITAL !\nVous n'avez plus aucun Cœur de Vie !\nVotre Caïd est évacué d'urgence à l'Hôpital pour y être soigné.");
+        localPlayer.hearts = 1; // Soins de réanimation
+      }
     }
 
     function emitCreateGame() {
@@ -1047,37 +1128,30 @@
       pendingAllianceRequest = null;
     }
 
-    // --- CONFIDENTIALITÉ TOTALE DES ADVERSAIRES ---
     function syncMultiplayerTargets() {
       const combatSel = document.getElementById('combatTargetSelect');
       const allySel = document.getElementById('allianceTargetSelect');
-      if (!combatSel || !allySel) return;
+      const specialSel = document.getElementById('specialTargetSelect');
+      if (!combatSel || !allySel || !specialSel) return;
+
       combatSel.innerHTML = '';
       allySel.innerHTML = '';
+      specialSel.innerHTML = '';
 
       connectedRivals.forEach(r => {
         const displayName = r.caidName || "Caïd Adverse";
-        // Confidentialité absolue : Aucun chiffre, stats, drogue ou cash affichés !
         combatSel.innerHTML += `<option value="${r.socketId}">${displayName}</option>`;
         allySel.innerHTML += `<option value="${r.socketId}">${displayName}</option>`;
+        specialSel.innerHTML += `<option value="${r.socketId}">${displayName}</option>`;
       });
     }
 
-    // --- NAVIGATION ---
     function navTo(pageId) {
       document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
       const target = document.getElementById(pageId);
       if (target) target.classList.add('active');
       if (pageId === 'page-4') initCarouselDOM();
       if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
-    }
-
-    function confirmLeaveGame() {
-      if (confirm("Voulez-vous vraiment quitter définitivement cette partie ?")) {
-        localStorage.removeItem('g2s_room_id');
-        if (socket) socket.emit('leave_room');
-        window.location.reload();
-      }
     }
 
     function switchMainCaidTab(tabKey) {
@@ -1125,7 +1199,6 @@
       });
     }
 
-    // --- CARROUSEL ---
     function getAvailableCaids() {
       return CAID_ROSTER.filter(c => !takenCaidsInGame.includes(c.id));
     }
@@ -1254,7 +1327,6 @@
       }, 3300);
     }
 
-    // --- GAMEPLAY & PHASES ---
     function startRoundPhase1() {
       const ev = currentSession.currentRadioEvent || { title: "Descente massive", desc: "La police avance de +2 cases." };
       document.getElementById('radioRoundNumber').innerText = currentSession.round;
@@ -1274,16 +1346,16 @@
     }
 
     function getTotalAtk() {
-      let atk = localPlayer.baseAtk;
+      let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
       if (localPlayer.equipped.weapon) atk += localPlayer.equipped.weapon.bonusVal;
       localPlayer.musclesOnPerson.forEach(m => { atk += m.bonusVal; });
-      return atk;
+      return Math.max(0, atk);
     }
 
     function getTotalDef() {
-      let def = localPlayer.baseDef;
+      let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0);
       if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
-      return def;
+      return Math.max(0, def);
     }
 
     function getTotalPm() {
@@ -1336,39 +1408,72 @@
       refreshHud();
     }
 
-    function triggerSpecialPower() {
+    // --- CAPACITÉS SPÉCIALES AVEC CIBLAGE ET VERROUILLAGE ---
+    function openSpecialAbilityPrompt() {
       if (!isMyTurnToPlay) return;
       if (localPlayer.specialUsedThisTurn) {
         alert("Capacité spéciale déjà déclenchée durant ce tour !");
         return;
       }
-      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
-      const confirmPrompt = `⚡ DÉCLENCHER LA CAPACITÉ SPÉCIALE ?\n\nCaïd : ${caid.name}\nCapacité : ${caid.skillName}\nEffet : ${caid.skillDesc}\n\nRappel : Utilisable strictement 1 SEULE FOIS par tour.\n\nConfirmez-vous son activation immédiate ?`;
-      if (!confirm(confirmPrompt)) return;
 
-      if (caid.id === 'caid_3') {
-        if (localPlayer.hearts < 3) {
-          localPlayer.hearts++;
-          alert(`⚡ ${caid.skillName} activée !\n\nVous vous assoupissez un instant : +1 Cœur de Vie restauré !`);
-        } else {
-          alert(`⚡ ${caid.skillName} activée !\n\nVous êtes déjà au maximum de votre santé (3 Cœurs).`);
+      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
+      const targetedSkills = ['caid_2', 'caid_4', 'caid_6', 'caid_7', 'caid_8'];
+
+      if (targetedSkills.includes(caid.id)) {
+        if (!connectedRivals.length) {
+          return alert("Aucun rival connecté à cibler pour votre capacité spéciale !");
         }
-      } else if (caid.id === 'caid_5') {
-        if (Math.random() >= 0.5) {
-          alert(`⚡ ${caid.skillName} : FACE !\n\nInteraction totalement annulée jusqu'à la fin de la manche !`);
-        } else {
-          alert(`⚡ ${caid.skillName} : PILE !\n\nLa prière n'a pas été entendue cette fois-ci.`);
-        }
-      } else if (caid.id === 'caid_8') {
-        if (localPlayer.hearts < 3) {
-          localPlayer.hearts++;
-          alert(`⚡ ${caid.skillName} activée !\n\nVous aspirez 1 Cœur de Vie à votre rival adjacent ! (+1 PV).`);
-        } else {
-          alert(`⚡ ${caid.skillName} activée !\n\nVotre rival perd 1 Cœur de Vie (votre jauge est déjà pleine).`);
-        }
+        syncMultiplayerTargets();
+        document.getElementById('specialTargetDesc').innerText = `${caid.skillName} : ${caid.skillDesc}`;
+        document.getElementById('modalTargetSpecial').classList.remove('hidden');
       } else {
-        alert(`⚡ Capacité Spéciale : ${caid.skillName} activée !\n\nEffet : ${caid.skillDesc}`);
+        // Capacité personnelle
+        if (!confirm(`⚡ DÉCLENCHER LA CAPACITÉ SPÉCIALE ?\n\n${caid.skillName} : ${caid.skillDesc}\n\nUtilisable strictement 1x par tour.`)) return;
+
+        if (caid.id === 'caid_3') {
+          localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
+          alert("⚡ La Grosse Sieste : +1 Cœur de Vie restauré !");
+        } else if (caid.id === 'caid_5') {
+          alert("⚡ Prière Miraculeuse prête !");
+        } else {
+          alert(`⚡ Capacité Spéciale ${caid.skillName} activée !`);
+        }
+        localPlayer.specialUsedThisTurn = true;
+        refreshHud();
       }
+    }
+
+    function executeTargetedSpecialPower() {
+      const sel = document.getElementById('specialTargetSelect');
+      const targetSocketId = sel.value;
+      const target = connectedRivals.find(r => r.socketId === targetSocketId);
+      if (!target) return alert("Veuillez sélectionner un Caïd cible.");
+
+      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
+      closeModal('modalTargetSpecial');
+
+      let effect = '';
+      if (caid.id === 'caid_8') effect = 'siphon';
+      else if (caid.id === 'caid_6') effect = 'shuriken';
+      else if (caid.id === 'caid_4') effect = 'danse';
+      else if (caid.id === 'caid_7') effect = 'steal_item';
+      else if (caid.id === 'caid_2') effect = 'swap_pos';
+
+      if (socket) {
+        socket.emit('apply_special_to_target', {
+          targetSocketId: target.socketId,
+          effectType: effect,
+          senderCaid: caid.name
+        });
+      }
+
+      if (effect === 'siphon') {
+        localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
+        alert(`🩸 Siphon Vital réussi sur ${target.caidName || 'le rival'} : vous gagnez +1 Cœur !`);
+      } else {
+        alert(`⚡ Capacité Spéciale ${caid.skillName} appliquée avec succès sur ${target.caidName || 'la cible'} !`);
+      }
+
       localPlayer.specialUsedThisTurn = true;
       refreshHud();
     }
@@ -1417,14 +1522,11 @@
       }
     }
 
-    // --- MISE A JOUR INSTANTANEE DE L'INTERFACE ---
+    // --- RAFRAÎCHISSEMENT HUD ET ÉTAT BOUTON SPÉCIAL ---
     function refreshHud() {
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       const bannerImg = document.getElementById('caidBannerImg');
       if (bannerImg && caid.bannerFile) bannerImg.src = caid.bannerFile;
-
-      const headerTitle = document.getElementById('headerPlayerTitle');
-      if (headerTitle) headerTitle.innerText = `${caid.name}`;
 
       let heartsStr = '';
       for (let i = 0; i < localPlayer.hearts; i++) heartsStr += '❤️';
@@ -1458,6 +1560,19 @@
       document.getElementById('hudSpecialPowerName').innerText = caid.skillName;
       document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
 
+      // Bouton Capacité Spéciale : Grisé et bloqué dès qu'utilisé ce tour
+      const btnSpec = document.getElementById('btnSpecialPower');
+      const actionLabel = document.getElementById('hudSpecialActionBtnLabel');
+      if (localPlayer.specialUsedThisTurn) {
+        btnSpec.classList.add('opacity-30', 'pointer-events-none', 'grayscale');
+        actionLabel.innerText = "Épuisée";
+        actionLabel.className = "text-[9px] font-black uppercase px-2 py-1 bg-slate-800 text-slate-500 rounded-lg inline-block";
+      } else {
+        btnSpec.classList.remove('opacity-30', 'pointer-events-none', 'grayscale');
+        actionLabel.innerText = "Activer";
+        actionLabel.className = "text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block shadow";
+      }
+
       let equippedCount = 0;
       if (localPlayer.equipped.weapon) equippedCount++;
       if (localPlayer.equipped.armor) equippedCount++;
@@ -1465,7 +1580,6 @@
       document.getElementById('hudEquipCount').innerText = `${equippedCount}/3`;
       document.getElementById('hudItemCount').innerText = localPlayer.inventory.length;
 
-      // Actualisation immédiate du Sac et de l'Équipement
       renderInventoryList();
       renderEquipmentSlotsView();
 
@@ -1482,13 +1596,11 @@
       }
     }
 
-    // --- GESTION DU SAC / INVENTAIRE (AVEC INFOS ACTIONS CLAIRES) ---
     function renderInventoryList() {
       const c = document.getElementById('inventoryItemsList');
       if (!c) return;
       c.innerHTML = '';
 
-      // Ne jamais afficher un faux item "À pied" dans le sac
       const filtered = localPlayer.inventory.filter(item => item && item.name !== 'À pied' && item.type !== 'FOOT');
 
       if (!filtered.length) {
@@ -1538,14 +1650,13 @@
       else if (item.type === 'VEHICLE') slotKey = 'vehicle';
       if (!slotKey) return;
 
-      // Si un objet était déjà équipé (autre qu'à pied), le renvoyer dans le sac
       if (localPlayer.equipped[slotKey]) {
         localPlayer.inventory.push(localPlayer.equipped[slotKey]);
       }
 
       localPlayer.equipped[slotKey] = item;
       localPlayer.inventory.splice(idx, 1);
-      refreshHud(); // Actualisation instantanée
+      refreshHud();
     }
 
     function unequipSlot(slotKey) {
@@ -1553,12 +1664,11 @@
       const item = localPlayer.equipped[slotKey];
       if (!item) return;
 
-      // Ne jamais mettre "À pied" dans le sac
       if (item.name !== 'À pied' && item.type !== 'FOOT') {
         localPlayer.inventory.push(item);
       }
       localPlayer.equipped[slotKey] = null;
-      refreshHud(); // Actualisation instantanée
+      refreshHud();
     }
 
     function useItem(idx) {
@@ -1572,12 +1682,10 @@
         alert(`${it.name} utilisé !`);
         localPlayer.inventory.splice(idx, 1);
       }
-      refreshHud(); // Actualisation instantanée
+      refreshHud();
     }
 
-    // --- SECTION ÉQUIPEMENT (GROS FORMAT GAUCHE / STATUT LIBRE-OCCUPÉ DROITE) ---
     function renderEquipmentSlotsView() {
-      // 1. Arme
       const wTitle = document.getElementById('slotWeaponTitle');
       const wStats = document.getElementById('slotWeaponStats');
       const wStatus = document.getElementById('slotWeaponStatusContainer');
@@ -1597,7 +1705,6 @@
         wStatus.innerHTML = `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
       }
 
-      // 2. Protection
       const aTitle = document.getElementById('slotArmorTitle');
       const aStats = document.getElementById('slotArmorStats');
       const aStatus = document.getElementById('slotArmorStatusContainer');
@@ -1617,7 +1724,6 @@
         aStatus.innerHTML = `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
       }
 
-      // 3. Véhicule
       const vTitle = document.getElementById('slotVehicleTitle');
       const vStats = document.getElementById('slotVehicleStats');
       const vStatus = document.getElementById('slotVehicleStatusContainer');
@@ -1638,7 +1744,6 @@
       }
     }
 
-    // --- MODALE TRANSFERT AVEC SLIDER & PRESETS (0%, 50%, 100%) ---
     function openTransferModal(mode) {
       if (!isMyTurnToPlay) return;
       currentTransferMode = mode;
@@ -1741,7 +1846,6 @@
       refreshHud();
     }
 
-    // --- COMBAT & ALLIANCE ---
     function openCombatModal() {
       if (!isMyTurnToPlay) return;
       document.getElementById('arenaPlayerAtk').innerText = getTotalAtk();
@@ -1749,17 +1853,23 @@
       document.getElementById('modalCombat').classList.remove('hidden');
     }
 
+    // RESOLUTION DU COMBAT (AUCUN CŒUR PERDU PAR LA CIBLE SI L'ATTAQUE ÉCHOUE) [1]
     function resolveStreetFight() {
       if (!isMyTurnToPlay) return;
       const sel = document.getElementById('combatTargetSelect');
       const target = connectedRivals.find(r => r.socketId === sel.value);
       if (!target) return alert("Sélectionnez un Caïd adverse.");
-      const dmg = Math.max(0, getTotalAtk() - (target.def || 0));
-      if (socket) {
-        socket.emit('execute_combat', { targetSocketId: target.socketId, dmg, totalAtk: getTotalAtk() });
-      }
-      alert(`Attaque lancée contre ${target.caidName || 'le rival'} !`);
+
+      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       closeModal('modalCombat');
+
+      if (socket) {
+        socket.emit('execute_combat', {
+          targetSocketId: target.socketId,
+          attackerCaid: caid.name,
+          totalAtk: getTotalAtk()
+        });
+      }
     }
 
     function openAllianceModal() {
@@ -1774,10 +1884,12 @@
       const target = connectedRivals.find(r => r.socketId === sel.value);
       if (!target) return alert("Choisissez un Caïd connecté.");
 
+      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
+
       if (socket) {
         socket.emit('propose_alliance', {
           targetSocketId: target.socketId,
-          senderName: localPlayer.name,
+          senderName: caid.name,
           musclesCount: localPlayer.musclesOnPerson.length
         });
       }
@@ -1785,7 +1897,7 @@
       closeModal('modalAlliance');
     }
 
-    // --- SCANNER QR CODE ROBUSTE ---
+    // --- SCANNER QR CODE ---
     async function openQrScannerModal() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalQrScanner').classList.remove('hidden');
@@ -1804,7 +1916,6 @@
             return { width: edge, height: edge };
           };
 
-          // Tente d'abord la caméra arrière, sinon bascule sur la caméra disponible
           await html5QrScannerInstance.start(
             { facingMode: "environment" },
             { fps: 15, qrbox: qrBoxFunction },
@@ -1816,7 +1927,6 @@
           );
           statusEl.innerText = "Visez le QR Code...";
         } catch(err) {
-          console.warn("Échec caméra arrière, tentative caméra frontale:", err);
           try {
             await html5QrScannerInstance.start(
               { facingMode: "user" },
@@ -1829,7 +1939,7 @@
             );
             statusEl.innerText = "Caméra active : visez le QR Code...";
           } catch(errUser) {
-            statusEl.innerText = "Caméra bloquée (Vérifiez HTTPS / Autorisations ou utilisez le bouton photo ci-dessous).";
+            statusEl.innerText = "Caméra bloquée (Vérifiez HTTPS / Autorisations ou utilisez le bouton photo).";
           }
         }
       }
@@ -1852,21 +1962,18 @@
             processQrPayload(decodedText);
             closeQrScannerModal();
           })
-          .catch(err => {
+          .catch(() => {
             alert("Aucun QR Code valide détecté sur cette photo.");
           });
       }
     }
 
-    // Décodage et parsing JSON blindé
     function processQrPayload(payload) {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'effectuer des achats ou des missions !");
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'effectuer des actions !");
 
       let data = payload;
       if (typeof payload === 'string') {
-        let clean = payload.trim();
-        // Nettoyage des guillemets spéciaux
-        clean = clean.replace(/[\u201C\u201D]/g, '"');
+        let clean = payload.trim().replace(/[\u201C\u201D]/g, '"');
         if (clean.startsWith('{') && clean.endsWith('}')) {
           try {
             data = JSON.parse(clean);
@@ -1943,7 +2050,7 @@
         localPlayer.drugs += (data.d || 0);
         alert(`🏆 Braquage Réussi : +${data.c.toLocaleString()} €${data.d ? ` et +${data.d} kg` : ''} !`);
       }
-      refreshHud(); // Actualisation immédiate
+      refreshHud();
     }
 
     function endCurrentPlayerTurn() {
