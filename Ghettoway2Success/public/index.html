@@ -162,19 +162,19 @@
 <body>
   <div id="app-container">
 
-    <!-- PAGE 1 : ACCUEIL [1] -->
+    <!-- PAGE 1 : ACCUEIL -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full flex-shrink-0">
         <button onclick="navTo('page-2')" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 active:scale-95 transition">
-          <i class="ph-bold ph-plus-circle text-lg"></i> Créer une partie [1]
+          <i class="ph-bold ph-plus-circle text-lg"></i> Créer une partie
         </button>
         <button onclick="navTo('page-3')" class="w-full py-4 glass-panel hover:bg-white/10 text-white font-bold uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="ph-bold ph-sign-in text-lg text-slate-300"></i> Rejoindre une partie [1]
+          <i class="ph-bold ph-sign-in text-lg text-slate-300"></i> Rejoindre une partie
         </button>
       </div>
     </div>
 
-    <!-- PAGE 2 : CRÉER [1] -->
+    <!-- PAGE 2 : CRÉER UN SALON -->
     <div id="page-2" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-5">
@@ -182,21 +182,21 @@
             <i class="ph-bold ph-caret-left text-lg"></i>
           </button>
           <div>
-            <h2 class="text-base font-black text-white uppercase tracking-wider">Créer un salon [1]</h2>
-            <p class="text-[10px] text-slate-400">Configurez votre empire [1]</p>
+            <h2 class="text-base font-black text-white uppercase tracking-wider">Créer un salon</h2>
+            <p class="text-[10px] text-slate-400">Configurez votre empire</p>
           </div>
         </div>
         <div class="space-y-5">
           <div>
-            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-1.5">Nom de la partie [1]</label>
+            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-1.5">Nom de la partie</label>
             <input type="text" id="createGameName" placeholder="Ex: Cartel du Bronx" value="Ghetto War #1" class="w-full glass-input text-white px-4 py-3 rounded-xl text-sm font-semibold focus:border-ghetto-gold outline-none transition">
           </div>
           <div>
-            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-2">Nombre de Caïds [1]</label>
+            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-2">Nombre de Caïds</label>
             <div class="grid grid-cols-3 gap-2.5">
-              <button type="button" onclick="selectPlayerCount(2)" id="btnCount-2" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">2 Caïds [1]</button>
-              <button type="button" onclick="selectPlayerCount(3)" id="btnCount-3" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">3 Caïds [1]</button>
-              <button type="button" onclick="selectPlayerCount(4)" id="btnCount-4" class="count-btn py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold shadow-lg shadow-yellow-500/10 transition">4 Caïds [1]</button>
+              <button type="button" onclick="selectPlayerCount(2)" id="btnCount-2" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">2 Caïds</button>
+              <button type="button" onclick="selectPlayerCount(3)" id="btnCount-3" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">3 Caïds</button>
+              <button type="button" onclick="selectPlayerCount(4)" id="btnCount-4" class="count-btn py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold shadow-lg shadow-yellow-500/10 transition">4 Caïds</button>
             </div>
           </div>
         </div>
@@ -209,7 +209,7 @@
       </div>
     </div>
 
-    <!-- PAGE 3 : REJOINDRE [1] -->
+    <!-- PAGE 3 : REJOINDRE -->
     <div id="page-3" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-4">
@@ -217,12 +217,12 @@
             <i class="ph-bold ph-caret-left text-lg"></i>
           </button>
           <div>
-            <h2 class="text-base font-black text-white uppercase tracking-wider">Rejoindre [1]</h2>
-            <p class="text-[10px] text-slate-400">Salons disponibles [1]</p>
+            <h2 class="text-base font-black text-white uppercase tracking-wider">Rejoindre</h2>
+            <p class="text-[10px] text-slate-400">Salons disponibles</p>
           </div>
         </div>
         <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
-          <span class="text-[10px] tracking-wider uppercase">Salons détectés en direct [1]</span>
+          <span class="text-[10px] tracking-wider uppercase">Salons détectés en direct</span>
         </div>
         <div id="gamesListContainer" class="space-y-2 overflow-y-auto max-h-[360px]"></div>
       </div>
@@ -233,7 +233,7 @@
       </div>
     </div>
 
-    <!-- PAGE 4 : CARROUSEL DE TIRAGE [1] -->
+    <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex-col justify-between h-full">
       <div class="flex items-center justify-between w-full pt-1 flex-shrink-0 mb-1">
         <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
@@ -254,40 +254,40 @@
 
       <div id="revealedCaidBox" class="w-full max-w-[340px] h-[190px] glass-panel p-3.5 rounded-2xl text-left flex flex-col justify-between shadow-2xl flex-shrink-0 mx-auto my-auto">
         <div class="flex items-center justify-between border-b border-white/10 pb-1 flex-shrink-0">
-          <span id="revealedName" class="font-black text-sm text-slate-400 uppercase tracking-wide truncate">Caïd non déterminé [1]</span>
-          <span id="revealedIdBadge" class="text-[9px] px-2 py-0.5 rounded-md font-mono font-bold bg-white/5 text-slate-500 flex-shrink-0">En attente [1]</span>
+          <span id="revealedName" class="font-black text-sm text-slate-400 uppercase tracking-wide truncate">Caïd non déterminé</span>
+          <span id="revealedIdBadge" class="text-[9px] px-2 py-0.5 rounded-md font-mono font-bold bg-white/5 text-slate-500 flex-shrink-0">En attente</span>
         </div>
         <div class="min-h-[26px] flex items-start gap-2 pt-0.5">
-          <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Bonus [1]</span>
-          <span id="revealedBonusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">— [1]</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Bonus</span>
+          <span id="revealedBonusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—</span>
         </div>
         <div class="min-h-[26px] flex items-start gap-2">
-          <span class="px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Malus [1]</span>
-          <span id="revealedMalusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">— [1]</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Malus</span>
+          <span id="revealedMalusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—</span>
         </div>
         <div class="min-h-[28px] flex items-start gap-2 pt-0.5 border-t border-white/5">
-          <span class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Capacité [1]</span>
-          <span id="revealedSkill" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">— [1]</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Capacité</span>
+          <span id="revealedSkill" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—</span>
         </div>
         <div class="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-white/10 font-mono flex-shrink-0">
-          <div id="revealedCash" class="text-slate-400 font-bold">Cash: — € [1]</div>
-          <div id="revealedDrug" class="text-slate-400 font-bold">Drogue: — kg [1]</div>
+          <div id="revealedCash" class="text-slate-400 font-bold">Cash: — €</div>
+          <div id="revealedDrug" class="text-slate-400 font-bold">Drogue: — kg</div>
         </div>
       </div>
 
       <div class="space-y-2 mt-2 flex-shrink-0 w-full">
         <button type="button" id="btnSpinWheel" onclick="startCarouselDraw()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
           <i class="ph-bold ph-dice-five text-xl"></i>
-          <span>Tirage au sort [1]</span>
+          <span>Tirage au sort</span>
         </button>
         <button type="button" id="btnProceedLobby" onclick="navTo('page-lobby')" class="hidden w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20">
-          <span>Rejoindre la Salle d'Attente [1]</span>
+          <span>Rejoindre la Salle d'Attente</span>
           <i class="ph-bold ph-arrow-right"></i>
         </button>
       </div>
     </div>
 
-    <!-- PAGE LOBBY : SALLE D'ATTENTE [1] -->
+    <!-- PAGE LOBBY : SALLE D'ATTENTE -->
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center justify-between pt-1 mb-3">
@@ -295,13 +295,13 @@
             <i class="ph-bold ph-sign-out text-lg text-rose-400"></i>
           </button>
           <div class="inline-block px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
-            Salon Ouvert [1]
+            Salon Ouvert
           </div>
           <div class="w-10"></div>
         </div>
         <div class="text-center mb-4">
-          <h2 id="lobbyGameTitle" class="text-lg font-black text-white uppercase tracking-wider">Partie Urbaine [1]</h2>
-          <span id="lobbyPlayerCount" class="text-xs text-slate-400 font-mono">1 / 4 Joueurs connectés [1]</span>
+          <h2 id="lobbyGameTitle" class="text-lg font-black text-white uppercase tracking-wider">Partie Urbaine</h2>
+          <span id="lobbyPlayerCount" class="text-xs text-slate-400 font-mono">1 / 4 Joueurs connectés</span>
         </div>
         <div id="lobbyPlayersContainer" class="space-y-2 mt-4"></div>
       </div>
@@ -323,7 +323,7 @@
       </div>
     </div>
 
-    <!-- PAGE 5 : FLASH RADIO [1] -->
+    <!-- PAGE 5 : FLASH RADIO -->
     <div id="page-5" class="screen-view p-5 justify-between bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
       <div class="pt-1 text-center flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
@@ -331,33 +331,33 @@
             <i class="ph-bold ph-caret-left text-base"></i>
           </button>
           <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 border border-rose-500/40 text-rose-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
-            <i class="ph-bold ph-broadcast animate-pulse text-base"></i> Phase 1 : Flash Radio [1]
+            <i class="ph-bold ph-broadcast animate-pulse text-base"></i> Phase 1 : Flash Radio
           </div>
           <div class="w-9"></div>
         </div>
-        <h2 class="text-2xl font-black text-white uppercase tracking-tight font-mono">Manche <span id="radioRoundNumber">1</span> [1]</h2>
-        <p class="text-xs text-slate-400 mt-0.5">Alerte métropolitaine instantanée. [1]</p>
+        <h2 class="text-2xl font-black text-white uppercase tracking-tight font-mono">Manche <span id="radioRoundNumber">1</span></h2>
+        <p class="text-xs text-slate-400 mt-0.5">Alerte métropolitaine instantanée.</p>
       </div>
 
       <div class="glass-panel p-5 rounded-2xl text-left space-y-3 my-auto flex-shrink-0 shadow-2xl border-rose-500/20">
         <div class="flex items-center gap-2 text-rose-400 font-mono text-xs uppercase font-bold">
-          <i class="ph-bold ph-siren text-lg"></i> Fréquence 93.4 Ghetto FM [1]
+          <i class="ph-bold ph-siren text-lg"></i> Fréquence 93.4 Ghetto FM
         </div>
-        <h3 id="radioCardTitle" class="text-base font-black text-white leading-tight">Descente de Police massive [1]</h3>
+        <h3 id="radioCardTitle" class="text-base font-black text-white leading-tight">Descente de Police massive</h3>
         <p id="radioCardEffect" class="text-xs text-slate-300 leading-relaxed">
-          La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds. [1]
+          La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds.
         </p>
       </div>
 
       <div class="mt-4 flex-shrink-0">
         <button type="button" onclick="acknowledgeRadioCard()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
-          <span>Passer à l'action des Caïds [1]</span>
+          <span>Passer à l'action des Caïds</span>
           <i class="ph-bold ph-arrow-right"></i>
         </button>
       </div>
     </div>
 
-    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) [1] -->
+    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) -->
     <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between relative">
 
       <!-- CALQUE GRISÉ DE BLOCAGE TOUR PAR TOUR -->
@@ -383,7 +383,7 @@
 
       <div class="flex flex-col h-full justify-between space-y-2">
 
-        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE [1] -->
+        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE -->
         <div id="caidTopBannerContainer" class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition z-10 shadow-md hover:bg-black/40" title="Retour au Flash Radio">
@@ -391,33 +391,33 @@
           </button>
         </div>
 
-        <!-- STATS [1] -->
+        <!-- STATS -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10">
-            <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️ [1]</span>
+            <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️</span>
           </div>
           <div class="flex items-center justify-center gap-1.5 border-r border-white/10">
             <i class="ph-bold ph-sword text-rose-400 text-sm"></i>
-            <span id="hudAtk" class="text-base font-black text-white">1</span> [1]
+            <span id="hudAtk" class="text-base font-black text-white">1</span>
           </div>
           <div class="flex items-center justify-center gap-1.5 border-r border-white/10">
             <i class="ph-bold ph-shield text-sky-400 text-sm"></i>
-            <span id="hudDef" class="text-base font-black text-white">0</span> [1]
+            <span id="hudDef" class="text-base font-black text-white">0</span>
           </div>
           <div class="flex items-center justify-center gap-1.5">
             <span id="hudVehicleIcon" class="text-emerald-400 text-sm"><i class="ph-bold ph-person-simple-walk"></i></span>
-            <span id="hudCurrentPm" class="text-base font-black text-white">8</span> [1]
+            <span id="hudCurrentPm" class="text-base font-black text-white">8</span>
           </div>
         </div>
 
-        <!-- RECRUES (GROS BRAS & PROSTITUEE) [1] -->
+        <!-- RECRUES (GROS BRAS & PROSTITUEE) -->
         <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
           <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 shadow-lg flex items-center justify-between gap-1">
             <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl flex-shrink-0"><i class="ph-bold ph-barbell"></i></div>
             <div class="flex items-center gap-1.5 flex-shrink-0" id="muscleSlotsContainer">
-              <div onclick="clickMuscleSlot(0)" id="muscleSlot_0" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
-              <div onclick="clickMuscleSlot(1)" id="muscleSlot_1" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
-              <div onclick="clickMuscleSlot(2)" id="muscleSlot_2" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+              <div onclick="clickMuscleSlot(0)" id="muscleSlot_0" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
+              <div onclick="clickMuscleSlot(1)" id="muscleSlot_1" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
+              <div onclick="clickMuscleSlot(2)" id="muscleSlot_2" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
             </div>
           </div>
           <div class="col-span-5 py-1.5 px-2 rounded-2xl bg-rose-950/25 border-2 border-rose-400/60 shadow-lg flex items-center justify-between gap-1">
@@ -425,71 +425,71 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="w-6 h-6"><path d="M4 6h16v1.5c-2.5 0-5 3.5-7 9.5a1.5 1.5 0 0 1-2 0C9 11 6.5 7.5 4 7.5V6z"/><path d="M4 6c0 4 3 8 7 11"/><path d="M20 6c0 4-3 8-7 11"/></svg>
             </div>
             <div class="flex items-center gap-1.5 flex-shrink-0">
-              <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
-              <button onclick="depositProstituteToSafe()" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center gap-0.5 active:scale-95 transition"><span class="text-[9px] font-mono font-black uppercase">QG [1]</span></button>
+              <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
+              <button onclick="depositProstituteToSafe()" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center gap-0.5 active:scale-95 transition"><span class="text-[9px] font-mono font-black uppercase">QG</span></button>
             </div>
           </div>
         </div>
 
-        <!-- FLASH RADIO MINI [1] -->
+        <!-- FLASH RADIO MINI -->
         <div class="w-full py-1.5 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 shadow-sm flex-shrink-0">
           <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
           <div class="overflow-hidden flex-1 min-w-0 flex flex-col justify-center">
             <div class="flex items-center gap-1 leading-none mb-0.5">
-              <span class="text-[8px] font-mono uppercase font-black text-rose-400 tracking-wider">Flash Radio [1]</span>
-              <span class="text-[8px] text-slate-500 font-mono">• Manche <span id="hudRadioRoundTag">1</span> [1]</span>
+              <span class="text-[8px] font-mono uppercase font-black text-rose-400 tracking-wider">Flash Radio</span>
+              <span class="text-[8px] text-slate-500 font-mono">• Manche <span id="hudRadioRoundTag">1</span></span>
             </div>
             <div class="flex items-baseline gap-1 overflow-hidden text-xs truncate">
-              <h4 id="hudRadioReminderTitle" class="font-black text-white truncate flex-shrink-0 text-[11px]">Canicule Urbaine [1]</h4>
-              <p id="hudRadioReminderDesc" class="text-[10px] text-slate-300 truncate">les véhicules motorisés perdent -2 PM [1]</p>
+              <h4 id="hudRadioReminderTitle" class="font-black text-white truncate flex-shrink-0 text-[11px]">Canicule Urbaine</h4>
+              <p id="hudRadioReminderDesc" class="text-[10px] text-slate-300 truncate">les véhicules motorisés perdent -2 PM</p>
             </div>
           </div>
         </div>
 
-        <!-- ONGLETS [1] -->
+        <!-- ONGLETS -->
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex items-end gap-1.5 px-1 pt-1 flex-shrink-0">
             <button id="mainTabInteractions" onclick="switchMainCaidTab('interactions')" class="flex-1 py-2 px-2 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-amber-300 bg-[#141622] border-t-2 border-amber-400 shadow-lg">
-              <i class="ph-bold ph-lightning text-sm"></i><span>Actions [1]</span>
+              <i class="ph-bold ph-lightning text-sm"></i><span>Actions</span>
             </button>
             <button id="mainTabEquipment" onclick="switchMainCaidTab('equipment')" class="flex-1 py-2 px-2 rounded-t-xl font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-slate-400 bg-white/5 border border-white/10 hover:text-white">
-              <i class="ph-bold ph-shield-chevron text-sm"></i><span>Équip. (<span id="hudEquipCount">0/3</span>) [1]</span>
+              <i class="ph-bold ph-shield-chevron text-sm"></i><span>Équip. (<span id="hudEquipCount">0/3</span>)</span>
             </button>
             <button id="mainTabInventory" onclick="switchMainCaidTab('inventory')" class="flex-1 py-2 px-2 rounded-t-xl font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-slate-400 bg-white/5 border border-white/10 hover:text-white">
-              <i class="ph-bold ph-backpack text-sm"></i><span>Sac (<span id="hudItemCount">0</span>) [1]</span>
+              <i class="ph-bold ph-backpack text-sm"></i><span>Sac (<span id="hudItemCount">0</span>)</span>
             </button>
           </div>
 
           <div id="mainTabsContentContainer" class="flex-1 px-1 py-2 bg-gradient-to-b from-[#141622] via-[#0d0f17] to-[#090a10] border-t-2 border-b-2 border-x-0 border-amber-400 shadow-2xl flex flex-col justify-center overflow-hidden">
 
-            <!-- VOLET 1 : ACTIONS [1] -->
+            <!-- VOLET 1 : ACTIONS -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
               <button id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
                 <div class="flex items-start gap-2 flex-1 min-w-0">
                   <div class="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 flex-shrink-0 text-sm mt-0.5"><i class="ph-bold ph-sparkle animate-pulse"></i></div>
                   <div class="flex-1 min-w-0">
-                    <span class="text-[9px] font-mono uppercase tracking-wider text-purple-300 font-black">Capacité Spéciale [1]</span>
-                    <h4 id="hudSpecialPowerName" class="text-xs font-black text-white leading-tight">Boule de Graisse [1]</h4>
-                    <p id="hudSpecialPowerDesc" class="text-[10px] text-slate-300 mt-0.5 leading-snug">Roule jusqu'à 5 cases de distance. [1]</p>
+                    <span class="text-[9px] font-mono uppercase tracking-wider text-purple-300 font-black">Capacité Spéciale</span>
+                    <h4 id="hudSpecialPowerName" class="text-xs font-black text-white leading-tight">Boule de Graisse</h4>
+                    <p id="hudSpecialPowerDesc" class="text-[10px] text-slate-300 mt-0.5 leading-snug">Roule jusqu'à 5 cases de distance.</p>
                   </div>
                 </div>
-                <div class="flex-shrink-0 self-center"><span id="hudSpecialActionBtnLabel" class="text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block shadow">Activer [1]</span></div>
+                <div class="flex-shrink-0 self-center"><span id="hudSpecialActionBtnLabel" class="text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block shadow">Activer</span></div>
               </button>
 
               <div class="w-full grid grid-cols-2 gap-2">
-                <button onclick="openQrScannerModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-yellow-500/10 to-yellow-950/20 border border-yellow-500/35 hover:border-yellow-400 text-ghetto-gold flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-qr-code text-sm"></i><span class="text-xs font-black uppercase text-white">Scanner [1]</span></button>
-                <button onclick="openCombatModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-rose-500/10 to-rose-950/20 border border-rose-500/35 hover:border-rose-400 text-rose-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-sword text-sm"></i><span class="text-xs font-black uppercase text-white">Combat [1]</span></button>
-                <button onclick="openAllianceModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-purple-500/10 to-purple-950/20 border border-purple-500/35 hover:border-purple-400 text-purple-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-handshake text-sm"></i><span class="text-xs font-black uppercase text-white">Alliance [1]</span></button>
-                <button onclick="triggerPoliceInspection()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-sky-500/10 to-sky-950/20 border border-sky-500/35 hover:border-sky-400 text-sky-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-siren text-sm"></i><span class="text-xs font-black uppercase text-white">Contrôle [1]</span></button>
+                <button onclick="openQrScannerModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-yellow-500/10 to-yellow-950/20 border border-yellow-500/35 hover:border-yellow-400 text-ghetto-gold flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-qr-code text-sm"></i><span class="text-xs font-black uppercase text-white">Scanner</span></button>
+                <button onclick="openCombatModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-rose-500/10 to-rose-950/20 border border-rose-500/35 hover:border-rose-400 text-rose-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-sword text-sm"></i><span class="text-xs font-black uppercase text-white">Combat</span></button>
+                <button onclick="openAllianceModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-purple-500/10 to-purple-950/20 border border-purple-500/35 hover:border-purple-400 text-purple-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-handshake text-sm"></i><span class="text-xs font-black uppercase text-white">Alliance</span></button>
+                <button onclick="triggerPoliceInspection()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-sky-500/10 to-sky-950/20 border border-sky-500/35 hover:border-sky-400 text-sky-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-siren text-sm"></i><span class="text-xs font-black uppercase text-white">Contrôle</span></button>
               </div>
             </div>
 
-            <!-- VOLET 2 : ÉQUIPEMENT [1] -->
+            <!-- VOLET 2 : ÉQUIPEMENT -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
-                  <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale [1]</span>
-                  <div id="slotWeaponTitle" class="text-sm font-black text-white truncate">Mains nues [1]</div>
+                  <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale</span>
+                  <div id="slotWeaponTitle" class="text-sm font-black text-white truncate">Mains nues</div>
                   <div id="slotWeaponStats" class="text-xs font-mono font-bold text-ghetto-gold mt-0.5">Attaque +0</div>
                 </div>
                 <div id="slotWeaponStatusContainer" class="flex-shrink-0">
@@ -499,8 +499,8 @@
 
               <div class="p-3 bg-black/50 rounded-2xl border border-sky-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
-                  <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet [1]</span>
-                  <div id="slotArmorTitle" class="text-sm font-black text-white truncate">Aucune protection [1]</div>
+                  <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet</span>
+                  <div id="slotArmorTitle" class="text-sm font-black text-white truncate">Aucune protection</div>
                   <div id="slotArmorStats" class="text-xs font-mono font-bold text-sky-400 mt-0.5">Défense +0</div>
                 </div>
                 <div id="slotArmorStatusContainer" class="flex-shrink-0">
@@ -510,9 +510,9 @@
 
               <div class="p-3 bg-black/50 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
-                  <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif [1]</span>
-                  <div id="slotVehicleTitle" class="text-sm font-black text-white truncate">À pied [1]</div>
-                  <div id="slotVehicleStats" class="text-xs font-mono font-bold text-emerald-400 mt-0.5">Déplacement 8 PM [1]</div>
+                  <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif</span>
+                  <div id="slotVehicleTitle" class="text-sm font-black text-white truncate">À pied</div>
+                  <div id="slotVehicleStats" class="text-xs font-mono font-bold text-emerald-400 mt-0.5">Déplacement 8 PM</div>
                 </div>
                 <div id="slotVehicleStatusContainer" class="flex-shrink-0">
                   <span class="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>
@@ -520,22 +520,22 @@
               </div>
             </div>
 
-            <!-- VOLET 3 : INVENTAIRE / SAC [1] -->
+            <!-- VOLET 3 : INVENTAIRE / SAC -->
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
-                  <span class="text-[8px] text-amber-400 font-bold uppercase">En Poche [1]</span>
-                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudPocketCash" class="text-xs font-black text-amber-300">5 000 € [1]</span><span id="hudDrugs" class="text-xs font-black text-emerald-400">🌿 5 kg [1]</span></div>
-                  <button onclick="openTransferModal('deposit')" class="w-full py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[8px] font-bold rounded uppercase transition">Déposer au QG [1]</button>
+                  <span class="text-[8px] text-amber-400 font-bold uppercase">En Poche</span>
+                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudPocketCash" class="text-xs font-black text-amber-300">5 000 €</span><span id="hudDrugs" class="text-xs font-black text-emerald-400">🌿 5 kg</span></div>
+                  <button onclick="openTransferModal('deposit')" class="w-full py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[8px] font-bold rounded uppercase transition">Déposer au QG</button>
                 </div>
                 <div class="p-2 rounded-lg bg-sky-500/10 border border-sky-500/30 flex flex-col justify-between">
-                  <span class="text-[8px] text-sky-400 font-bold uppercase">Planque / QG [1]</span>
-                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudSafeCash" class="text-xs font-black text-sky-300">0 € [1]</span><span id="hudSafeDrugs" class="text-xs font-black text-sky-200">📦 0 kg [1]</span></div>
-                  <button onclick="openTransferModal('withdraw')" class="w-full py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-[8px] font-bold rounded uppercase transition">Récupérer du QG [1]</button>
+                  <span class="text-[8px] text-sky-400 font-bold uppercase">Planque / QG</span>
+                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudSafeCash" class="text-xs font-black text-sky-300">0 €</span><span id="hudSafeDrugs" class="text-xs font-black text-sky-200">📦 0 kg</span></div>
+                  <button onclick="openTransferModal('withdraw')" class="w-full py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-[8px] font-bold rounded uppercase transition">Récupérer du QG</button>
                 </div>
               </div>
               <div class="pt-1">
-                <span class="text-[9px] font-mono uppercase tracking-wider text-slate-400 block font-bold px-1 mb-1">Objets & Équipements en Stock : [1]</span>
+                <span class="text-[9px] font-mono uppercase tracking-wider text-slate-400 block font-bold px-1 mb-1">Objets & Équipements en Stock :</span>
                 <div id="inventoryItemsList" class="space-y-1.5"></div>
               </div>
             </div>
@@ -544,7 +544,7 @@
 
         <div class="flex-shrink-0 pt-1 pb-1 border-t border-white/10">
           <button id="btnEndTurn" onclick="endCurrentPlayerTurn()" class="w-full py-3 bg-gradient-to-r from-[#161822] via-[#24171d] to-[#450a0a] border border-rose-950/60 text-white font-bold tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition shadow-lg">
-            <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé [1]</span>
+            <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé (Dé Patrouille)</span>
           </button>
         </div>
       </div>
@@ -571,19 +571,19 @@
       </div>
     </div>
 
-    <!-- MODALE ALLIANCE REÇUE [1] -->
+    <!-- MODALE ALLIANCE REÇUE -->
     <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 shadow-2xl max-w-sm mx-auto w-full text-center">
         <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-300 mx-auto flex items-center justify-center text-2xl border border-purple-400/40">
           <i class="ph-bold ph-handshake"></i>
         </div>
         <div>
-          <h3 class="text-base font-black text-white uppercase tracking-wider">Demande d'Alliance [1]</h3>
+          <h3 class="text-base font-black text-white uppercase tracking-wider">Demande d'Alliance</h3>
           <p class="text-xs text-slate-300 mt-1">
-            Le Caïd <strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose une alliance pour ce tour. [1]
+            Le Caïd <strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose une alliance pour ce tour.
           </p>
           <span class="text-[10px] text-slate-400 font-mono block mt-2">
-            Si vous acceptez, vos deux interfaces seront déverrouillées pour jouer simultanément vos braquages ! [1]
+            Si vous acceptez, vos deux interfaces seront déverrouillées pour jouer simultanément vos braquages !
           </span>
         </div>
         <div class="grid grid-cols-2 gap-2 pt-2">
@@ -597,47 +597,129 @@
       </div>
     </div>
 
-    <!-- MODALE TRANSFERT QG [1] -->
+    <!-- MODALE CHOIX DU DÉBIT (CASH EN POCHE OU COFFRE QG) -->
+    <div id="modalPaymentChoice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
+      <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 shadow-2xl max-w-sm mx-auto w-full">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
+            <i class="ph-bold ph-credit-card text-base"></i> Choisir le Compte à Débiter
+          </h3>
+          <button onclick="closeModal('modalPaymentChoice')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
+        </div>
+        <div>
+          <p class="text-xs text-white font-bold" id="paymentItemNameTitle">Achat d'article</p>
+          <p class="text-[11px] text-slate-300 mt-0.5">Montant total requis : <strong id="paymentItemPriceDisplay" class="text-ghetto-gold font-mono">0 €</strong></p>
+        </div>
+        <div class="space-y-2">
+          <button id="btnPayWithPocket" onclick="confirmPaymentSource('pocket')" class="w-full p-3 glass-panel rounded-xl flex items-center justify-between border-amber-500/30 hover:border-amber-400 transition active:scale-95">
+            <div class="text-left">
+              <span class="text-xs font-black text-amber-300 block uppercase">En Poche (Cash)</span>
+              <span id="paymentPocketAvailable" class="text-[10px] font-mono text-slate-400">Solde : 5 000 €</span>
+            </div>
+            <i class="ph-bold ph-arrow-right text-amber-400"></i>
+          </button>
+          <button id="btnPayWithSafe" onclick="confirmPaymentSource('safe')" class="w-full p-3 glass-panel rounded-xl flex items-center justify-between border-sky-500/30 hover:border-sky-400 transition active:scale-95">
+            <div class="text-left">
+              <span class="text-xs font-black text-sky-300 block uppercase">Coffre du QG</span>
+              <span id="paymentSafeAvailable" class="text-[10px] font-mono text-slate-400">Solde : 0 €</span>
+            </div>
+            <i class="ph-bold ph-arrow-right text-sky-400"></i>
+          </button>
+        </div>
+        <button onclick="closeModal('modalPaymentChoice')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs hover:text-white transition">
+          Annuler l'achat
+        </button>
+      </div>
+    </div>
+
+    <!-- MODALE ACHAT CASE GROSSISTE (PAYABLE UNIQUEMENT EN CASH) -->
+    <div id="modalGrossiste" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
+      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-emerald-500/40 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <h3 class="text-sm font-black text-emerald-400 uppercase flex items-center gap-1.5">
+            <i class="ph-bold ph-storefront text-base"></i> Case Grossiste de Drogue
+          </h3>
+          <button onclick="closeModal('modalGrossiste')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
+        </div>
+        <div class="p-3 bg-black/40 rounded-2xl border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
+          <div class="border-r border-white/10 pr-2">
+            <span class="text-[9px] text-amber-400 uppercase font-bold block">Cash en Poche</span>
+            <div id="grossistePocketCash" class="text-sm font-black text-white mt-0.5">5 000 €</div>
+          </div>
+          <div class="pl-2">
+            <span class="text-[9px] text-emerald-400 uppercase font-bold block">Tarif Grossiste</span>
+            <div id="grossisteUnitPrice" class="text-sm font-black text-white mt-0.5">1 000 € / kg</div>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-[10px] uppercase text-slate-400 font-bold">Quantité à acheter (kg) :</span>
+            <span id="grossisteMaxKg" class="text-[10px] text-emerald-400 font-bold">Max possible : 5 kg</span>
+          </div>
+          <div class="relative flex items-center gap-2">
+            <input type="number" id="grossisteKgInput" value="0" min="0" oninput="syncGrossisteInputToSlider()" class="w-full glass-input text-white px-3 py-2.5 rounded-xl text-sm font-mono font-bold">
+            <span class="text-xs font-mono text-slate-400 absolute right-3">kg</span>
+          </div>
+          <div class="space-y-1 pt-1">
+            <input type="range" id="grossisteRangeSlider" min="0" max="100" value="0" oninput="syncGrossisteSliderToInput()" class="w-full">
+            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>0%</span>
+              <span id="grossisteSliderPercentLabel" class="text-emerald-400 font-bold">0%</span>
+              <span>100%</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
+            <button onclick="setGrossistePercentage(0)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">0 %</button>
+            <button onclick="setGrossistePercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 %</button>
+            <button onclick="setGrossistePercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-emerald-400 font-bold transition">100 % (Tout)</button>
+          </div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-emerald-950/20 border border-emerald-500/30 flex justify-between items-center text-xs font-mono">
+          <span class="text-slate-300 text-[10px] uppercase font-bold">Total à payer en Cash :</span>
+          <span id="grossisteTotalPriceDisplay" class="text-sm font-black text-emerald-300">0 €</span>
+        </div>
+        <button onclick="confirmGrossistePurchase()" class="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-emerald-500/20">
+          Acheter la Drogue (Cash uniquement)
+        </button>
+      </div>
+    </div>
+
+    <!-- MODALE TRANSFERT QG -->
     <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 id="transferModalTitle" class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-vault text-base"></i> Coffre du QG [1]
+            <i class="ph-bold ph-vault text-base"></i> Coffre du QG
           </h3>
           <button onclick="closeModal('modalTransfer')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-
         <div class="grid grid-cols-2 gap-1.5 p-1 bg-black/60 rounded-2xl font-mono text-xs">
           <button id="transferTabCash" onclick="switchTransferResource('cash')" class="py-2 rounded-xl font-bold bg-yellow-400 text-black flex items-center justify-center gap-1">
-            <i class="ph-bold ph-coins"></i> Argent (€) [1]
+            <i class="ph-bold ph-coins"></i> Argent (€)
           </button>
           <button id="transferTabDrugs" onclick="switchTransferResource('drugs')" class="py-2 rounded-xl font-bold text-slate-400 flex items-center justify-center gap-1">
-            <i class="ph-bold ph-plant"></i> Drogue (kg) [1]
+            <i class="ph-bold ph-plant"></i> Drogue (kg)
           </button>
         </div>
-
         <div class="p-3 bg-black/40 rounded-2xl border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
           <div class="border-r border-white/10 pr-2">
-            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous [1]</span>
-            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 € [1]</div>
+            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous</span>
+            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 €</div>
           </div>
           <div class="pl-2">
-            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre [1]</span>
-            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 € [1]</div>
+            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre</span>
+            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 €</div>
           </div>
         </div>
-
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs font-mono">
-            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer : [1]</span>
+            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer :</span>
             <span id="transferMaxAvailableLabel" class="text-[10px] text-ghetto-gold font-bold">Max dispo : 5 000 €</span>
           </div>
-
           <div class="relative flex items-center gap-2">
             <input type="number" id="transferAmountInput" value="0" min="0" oninput="syncTransferInputToSlider()" class="w-full glass-input text-white px-3 py-2.5 rounded-xl text-sm font-mono font-bold">
             <span id="transferUnitSuffix" class="text-xs font-mono text-slate-400 absolute right-3">€</span>
           </div>
-
           <div class="space-y-1 pt-1">
             <input type="range" id="transferRangeSlider" min="0" max="100" value="0" oninput="syncTransferSliderToInput()" class="w-full">
             <div class="flex justify-between text-[10px] font-mono text-slate-400">
@@ -646,122 +728,111 @@
               <span>100%</span>
             </div>
           </div>
-
           <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
             <button onclick="setTransferPercentage(0)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">0 %</button>
-            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 % [1]</button>
-            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout) [1]</button>
+            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 %</button>
+            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout)</button>
           </div>
         </div>
-
         <button id="transferConfirmBtn" onclick="confirmTransferAction()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-yellow-500/20">
-          Confirmer le Transfert [1]
+          Confirmer le Transfert
         </button>
       </div>
     </div>
 
-    <!-- MODALE COMBAT [1] -->
+    <!-- MODALE COMBAT -->
     <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 class="text-sm font-black text-rose-500 uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-sword text-base"></i> Combat de Rue [1]
+            <i class="ph-bold ph-sword text-base"></i> Combat de Rue
           </h3>
           <button onclick="closeModal('modalCombat')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
         <div>
-          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible : [1]</label>
+          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
           <select id="combatTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
         </div>
-
         <div class="grid grid-cols-2 gap-2 text-center font-mono">
           <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30">
-            <span class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut [1]</span>
-            <div class="text-xl font-black text-white mt-0.5" id="arenaPlayerAtk">1 [1]</div>
+            <span class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut</span>
+            <div class="text-xl font-black text-white mt-0.5" id="arenaPlayerAtk">1</div>
           </div>
           <div class="p-3 rounded-2xl bg-sky-500/10 border border-sky-500/30">
-            <span class="text-[9px] text-sky-400 uppercase font-bold">Défense Cible [1]</span>
+            <span class="text-[9px] text-sky-400 uppercase font-bold">Défense Cible</span>
             <div class="text-xl font-black text-slate-400 mt-0.5" title="Statistique adverse cachée">❓ Secret</div>
           </div>
         </div>
-
         <button id="btnExecuteFight" onclick="resolveStreetFight()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-rose-500/20">
           Lancer l'Attaque
         </button>
-        <button onclick="closeModal('modalCombat')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Fermer [1]</button>
+        <button onclick="closeModal('modalCombat')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Fermer</button>
       </div>
     </div>
 
-    <!-- MODALE ALLIANCE [1] -->
+    <!-- MODALE ALLIANCE -->
     <div id="modalAlliance" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 class="text-sm font-black text-purple-400 uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-handshake text-base"></i> Sceller une Alliance [1]
+            <i class="ph-bold ph-handshake text-base"></i> Sceller une Alliance
           </h3>
           <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
         <p class="text-xs text-slate-300">
-          L'allié recevra une demande. S'il accepte, ses forces s'additionneront aux vôtres et son écran se débloquera pour jouer simultanément avec vous ! [1]
+          L'allié recevra une demande. S'il accepte, ses forces s'additionneront aux vôtres et son écran se débloquera pour jouer simultanément avec vous !
         </p>
         <div>
-          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd : [1]</label>
+          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd :</label>
           <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
         </div>
         <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-purple-500/20">
           Envoyer la Demande
         </button>
-        <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler [1]</button>
+        <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
 
-    <!-- MODALE SCANNER [1] -->
+    <!-- MODALE SCANNER -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-5 flex flex-col justify-between">
       <div class="pt-1">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
           <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-qr-code text-base"></i> Scanner d'Article [1]
+            <i class="ph-bold ph-qr-code text-base"></i> Scanner Tactique
           </h3>
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-
         <div id="qr-reader" class="w-full h-48 bg-black rounded-2xl overflow-hidden border border-white/15 relative"></div>
         <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1">Démarrage du capteur vidéo...</div>
-
         <div class="mt-2 text-center">
           <label class="px-3 py-1.5 glass-panel rounded-xl text-[10px] font-mono text-slate-300 cursor-pointer inline-flex items-center gap-1 hover:text-white">
             <i class="ph-bold ph-image text-xs"></i> Scanner depuis une photo
             <input type="file" id="qrFileInput" accept="image/*" class="hidden" onchange="scanFromImageFile(this)">
           </label>
         </div>
-
         <div class="mt-2.5 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
-          <button onclick='processQrPayload("{\"t\":\"eq\",\"sl\":\"arme\",\"n\":\"Revolver\",\"p\":3000,\"atk\":2}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🔫 Revolver (+2 Atk) [1]</button>
-          <button onclick='processQrPayload("{\"t\":\"eq\",\"sl\":\"prot\",\"n\":\"Kevlar\",\"p\":3500,\"def\":2}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🦺 Kevlar (+2 Def) [1]</button>
+          <button onclick='processQrPayload("{\"t\":\"grossiste\",\"p\":1000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold">🌿 Case Grossiste (1000€/kg)</button>
+          <button onclick='processQrPayload("{\"t\":\"eq\",\"sl\":\"arme\",\"n\":\"Revolver\",\"p\":3000,\"atk\":2}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🔫 Revolver (+2 Atk)</button>
+          <button onclick='processQrPayload("{\"t\":\"eq\",\"sl\":\"prot\",\"n\":\"Kevlar\",\"p\":3500,\"def\":2}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🦺 Kevlar (+2 Def)</button>
           <button onclick='processQrPayload("{\"t\":\"gb\",\"lvl\":1,\"p\":1500,\"atk\":1}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">💪 Gros Bras L1 (+1)</button>
-          <button onclick='processQrPayload("{\"t\":\"gb\",\"lvl\":2,\"p\":3000,\"atk\":2}")' class="p-2 glass-panel rounded-xl text-left text-sky-400">💪 Gros Bras L2 (+2)</button>
           <button onclick='processQrPayload("{\"t\":\"pr\",\"lvl\":1,\"p\":2000,\"rev\":1000}")' class="p-2 glass-panel rounded-xl text-left text-pink-300">👠 Prostituée L1</button>
-          <button onclick='processQrPayload("{\"t\":\"pr\",\"lvl\":2,\"p\":4000,\"rev\":2500}")' class="p-2 glass-panel rounded-xl text-left text-pink-400">👠 Prostituée L2</button>
           <button onclick='processQrPayload("{\"t\":\"yen\",\"n\":\"Client VIP\",\"d\":2,\"c\":4000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-300">🤝 Yencli (2kg&rarr;4k€)</button>
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (Req: 3Atk/2M)</button>
         </div>
       </div>
-      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer [1]</button>
+      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer</button>
     </div>
 
-    <!-- MODALE PATROUILLE AVEC DIRECTION ALÉATOIRE [1] -->
+    <!-- MODALE PATROUILLE -->
     <div id="modalPatrolDice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
-        <h3 class="text-base font-black text-white uppercase">Patrouille de Police [1]</h3>
-        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">? [1]</div>
-        
+        <h3 class="text-base font-black text-white uppercase">Patrouille de Police</h3>
+        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">?</div>
         <div>
-          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule... [1]</span>
-          <!-- Ligne pour la direction aléatoire -->
+          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule...</span>
           <div id="patrolDiceDirectionLabel" class="text-sm font-black font-mono text-ghetto-gold uppercase mt-1"></div>
         </div>
-
-        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr; [1]</button>
+        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr;</button>
       </div>
     </div>
 
@@ -829,6 +900,10 @@
     let takenCaidsInGame = [];
     let pendingAllianceRequest = null;
     let isMyTurnToPlay = false;
+
+    // Gestion des achats et du Grossiste
+    let pendingPurchaseData = null;
+    let grossisteUnitCost = 1000;
 
     // --- SOCKET.IO ---
     const socket = typeof io !== 'undefined' ? io() : null;
@@ -1376,7 +1451,6 @@
       refreshHud();
     }
 
-    // --- RECRUES : SUPPRESSION DÉFINITIVE (NE VA PAS DANS L'INVENTAIRE) ---
     function clickMuscleSlot(idx) {
       if (!isMyTurnToPlay) return;
       if (localPlayer.musclesOnPerson[idx]) {
@@ -1549,7 +1623,6 @@
       }
     }
 
-    // --- REFRESH HUD AVEC IMAGES DES GROS BRAS ET DES PROSTITUÉES ---
     function refreshHud() {
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       const bannerImg = document.getElementById('caidBannerImg');
@@ -1563,7 +1636,6 @@
       document.getElementById('hudDef').innerText = getTotalDef();
       document.getElementById('hudCurrentPm').innerText = getTotalPm();
 
-      // 1. Synchronisation Boîte Bleue : Images gblvl1.jpg et gblvl2.jpg [1]
       for (let i = 0; i < 3; i++) {
         const slotEl = document.getElementById(`muscleSlot_${i}`);
         if (localPlayer.musclesOnPerson[i]) {
@@ -1583,7 +1655,6 @@
         }
       }
 
-      // 2. Synchronisation Boîte Rose : Images plvl1.jpg et plvl2.jpg [1]
       const pSlot = document.getElementById('prostituteTransitSlot');
       if (localPlayer.prostituteInTransit) {
         const pr = localPlayer.prostituteInTransit;
@@ -1649,7 +1720,6 @@
       if (!c) return;
       c.innerHTML = '';
 
-      // Ne jamais afficher les objets non désirés dans le sac
       const filtered = localPlayer.inventory.filter(item => item && item.name !== 'À pied' && item.type !== 'FOOT' && item.type !== 'MUSCLE' && item.type !== 'PROSTITUTE');
 
       if (!filtered.length) {
@@ -1804,7 +1874,7 @@
       }
     }
 
-    // --- TRANSFERTS QG ---
+    // --- MODALE TRANSFERT QG ---
     function openTransferModal(mode) {
       if (!isMyTurnToPlay) return;
       currentTransferMode = mode;
@@ -1907,7 +1977,170 @@
       refreshHud();
     }
 
-    // --- COMBAT & ALLIANCE [1] ---
+    // --- CASE GROSSISTE (ACHAT DE DROGUE 100% EN CASH) ---
+    function openGrossisteModal(unitPrice) {
+      grossisteUnitCost = unitPrice || 1000;
+      document.getElementById('grossistePocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
+      document.getElementById('grossisteUnitPrice').innerText = `${grossisteUnitCost.toLocaleString()} € / kg`;
+      
+      const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
+      document.getElementById('grossisteMaxKg').innerText = `Max possible : ${maxKg} kg`;
+
+      setGrossistePercentage(0);
+      document.getElementById('modalGrossiste').classList.remove('hidden');
+    }
+
+    function setGrossistePercentage(pct) {
+      const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
+      const kgAmount = Math.floor((maxKg * pct) / 100);
+      document.getElementById('grossisteKgInput').value = kgAmount;
+      document.getElementById('grossisteRangeSlider').value = pct;
+      document.getElementById('grossisteSliderPercentLabel').innerText = `${pct}%`;
+      updateGrossisteTotalDisplay(kgAmount);
+    }
+
+    function syncGrossisteSliderToInput() {
+      const sliderVal = parseInt(document.getElementById('grossisteRangeSlider').value) || 0;
+      const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
+      const calculatedKg = Math.floor((maxKg * sliderVal) / 100);
+      document.getElementById('grossisteKgInput').value = calculatedKg;
+      document.getElementById('grossisteSliderPercentLabel').innerText = `${sliderVal}%`;
+      updateGrossisteTotalDisplay(calculatedKg);
+    }
+
+    function syncGrossisteInputToSlider() {
+      const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
+      let kgVal = parseInt(document.getElementById('grossisteKgInput').value) || 0;
+      if (kgVal > maxKg) {
+        kgVal = maxKg;
+        document.getElementById('grossisteKgInput').value = maxKg;
+      }
+      const pct = maxKg > 0 ? Math.min(100, Math.round((kgVal / maxKg) * 100)) : 0;
+      document.getElementById('grossisteRangeSlider').value = pct;
+      document.getElementById('grossisteSliderPercentLabel').innerText = `${pct}%`;
+      updateGrossisteTotalDisplay(kgVal);
+    }
+
+    function updateGrossisteTotalDisplay(kg) {
+      const total = kg * grossisteUnitCost;
+      document.getElementById('grossisteTotalPriceDisplay').innerText = `${total.toLocaleString()} €`;
+    }
+
+    function confirmGrossistePurchase() {
+      if (!isMyTurnToPlay) return;
+      const kg = parseInt(document.getElementById('grossisteKgInput').value) || 0;
+      if (kg <= 0) return alert("Veuillez sélectionner au moins 1 kg de drogue.");
+
+      const totalCost = kg * grossisteUnitCost;
+      if (localPlayer.pocketCash < totalCost) {
+        return alert(`Cash insuffisant ! Vous avez ${localPlayer.pocketCash.toLocaleString()} € en poche (Requis : ${totalCost.toLocaleString()} €).`);
+      }
+
+      localPlayer.pocketCash -= totalCost;
+      localPlayer.drugs += kg;
+      alert(`🌿 Achat Grossiste validé : +${kg} kg de drogue ajoutés à votre stock (-${totalCost.toLocaleString()} € en Cash).`);
+      closeModal('modalGrossiste');
+      refreshHud();
+    }
+
+    // --- MODALE DU CHOIX DU COMPTE A DEBITER ---
+    function openPaymentChoiceModal(purchaseData) {
+      pendingPurchaseData = purchaseData;
+      const cost = purchaseData.cost;
+
+      document.getElementById('paymentItemNameTitle').innerText = `Article : ${purchaseData.name}`;
+      document.getElementById('paymentItemPriceDisplay').innerText = `${cost.toLocaleString()} €`;
+
+      const pocketAvailEl = document.getElementById('paymentPocketAvailable');
+      const safeAvailEl = document.getElementById('paymentSafeAvailable');
+      pocketAvailEl.innerText = `Solde : ${localPlayer.pocketCash.toLocaleString()} €`;
+      safeAvailEl.innerText = `Solde : ${localPlayer.safeCash.toLocaleString()} €`;
+
+      const btnPocket = document.getElementById('btnPayWithPocket');
+      const btnSafe = document.getElementById('btnPayWithSafe');
+
+      // Griser si fonds insuffisants dans l'un des comptes
+      if (localPlayer.pocketCash < cost) {
+        btnPocket.classList.add('opacity-40', 'pointer-events-none');
+        pocketAvailEl.innerText += ' (Insuffisant)';
+      } else {
+        btnPocket.classList.remove('opacity-40', 'pointer-events-none');
+      }
+
+      if (localPlayer.safeCash < cost) {
+        btnSafe.classList.add('opacity-40', 'pointer-events-none');
+        safeAvailEl.innerText += ' (Insuffisant)';
+      } else {
+        btnSafe.classList.remove('opacity-40', 'pointer-events-none');
+      }
+
+      document.getElementById('modalPaymentChoice').classList.remove('hidden');
+    }
+
+    function confirmPaymentSource(source) {
+      if (!pendingPurchaseData) return;
+      const cost = pendingPurchaseData.cost;
+
+      if (source === 'pocket') {
+        if (localPlayer.pocketCash < cost) return alert("Fonds en liquide insuffisants en poche !");
+        localPlayer.pocketCash -= cost;
+      } else if (source === 'safe') {
+        if (localPlayer.safeCash < cost) return alert("Fonds insuffisants au coffre du QG !");
+        localPlayer.safeCash -= cost;
+      }
+
+      // Finaliser l'achat
+      finalizePurchaseExecution(pendingPurchaseData);
+      closeModal('modalPaymentChoice');
+      pendingPurchaseData = null;
+      refreshHud();
+    }
+
+    function finalizePurchaseExecution(pData) {
+      const type = pData.type;
+      const data = pData.data;
+
+      if (type === 'eq') {
+        const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
+        const bonus = data.atk || data.def || data.pm || 1;
+        const bonusTxt = data.atk ? `+${data.atk} Attaque` : (data.def ? `+${data.def} Défense` : `+${data.pm} PM`);
+
+        localPlayer.inventory.push({
+          id: 'item_' + Date.now(),
+          type: slot,
+          name: data.n,
+          price: pData.cost,
+          bonusVal: bonus,
+          bonusLabel: bonusTxt,
+          desc: `Équipement conférant ${bonusTxt}`
+        });
+        alert(`📦 ${data.n} acheté et ajouté au Sac !`);
+      } else if (type === 'gb') {
+        const bonusAtk = data.atk || (data.lvl === 2 ? 2 : 1);
+        localPlayer.musclesOnPerson.push({
+          id: 'gb_' + Date.now(),
+          type: 'MUSCLE',
+          level: data.lvl || 1,
+          name: `Gros Bras L${data.lvl||1}`,
+          bonusVal: bonusAtk,
+          bonusLabel: `+${bonusAtk} Attaque`,
+          desc: `Homme de main conférant +${bonusAtk} en Attaque`
+        });
+        alert("💪 Gros Bras enrôlé ! Vos points d'Assaut ont augmenté.");
+      } else if (type === 'pr') {
+        localPlayer.prostituteInTransit = {
+          id: 'pr_' + Date.now(),
+          type: 'PROSTITUTE',
+          level: data.lvl || 1,
+          name: `Prostituée L${data.lvl||1}`,
+          revenue: data.rev || 1000,
+          desc: `Génère +${data.rev || 1000} € par manche au QG`
+        };
+        alert("💃 Prostituée avec vous en transit. Cliquez sur le bouton QG de la boîte rose pour sécuriser sa rente.");
+      }
+    }
+
+    // --- COMBAT & ALLIANCE ---
     function openCombatModal() {
       if (!isMyTurnToPlay) return;
       document.getElementById('arenaPlayerAtk').innerText = getTotalAtk();
@@ -1957,7 +2190,7 @@
       closeModal('modalAlliance');
     }
 
-    // --- SCANNER QR CODE [1] ---
+    // --- SCANNER QR CODE ROBUSTE ---
     async function openQrScannerModal() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalQrScanner').classList.remove('hidden');
@@ -2048,60 +2281,58 @@
       }
 
       const type = data.t;
-      if (type === 'eq') {
-        const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
-        const bonus = data.atk || data.def || data.pm || 1;
-        const bonusTxt = data.atk ? `+${data.atk} Attaque` : (data.def ? `+${data.def} Défense` : `+${data.pm} PM`);
 
-        localPlayer.inventory.push({
-          id: 'item_' + Date.now(),
-          type: slot,
-          name: data.n,
-          price: data.p || 3000,
-          bonusVal: bonus,
-          bonusLabel: bonusTxt,
-          desc: `Équipement conférant ${bonusTxt}`
-        });
-        localPlayer.pocketCash -= (data.p || 0);
-        alert(`📦 ${data.n} ajouté au Sac ! Rendez-vous dans le Sac ou l'Équipement pour l'équiper.`);
-      } else if (type === 'gb') {
-        if (localPlayer.musclesOnPerson.length >= 3) return alert("3 Gros Bras max sur le terrain.");
-        const bonusAtk = data.atk || (data.lvl === 2 ? 2 : 1);
-        localPlayer.musclesOnPerson.push({
-          id: 'gb_' + Date.now(),
-          type: 'MUSCLE',
-          level: data.lvl || 1,
-          name: `Gros Bras L${data.lvl||1}`,
-          bonusVal: bonusAtk,
-          bonusLabel: `+${bonusAtk} Attaque`,
-          desc: `Homme de main conférant +${bonusAtk} en Attaque`
-        });
-        localPlayer.pocketCash -= (data.p || 0);
-        alert("💪 Gros Bras enrôlé ! Vos points d'Assaut ont augmenté.");
-      } else if (type === 'pr') {
-        if (localPlayer.prostituteInTransit) return alert("1 seule prostituée en transit possible ! Déposez d'abord celle que vous avez au QG.");
-        let prix = data.p || (data.lvl === 2 ? 4000 : 2000);
-        if (localPlayer.caidId === 'caid_4' && !localPlayer.freeProstituteClaimed && data.lvl === 1) {
-          prix = 0;
-          localPlayer.freeProstituteClaimed = true;
-          alert("💄 Bonus Mary J Blunt : 1ère Prostituée L1 gratuite !");
+      // 1. Case Grossiste de Drogue
+      if (type === 'grossiste') {
+        openGrossisteModal(data.p || 1000);
+        return;
+      }
+
+      // 2. Achats nécessitant un choix de compte (Équipement, Gros bras, Prostituée)
+      if (type === 'eq' || type === 'gb' || type === 'pr') {
+        let cost = data.p || (type === 'gb' ? (data.lvl === 2 ? 3000 : 1500) : (data.lvl === 2 ? 4000 : 2000));
+        let itemName = data.n || (type === 'gb' ? `Gros Bras L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
+
+        // Vérifications de contraintes de jeu
+        if (type === 'gb' && localPlayer.musclesOnPerson.length >= 3) {
+          return alert("Action impossible : vous avez déjà 3 Gros Bras déployés sur le terrain !");
         }
-        localPlayer.prostituteInTransit = {
-          id: 'pr_' + Date.now(),
-          type: 'PROSTITUTE',
-          level: data.lvl || 1,
-          name: `Prostituée L${data.lvl||1}`,
-          revenue: data.rev || 1000,
-          desc: `Génère +${data.rev || 1000} € par manche au QG`
-        };
-        localPlayer.pocketCash -= prix;
-        alert("💃 Prostituée avec vous en transit. Cliquez sur le bouton QG de la boîte rose pour sécuriser sa rente.");
-      } else if (type === 'yen') {
+        if (type === 'pr' && localPlayer.prostituteInTransit) {
+          return alert("Action impossible : vous avez déjà une prostituée en transit sur vous ! Déposez-la au QG.");
+        }
+
+        // Gratuité Mary J Blunt
+        if (type === 'pr' && localPlayer.caidId === 'caid_4' && !localPlayer.freeProstituteClaimed && data.lvl === 1) {
+          localPlayer.freeProstituteClaimed = true;
+          finalizePurchaseExecution({ type, data, cost: 0, name: itemName });
+          alert("💄 Bonus Mary J Blunt : 1ère Prostituée L1 recrutée GRATUITEMENT !");
+          refreshHud();
+          return;
+        }
+
+        // CONTRÔLE STRICT DES FONDS DISPONIBLES :
+        const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
+        if (totalFunds < cost) {
+          return alert(`❌ ACHAT IMPOSSIBLE : Fonds totaux insuffisants !\nCoût de l'article : ${cost.toLocaleString()} €\nTotal disponible (Poche + Coffre QG) : ${totalFunds.toLocaleString()} €.`);
+        }
+
+        // Si fonds suffisants -> Ouvrir la boîte de choix du compte à débiter
+        openPaymentChoiceModal({ type, data, cost, name: itemName });
+        return;
+      }
+
+      // 3. Missions Yencli (Vente de drogue)
+      if (type === 'yen') {
         if (localPlayer.drugs < data.d) return alert(`Drogue insuffisante ! Le Yencli exige ${data.d} kg.`);
         localPlayer.drugs -= data.d;
         localPlayer.pocketCash += data.c;
         alert(`🤝 Deal réussi : -${data.d} kg de drogue / +${data.c.toLocaleString()} € en poche !`);
-      } else if (type === 'brq') {
+        refreshHud();
+        return;
+      }
+
+      // 4. Missions Braquage
+      if (type === 'brq') {
         let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
         let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
         if (teamAtk < data.req || members < data.m) {
@@ -2110,11 +2341,14 @@
         localPlayer.pocketCash += data.c;
         localPlayer.drugs += (data.d || 0);
         alert(`🏆 Braquage Réussi : +${data.c.toLocaleString()} €${data.d ? ` et +${data.d} kg` : ''} !`);
+        refreshHud();
+        return;
       }
+
       refreshHud();
     }
 
-    // --- FIN DE TOUR ET DÉ DE PATROUILLE AVEC DIRECTION ALÉATOIRE [1] ---
+    // --- FIN DE TOUR ET PATROUILLE ---
     function endCurrentPlayerTurn() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalPatrolDice').classList.remove('hidden');
