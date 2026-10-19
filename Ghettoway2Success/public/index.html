@@ -236,7 +236,7 @@
     <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex-col justify-between h-full">
       <div class="flex items-center justify-between w-full pt-1 flex-shrink-0 mb-1">
-        <button onclick="navTo('page-1')" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
+        <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
           <i class="ph-bold ph-caret-left text-base"></i>
         </button>
         <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">Sélection du Caïd</span>
@@ -291,8 +291,8 @@
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center justify-between pt-1 mb-3">
-          <button onclick="navTo('page-4')" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition">
-            <i class="ph-bold ph-caret-left text-lg"></i>
+          <button onclick="confirmLeaveGame()" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter le salon">
+            <i class="ph-bold ph-sign-out text-lg text-rose-400"></i>
           </button>
           <div class="inline-block px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
             Salon Ouvert
@@ -357,7 +357,7 @@
       </div>
     </div>
 
-    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD AVEC BOUTON RETOUR DIRECT SUR BANDEAU) -->
+    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) -->
     <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between relative">
 
       <!-- CALQUE GRISÉ DE BLOCAGE TOUR PAR TOUR -->
@@ -383,16 +383,15 @@
 
       <div class="flex flex-col h-full justify-between space-y-2">
 
-        <!-- BANDEAU VISUEL AVEC BOUTON RETOUR SUPERPOSÉ EN HAUT À GAUCHE (AUCUN TEXTE NI BOUTON QUITTER) -->
+        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE -->
         <div id="caidTopBannerContainer" class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
-          <!-- Bouton retour superposé à gauche sur l'image -->
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition z-10 shadow-md hover:bg-black/40" title="Retour au Flash Radio">
             <i class="ph-bold ph-caret-left text-sm"></i>
           </button>
         </div>
 
-        <!-- STATS DU JOUEUR -->
+        <!-- STATS -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10">
             <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️</span>
@@ -411,7 +410,7 @@
           </div>
         </div>
 
-        <!-- RECRUES (GROS BRAS & PROSTITUEE) -->
+        <!-- RECRUES -->
         <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
           <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 shadow-lg flex items-center justify-between gap-1">
             <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl flex-shrink-0"><i class="ph-bold ph-barbell"></i></div>
@@ -432,7 +431,7 @@
           </div>
         </div>
 
-        <!-- FLASH RADIO -->
+        <!-- FLASH RADIO MINI -->
         <div class="w-full py-1.5 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 shadow-sm flex-shrink-0">
           <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
           <div class="overflow-hidden flex-1 min-w-0 flex flex-col justify-center">
@@ -465,7 +464,6 @@
 
             <!-- VOLET 1 : ACTIONS -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
-              <!-- Bouton Capacité Spéciale (avec verrouillage et grisement automatique) -->
               <button id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
                 <div class="flex items-start gap-2 flex-1 min-w-0">
                   <div class="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 flex-shrink-0 text-sm mt-0.5"><i class="ph-bold ph-sparkle animate-pulse"></i></div>
@@ -488,6 +486,7 @@
 
             <!-- VOLET 2 : ÉQUIPEMENT -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
+              <!-- Arme -->
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale</span>
@@ -499,6 +498,7 @@
                 </div>
               </div>
 
+              <!-- Protection -->
               <div class="p-3 bg-black/50 rounded-2xl border border-sky-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet</span>
@@ -510,6 +510,7 @@
                 </div>
               </div>
 
+              <!-- Véhicule -->
               <div class="p-3 bg-black/50 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif</span>
@@ -522,7 +523,7 @@
               </div>
             </div>
 
-            <!-- VOLET 3 : INVENTAIRE / SAC -->
+            <!-- VOLET 3 : INVENTAIRE / SAC AVEC JETER & REVENDRE -->
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
@@ -781,8 +782,8 @@
       { id: 'caid_4', name: 'Mary J Blunt', imageFile: 'rose.jpg', bannerFile: 'bandeau-rose.jpg', hex: '#ec4899', bonus: '1ère Prostituée Lvl 1 recrutée totalement gratuite.', malus: 'Santé critique : commence la partie avec 1 seul Cœur sur 3.', skillName: 'Danse Lascive', skillDesc: 'Réduit l\'Attaque d\'un rival ciblé de 3 points jusqu\'au prochain tour.', startCash: 5000, startDrug: 5, startHearts: 1, startItems: [], unarmedAtk: 1 },
       { id: 'caid_5', name: 'J-Lo Gramme', imageFile: 'violet.jpg', bannerFile: 'bandeau-violet.jpg', hex: '#a855f7', bonus: 'Peut choisir de démarrer sur la tuile Église au lieu de son QG.', malus: 'Ses 5 premiers kg de drogue achetés au grossiste coûtent le double.', skillName: 'Prière Miraculeuse', skillDesc: '50% de chance d\'annuler totalement un contrôle ou une agression.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [], unarmedAtk: 1 },
       { id: 'caid_6', name: 'Tonteushi Kitano', imageFile: 'jaune.jpg', bannerFile: 'bandeau-jaune.jpg', hex: '#eab308', bonus: 'Attaque à mains nues = 3 (au lieu de 1 pour les autres).', malus: 'Premier achat d\'arme à l\'Armurerie coûte le double.', skillName: 'Tir de Shuriken', skillDesc: 'Réduit la Défense d\'un joueur ciblé de 3 points (portée 5 cases).', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [], unarmedAtk: 3 },
-      { id: 'caid_7', name: 'Jamel Pépouze', imageFile: 'orange.jpg', bannerFile: 'bandeau-orange.jpg', hex: '#f97316', bonus: 'Démarre la partie avec 2 cartes Objets aléatoires en main.', malus: 'Déjà fiché : commence placé devant le Commissariat (pas au QG).', skillName: 'Vol à la Tire', skillDesc: 'Dérobe 1 carte Objet à un rival situé à 1 case de distance max.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'armor_jamel', type: 'ARMOR', name: 'Gilet pare-balles usagé', bonusVal: 1, bonusLabel: '+1 Défense', desc: 'Confère +1 en Défense passive' }], unarmedAtk: 1 },
-      { id: 'caid_8', name: 'Weed-Nesday', imageFile: 'noir.jpg', bannerFile: 'bandeau-noir.jpg', hex: '#64748b', bonus: 'Démarre avec un Poing Américain équipé (+1 Attaque).', malus: 'Corps fragile : commence avec 2 Cœurs sur 3.', skillName: 'Siphon Vital', skillDesc: 'Aspire et vole 1 Cœur de Vie à un joueur adverse situé à 1 case max.', startCash: 5000, startDrug: 5, startHearts: 2, startItems: [{ id: 'weapon_poing', type: 'WEAPON', name: 'Poing Américain', bonusVal: 1, bonusLabel: '+1 Attaque', desc: 'Confère +1 en Attaque au combat' }], unarmedAtk: 1 }
+      { id: 'caid_7', name: 'Jamel Pépouze', imageFile: 'orange.jpg', bannerFile: 'bandeau-orange.jpg', hex: '#f97316', bonus: 'Démarre la partie avec 2 cartes Objets aléatoires en main.', malus: 'Déjà fiché : commence placé devant le Commissariat (pas au QG).', skillName: 'Vol à la Tire', skillDesc: 'Dérobe 1 carte Objet à un rival situé à 1 case de distance max.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'armor_jamel', type: 'ARMOR', name: 'Gilet pare-balles usagé', price: 2000, bonusVal: 1, bonusLabel: '+1 Défense', desc: 'Confère +1 en Défense passive' }], unarmedAtk: 1 },
+      { id: 'caid_8', name: 'Weed-Nesday', imageFile: 'noir.jpg', bannerFile: 'bandeau-noir.jpg', hex: '#64748b', bonus: 'Démarre avec un Poing Américain équipé (+1 Attaque).', malus: 'Corps fragile : commence avec 2 Cœurs sur 3.', skillName: 'Siphon Vital', skillDesc: 'Aspire et vole 1 Cœur de Vie à un joueur adverse situé à 1 case max.', startCash: 5000, startDrug: 5, startHearts: 2, startItems: [{ id: 'weapon_poing', type: 'WEAPON', name: 'Poing Américain', price: 1500, bonusVal: 1, bonusLabel: '+1 Attaque', desc: 'Confère +1 en Attaque au combat' }], unarmedAtk: 1 }
     ];
 
     const VEHICLES_DEF = {
@@ -826,7 +827,7 @@
     let pendingAllianceRequest = null;
     let isMyTurnToPlay = false;
 
-    // --- SOCKET.IO EN DIRECT ---
+    // --- SOCKET.IO ---
     const socket = typeof io !== 'undefined' ? io() : null;
 
     if (socket) {
@@ -992,13 +993,11 @@
         }
       });
 
-      // RÉCEPTION D'ATTAQUE COMBAT (LE CŒUR N'EST PERDU QU'EN CAS DE DÉFAITE NETTE) [1]
       socket.on('received_attack', ({ attackerCaid, totalAtk, attackerSocketId }) => {
         const myDef = getTotalDef();
         const dmgNet = totalAtk - myDef;
 
         if (dmgNet > 0) {
-          // La cible perd un cœur [1]
           localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
           checkHospitalStatus();
           alert(`💥 AGRESSION RÉUSSIE DE ${attackerCaid || 'UN RIVAL'} !\nAssaut adverse : ${totalAtk} vs Votre Défense : ${myDef}.\nVous perdez 1 Cœur de Vie !`);
@@ -1008,8 +1007,7 @@
             dmgNet
           });
         } else {
-          // Attaque repoussée : AUCUN CŒUR PERDU PAR LA CIBLE !
-          alert(`🛡️ AGRESSION REPOUSSÉE !\n${attackerCaid || 'Un rival'} vous a attaqué avec ${totalAtk} d'Assaut.\nVotre Défense (${myDef}) a totalement bloqué l'attaque ! Vous ne perdez aucun cœur.`);
+          alert(`🛡️ AGRESSION REPOUSSÉE !\n${attackerCaid || 'Un rival'} vous a attaqué avec ${totalAtk} d'Assaut.\nVotre Défense (${myDef}) a bloqué l'attaque ! Vous ne perdez aucun cœur.`);
           socket.emit('combat_result_feedback', {
             attackerSocketId,
             success: false,
@@ -1021,9 +1019,8 @@
 
       socket.on('combat_result_ack', ({ success, dmgNet }) => {
         if (success) {
-          alert(`🏆 VICTOIRE ÉCRASANTE !\nVotre attaque a percé la défense adverse (Dégâts : ${dmgNet}). La cible perd 1 Cœur !`);
+          alert(`🏆 VICTOIRE ÉCRASANTE !\nVotre assaut a percé la défense adverse (Dégâts : ${dmgNet}). La cible perd 1 Cœur !`);
         } else {
-          // L'attaque a échoué : l'attaquant perd un cœur lors du retour de flamme
           localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
           checkHospitalStatus();
           alert(`🛑 ATTAQUE ÉCHOUÉE !\nLa défense adverse était trop solide. Vous subissez une contre-attaque et perdez 1 Cœur !`);
@@ -1031,7 +1028,6 @@
         refreshHud();
       });
 
-      // RÉCEPTION D'EFFET DE CAPACITÉ SPÉCIALE CIBLÉE
       socket.on('received_special_effect', ({ effectType, senderCaid, senderSocketId }) => {
         if (effectType === 'siphon') {
           localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
@@ -1046,7 +1042,7 @@
         } else if (effectType === 'steal_item') {
           if (localPlayer.inventory.length > 0) {
             const stolen = localPlayer.inventory.pop();
-            alert(`🦹 VOL À LA TIRE de ${senderCaid} !\nIl vous a dérobé votre objet : ${stolen.name} !`);
+            alert(`🦹 VOL À LA TIRE de ${senderCaid} !\nIl vous a dérobé : ${stolen.name} !`);
             socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });
           } else {
             alert(`🦹 Tentative de vol de ${senderCaid}, mais votre sac était vide !`);
@@ -1093,7 +1089,7 @@
     function checkHospitalStatus() {
       if (localPlayer.hearts <= 0) {
         alert("🚑 URGENCE MÉDICALE — TRANSFERT À L'HÔPITAL !\nVous n'avez plus aucun Cœur de Vie !\nVotre Caïd est évacué d'urgence à l'Hôpital pour y être soigné.");
-        localPlayer.hearts = 1; // Soins de réanimation
+        localPlayer.hearts = 1;
       }
     }
 
@@ -1152,6 +1148,14 @@
       if (target) target.classList.add('active');
       if (pageId === 'page-4') initCarouselDOM();
       if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
+    }
+
+    function confirmLeaveGame() {
+      if (confirm("Voulez-vous vraiment quitter définitivement cette partie ?")) {
+        localStorage.removeItem('g2s_room_id');
+        if (socket) socket.emit('leave_room');
+        window.location.reload();
+      }
     }
 
     function switchMainCaidTab(tabKey) {
@@ -1408,7 +1412,7 @@
       refreshHud();
     }
 
-    // --- CAPACITÉS SPÉCIALES AVEC CIBLAGE ET VERROUILLAGE ---
+    // --- CAPACITÉ SPÉCIALE ---
     function openSpecialAbilityPrompt() {
       if (!isMyTurnToPlay) return;
       if (localPlayer.specialUsedThisTurn) {
@@ -1427,7 +1431,6 @@
         document.getElementById('specialTargetDesc').innerText = `${caid.skillName} : ${caid.skillDesc}`;
         document.getElementById('modalTargetSpecial').classList.remove('hidden');
       } else {
-        // Capacité personnelle
         if (!confirm(`⚡ DÉCLENCHER LA CAPACITÉ SPÉCIALE ?\n\n${caid.skillName} : ${caid.skillDesc}\n\nUtilisable strictement 1x par tour.`)) return;
 
         if (caid.id === 'caid_3') {
@@ -1522,7 +1525,35 @@
       }
     }
 
-    // --- RAFRAÎCHISSEMENT HUD ET ÉTAT BOUTON SPÉCIAL ---
+    // --- REVENTE ET ABANDON D'OBJETS ---
+    function sellItem(idx) {
+      if (!isMyTurnToPlay) return alert("Attendez votre tour pour effectuer une vente.");
+      const item = localPlayer.inventory[idx];
+      if (!item) return;
+
+      const basePrice = item.price || item.p || (item.type === 'WEAPON' ? 3000 : (item.type === 'ARMOR' ? 3500 : 5000));
+      const resellValue = Math.floor(basePrice * 0.5);
+
+      if (confirm(`Revendre "${item.name}" pour ${resellValue.toLocaleString()} € en liquide ?`)) {
+        localPlayer.inventory.splice(idx, 1);
+        localPlayer.pocketCash += resellValue;
+        alert(`💰 Vente conclue : vous récupérez +${resellValue.toLocaleString()} € en poche.`);
+        refreshHud();
+      }
+    }
+
+    function discardItem(idx) {
+      if (!isMyTurnToPlay) return alert("Attendez votre tour pour gérer votre inventaire.");
+      const item = localPlayer.inventory[idx];
+      if (!item) return;
+
+      if (confirm(`Voulez-vous vraiment jeter définitivement "${item.name}" ?`)) {
+        localPlayer.inventory.splice(idx, 1);
+        refreshHud();
+      }
+    }
+
+    // --- RAFRAÎCHISSEMENT DU HUD ---
     function refreshHud() {
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       const bannerImg = document.getElementById('caidBannerImg');
@@ -1560,7 +1591,6 @@
       document.getElementById('hudSpecialPowerName').innerText = caid.skillName;
       document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
 
-      // Bouton Capacité Spéciale : Grisé et bloqué dès qu'utilisé ce tour
       const btnSpec = document.getElementById('btnSpecialPower');
       const actionLabel = document.getElementById('hudSpecialActionBtnLabel');
       if (localPlayer.specialUsedThisTurn) {
@@ -1596,6 +1626,7 @@
       }
     }
 
+    // --- INVENTAIRE : RENDU DÉTAILLÉ AVEC ACTIONS ---
     function renderInventoryList() {
       const c = document.getElementById('inventoryItemsList');
       if (!c) return;
@@ -1613,18 +1644,29 @@
         const d = document.createElement('div');
         d.className = "p-2.5 bg-black/60 rounded-xl border border-white/10 flex items-center justify-between text-xs gap-2 shadow-sm";
 
-        let actionBtn = '';
+        let primaryBtn = '';
         if (item.type === 'WEAPON' || item.type === 'ARMOR' || item.type === 'VEHICLE') {
-          actionBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0"><i class="ph-bold ph-shield-check"></i> Équiper</button>`;
+          primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0"><i class="ph-bold ph-shield-check"></i> Équiper</button>`;
         } else if (item.type === 'MUSCLE') {
-          actionBtn = `<button onclick="equipMuscleFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0">Assigner</button>`;
+          primaryBtn = `<button onclick="equipMuscleFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0">Assigner</button>`;
         } else if (item.type === 'PROSTITUTE') {
-          actionBtn = `<button onclick="takeProstituteInTransitFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-pink-400 to-rose-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0">Escorter</button>`;
+          primaryBtn = `<button onclick="takeProstituteInTransitFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-pink-400 to-rose-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0">Escorter</button>`;
         } else if (item.type === 'CONSUMABLE') {
-          actionBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] active:scale-95 transition flex-shrink-0 uppercase">Consommer</button>`;
+          primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] active:scale-95 transition flex-shrink-0 uppercase">Consommer</button>`;
         } else {
-          actionBtn = `<span class="text-[9px] text-slate-400 font-mono">Passif</span>`;
+          primaryBtn = `<span class="text-[9px] text-slate-400 font-mono">Passif</span>`;
         }
+
+        // Revente à 50% pour les équipements
+        const isSellable = (item.type === 'WEAPON' || item.type === 'ARMOR' || item.type === 'VEHICLE');
+        const basePrice = item.price || item.p || (item.type === 'WEAPON' ? 3000 : (item.type === 'ARMOR' ? 3500 : 5000));
+        const resellVal = Math.floor(basePrice * 0.5);
+
+        const sellBtn = isSellable
+          ? `<button onclick="sellItem(${realIdx})" class="px-2 py-1 glass-panel text-amber-300 border border-amber-500/30 rounded-lg font-mono text-[9px] font-bold hover:text-white" title="Revendre à 50% de la valeur">Vendre (${resellVal}€)</button>`
+          : '';
+
+        const discardBtn = `<button onclick="discardItem(${realIdx})" class="px-2 py-1 glass-panel text-rose-400 border border-rose-500/30 rounded-lg font-mono text-[9px] hover:text-white" title="Jeter définitivement">Jeter</button>`;
 
         const effectDesc = item.desc || item.bonusLabel || "Objet spécial de Caïd";
 
@@ -1633,7 +1675,11 @@
             <span class="font-bold text-white block text-xs truncate">${item.name}</span>
             <span class="text-[10px] text-ghetto-gold font-mono block leading-snug">${effectDesc}</span>
           </div>
-          ${actionBtn}
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            ${primaryBtn}
+            ${sellBtn}
+            ${discardBtn}
+          </div>
         `;
         c.appendChild(d);
       });
@@ -1675,6 +1721,7 @@
       if (!isMyTurnToPlay) return;
       const it = localPlayer.inventory[idx];
       if (it && it.name && it.name.includes('Kebab')) {
+        if (localPlayer.hearts >= 3) return alert("Votre santé est déjà au maximum (3 Cœurs) !");
         localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
         alert("🥙 Kebab consommé : +1 Cœur de Vie restauré !");
         localPlayer.inventory.splice(idx, 1);
@@ -1744,6 +1791,7 @@
       }
     }
 
+    // --- TRANSFERTS QG ---
     function openTransferModal(mode) {
       if (!isMyTurnToPlay) return;
       currentTransferMode = mode;
@@ -1846,6 +1894,7 @@
       refreshHud();
     }
 
+    // --- COMBAT & ALLIANCE ---
     function openCombatModal() {
       if (!isMyTurnToPlay) return;
       document.getElementById('arenaPlayerAtk').innerText = getTotalAtk();
@@ -1853,13 +1902,11 @@
       document.getElementById('modalCombat').classList.remove('hidden');
     }
 
-    // RESOLUTION DU COMBAT (AUCUN CŒUR PERDU PAR LA CIBLE SI L'ATTAQUE ÉCHOUE) [1]
     function resolveStreetFight() {
       if (!isMyTurnToPlay) return;
       const sel = document.getElementById('combatTargetSelect');
       const target = connectedRivals.find(r => r.socketId === sel.value);
       if (!target) return alert("Sélectionnez un Caïd adverse.");
-
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       closeModal('modalCombat');
 
@@ -1997,6 +2044,7 @@
           id: 'item_' + Date.now(),
           type: slot,
           name: data.n,
+          price: data.p || 3000,
           bonusVal: bonus,
           bonusLabel: bonusTxt,
           desc: `Équipement conférant ${bonusTxt}`
