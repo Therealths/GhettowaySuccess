@@ -486,6 +486,7 @@
 
             <!-- VOLET 2 : ÉQUIPEMENT -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
+              <!-- Arme -->
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale</span>
@@ -497,6 +498,7 @@
                 </div>
               </div>
 
+              <!-- Protection -->
               <div class="p-3 bg-black/50 rounded-2xl border border-sky-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet</span>
@@ -508,6 +510,7 @@
                 </div>
               </div>
 
+              <!-- Véhicule -->
               <div class="p-3 bg-black/50 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif</span>
@@ -520,7 +523,7 @@
               </div>
             </div>
 
-            <!-- VOLET 3 : INVENTAIRE / SAC -->
+            <!-- VOLET 3 : INVENTAIRE / SAC AVEC JETER & REVENDRE -->
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
@@ -632,7 +635,7 @@
       </div>
     </div>
 
-    <!-- MODALE ACHAT CASE GROSSISTE (PAYABLE UNIQUEMENT EN CASH) -->
+    <!-- MODALE ACHAT CASE GROSSISTE (CASH UNIQUEMENT) -->
     <div id="modalGrossiste" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-emerald-500/40 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -901,11 +904,9 @@
     let pendingAllianceRequest = null;
     let isMyTurnToPlay = false;
 
-    // Gestion des achats et du Grossiste
     let pendingPurchaseData = null;
     let grossisteUnitCost = 1000;
 
-    // --- SOCKET.IO ---
     const socket = typeof io !== 'undefined' ? io() : null;
 
     if (socket) {
@@ -1072,6 +1073,25 @@
       });
 
       socket.on('received_attack', ({ attackerCaid, totalAtk, attackerSocketId }) => {
+        if (localPlayer.caidId === 'caid_5' && !localPlayer.specialUsedThisTurn) {
+          const usePrayer = confirm(`🙏 J-Lo Gramme : ${attackerCaid || 'Un rival'} vous attaque !\nSouhaitez-vous tenter votre 'Prière Miraculeuse' (50% de chance d'annuler totalement l'agression) ?\n\nRappel : Utilisable 1 seule fois par tour.`);
+          if (usePrayer) {
+            localPlayer.specialUsedThisTurn = true;
+            refreshHud();
+            if (Math.random() >= 0.5) {
+              alert("🙏 Prière Miraculeuse : FACE !\n\nL'attaque rivale est miraculeusement annulée !");
+              socket.emit('combat_result_feedback', {
+                attackerSocketId,
+                success: false,
+                dmgNet: 0
+              });
+              return;
+            } else {
+              alert("🙏 Prière Miraculeuse : PILE !\n\nLa prière n'a pas suffi, vous devez vous défendre.");
+            }
+          }
+        }
+
         const myDef = getTotalDef();
         const dmgNet = totalAtk - myDef;
 
@@ -1552,21 +1572,27 @@
       refreshHud();
     }
 
+    // CONTRÔLE DE POLICE AVEC TRANSFERT IMMÉDIAT AU POSTE
     function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return;
       const vehKey = localPlayer.equipped.vehicle ? (localPlayer.equipped.vehicle.key || 'veh') : 'none';
       const hasVehicle = vehKey !== 'none';
       const promptMsg = hasVehicle
-        ? `🚨 INTERCEPTION DE POLICE !\n\nLa patrouille vous croise.\nVéhicule actif (Tentative Go-Fast 4+ disponible).\n\nConfirmer et lancer le contrôle ?`
-        : `🚨 INTERCEPTION DE POLICE !\n\nLa patrouille vous croise (vous êtes à pied).\nFouille immédiate requise.\n\nConfirmer et lancer le contrôle ?`;
+        ? "🚨 INTERCEPTION DE POLICE !\n\nLa patrouille vous croise.\nVéhicule actif (Tentative Go-Fast 4+ disponible).\n\nConfirmer et lancer le contrôle ?"
+        : "🚨 INTERCEPTION DE POLICE !\n\nLa patrouille vous croise (vous êtes à pied).\nFouille immédiate requise.\n\nConfirmer et lancer le contrôle ?";
       if (!confirm(promptMsg)) return;
 
-      if (localPlayer.caidId === 'caid_5') {
-        if (Math.random() >= 0.5) {
-          alert("🙏 Prière Miraculeuse de J-Lo Gramme : FACE !\n\nLe contrôle de police est miraculeusement annulé ce tour !");
-          return;
-        } else {
-          alert("🙏 Prière Miraculeuse : PILE !\n\nLa prière échoue, le contrôle se poursuit.");
+      if (localPlayer.caidId === 'caid_5' && !localPlayer.specialUsedThisTurn) {
+        const usePrayer = confirm("🙏 J-Lo Gramme : Souhaitez-vous tenter votre 'Prière Miraculeuse' (50% de chance d'annuler ce contrôle) ?\n\nRappel : Utilisable 1 seule fois par tour.");
+        if (usePrayer) {
+          localPlayer.specialUsedThisTurn = true;
+          refreshHud();
+          if (Math.random() >= 0.5) {
+            alert("🙏 Prière Miraculeuse : FACE !\n\nLe contrôle de police est miraculeusement annulé ce tour !");
+            return;
+          } else {
+            alert("🙏 Prière Miraculeuse : PILE !\n\nLa prière échoue, le contrôle se poursuit.");
+          }
         }
       }
 
@@ -1585,14 +1611,15 @@
       if (pick === 'CLEAN' || (pick === 'DRUGS_FOUND' && localPlayer.drugs === 0)) {
         alert("👮 Contrôle de Police : R.A.S. !\n\nVos papiers sont en règle, la patrouille vous laisse repartir.");
       } else if (pick === 'DRUGS_FOUND' && localPlayer.drugs > 0) {
-        alert(`🚨 DÉLIT DE TRAFIC !\n\nLes ${localPlayer.drugs} kg de drogue sur vous sont confisqués et vous êtes transféré en Prison !`);
+        const seized = localPlayer.drugs;
         localPlayer.drugs = 0;
         refreshHud();
+        alert(`🚨 SAISIE DE MARCHANDISE ILLÉGALE !\n\nLes ${seized} kg de drogue sur vous ont été saisis !\n\n🚔 CONDUITE IMMÉDIATE AU POSTE !\nVous êtes arrêté en flagrant délit pour trafic et immédiatement conduit au poste de police / commissariat !`);
       } else {
-        alert("🔫 ARMES ILLÉGALES DÉTECTÉES !\n\nVotre arme équipée et vos armes en inventaire sont saisies par la police.");
         localPlayer.equipped.weapon = null;
         localPlayer.inventory = localPlayer.inventory.filter(it => it.type !== 'WEAPON');
         refreshHud();
+        alert("🔫 PORT D'ARMES ILLÉGAL !\n\nVotre arme et vos équipements offensifs ont été confisqués !\n\n🚔 CONDUITE IMMÉDIATE AU POSTE !\nVous êtes arrêté pour détention d'armes non autorisées et immédiatement conduit au poste de police / commissariat !");
       }
     }
 
@@ -1977,7 +2004,7 @@
       refreshHud();
     }
 
-    // --- CASE GROSSISTE (ACHAT DE DROGUE 100% EN CASH) ---
+    // --- CASE GROSSISTE ---
     function openGrossisteModal(unitPrice) {
       grossisteUnitCost = unitPrice || 1000;
       document.getElementById('grossistePocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
@@ -2043,7 +2070,7 @@
       refreshHud();
     }
 
-    // --- MODALE DU CHOIX DU COMPTE A DEBITER ---
+    // --- MODALE CHOIX PAIEMENT ---
     function openPaymentChoiceModal(purchaseData) {
       pendingPurchaseData = purchaseData;
       const cost = purchaseData.cost;
@@ -2059,7 +2086,6 @@
       const btnPocket = document.getElementById('btnPayWithPocket');
       const btnSafe = document.getElementById('btnPayWithSafe');
 
-      // Griser si fonds insuffisants dans l'un des comptes
       if (localPlayer.pocketCash < cost) {
         btnPocket.classList.add('opacity-40', 'pointer-events-none');
         pocketAvailEl.innerText += ' (Insuffisant)';
@@ -2089,7 +2115,6 @@
         localPlayer.safeCash -= cost;
       }
 
-      // Finaliser l'achat
       finalizePurchaseExecution(pendingPurchaseData);
       closeModal('modalPaymentChoice');
       pendingPurchaseData = null;
@@ -2190,7 +2215,7 @@
       closeModal('modalAlliance');
     }
 
-    // --- SCANNER QR CODE ROBUSTE ---
+    // --- SCANNER QR CODE ---
     async function openQrScannerModal() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalQrScanner').classList.remove('hidden');
@@ -2264,6 +2289,8 @@
     function processQrPayload(payload) {
       if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'effectuer des actions !");
 
+      closeQrScannerModal();
+
       let data = payload;
       if (typeof payload === 'string') {
         let clean = payload.trim().replace(/[\u201C\u201D]/g, '"');
@@ -2282,18 +2309,15 @@
 
       const type = data.t;
 
-      // 1. Case Grossiste de Drogue
       if (type === 'grossiste') {
         openGrossisteModal(data.p || 1000);
         return;
       }
 
-      // 2. Achats nécessitant un choix de compte (Équipement, Gros bras, Prostituée)
       if (type === 'eq' || type === 'gb' || type === 'pr') {
         let cost = data.p || (type === 'gb' ? (data.lvl === 2 ? 3000 : 1500) : (data.lvl === 2 ? 4000 : 2000));
         let itemName = data.n || (type === 'gb' ? `Gros Bras L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
 
-        // Vérifications de contraintes de jeu
         if (type === 'gb' && localPlayer.musclesOnPerson.length >= 3) {
           return alert("Action impossible : vous avez déjà 3 Gros Bras déployés sur le terrain !");
         }
@@ -2301,7 +2325,6 @@
           return alert("Action impossible : vous avez déjà une prostituée en transit sur vous ! Déposez-la au QG.");
         }
 
-        // Gratuité Mary J Blunt
         if (type === 'pr' && localPlayer.caidId === 'caid_4' && !localPlayer.freeProstituteClaimed && data.lvl === 1) {
           localPlayer.freeProstituteClaimed = true;
           finalizePurchaseExecution({ type, data, cost: 0, name: itemName });
@@ -2310,18 +2333,15 @@
           return;
         }
 
-        // CONTRÔLE STRICT DES FONDS DISPONIBLES :
         const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
         if (totalFunds < cost) {
           return alert(`❌ ACHAT IMPOSSIBLE : Fonds totaux insuffisants !\nCoût de l'article : ${cost.toLocaleString()} €\nTotal disponible (Poche + Coffre QG) : ${totalFunds.toLocaleString()} €.`);
         }
 
-        // Si fonds suffisants -> Ouvrir la boîte de choix du compte à débiter
         openPaymentChoiceModal({ type, data, cost, name: itemName });
         return;
       }
 
-      // 3. Missions Yencli (Vente de drogue)
       if (type === 'yen') {
         if (localPlayer.drugs < data.d) return alert(`Drogue insuffisante ! Le Yencli exige ${data.d} kg.`);
         localPlayer.drugs -= data.d;
@@ -2331,7 +2351,6 @@
         return;
       }
 
-      // 4. Missions Braquage
       if (type === 'brq') {
         let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
         let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
