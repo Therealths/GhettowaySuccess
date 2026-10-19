@@ -166,10 +166,10 @@
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full flex-shrink-0">
         <button onclick="navTo('page-2')" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 active:scale-95 transition">
-          <i class="ph-bold ph-plus-circle text-lg"></i> Créer une partie
+          <i class="ph-bold ph-plus-circle text-lg"></i> Créer une partie [1]
         </button>
         <button onclick="navTo('page-3')" class="w-full py-4 glass-panel hover:bg-white/10 text-white font-bold uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-          <i class="ph-bold ph-sign-in text-lg text-slate-300"></i> Rejoindre une partie
+          <i class="ph-bold ph-sign-in text-lg text-slate-300"></i> Rejoindre une partie [1]
         </button>
       </div>
     </div>
@@ -182,21 +182,21 @@
             <i class="ph-bold ph-caret-left text-lg"></i>
           </button>
           <div>
-            <h2 class="text-base font-black text-white uppercase tracking-wider">Créer un salon</h2>
-            <p class="text-[10px] text-slate-400">Configurez votre empire</p>
+            <h2 class="text-base font-black text-white uppercase tracking-wider">Créer un salon [1]</h2>
+            <p class="text-[10px] text-slate-400">Configurez votre empire [1]</p>
           </div>
         </div>
         <div class="space-y-5">
           <div>
-            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-1.5">Nom de la partie</label>
+            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-1.5">Nom de la partie [1]</label>
             <input type="text" id="createGameName" placeholder="Ex: Cartel du Bronx" value="Ghetto War #1" class="w-full glass-input text-white px-4 py-3 rounded-xl text-sm font-semibold focus:border-ghetto-gold outline-none transition">
           </div>
           <div>
-            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-2">Nombre de Caïds</label>
+            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider block mb-2">Nombre de Caïds [1]</label>
             <div class="grid grid-cols-3 gap-2.5">
-              <button type="button" onclick="selectPlayerCount(2)" id="btnCount-2" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">2 Caïds</button>
-              <button type="button" onclick="selectPlayerCount(3)" id="btnCount-3" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">3 Caïds</button>
-              <button type="button" onclick="selectPlayerCount(4)" id="btnCount-4" class="count-btn py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold shadow-lg shadow-yellow-500/10 transition">4 Caïds</button>
+              <button type="button" onclick="selectPlayerCount(2)" id="btnCount-2" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">2 Caïds [1]</button>
+              <button type="button" onclick="selectPlayerCount(3)" id="btnCount-3" class="count-btn py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 transition">3 Caïds [1]</button>
+              <button type="button" onclick="selectPlayerCount(4)" id="btnCount-4" class="count-btn py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold shadow-lg shadow-yellow-500/10 transition">4 Caïds [1]</button>
             </div>
           </div>
         </div>
@@ -217,12 +217,12 @@
             <i class="ph-bold ph-caret-left text-lg"></i>
           </button>
           <div>
-            <h2 class="text-base font-black text-white uppercase tracking-wider">Rejoindre</h2>
-            <p class="text-[10px] text-slate-400">Salons disponibles</p>
+            <h2 class="text-base font-black text-white uppercase tracking-wider">Rejoindre [1]</h2>
+            <p class="text-[10px] text-slate-400">Salons disponibles [1]</p>
           </div>
         </div>
         <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
-          <span class="text-[10px] tracking-wider uppercase">Salons détectés en direct</span>
+          <span class="text-[10px] tracking-wider uppercase">Salons détectés en direct [1]</span>
         </div>
         <div id="gamesListContainer" class="space-y-2 overflow-y-auto max-h-[360px]"></div>
       </div>
@@ -254,34 +254,34 @@
 
       <div id="revealedCaidBox" class="w-full max-w-[340px] h-[190px] glass-panel p-3.5 rounded-2xl text-left flex flex-col justify-between shadow-2xl flex-shrink-0 mx-auto my-auto">
         <div class="flex items-center justify-between border-b border-white/10 pb-1 flex-shrink-0">
-          <span id="revealedName" class="font-black text-sm text-slate-400 uppercase tracking-wide truncate">Caïd non déterminé</span>
-          <span id="revealedIdBadge" class="text-[9px] px-2 py-0.5 rounded-md font-mono font-bold bg-white/5 text-slate-500 flex-shrink-0">En attente</span>
+          <span id="revealedName" class="font-black text-sm text-slate-400 uppercase tracking-wide truncate">Caïd non déterminé [1]</span>
+          <span id="revealedIdBadge" class="text-[9px] px-2 py-0.5 rounded-md font-mono font-bold bg-white/5 text-slate-500 flex-shrink-0">En attente [1]</span>
         </div>
         <div class="min-h-[26px] flex items-start gap-2 pt-0.5">
-          <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Bonus</span>
-          <span id="revealedBonusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Bonus [1]</span>
+          <span id="revealedBonusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">— [1]</span>
         </div>
         <div class="min-h-[26px] flex items-start gap-2">
-          <span class="px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Malus</span>
-          <span id="revealedMalusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-400 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Malus [1]</span>
+          <span id="revealedMalusText" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">— [1]</span>
         </div>
         <div class="min-h-[28px] flex items-start gap-2 pt-0.5 border-t border-white/5">
-          <span class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Capacité</span>
-          <span id="revealedSkill" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">—</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-mono font-bold uppercase text-[9px] flex-shrink-0 mt-0.5">Capacité [1]</span>
+          <span id="revealedSkill" class="text-[10px] text-slate-400 italic leading-snug line-clamp-2">— [1]</span>
         </div>
         <div class="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-white/10 font-mono flex-shrink-0">
-          <div id="revealedCash" class="text-slate-400 font-bold">Cash: — €</div>
-          <div id="revealedDrug" class="text-slate-400 font-bold">Drogue: — kg</div>
+          <div id="revealedCash" class="text-slate-400 font-bold">Cash: — € [1]</div>
+          <div id="revealedDrug" class="text-slate-400 font-bold">Drogue: — kg [1]</div>
         </div>
       </div>
 
       <div class="space-y-2 mt-2 flex-shrink-0 w-full">
         <button type="button" id="btnSpinWheel" onclick="startCarouselDraw()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
           <i class="ph-bold ph-dice-five text-xl"></i>
-          <span>Tirage au sort</span>
+          <span>Tirage au sort [1]</span>
         </button>
         <button type="button" id="btnProceedLobby" onclick="navTo('page-lobby')" class="hidden w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20">
-          <span>Rejoindre la Salle d'Attente</span>
+          <span>Rejoindre la Salle d'Attente [1]</span>
           <i class="ph-bold ph-arrow-right"></i>
         </button>
       </div>
@@ -295,13 +295,13 @@
             <i class="ph-bold ph-sign-out text-lg text-rose-400"></i>
           </button>
           <div class="inline-block px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
-            Salon Ouvert
+            Salon Ouvert [1]
           </div>
           <div class="w-10"></div>
         </div>
         <div class="text-center mb-4">
-          <h2 id="lobbyGameTitle" class="text-lg font-black text-white uppercase tracking-wider">Partie Urbaine</h2>
-          <span id="lobbyPlayerCount" class="text-xs text-slate-400 font-mono">1 / 4 Joueurs connectés</span>
+          <h2 id="lobbyGameTitle" class="text-lg font-black text-white uppercase tracking-wider">Partie Urbaine [1]</h2>
+          <span id="lobbyPlayerCount" class="text-xs text-slate-400 font-mono">1 / 4 Joueurs connectés [1]</span>
         </div>
         <div id="lobbyPlayersContainer" class="space-y-2 mt-4"></div>
       </div>
@@ -331,27 +331,27 @@
             <i class="ph-bold ph-caret-left text-base"></i>
           </button>
           <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 border border-rose-500/40 text-rose-400 font-mono text-[10px] uppercase tracking-widest font-black rounded-full">
-            <i class="ph-bold ph-broadcast animate-pulse text-base"></i> Phase 1 : Flash Radio
+            <i class="ph-bold ph-broadcast animate-pulse text-base"></i> Phase 1 : Flash Radio [1]
           </div>
           <div class="w-9"></div>
         </div>
-        <h2 class="text-2xl font-black text-white uppercase tracking-tight font-mono">Manche <span id="radioRoundNumber">1</span></h2>
-        <p class="text-xs text-slate-400 mt-0.5">Alerte métropolitaine instantanée.</p>
+        <h2 class="text-2xl font-black text-white uppercase tracking-tight font-mono">Manche <span id="radioRoundNumber">1</span> [1]</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Alerte métropolitaine instantanée. [1]</p>
       </div>
 
       <div class="glass-panel p-5 rounded-2xl text-left space-y-3 my-auto flex-shrink-0 shadow-2xl border-rose-500/20">
         <div class="flex items-center gap-2 text-rose-400 font-mono text-xs uppercase font-bold">
-          <i class="ph-bold ph-siren text-lg"></i> Fréquence 93.4 Ghetto FM
+          <i class="ph-bold ph-siren text-lg"></i> Fréquence 93.4 Ghetto FM [1]
         </div>
-        <h3 id="radioCardTitle" class="text-base font-black text-white leading-tight">Descente de Police massive</h3>
+        <h3 id="radioCardTitle" class="text-base font-black text-white leading-tight">Descente de Police massive [1]</h3>
         <p id="radioCardEffect" class="text-xs text-slate-300 leading-relaxed">
-          La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds.
+          La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds. [1]
         </p>
       </div>
 
       <div class="mt-4 flex-shrink-0">
         <button type="button" onclick="acknowledgeRadioCard()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg shadow-yellow-500/20 active:scale-95 transition flex items-center justify-center gap-2">
-          <span>Passer à l'action des Caïds</span>
+          <span>Passer à l'action des Caïds [1]</span>
           <i class="ph-bold ph-arrow-right"></i>
         </button>
       </div>
@@ -394,19 +394,19 @@
         <!-- STATS [1] -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10">
-            <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️</span>
+            <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️ [1]</span>
           </div>
           <div class="flex items-center justify-center gap-1.5 border-r border-white/10">
             <i class="ph-bold ph-sword text-rose-400 text-sm"></i>
-            <span id="hudAtk" class="text-base font-black text-white">1</span>
+            <span id="hudAtk" class="text-base font-black text-white">1</span> [1]
           </div>
           <div class="flex items-center justify-center gap-1.5 border-r border-white/10">
             <i class="ph-bold ph-shield text-sky-400 text-sm"></i>
-            <span id="hudDef" class="text-base font-black text-white">0</span>
+            <span id="hudDef" class="text-base font-black text-white">0</span> [1]
           </div>
           <div class="flex items-center justify-center gap-1.5">
             <span id="hudVehicleIcon" class="text-emerald-400 text-sm"><i class="ph-bold ph-person-simple-walk"></i></span>
-            <span id="hudCurrentPm" class="text-base font-black text-white">8</span>
+            <span id="hudCurrentPm" class="text-base font-black text-white">8</span> [1]
           </div>
         </div>
 
@@ -415,9 +415,9 @@
           <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 shadow-lg flex items-center justify-between gap-1">
             <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl flex-shrink-0"><i class="ph-bold ph-barbell"></i></div>
             <div class="flex items-center gap-1.5 flex-shrink-0" id="muscleSlotsContainer">
-              <div onclick="clickMuscleSlot(0)" id="muscleSlot_0" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <div onclick="clickMuscleSlot(1)" id="muscleSlot_1" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <div onclick="clickMuscleSlot(2)" id="muscleSlot_2" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
+              <div onclick="clickMuscleSlot(0)" id="muscleSlot_0" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+              <div onclick="clickMuscleSlot(1)" id="muscleSlot_1" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+              <div onclick="clickMuscleSlot(2)" id="muscleSlot_2" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
             </div>
           </div>
           <div class="col-span-5 py-1.5 px-2 rounded-2xl bg-rose-950/25 border-2 border-rose-400/60 shadow-lg flex items-center justify-between gap-1">
@@ -425,8 +425,8 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="w-6 h-6"><path d="M4 6h16v1.5c-2.5 0-5 3.5-7 9.5a1.5 1.5 0 0 1-2 0C9 11 6.5 7.5 4 7.5V6z"/><path d="M4 6c0 4 3 8 7 11"/><path d="M20 6c0 4-3 8-7 11"/></svg>
             </div>
             <div class="flex items-center gap-1.5 flex-shrink-0">
-              <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <button onclick="depositProstituteToSafe()" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center gap-0.5 active:scale-95 transition"><span class="text-[9px] font-mono font-black uppercase">QG</span></button>
+              <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕ [1]</span></div>
+              <button onclick="depositProstituteToSafe()" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center gap-0.5 active:scale-95 transition"><span class="text-[9px] font-mono font-black uppercase">QG [1]</span></button>
             </div>
           </div>
         </div>
@@ -436,12 +436,12 @@
           <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
           <div class="overflow-hidden flex-1 min-w-0 flex flex-col justify-center">
             <div class="flex items-center gap-1 leading-none mb-0.5">
-              <span class="text-[8px] font-mono uppercase font-black text-rose-400 tracking-wider">Flash Radio</span>
-              <span class="text-[8px] text-slate-500 font-mono">• Manche <span id="hudRadioRoundTag">1</span></span>
+              <span class="text-[8px] font-mono uppercase font-black text-rose-400 tracking-wider">Flash Radio [1]</span>
+              <span class="text-[8px] text-slate-500 font-mono">• Manche <span id="hudRadioRoundTag">1</span> [1]</span>
             </div>
             <div class="flex items-baseline gap-1 overflow-hidden text-xs truncate">
-              <h4 id="hudRadioReminderTitle" class="font-black text-white truncate flex-shrink-0 text-[11px]">Canicule Urbaine</h4>
-              <p id="hudRadioReminderDesc" class="text-[10px] text-slate-300 truncate">les véhicules motorisés perdent -2 PM</p>
+              <h4 id="hudRadioReminderTitle" class="font-black text-white truncate flex-shrink-0 text-[11px]">Canicule Urbaine [1]</h4>
+              <p id="hudRadioReminderDesc" class="text-[10px] text-slate-300 truncate">les véhicules motorisés perdent -2 PM [1]</p>
             </div>
           </div>
         </div>
@@ -450,13 +450,13 @@
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex items-end gap-1.5 px-1 pt-1 flex-shrink-0">
             <button id="mainTabInteractions" onclick="switchMainCaidTab('interactions')" class="flex-1 py-2 px-2 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-amber-300 bg-[#141622] border-t-2 border-amber-400 shadow-lg">
-              <i class="ph-bold ph-lightning text-sm"></i><span>Actions</span>
+              <i class="ph-bold ph-lightning text-sm"></i><span>Actions [1]</span>
             </button>
             <button id="mainTabEquipment" onclick="switchMainCaidTab('equipment')" class="flex-1 py-2 px-2 rounded-t-xl font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-slate-400 bg-white/5 border border-white/10 hover:text-white">
-              <i class="ph-bold ph-shield-chevron text-sm"></i><span>Équip. (<span id="hudEquipCount">0/3</span>)</span>
+              <i class="ph-bold ph-shield-chevron text-sm"></i><span>Équip. (<span id="hudEquipCount">0/3</span>) [1]</span>
             </button>
             <button id="mainTabInventory" onclick="switchMainCaidTab('inventory')" class="flex-1 py-2 px-2 rounded-t-xl font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-slate-400 bg-white/5 border border-white/10 hover:text-white">
-              <i class="ph-bold ph-backpack text-sm"></i><span>Sac (<span id="hudItemCount">0</span>)</span>
+              <i class="ph-bold ph-backpack text-sm"></i><span>Sac (<span id="hudItemCount">0</span>) [1]</span>
             </button>
           </div>
 
@@ -468,29 +468,28 @@
                 <div class="flex items-start gap-2 flex-1 min-w-0">
                   <div class="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 flex-shrink-0 text-sm mt-0.5"><i class="ph-bold ph-sparkle animate-pulse"></i></div>
                   <div class="flex-1 min-w-0">
-                    <span class="text-[9px] font-mono uppercase tracking-wider text-purple-300 font-black">Capacité Spéciale</span>
-                    <h4 id="hudSpecialPowerName" class="text-xs font-black text-white leading-tight">Boule de Graisse</h4>
-                    <p id="hudSpecialPowerDesc" class="text-[10px] text-slate-300 mt-0.5 leading-snug">Roule jusqu'à 5 cases de distance.</p>
+                    <span class="text-[9px] font-mono uppercase tracking-wider text-purple-300 font-black">Capacité Spéciale [1]</span>
+                    <h4 id="hudSpecialPowerName" class="text-xs font-black text-white leading-tight">Boule de Graisse [1]</h4>
+                    <p id="hudSpecialPowerDesc" class="text-[10px] text-slate-300 mt-0.5 leading-snug">Roule jusqu'à 5 cases de distance. [1]</p>
                   </div>
                 </div>
-                <div class="flex-shrink-0 self-center"><span id="hudSpecialActionBtnLabel" class="text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block shadow">Activer</span></div>
+                <div class="flex-shrink-0 self-center"><span id="hudSpecialActionBtnLabel" class="text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block shadow">Activer [1]</span></div>
               </button>
 
               <div class="w-full grid grid-cols-2 gap-2">
-                <button onclick="openQrScannerModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-yellow-500/10 to-yellow-950/20 border border-yellow-500/35 hover:border-yellow-400 text-ghetto-gold flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-qr-code text-sm"></i><span class="text-xs font-black uppercase text-white">Scanner</span></button>
-                <button onclick="openCombatModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-rose-500/10 to-rose-950/20 border border-rose-500/35 hover:border-rose-400 text-rose-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-sword text-sm"></i><span class="text-xs font-black uppercase text-white">Combat</span></button>
-                <button onclick="openAllianceModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-purple-500/10 to-purple-950/20 border border-purple-500/35 hover:border-purple-400 text-purple-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-handshake text-sm"></i><span class="text-xs font-black uppercase text-white">Alliance</span></button>
-                <button onclick="triggerPoliceInspection()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-sky-500/10 to-sky-950/20 border border-sky-500/35 hover:border-sky-400 text-sky-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-siren text-sm"></i><span class="text-xs font-black uppercase text-white">Contrôle</span></button>
+                <button onclick="openQrScannerModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-yellow-500/10 to-yellow-950/20 border border-yellow-500/35 hover:border-yellow-400 text-ghetto-gold flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-qr-code text-sm"></i><span class="text-xs font-black uppercase text-white">Scanner [1]</span></button>
+                <button onclick="openCombatModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-rose-500/10 to-rose-950/20 border border-rose-500/35 hover:border-rose-400 text-rose-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-sword text-sm"></i><span class="text-xs font-black uppercase text-white">Combat [1]</span></button>
+                <button onclick="openAllianceModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-purple-500/10 to-purple-950/20 border border-purple-500/35 hover:border-purple-400 text-purple-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-handshake text-sm"></i><span class="text-xs font-black uppercase text-white">Alliance [1]</span></button>
+                <button onclick="triggerPoliceInspection()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-sky-500/10 to-sky-950/20 border border-sky-500/35 hover:border-sky-400 text-sky-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-siren text-sm"></i><span class="text-xs font-black uppercase text-white">Contrôle [1]</span></button>
               </div>
             </div>
 
             <!-- VOLET 2 : ÉQUIPEMENT [1] -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
-              <!-- Arme [1] -->
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
-                  <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale</span>
-                  <div id="slotWeaponTitle" class="text-sm font-black text-white truncate">Mains nues</div>
+                  <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale [1]</span>
+                  <div id="slotWeaponTitle" class="text-sm font-black text-white truncate">Mains nues [1]</div>
                   <div id="slotWeaponStats" class="text-xs font-mono font-bold text-ghetto-gold mt-0.5">Attaque +0</div>
                 </div>
                 <div id="slotWeaponStatusContainer" class="flex-shrink-0">
@@ -498,11 +497,10 @@
                 </div>
               </div>
 
-              <!-- Protection [1] -->
               <div class="p-3 bg-black/50 rounded-2xl border border-sky-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
-                  <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet</span>
-                  <div id="slotArmorTitle" class="text-sm font-black text-white truncate">Aucune protection</div>
+                  <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet [1]</span>
+                  <div id="slotArmorTitle" class="text-sm font-black text-white truncate">Aucune protection [1]</div>
                   <div id="slotArmorStats" class="text-xs font-mono font-bold text-sky-400 mt-0.5">Défense +0</div>
                 </div>
                 <div id="slotArmorStatusContainer" class="flex-shrink-0">
@@ -510,12 +508,11 @@
                 </div>
               </div>
 
-              <!-- Véhicule [1] -->
               <div class="p-3 bg-black/50 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
-                  <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif</span>
-                  <div id="slotVehicleTitle" class="text-sm font-black text-white truncate">À pied</div>
-                  <div id="slotVehicleStats" class="text-xs font-mono font-bold text-emerald-400 mt-0.5">Déplacement 8 PM</div>
+                  <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif [1]</span>
+                  <div id="slotVehicleTitle" class="text-sm font-black text-white truncate">À pied [1]</div>
+                  <div id="slotVehicleStats" class="text-xs font-mono font-bold text-emerald-400 mt-0.5">Déplacement 8 PM [1]</div>
                 </div>
                 <div id="slotVehicleStatusContainer" class="flex-shrink-0">
                   <span class="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>
@@ -527,18 +524,18 @@
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
-                  <span class="text-[8px] text-amber-400 font-bold uppercase">En Poche</span>
-                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudPocketCash" class="text-xs font-black text-amber-300">5 000 €</span><span id="hudDrugs" class="text-xs font-black text-emerald-400">🌿 5 kg</span></div>
-                  <button onclick="openTransferModal('deposit')" class="w-full py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[8px] font-bold rounded uppercase transition">Déposer au QG</button>
+                  <span class="text-[8px] text-amber-400 font-bold uppercase">En Poche [1]</span>
+                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudPocketCash" class="text-xs font-black text-amber-300">5 000 € [1]</span><span id="hudDrugs" class="text-xs font-black text-emerald-400">🌿 5 kg [1]</span></div>
+                  <button onclick="openTransferModal('deposit')" class="w-full py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[8px] font-bold rounded uppercase transition">Déposer au QG [1]</button>
                 </div>
                 <div class="p-2 rounded-lg bg-sky-500/10 border border-sky-500/30 flex flex-col justify-between">
-                  <span class="text-[8px] text-sky-400 font-bold uppercase">Planque / QG</span>
-                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudSafeCash" class="text-xs font-black text-sky-300">0 €</span><span id="hudSafeDrugs" class="text-xs font-black text-sky-200">📦 0 kg</span></div>
-                  <button onclick="openTransferModal('withdraw')" class="w-full py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-[8px] font-bold rounded uppercase transition">Récupérer du QG</button>
+                  <span class="text-[8px] text-sky-400 font-bold uppercase">Planque / QG [1]</span>
+                  <div class="my-1 flex items-center justify-between gap-1"><span id="hudSafeCash" class="text-xs font-black text-sky-300">0 € [1]</span><span id="hudSafeDrugs" class="text-xs font-black text-sky-200">📦 0 kg [1]</span></div>
+                  <button onclick="openTransferModal('withdraw')" class="w-full py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-[8px] font-bold rounded uppercase transition">Récupérer du QG [1]</button>
                 </div>
               </div>
               <div class="pt-1">
-                <span class="text-[9px] font-mono uppercase tracking-wider text-slate-400 block font-bold px-1 mb-1">Objets & Équipements en Stock :</span>
+                <span class="text-[9px] font-mono uppercase tracking-wider text-slate-400 block font-bold px-1 mb-1">Objets & Équipements en Stock : [1]</span>
                 <div id="inventoryItemsList" class="space-y-1.5"></div>
               </div>
             </div>
@@ -547,7 +544,7 @@
 
         <div class="flex-shrink-0 pt-1 pb-1 border-t border-white/10">
           <button id="btnEndTurn" onclick="endCurrentPlayerTurn()" class="w-full py-3 bg-gradient-to-r from-[#161822] via-[#24171d] to-[#450a0a] border border-rose-950/60 text-white font-bold tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition shadow-lg">
-            <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé (Dé Patrouille)</span>
+            <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé [1]</span>
           </button>
         </div>
       </div>
@@ -581,12 +578,12 @@
           <i class="ph-bold ph-handshake"></i>
         </div>
         <div>
-          <h3 class="text-base font-black text-white uppercase tracking-wider">Demande d'Alliance</h3>
+          <h3 class="text-base font-black text-white uppercase tracking-wider">Demande d'Alliance [1]</h3>
           <p class="text-xs text-slate-300 mt-1">
-            Le Caïd <strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose une alliance pour ce tour.
+            Le Caïd <strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose une alliance pour ce tour. [1]
           </p>
           <span class="text-[10px] text-slate-400 font-mono block mt-2">
-            Si vous acceptez, vos deux interfaces seront déverrouillées pour jouer simultanément vos braquages !
+            Si vous acceptez, vos deux interfaces seront déverrouillées pour jouer simultanément vos braquages ! [1]
           </span>
         </div>
         <div class="grid grid-cols-2 gap-2 pt-2">
@@ -605,34 +602,34 @@
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 id="transferModalTitle" class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-vault text-base"></i> Coffre du QG
+            <i class="ph-bold ph-vault text-base"></i> Coffre du QG [1]
           </h3>
           <button onclick="closeModal('modalTransfer')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
 
         <div class="grid grid-cols-2 gap-1.5 p-1 bg-black/60 rounded-2xl font-mono text-xs">
           <button id="transferTabCash" onclick="switchTransferResource('cash')" class="py-2 rounded-xl font-bold bg-yellow-400 text-black flex items-center justify-center gap-1">
-            <i class="ph-bold ph-coins"></i> Argent (€)
+            <i class="ph-bold ph-coins"></i> Argent (€) [1]
           </button>
           <button id="transferTabDrugs" onclick="switchTransferResource('drugs')" class="py-2 rounded-xl font-bold text-slate-400 flex items-center justify-center gap-1">
-            <i class="ph-bold ph-plant"></i> Drogue (kg)
+            <i class="ph-bold ph-plant"></i> Drogue (kg) [1]
           </button>
         </div>
 
         <div class="p-3 bg-black/40 rounded-2xl border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
           <div class="border-r border-white/10 pr-2">
-            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous</span>
-            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 €</div>
+            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous [1]</span>
+            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 € [1]</div>
           </div>
           <div class="pl-2">
-            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre</span>
-            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 €</div>
+            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre [1]</span>
+            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 € [1]</div>
           </div>
         </div>
 
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs font-mono">
-            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer :</span>
+            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer : [1]</span>
             <span id="transferMaxAvailableLabel" class="text-[10px] text-ghetto-gold font-bold">Max dispo : 5 000 €</span>
           </div>
 
@@ -652,13 +649,13 @@
 
           <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
             <button onclick="setTransferPercentage(0)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">0 %</button>
-            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 %</button>
-            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout)</button>
+            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 % [1]</button>
+            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout) [1]</button>
           </div>
         </div>
 
         <button id="transferConfirmBtn" onclick="confirmTransferAction()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-yellow-500/20">
-          Confirmer le Transfert
+          Confirmer le Transfert [1]
         </button>
       </div>
     </div>
@@ -668,22 +665,22 @@
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 class="text-sm font-black text-rose-500 uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-sword text-base"></i> Combat de Rue
+            <i class="ph-bold ph-sword text-base"></i> Combat de Rue [1]
           </h3>
           <button onclick="closeModal('modalCombat')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
         <div>
-          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
+          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible : [1]</label>
           <select id="combatTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-center font-mono">
           <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30">
-            <span class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut</span>
-            <div class="text-xl font-black text-white mt-0.5" id="arenaPlayerAtk">1</div>
+            <span class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut [1]</span>
+            <div class="text-xl font-black text-white mt-0.5" id="arenaPlayerAtk">1 [1]</div>
           </div>
           <div class="p-3 rounded-2xl bg-sky-500/10 border border-sky-500/30">
-            <span class="text-[9px] text-sky-400 uppercase font-bold">Défense Cible</span>
+            <span class="text-[9px] text-sky-400 uppercase font-bold">Défense Cible [1]</span>
             <div class="text-xl font-black text-slate-400 mt-0.5" title="Statistique adverse cachée">❓ Secret</div>
           </div>
         </div>
@@ -691,7 +688,7 @@
         <button id="btnExecuteFight" onclick="resolveStreetFight()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-rose-500/20">
           Lancer l'Attaque
         </button>
-        <button onclick="closeModal('modalCombat')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Fermer</button>
+        <button onclick="closeModal('modalCombat')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Fermer [1]</button>
       </div>
     </div>
 
@@ -700,21 +697,21 @@
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 class="text-sm font-black text-purple-400 uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-handshake text-base"></i> Sceller une Alliance
+            <i class="ph-bold ph-handshake text-base"></i> Sceller une Alliance [1]
           </h3>
           <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
         <p class="text-xs text-slate-300">
-          L'allié recevra une demande. S'il accepte, ses forces s'additionneront aux vôtres et son écran se débloquera pour jouer simultanément avec vous !
+          L'allié recevra une demande. S'il accepte, ses forces s'additionneront aux vôtres et son écran se débloquera pour jouer simultanément avec vous ! [1]
         </p>
         <div>
-          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd :</label>
+          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd : [1]</label>
           <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
         </div>
         <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-purple-500/20">
           Envoyer la Demande
         </button>
-        <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
+        <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler [1]</button>
       </div>
     </div>
 
@@ -723,7 +720,7 @@
       <div class="pt-1">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
           <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-qr-code text-base"></i> Scanner Tactique
+            <i class="ph-bold ph-qr-code text-base"></i> Scanner d'Article [1]
           </h3>
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
@@ -749,16 +746,22 @@
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (Req: 3Atk/2M)</button>
         </div>
       </div>
-      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer</button>
+      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer [1]</button>
     </div>
 
-    <!-- MODALE PATROUILLE [1] -->
+    <!-- MODALE PATROUILLE AVEC DIRECTION ALÉATOIRE [1] -->
     <div id="modalPatrolDice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
-        <h3 class="text-base font-black text-white uppercase">Patrouille de Police</h3>
-        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">?</div>
-        <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule...</span>
-        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr;</button>
+        <h3 class="text-base font-black text-white uppercase">Patrouille de Police [1]</h3>
+        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">? [1]</div>
+        
+        <div>
+          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule... [1]</span>
+          <!-- Ligne pour la direction aléatoire -->
+          <div id="patrolDiceDirectionLabel" class="text-sm font-black font-mono text-ghetto-gold uppercase mt-1"></div>
+        </div>
+
+        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr; [1]</button>
       </div>
     </div>
 
@@ -1150,6 +1153,14 @@
       if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
     }
 
+    function confirmLeaveGame() {
+      if (confirm("Voulez-vous vraiment quitter définitivement cette partie ?")) {
+        localStorage.removeItem('g2s_room_id');
+        if (socket) socket.emit('leave_room');
+        window.location.reload();
+      }
+    }
+
     function switchMainCaidTab(tabKey) {
       const pInter = document.getElementById('panelInteractions');
       const pEquip = document.getElementById('panelEquipment');
@@ -1365,31 +1376,26 @@
       refreshHud();
     }
 
+    // --- RECRUES : SUPPRESSION DÉFINITIVE (NE VA PAS DANS L'INVENTAIRE) ---
     function clickMuscleSlot(idx) {
       if (!isMyTurnToPlay) return;
       if (localPlayer.musclesOnPerson[idx]) {
         const item = localPlayer.musclesOnPerson[idx];
-        if (confirm(`Libérer ce Gros Bras (${item.name}) et le renvoyer dans le Sac ?`)) {
-          localPlayer.inventory.push(item);
+        if (confirm(`Congédier définitivement ${item.name} ?\n(Attention : il disparaîtra et n'ira pas dans l'inventaire)`)) {
           localPlayer.musclesOnPerson.splice(idx, 1);
           refreshHud();
-        }
-      } else {
-        const inInv = localPlayer.inventory.findIndex(i => i.type === 'MUSCLE');
-        if (inInv >= 0) {
-          const muscle = localPlayer.inventory.splice(inInv, 1)[0];
-          localPlayer.musclesOnPerson.push(muscle);
-          alert(`${muscle.name} a rejoint vos Gros Bras actifs (+${muscle.bonusVal} Attaque) !`);
-          refreshHud();
-        } else {
-          alert("Aucun Gros Bras en réserve dans le Sac.");
         }
       }
     }
 
     function clickProstituteTransitSlot() {
+      if (!isMyTurnToPlay) return;
       if (localPlayer.prostituteInTransit) {
-        alert(`${localPlayer.prostituteInTransit.name} voyage avec vous. Déposez-la au QG pour sécuriser sa rente.`);
+        const p = localPlayer.prostituteInTransit;
+        if (confirm(`Congédier définitivement ${p.name} ?\n(Attention : elle disparaîtra et n'ira pas dans l'inventaire)`)) {
+          localPlayer.prostituteInTransit = null;
+          refreshHud();
+        }
       } else {
         alert("Aucune prostituée en transit. Flashez son QR Code pour la recruter !");
       }
@@ -1543,7 +1549,7 @@
       }
     }
 
-    // --- REFRESH HUD AVEC REMPLISSAGE PAR IMAGES gblvl1.jpg ET gblvl2.jpg [1] ---
+    // --- REFRESH HUD AVEC IMAGES DES GROS BRAS ET DES PROSTITUÉES ---
     function refreshHud() {
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       const bannerImg = document.getElementById('caidBannerImg');
@@ -1557,7 +1563,7 @@
       document.getElementById('hudDef').innerText = getTotalDef();
       document.getElementById('hudCurrentPm').innerText = getTotalPm();
 
-      // Synchronisation Boîte Bleue : Remplissage des 3 slots par gblvl1.jpg ou gblvl2.jpg [1]
+      // 1. Synchronisation Boîte Bleue : Images gblvl1.jpg et gblvl2.jpg [1]
       for (let i = 0; i < 3; i++) {
         const slotEl = document.getElementById(`muscleSlot_${i}`);
         if (localPlayer.musclesOnPerson[i]) {
@@ -1569,7 +1575,7 @@
                  onerror="this.outerHTML='<span class=\\'text-[10px] font-black text-sky-300 font-mono\\'>L${mb.level || 1}</span>';">
           `;
           slotEl.className = "w-8 h-8 rounded-xl bg-sky-950/80 border border-sky-400 overflow-hidden flex items-center justify-center cursor-pointer shadow-sm";
-          slotEl.title = `${mb.name} (+${mb.bonusVal} Atk) - Cliquer pour renvoyer au Sac`;
+          slotEl.title = `${mb.name} (+${mb.bonusVal} Atk) - Cliquer pour congédier`;
         } else {
           slotEl.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold leading-none select-none">✕</span>`;
           slotEl.className = "w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer hover:border-sky-300 transition";
@@ -1577,12 +1583,22 @@
         }
       }
 
-      // Synchronisation Boîte Rose [1]
+      // 2. Synchronisation Boîte Rose : Images plvl1.jpg et plvl2.jpg [1]
       const pSlot = document.getElementById('prostituteTransitSlot');
       if (localPlayer.prostituteInTransit) {
-        pSlot.innerHTML = `<span class="text-xs font-black text-rose-300 font-mono">L${localPlayer.prostituteInTransit.level || 1}</span>`;
+        const pr = localPlayer.prostituteInTransit;
+        const imgPr = (pr.level === 2) ? 'plvl2.jpg' : 'plvl1.jpg';
+        pSlot.innerHTML = `
+          <img src="${imgPr}" alt="${pr.name}" 
+               class="w-full h-full object-cover rounded-xl" 
+               onerror="this.outerHTML='<span class=\\'text-[10px] font-black text-rose-300 font-mono\\'>L${pr.level || 1}</span>';">
+        `;
+        pSlot.className = "w-8 h-8 rounded-xl bg-rose-950/80 border border-rose-400 overflow-hidden flex items-center justify-center cursor-pointer shadow-sm";
+        pSlot.title = `${pr.name} (Rente: ${pr.revenue}€) - Cliquer pour congédier`;
       } else {
-        pSlot.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold">✕</span>`;
+        pSlot.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold leading-none select-none">✕</span>`;
+        pSlot.className = "w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer hover:border-rose-300 transition";
+        pSlot.title = "Aucune fille en transit";
       }
 
       document.getElementById('hudPocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
@@ -1633,10 +1649,11 @@
       if (!c) return;
       c.innerHTML = '';
 
-      const filtered = localPlayer.inventory.filter(item => item && item.name !== 'À pied' && item.type !== 'FOOT');
+      // Ne jamais afficher les objets non désirés dans le sac
+      const filtered = localPlayer.inventory.filter(item => item && item.name !== 'À pied' && item.type !== 'FOOT' && item.type !== 'MUSCLE' && item.type !== 'PROSTITUTE');
 
       if (!filtered.length) {
-        c.innerHTML = '<p class="text-xs text-slate-400 italic p-4 text-center glass-panel rounded-xl">Aucun objet non équipé dans le sac.</p>';
+        c.innerHTML = '<p class="text-xs text-slate-400 italic p-4 text-center glass-panel rounded-xl">Aucun équipement non équipé dans le sac.</p>';
         return;
       }
 
@@ -1648,10 +1665,6 @@
         let primaryBtn = '';
         if (item.type === 'WEAPON' || item.type === 'ARMOR' || item.type === 'VEHICLE') {
           primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0"><i class="ph-bold ph-shield-check"></i> Équiper</button>`;
-        } else if (item.type === 'MUSCLE') {
-          primaryBtn = `<button onclick="equipMuscleFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0">Assigner</button>`;
-        } else if (item.type === 'PROSTITUTE') {
-          primaryBtn = `<button onclick="takeProstituteInTransitFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-pink-400 to-rose-500 text-black font-black rounded-lg font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 active:scale-95 transition flex-shrink-0">Escorter</button>`;
         } else if (item.type === 'CONSUMABLE') {
           primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] active:scale-95 transition flex-shrink-0 uppercase">Consommer</button>`;
         } else {
@@ -1791,7 +1804,7 @@
       }
     }
 
-    // --- TRANSFERTS QG [1] ---
+    // --- TRANSFERTS QG ---
     function openTransferModal(mode) {
       if (!isMyTurnToPlay) return;
       currentTransferMode = mode;
@@ -2101,13 +2114,19 @@
       refreshHud();
     }
 
+    // --- FIN DE TOUR ET DÉ DE PATROUILLE AVEC DIRECTION ALÉATOIRE [1] ---
     function endCurrentPlayerTurn() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalPatrolDice').classList.remove('hidden');
+      document.getElementById('patrolDiceDirectionLabel').innerText = '';
+
       setTimeout(() => {
         const val = Math.floor(Math.random() * 6) + 1;
+        const dir = Math.random() < 0.5 ? '⬅️ GAUCHE' : 'DROITE ➡️';
+        
         document.getElementById('patrolDiceVisual').innerText = val;
         document.getElementById('patrolDiceMoveLabel').innerText = `Déplacement : ${val} case(s)`;
+        document.getElementById('patrolDiceDirectionLabel').innerText = `Direction : ${dir}`;
       }, 700);
     }
 
