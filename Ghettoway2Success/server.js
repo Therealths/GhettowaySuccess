@@ -11,7 +11,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
-// Événements Flash Radio de la Phase 1 [1]
 const RADIO_EVENTS = [
   {
     title: "Descente de Police massive",
@@ -40,7 +39,6 @@ const RADIO_EVENTS = [
   }
 ];
 
-// Vérifie que tous les Caïds requis sont connectés et ont validé leur tirage
 function checkRoomReady(room) {
   if (!room) return false;
   const isFull = room.players.length === room.maxPlayers;
@@ -48,7 +46,6 @@ function checkRoomReady(room) {
   return isFull && allPicked;
 }
 
-// Diffuse l'état du tour actif et les Caïds autorisés à agir (joueur actif + alliés)
 function broadcastTurnState(roomId) {
   const room = rooms[roomId];
   if (!room || !room.players.length) return;
@@ -65,7 +62,6 @@ function broadcastTurnState(roomId) {
 io.on('connection', (socket) => {
   socket.emit('rooms_list', getAvailableRooms());
 
-  // 1. Reconnexion automatique par jeton persistant
   socket.on('reconnect_player', ({ roomId, playerToken }) => {
     const room = rooms[roomId];
     if (!room) return socket.emit('reconnect_failed');
@@ -98,7 +94,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 2. Création de salon (sans obligation de pseudo) [1]
   socket.on('create_room', ({ gameName, maxPlayers, playerToken }) => {
     const roomId = 'GW_' + Math.random().toString(36).substring(2, 7).toUpperCase();
     rooms[roomId] = {
@@ -137,7 +132,6 @@ io.on('connection', (socket) => {
     io.emit('rooms_list', getAvailableRooms());
   });
 
-  // 3. Rejoindre un salon [1]
   socket.on('join_room', ({ roomId, playerToken }) => {
     const room = rooms[roomId];
     if (!room) return socket.emit('error_msg', 'Salon introuvable ou fermé.');
@@ -195,7 +189,6 @@ io.on('connection', (socket) => {
     io.emit('rooms_list', getAvailableRooms());
   });
 
-  // 4. Attribution unique du Caïd
   socket.on('assign_caid', ({ caidId, caidName, startCash, startDrug, startHearts, unarmedAtk }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -209,6 +202,7 @@ io.on('connection', (socket) => {
     if (p) {
       p.caidId = caidId;
       p.caidName = caidName;
+      p.name = caidName;
       p.pocketCash = startCash;
       p.drugs = startDrug;
       p.hearts = startHearts;
@@ -222,7 +216,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 5. Démarrage de la partie [1]
   socket.on('start_game', () => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -248,7 +241,6 @@ io.on('connection', (socket) => {
     broadcastTurnState(socket.roomId);
   });
 
-  // 6. Tour par tour : fin de tour et passage au joueur suivant [1]
   socket.on('next_player_turn', () => {
     const room = rooms[socket.roomId];
     if (!room || !room.gameStarted) return;
@@ -261,7 +253,6 @@ io.on('connection', (socket) => {
     room.currentTurnAlliedTokens = [];
     room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
 
-    // Nouvelle manche si la table a fini son tour
     if (room.currentTurnIndex === 0) {
       room.round++;
       room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
@@ -274,7 +265,6 @@ io.on('connection', (socket) => {
     broadcastTurnState(socket.roomId);
   });
 
-  // 7. Capacités Spéciales Ciblées
   socket.on('apply_special_to_target', ({ targetSocketId, effectType, senderCaid }) => {
     io.to(targetSocketId).emit('received_special_effect', {
       effectType,
@@ -287,7 +277,6 @@ io.on('connection', (socket) => {
     io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
-  // 8. Combats de rue en direct [1]
   socket.on('execute_combat', ({ targetSocketId, attackerCaid, totalAtk }) => {
     io.to(targetSocketId).emit('received_attack', {
       attackerCaid,
@@ -303,7 +292,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 9. Alliances en direct [1]
   socket.on('propose_alliance', ({ targetSocketId, senderName, musclesCount }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -348,7 +336,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 10. Synchronisation des profils joueurs (vie, ressources, stats) [1]
   socket.on('sync_player', (updatedData) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -359,7 +346,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 11. Déconnexion et sortie
   socket.on('leave_room', () => {
     handlePlayerDisconnect(socket);
   });
