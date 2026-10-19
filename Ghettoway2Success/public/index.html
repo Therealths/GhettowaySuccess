@@ -383,7 +383,7 @@
 
       <div class="flex flex-col h-full justify-between space-y-2">
 
-        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE -->
+        <!-- BANDEAU AVEC BOUTON RETOUR SUPERPOSÉ EN HAUT À GAUCHE -->
         <div id="caidTopBannerContainer" class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition z-10 shadow-md hover:bg-black/40" title="Retour au Flash Radio">
@@ -523,7 +523,7 @@
               </div>
             </div>
 
-            <!-- VOLET 3 : INVENTAIRE / SAC AVEC JETER & REVENDRE -->
+            <!-- VOLET 3 : INVENTAIRE / SAC -->
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
@@ -600,7 +600,7 @@
       </div>
     </div>
 
-    <!-- MODALE CHOIX DU DÉBIT (CASH EN POCHE OU COFFRE QG) -->
+    <!-- MODALE CHOIX DU DÉBIT (CASH EN POCHE OU COFFRE QG OU CUMUL) -->
     <div id="modalPaymentChoice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 shadow-2xl max-w-sm mx-auto w-full">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -627,6 +627,13 @@
               <span id="paymentSafeAvailable" class="text-[10px] font-mono text-slate-400">Solde : 0 €</span>
             </div>
             <i class="ph-bold ph-arrow-right text-sky-400"></i>
+          </button>
+          <button id="btnPayWithCumul" onclick="confirmPaymentSource('cumul')" class="w-full p-3 glass-panel rounded-xl flex items-center justify-between border-emerald-500/40 hover:border-emerald-400 transition active:scale-95">
+            <div class="text-left">
+              <span class="text-xs font-black text-emerald-300 block uppercase">Cumul (Poche + Coffre)</span>
+              <span id="paymentCumulDetail" class="text-[10px] font-mono text-slate-300 block leading-tight">Prendre X € en poche + Y € au coffre</span>
+            </div>
+            <i class="ph-bold ph-plus-circle text-emerald-400"></i>
           </button>
         </div>
         <button onclick="closeModal('modalPaymentChoice')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs hover:text-white transition">
@@ -1572,7 +1579,6 @@
       refreshHud();
     }
 
-    // CONTRÔLE DE POLICE AVEC TRANSFERT IMMÉDIAT AU POSTE
     function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return;
       const vehKey = localPlayer.equipped.vehicle ? (localPlayer.equipped.vehicle.key || 'veh') : 'none';
@@ -2080,11 +2086,14 @@
 
       const pocketAvailEl = document.getElementById('paymentPocketAvailable');
       const safeAvailEl = document.getElementById('paymentSafeAvailable');
+      const cumulDetailEl = document.getElementById('paymentCumulDetail');
+
       pocketAvailEl.innerText = `Solde : ${localPlayer.pocketCash.toLocaleString()} €`;
       safeAvailEl.innerText = `Solde : ${localPlayer.safeCash.toLocaleString()} €`;
 
       const btnPocket = document.getElementById('btnPayWithPocket');
       const btnSafe = document.getElementById('btnPayWithSafe');
+      const btnCumul = document.getElementById('btnPayWithCumul');
 
       if (localPlayer.pocketCash < cost) {
         btnPocket.classList.add('opacity-40', 'pointer-events-none');
@@ -2100,6 +2109,12 @@
         btnSafe.classList.remove('opacity-40', 'pointer-events-none');
       }
 
+      const partPocket = Math.min(localPlayer.pocketCash, cost);
+      const partSafe = cost - partPocket;
+      cumulDetailEl.innerText = `Prendre ${partPocket.toLocaleString()} € en poche + ${partSafe.toLocaleString()} € au coffre`;
+
+      btnCumul.classList.remove('opacity-40', 'pointer-events-none');
+
       document.getElementById('modalPaymentChoice').classList.remove('hidden');
     }
 
@@ -2113,6 +2128,16 @@
       } else if (source === 'safe') {
         if (localPlayer.safeCash < cost) return alert("Fonds insuffisants au coffre du QG !");
         localPlayer.safeCash -= cost;
+      } else if (source === 'cumul') {
+        const partPocket = Math.min(localPlayer.pocketCash, cost);
+        const partSafe = cost - partPocket;
+
+        if (localPlayer.pocketCash < partPocket || localPlayer.safeCash < partSafe) {
+          return alert("Fonds insuffisants pour finaliser le cumul !");
+        }
+
+        localPlayer.pocketCash -= partPocket;
+        localPlayer.safeCash -= partSafe;
       }
 
       finalizePurchaseExecution(pendingPurchaseData);
@@ -2367,7 +2392,7 @@
       refreshHud();
     }
 
-    // --- FIN DE TOUR ET PATROUILLE ---
+    // --- FIN DE TOUR ET PATROUILLE AVEC DIRECTION ALÉATOIRE ---
     function endCurrentPlayerTurn() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalPatrolDice').classList.remove('hidden');
