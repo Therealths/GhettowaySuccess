@@ -102,7 +102,8 @@ io.on('connection', (socket) => {
       round: 1,
       currentTurnIndex: 0,
       currentTurnAlliedTokens: [],
-      strayDogHolderToken: null, // Verrou unique du Chien Errant
+      strayDogHolderSocketId: null,
+      activeCombat: null,
       gameStarted: false,
       currentRadio: RADIO_EVENTS[0],
       players: []
@@ -229,7 +230,7 @@ io.on('connection', (socket) => {
     room.round = 1;
     room.currentTurnIndex = 0;
     room.currentTurnAlliedTokens = [];
-    room.strayDogHolderToken = null;
+    room.strayDogHolderSocketId = null;
     room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
 
     io.to(socket.roomId).emit('game_started', {
@@ -248,10 +249,7 @@ io.on('connection', (socket) => {
     const activePlayer = room.players[room.currentTurnIndex];
     if (!activePlayer || activePlayer.socketId !== socket.id) return;
 
-    // Libérer le Chien Errant et les alliances pour le nouveau tour
     room.currentTurnAlliedTokens = [];
-    room.strayDogHolderToken = null;
-
     room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
 
     if (room.currentTurnIndex === 0) {
@@ -266,25 +264,142 @@ io.on('connection', (socket) => {
     broadcastTurnState(socket.roomId);
   });
 
-  // Gestion de possession exclusive du Chien Errant
-  socket.on('request_claim_stray_dog', ({ playerToken }, callback) => {
+  // --- LOGIQUE DU CHIEN ERRANT : LE DERNIER QUI SIFFLE LE PREND / VOLE ---
+  socket.on('claim_stray_dog', ({ senderCaid }) => {
     const room = rooms[socket.roomId];
-    if (!room) return callback({ success: false, msg: "Salon introuvable" });
+    if (!room) return;
 
-    if (room.strayDogHolderToken && room.strayDogHolderToken !== playerToken) {
-      const holder = room.players.find(p => p.playerToken === room.strayDogHolderToken);
-      const holderName = holder ? holder.caidName : "un autre Caïd";
-      return callback({
-        success: false,
-        msg: `Action impossible : le Chien Errant est déjà avec ${holderName} pour ce tour !`
+    const previousHolderSocketId = room.strayDogHolderSocketId;
+    if (previousHolderSocketId && previousHolderSocketId !== socket.id) {
+      // Vole le chien au propriétaire précédent et l'avertit
+      io.to(previousHolderSocketId).emit('lost_stray_dog', {
+        thiefCaid: senderCaid || "Un rival"
       });
     }
 
-    room.strayDogHolderToken = playerToken;
-    callback({ success: true });
+    room.strayDogHolderSocketId = socket.id;
+    socket.emit('stray_dog_granted');
   });
 
-  // Capacités spéciales ciblées
+  // --- LOGIQUE COMBAT TEMPS RÉEL INTERACTIF (OBJETS EN DUEL) ---
+  socket.on('start_combat_engagement', ({ targetSocketId, attackerCaid }) => {
+    const room = rooms[socket.roomId];
+    if (!room) return;
+
+    const targetPlayer = room.players.find(p => p.socketId === targetSocketId);
+    const attackerPlayer = room.players.find(p => p.socketId === socket.id);
+
+    room.activeCombat = {
+      attackerSocketId: socket.id,
+      targetSocketId,
+      attackerCaid: attackerCaid || (attackerPlayer ? attackerPlayer.caidName : "Attaquant"),
+      targetCaid: targetPlayer ? targetPlayer.caidName : "Défenseur",
+      attackerReady: false,
+      targetReady: false,
+      attackerAtk: 1,
+      targetDef: 0,
+      attackerItems: [],
+      targetItems: []
+    };
+
+    // Ouvre l'interface de combat chez les deux joueurs
+    socket.emit('combat_duel_opened', {
+      role: 'attacker',
+      opponentCaid: room.activeCombat.targetCaid,
+      opponentSocketId: targetSocketId
+    });
+
+    io.to(targetSocketId).emit('combat_duel_opened', {
+      role: 'defender',
+      opponentCaid: room.activeCombat.attackerCaid,
+      opponentSocketId: socket.id
+    });
+  });
+
+  // Un joueur joue un ou plusieurs objets pendant le combat
+  socket.on('combat_play_items', ({ itemNames, newTotalStat }) => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.activeCombat) return;
+
+    const combat = room.activeCombat;
+    const isAttacker = (socket.id === combat.attackerSocketId);
+    const opponentSocketId = isAttacker ? combat.targetSocketId : combat.attackerSocketId;
+    const actorCaid = isAttacker ? combat.attackerCaid : combat.targetCaid;
+
+    if (isAttacker) {
+      combat.attackerItems.push(...itemNames);
+      combat.attackerAtk = newTotalStat;
+      combat.attackerReady = false; // Réinitialise l'état prêt pour relancer l'échange
+      combat.targetReady = false;
+    } else {
+      combat.targetItems.push(...itemNames);
+      combat.targetDef = newTotalStat;
+      combat.targetReady = false;
+      combat.attackerReady = false;
+    }
+
+    // Informe l'adversaire des cartes jouées
+    io.to(opponentSocketId).emit('combat_opponent_played_items', {
+      senderCaid: actorCaid,
+      itemNames
+    });
+
+    // Signale aux deux joueurs que les états prêts ont été réinitialisés
+    io.to(combat.attackerSocketId).emit('combat_ready_state_reset');
+    io.to(combat.targetSocketId).emit('combat_ready_state_reset');
+  });
+
+  // Un joueur clique sur "Prêt au combat"
+  socket.on('combat_set_ready', ({ currentStat }) => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.activeCombat) return;
+
+    const combat = room.activeCombat;
+    const isAttacker = (socket.id === combat.attackerSocketId);
+
+    if (isAttacker) {
+      combat.attackerReady = true;
+      combat.attackerAtk = currentStat;
+    } else {
+      combat.targetReady = true;
+      combat.targetDef = currentStat;
+    }
+
+    const opponentSocketId = isAttacker ? combat.targetSocketId : combat.attackerSocketId;
+    io.to(opponentSocketId).emit('combat_opponent_is_ready');
+
+    // Les deux joueurs sont prêts : résolution immédiate du combat !
+    if (combat.attackerReady && combat.targetReady) {
+      const dmgNet = combat.attackerAtk - combat.targetDef;
+      const success = dmgNet > 0;
+
+      io.to(combat.attackerSocketId).emit('combat_finished_result', {
+        success,
+        dmgNet: Math.max(0, dmgNet),
+        isAttacker: true,
+        opponentCaid: combat.targetCaid
+      });
+
+      io.to(combat.targetSocketId).emit('combat_finished_result', {
+        success: !success, // Si l'attaque a échoué, le défenseur a réussi son blocage
+        dmgNet: Math.max(0, dmgNet),
+        isAttacker: false,
+        opponentCaid: combat.attackerCaid
+      });
+
+      room.activeCombat = null;
+    }
+  });
+
+  socket.on('combat_cancel', () => {
+    const room = rooms[socket.roomId];
+    if (room && room.activeCombat) {
+      io.to(room.activeCombat.attackerSocketId).emit('combat_aborted');
+      io.to(room.activeCombat.targetSocketId).emit('combat_aborted');
+      room.activeCombat = null;
+    }
+  });
+
   socket.on('apply_special_to_target', ({ targetSocketId, effectType, senderCaid }) => {
     io.to(targetSocketId).emit('received_special_effect', {
       effectType,
@@ -297,24 +412,6 @@ io.on('connection', (socket) => {
     io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
-  // Combat direct avec transmission des modificateurs de combat
-  socket.on('execute_combat', ({ targetSocketId, attackerCaid, totalAtk, nullEnemyWeapon }) => {
-    io.to(targetSocketId).emit('received_attack', {
-      attackerCaid,
-      totalAtk,
-      nullEnemyWeapon: !!nullEnemyWeapon,
-      attackerSocketId: socket.id
-    });
-  });
-
-  socket.on('combat_result_feedback', ({ attackerSocketId, success, dmgNet }) => {
-    io.to(attackerSocketId).emit('combat_result_ack', {
-      success,
-      dmgNet
-    });
-  });
-
-  // Alliances interactives
   socket.on('propose_alliance', ({ targetSocketId, senderName, musclesCount }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -384,6 +481,9 @@ io.on('connection', (socket) => {
 function handlePlayerDisconnect(socket) {
   const room = rooms[socket.roomId];
   if (room) {
+    if (room.strayDogHolderSocketId === socket.id) {
+      room.strayDogHolderSocketId = null;
+    }
     room.players = room.players.filter(x => x.socketId !== socket.id);
     if (room.players.length === 0) {
       delete rooms[socket.roomId];
