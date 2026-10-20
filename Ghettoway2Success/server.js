@@ -41,9 +41,7 @@ const RADIO_EVENTS = [
 
 function checkRoomReady(room) {
   if (!room) return false;
-  const isFull = room.players.length === room.maxPlayers;
-  const allPicked = room.players.every(p => p.caidId !== null);
-  return isFull && allPicked;
+  return room.players.length === room.maxPlayers && room.players.every(p => p.caidId !== null);
 }
 
 function broadcastTurnState(roomId) {
@@ -104,6 +102,7 @@ io.on('connection', (socket) => {
       round: 1,
       currentTurnIndex: 0,
       currentTurnAlliedTokens: [],
+      strayDogHolderToken: null, // Verrou unique du Chien Errant
       gameStarted: false,
       currentRadio: RADIO_EVENTS[0],
       players: []
@@ -111,7 +110,7 @@ io.on('connection', (socket) => {
 
     const hostPlayer = {
       socketId: socket.id,
-      playerToken: playerToken,
+      playerToken,
       caidId: null,
       caidName: null,
       isHost: true,
@@ -163,7 +162,7 @@ io.on('connection', (socket) => {
 
     const joiner = {
       socketId: socket.id,
-      playerToken: playerToken,
+      playerToken,
       caidId: null,
       caidName: null,
       isHost: false,
@@ -230,6 +229,7 @@ io.on('connection', (socket) => {
     room.round = 1;
     room.currentTurnIndex = 0;
     room.currentTurnAlliedTokens = [];
+    room.strayDogHolderToken = null;
     room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
 
     io.to(socket.roomId).emit('game_started', {
@@ -246,11 +246,12 @@ io.on('connection', (socket) => {
     if (!room || !room.gameStarted) return;
 
     const activePlayer = room.players[room.currentTurnIndex];
-    if (!activePlayer || activePlayer.socketId !== socket.id) {
-      return;
-    }
+    if (!activePlayer || activePlayer.socketId !== socket.id) return;
 
+    // Libérer le Chien Errant et les alliances pour le nouveau tour
     room.currentTurnAlliedTokens = [];
+    room.strayDogHolderToken = null;
+
     room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
 
     if (room.currentTurnIndex === 0) {
@@ -265,6 +266,25 @@ io.on('connection', (socket) => {
     broadcastTurnState(socket.roomId);
   });
 
+  // Gestion de possession exclusive du Chien Errant
+  socket.on('request_claim_stray_dog', ({ playerToken }, callback) => {
+    const room = rooms[socket.roomId];
+    if (!room) return callback({ success: false, msg: "Salon introuvable" });
+
+    if (room.strayDogHolderToken && room.strayDogHolderToken !== playerToken) {
+      const holder = room.players.find(p => p.playerToken === room.strayDogHolderToken);
+      const holderName = holder ? holder.caidName : "un autre Caïd";
+      return callback({
+        success: false,
+        msg: `Action impossible : le Chien Errant est déjà avec ${holderName} pour ce tour !`
+      });
+    }
+
+    room.strayDogHolderToken = playerToken;
+    callback({ success: true });
+  });
+
+  // Capacités spéciales ciblées
   socket.on('apply_special_to_target', ({ targetSocketId, effectType, senderCaid }) => {
     io.to(targetSocketId).emit('received_special_effect', {
       effectType,
@@ -277,10 +297,12 @@ io.on('connection', (socket) => {
     io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
-  socket.on('execute_combat', ({ targetSocketId, attackerCaid, totalAtk }) => {
+  // Combat direct avec transmission des modificateurs de combat
+  socket.on('execute_combat', ({ targetSocketId, attackerCaid, totalAtk, nullEnemyWeapon }) => {
     io.to(targetSocketId).emit('received_attack', {
       attackerCaid,
       totalAtk,
+      nullEnemyWeapon: !!nullEnemyWeapon,
       attackerSocketId: socket.id
     });
   });
@@ -292,6 +314,7 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Alliances interactives
   socket.on('propose_alliance', ({ targetSocketId, senderName, musclesCount }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -392,5 +415,5 @@ function getAvailableRooms() {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Serveur Ghettoway opérationnel sur le port ${PORT}`);
+  console.log(`Serveur Ghettoway 2 Success actif sur le port ${PORT}`);
 });
