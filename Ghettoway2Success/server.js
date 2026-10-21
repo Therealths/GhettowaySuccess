@@ -204,7 +204,7 @@ io.on('connection', (socket) => {
       return socket.emit('error_msg', `Le Caïd ${caidName} a déjà été sélectionné par un autre joueur.`);
     }
 
-    const p = room.players.find(x => x.socketId === socket.id || x.playerToken === playerToken);
+    const p = room.players.find(x => x.playerToken === playerToken || x.socketId === socket.id);
     if (p) {
       p.caidId = caidId;
       p.caidName = caidName;
@@ -253,7 +253,7 @@ io.on('connection', (socket) => {
     if (!room || !room.gameStarted) return;
 
     const activePlayer = room.players[room.currentTurnIndex];
-    if (!activePlayer || activePlayer.socketId !== socket.id) return;
+    if (!activePlayer || (activePlayer.socketId !== socket.id && activePlayer.playerToken !== socket.handshake.auth?.token)) return;
 
     room.currentTurnAlliedTokens = [];
     room.strayDogHolderToken = null;
@@ -279,7 +279,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Gestion du Chien Errant : le dernier qui siffle le vole au propriétaire précédent
   socket.on('claim_stray_dog', ({ senderCaid, playerToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -308,8 +307,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Combat interactif en duel
-  socket.on('start_combat_engagement', ({ targetSocketId, targetPlayerToken, attackerCaid }) => {
+  socket.on('start_combat_engagement', ({ targetPlayerToken, targetSocketId, attackerCaid }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
 
@@ -425,7 +423,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('apply_special_to_target', ({ targetSocketId, targetPlayerToken, effectType, senderCaid }) => {
+  socket.on('apply_special_to_target', ({ targetPlayerToken, targetSocketId, effectType, senderCaid }) => {
     const room = rooms[socket.roomId];
     let destSocketId = targetSocketId;
 
@@ -445,7 +443,7 @@ io.on('connection', (socket) => {
     io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
-  socket.on('propose_alliance', ({ targetSocketId, targetPlayerToken, senderName, musclesCount }) => {
+  socket.on('propose_alliance', ({ targetPlayerToken, targetSocketId, senderName, musclesCount }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
     const sender = room.players.find(p => p.socketId === socket.id);
