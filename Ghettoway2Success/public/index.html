@@ -162,7 +162,7 @@
 <body>
   <div id="app-container">
 
-    <!-- PAGE 1 : ACCUEIL [1] -->
+    <!-- PAGE 1 : ACCUEIL -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full flex-shrink-0">
         <button onclick="navTo('page-2')" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 active:scale-95 transition">
@@ -174,7 +174,7 @@
       </div>
     </div>
 
-    <!-- PAGE 2 : CRÉER UN SALON [1] -->
+    <!-- PAGE 2 : CRÉER UN SALON -->
     <div id="page-2" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-5">
@@ -209,7 +209,7 @@
       </div>
     </div>
 
-    <!-- PAGE 3 : REJOINDRE [1] -->
+    <!-- PAGE 3 : REJOINDRE -->
     <div id="page-3" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-4">
@@ -233,7 +233,7 @@
       </div>
     </div>
 
-    <!-- PAGE 4 : CARROUSEL DE TIRAGE [1] -->
+    <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex-col justify-between h-full">
       <div class="flex items-center justify-between w-full pt-1 flex-shrink-0 mb-1">
         <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
@@ -287,7 +287,7 @@
       </div>
     </div>
 
-    <!-- PAGE LOBBY : SALLE D'ATTENTE [1] -->
+    <!-- PAGE LOBBY : SALLE D'ATTENTE -->
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center justify-between pt-1 mb-3">
@@ -323,7 +323,7 @@
       </div>
     </div>
 
-    <!-- PAGE 5 : FLASH RADIO [1] -->
+    <!-- PAGE 5 : FLASH RADIO -->
     <div id="page-5" class="screen-view p-5 justify-between bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
       <div class="pt-1 text-center flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
@@ -357,7 +357,7 @@
       </div>
     </div>
 
-    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) [1] -->
+    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) -->
     <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between relative">
 
       <!-- CALQUE GRISÉ DE BLOCAGE TOUR PAR TOUR -->
@@ -383,7 +383,7 @@
 
       <div class="flex flex-col h-full justify-between space-y-2">
 
-        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE [1] -->
+        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE -->
         <div id="caidTopBannerContainer" class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition z-10 shadow-md hover:bg-black/40" title="Retour au Flash Radio">
@@ -391,7 +391,7 @@
           </button>
         </div>
 
-        <!-- STATS [1] -->
+        <!-- STATS -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10">
             <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️</span>
@@ -410,7 +410,7 @@
           </div>
         </div>
 
-        <!-- RECRUES (GROS BRAS & PROSTITUEE) [1] -->
+        <!-- RECRUES -->
         <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
           <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 shadow-lg flex items-center justify-between gap-1">
             <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl flex-shrink-0"><i class="ph-bold ph-barbell"></i></div>
@@ -431,7 +431,7 @@
           </div>
         </div>
 
-        <!-- FLASH RADIO MINI [1] -->
+        <!-- FLASH RADIO MINI -->
         <div class="w-full py-1.5 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 shadow-sm flex-shrink-0">
           <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
           <div class="overflow-hidden flex-1 min-w-0 flex flex-col justify-center">
@@ -446,7 +446,7 @@
           </div>
         </div>
 
-        <!-- ONGLETS [1] -->
+        <!-- ONGLETS -->
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex items-end gap-1.5 px-1 pt-1 flex-shrink-0">
             <button id="mainTabInteractions" onclick="switchMainCaidTab('interactions')" class="flex-1 py-2 px-2 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-amber-300 bg-[#141622] border-t-2 border-amber-400 shadow-lg">
@@ -462,7 +462,7 @@
 
           <div id="mainTabsContentContainer" class="flex-1 px-1 py-2 bg-gradient-to-b from-[#141622] via-[#0d0f17] to-[#090a10] border-t-2 border-b-2 border-x-0 border-amber-400 shadow-2xl flex flex-col justify-center overflow-hidden">
 
-            <!-- VOLET 1 : ACTIONS [1] -->
+            <!-- VOLET 1 : ACTIONS -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
               <button id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
                 <div class="flex items-start gap-2 flex-1 min-w-0">
@@ -484,8 +484,9 @@
               </div>
             </div>
 
-            <!-- VOLET 2 : ÉQUIPEMENT [1] -->
+            <!-- VOLET 2 : ÉQUIPEMENT -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
+              <!-- Arme -->
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale</span>
@@ -497,6 +498,7 @@
                 </div>
               </div>
 
+              <!-- Protection -->
               <div class="p-3 bg-black/50 rounded-2xl border border-sky-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet</span>
@@ -508,6 +510,7 @@
                 </div>
               </div>
 
+              <!-- Véhicule -->
               <div class="p-3 bg-black/50 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif</span>
@@ -520,7 +523,7 @@
               </div>
             </div>
 
-            <!-- VOLET 3 : INVENTAIRE / SAC [1] -->
+            <!-- VOLET 3 : INVENTAIRE / SAC -->
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
@@ -571,7 +574,7 @@
       </div>
     </div>
 
-    <!-- MODALE ALLIANCE REÇUE [1] -->
+    <!-- MODALE ALLIANCE REÇUE -->
     <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 shadow-2xl max-w-sm mx-auto w-full text-center">
         <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-300 mx-auto flex items-center justify-center text-2xl border border-purple-400/40">
@@ -770,36 +773,36 @@
       </div>
     </div>
 
-    <!-- MODALE TRANSFERT QG [1] -->
+    <!-- MODALE TRANSFERT QG -->
     <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 id="transferModalTitle" class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-vault text-base"></i> Coffre du QG [1]
+            <i class="ph-bold ph-vault text-base"></i> Coffre du QG
           </h3>
           <button onclick="closeModal('modalTransfer')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
         <div class="grid grid-cols-2 gap-1.5 p-1 bg-black/60 rounded-2xl font-mono text-xs">
           <button id="transferTabCash" onclick="switchTransferResource('cash')" class="py-2 rounded-xl font-bold bg-yellow-400 text-black flex items-center justify-center gap-1">
-            <i class="ph-bold ph-coins"></i> Argent (€) [1]
+            <i class="ph-bold ph-coins"></i> Argent (€)
           </button>
           <button id="transferTabDrugs" onclick="switchTransferResource('drugs')" class="py-2 rounded-xl font-bold text-slate-400 flex items-center justify-center gap-1">
-            <i class="ph-bold ph-plant"></i> Drogue (kg) [1]
+            <i class="ph-bold ph-plant"></i> Drogue (kg)
           </button>
         </div>
         <div class="p-3 bg-black/40 rounded-2xl border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
           <div class="border-r border-white/10 pr-2">
-            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous [1]</span>
-            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 € [1]</div>
+            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous</span>
+            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 €</div>
           </div>
           <div class="pl-2">
-            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre [1]</span>
-            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 € [1]</div>
+            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre</span>
+            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 €</div>
           </div>
         </div>
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs font-mono">
-            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer : [1]</span>
+            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer :</span>
             <span id="transferMaxAvailableLabel" class="text-[10px] text-ghetto-gold font-bold">Max dispo : 5 000 €</span>
           </div>
           <div class="relative flex items-center gap-2">
@@ -816,22 +819,45 @@
           </div>
           <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
             <button onclick="setTransferPercentage(0)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">0 %</button>
-            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 % [1]</button>
-            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout) [1]</button>
+            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 %</button>
+            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout)</button>
           </div>
         </div>
         <button id="transferConfirmBtn" onclick="confirmTransferAction()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-yellow-500/20">
-          Confirmer le Transfert [1]
+          Confirmer le Transfert
         </button>
       </div>
     </div>
 
-    <!-- MODALE SCANNER [1] -->
+    <!-- MODALE ALLIANCE -->
+    <div id="modalAlliance" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
+      <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <h3 class="text-sm font-black text-purple-400 uppercase flex items-center gap-1.5">
+            <i class="ph-bold ph-handshake text-base"></i> Sceller une Alliance
+          </h3>
+          <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
+        </div>
+        <p class="text-xs text-slate-300">
+          L'allié recevra une demande. S'il accepte, ses forces s'additionneront aux vôtres et son écran se débloquera pour jouer simultanément avec vous !
+        </p>
+        <div>
+          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd :</label>
+          <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
+        </div>
+        <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-purple-500/20">
+          Envoyer la Demande
+        </button>
+        <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
+      </div>
+    </div>
+
+    <!-- MODALE SCANNER -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-5 flex flex-col justify-between">
       <div class="pt-1">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
           <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-qr-code text-base"></i> Scanner Tactique [1]
+            <i class="ph-bold ph-qr-code text-base"></i> Scanner Tactique
           </h3>
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
@@ -854,25 +880,97 @@
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (Req: 3Atk/2M)</button>
         </div>
       </div>
-      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer [1]</button>
+      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer</button>
     </div>
 
-    <!-- MODALE PATROUILLE [1] -->
+    <!-- MODALE PATROUILLE -->
     <div id="modalPatrolDice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
-        <h3 class="text-base font-black text-white uppercase">Patrouille de Police [1]</h3>
-        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">? [1]</div>
+        <h3 class="text-base font-black text-white uppercase">Patrouille de Police</h3>
+        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">?</div>
         <div>
-          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule... [1]</span>
+          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule...</span>
           <div id="patrolDiceDirectionLabel" class="text-sm font-black font-mono text-ghetto-gold uppercase mt-1"></div>
         </div>
-        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr; [1]</button>
+        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr;</button>
+      </div>
+    </div>
+
+    <!-- MODALE SYSTÈME : NOTIFICATION / ALERTE PERSONNALISÉE -->
+    <div id="modalAppAlert" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
+      <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 shadow-2xl max-w-sm mx-auto w-full text-center">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 mx-auto flex items-center justify-center text-2xl border border-amber-400/40">
+          <i class="ph-bold ph-bell-simple"></i>
+        </div>
+        <div>
+          <h3 id="appAlertTitle" class="text-base font-black text-white uppercase tracking-wider">Information</h3>
+          <p id="appAlertMessage" class="text-xs text-slate-300 mt-2 font-mono leading-relaxed whitespace-pre-line"></p>
+        </div>
+        <button id="btnAppAlertOk" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-yellow-500/20">
+          Compris
+        </button>
+      </div>
+    </div>
+
+    <!-- MODALE SYSTÈME : CONFIRMATION PERSONNALISÉE -->
+    <div id="modalAppConfirm" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
+      <div class="glass-panel p-6 rounded-3xl space-y-4 border-cyan-500/40 shadow-2xl max-w-sm mx-auto w-full text-center">
+        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-300 mx-auto flex items-center justify-center text-2xl border border-sky-400/40">
+          <i class="ph-bold ph-question"></i>
+        </div>
+        <div>
+          <h3 id="appConfirmTitle" class="text-base font-black text-white uppercase tracking-wider">Confirmation</h3>
+          <p id="appConfirmMessage" class="text-xs text-slate-300 mt-2 font-mono leading-relaxed whitespace-pre-line"></p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button id="btnAppConfirmYes" class="py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-xs shadow-lg active:scale-95 transition">
+            Confirmer
+          </button>
+          <button id="btnAppConfirmNo" class="py-3 glass-panel text-slate-400 font-bold uppercase rounded-xl text-xs hover:text-white transition">
+            Annuler
+          </button>
+        </div>
       </div>
     </div>
 
   </div>
 
   <script>
+    // --- GESTION DES MODALES D'ALERTE ET DE CONFIRMATION STYLISÉES ---
+    function showAppAlert(message, title = "Information") {
+      return new Promise((resolve) => {
+        document.getElementById('appAlertTitle').innerText = title;
+        document.getElementById('appAlertMessage').innerText = message;
+        const modal = document.getElementById('modalAppAlert');
+        modal.classList.remove('hidden');
+        const okBtn = document.getElementById('btnAppAlertOk');
+        okBtn.onclick = () => {
+          modal.classList.add('hidden');
+          resolve();
+        };
+      });
+    }
+
+    function showAppConfirm(message, title = "Confirmation") {
+      return new Promise((resolve) => {
+        document.getElementById('appConfirmTitle').innerText = title;
+        document.getElementById('appConfirmMessage').innerText = message;
+        const modal = document.getElementById('modalAppConfirm');
+        modal.classList.remove('hidden');
+        const yesBtn = document.getElementById('btnAppConfirmYes');
+        const noBtn = document.getElementById('btnAppConfirmNo');
+        yesBtn.onclick = () => {
+          modal.classList.add('hidden');
+          resolve(true);
+        };
+        noBtn.onclick = () => {
+          modal.classList.add('hidden');
+          resolve(false);
+        };
+      });
+    }
+
+    // --- JETON DE SESSION PERSISTANT ---
     function getOrCreatePlayerToken() {
       let token = localStorage.getItem('g2s_player_token');
       if (!token) {
@@ -1125,6 +1223,7 @@
         }
       });
 
+      // DUEL COMBAT
       socket.on('combat_duel_opened', ({ role, opponentCaid, opponentSocketId }) => {
         currentDuelInfo = { role, opponentCaid, opponentSocketId };
         resetCombatModifiers();
@@ -1144,12 +1243,12 @@
         document.getElementById('modalCombat').classList.remove('hidden');
       });
 
-      socket.on('combat_opponent_played_items', ({ senderCaid, itemNames }) => {
+      socket.on('combat_opponent_played_items', async ({ senderCaid, itemNames }) => {
         const log = document.getElementById('combatLiveLog');
         const itemsStr = itemNames.join(', ');
         log.innerHTML += `<p class="text-rose-300">⚠️ <strong>${senderCaid}</strong> a joué : ${itemsStr} !</p>`;
         log.scrollTop = log.scrollHeight;
-        alert(`⚠️ ${senderCaid} vient de jouer : ${itemsStr} !\nVous pouvez à votre tour utiliser des objets dans votre Sac.`);
+        await showAppAlert(`⚠️ ${senderCaid} vient de jouer : ${itemsStr} !\nVous pouvez à votre tour utiliser des objets dans votre Sac.`, "Action Adverse");
       });
 
       socket.on('combat_opponent_is_ready', () => {
@@ -1163,25 +1262,25 @@
         updateCombatReadyButtonUI();
       });
 
-      socket.on('combat_finished_result', ({ success, dmgNet, isAttacker, opponentCaid }) => {
+      socket.on('combat_finished_result', async ({ success, dmgNet, isAttacker, opponentCaid }) => {
         closeModal('modalCombat');
         closeModal('modalCombatItemSelector');
 
         if (isAttacker) {
           if (success) {
-            alert(`🏆 VICTOIRE ÉCRASANTE !\nVotre assaut a transpercé la défense de ${opponentCaid} (Dégâts nets : ${dmgNet}). La cible perd 1 Cœur !`);
+            await showAppAlert(`Votre assaut a transpercé la défense de ${opponentCaid} (Dégâts nets : ${dmgNet}). La cible perd 1 Cœur !`, "🏆 Victoire Écrasante");
           } else {
             localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-            checkHospitalStatus();
-            alert(`🛑 ATTAQUE ÉCHOUÉE !\nLa défense de ${opponentCaid} était infranchissable. Vous subissez la contre-attaque et perdez 1 Cœur !`);
+            await checkHospitalStatus();
+            await showAppAlert(`La défense de ${opponentCaid} était infranchissable. Vous subissez la contre-attaque et perdez 1 Cœur !`, "🛑 Attaque Échouée");
           }
         } else {
           if (!success) {
             localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-            checkHospitalStatus();
-            alert(`💥 AGRESSION RÉUSSIE DE ${opponentCaid} !\nIl transperce votre défense (Dégâts nets : ${dmgNet}). Vous perdez 1 Cœur !`);
+            await checkHospitalStatus();
+            await showAppAlert(`${opponentCaid} transperce votre défense (Dégâts nets : ${dmgNet}). Vous perdez 1 Cœur !`, "💥 Agression Subie");
           } else {
-            alert(`🛡️ AGRESSION REPOUSSÉE !\nVotre défense a totalement bloqué l'assaut de ${opponentCaid} ! Vous ne perdez aucun cœur.`);
+            await showAppAlert(`Votre défense a totalement bloqué l'assaut de ${opponentCaid} ! Vous ne perdez aucun cœur.`, "🛡️ Agression Repoussée");
           }
         }
 
@@ -1190,52 +1289,54 @@
         refreshHud();
       });
 
-      socket.on('combat_aborted', () => {
+      socket.on('combat_aborted', async () => {
         closeModal('modalCombat');
         closeModal('modalCombatItemSelector');
         resetCombatModifiers();
         currentDuelInfo = null;
-        alert("Le combat a été annulé.");
+        await showAppAlert("Le combat a été annulé par un joueur.", "Combat Interrompu");
       });
 
-      socket.on('lost_stray_dog', ({ thiefCaid }) => {
+      // CHIEN ERRANT
+      socket.on('lost_stray_dog', async ({ thiefCaid }) => {
         localPlayer.strayDogActive = false;
-        alert(`🐕 ATTENTION : ${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant ! Vous perdez son bonus.`);
+        await showAppAlert(`🐕 ATTENTION : ${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant ! Vous perdez son bonus.`, "Chien Errant Volé");
         refreshHud();
       });
 
-      socket.on('stray_dog_granted', () => {
+      socket.on('stray_dog_granted', async () => {
         localPlayer.strayDogActive = true;
-        alert("🐕 Le Chien Errant vous a rejoint (+2 Attaque / +2 Défense) !");
+        await showAppAlert("🐕 Le Chien Errant vous a rejoint (+2 Attaque / +2 Défense jusqu'à la fin du tour) !", "Chien Rallié");
         refreshHud();
       });
 
-      socket.on('received_special_effect', ({ effectType, senderCaid, senderSocketId }) => {
+      // EFFETS SPÉCIAUX
+      socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
         if (effectType === 'siphon') {
           localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-          checkHospitalStatus();
-          alert(`🩸 SIPHON VITAL de ${senderCaid} !\nIl vous vole 1 Cœur de Vie !`);
+          await checkHospitalStatus();
+          await showAppAlert(`🩸 SIPHON VITAL de ${senderCaid} !\nIl vous vole 1 Cœur de Vie !`, "Attaque Spéciale Subie");
         } else if (effectType === 'shuriken') {
           localPlayer.tempDefMalus = 3;
-          alert(`⭐ SHURIKEN de ${senderCaid} !\nVotre Défense est réduite de 3 points ce tour !`);
+          await showAppAlert(`⭐ SHURIKEN de ${senderCaid} !\nVotre Défense est réduite de 3 points ce tour !`, "Attaque Spéciale Subie");
         } else if (effectType === 'danse') {
           localPlayer.tempAtkMalus = 3;
-          alert(`💃 DANSE LASCIVE de ${senderCaid} !\nVotre Attaque est réduite de 3 points ce tour !`);
+          await showAppAlert(`💃 DANSE LASCIVE de ${senderCaid} !\nVotre Attaque est réduite de 3 points ce tour !`, "Attaque Spéciale Subie");
         } else if (effectType === 'steal_item') {
           if (localPlayer.inventory.length > 0) {
             const stolen = localPlayer.inventory.pop();
-            alert(`🦹 VOL À LA TIRE de ${senderCaid} !\nIl vous a dérobé : ${stolen.name} !`);
+            await showAppAlert(`🦹 VOL À LA TIRE de ${senderCaid} !\nIl vous a dérobé : ${stolen.name} !`, "Vol Subi");
             socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });
           } else {
-            alert(`🦹 Tentative de vol de ${senderCaid}, mais votre sac était vide !`);
+            await showAppAlert(`🦹 Tentative de vol de ${senderCaid}, mais votre sac était vide !`, "Vol Déjoué");
           }
         }
         refreshHud();
       });
 
-      socket.on('gain_stolen_item', ({ item }) => {
+      socket.on('gain_stolen_item', async ({ item }) => {
         localPlayer.inventory.push(item);
-        alert(`🎁 Butin dérobé : ${item.name} a été ajouté à votre Sac !`);
+        await showAppAlert(`🎁 Butin dérobé : ${item.name} a été ajouté à votre Sac !`, "Vol Réussi");
         refreshHud();
       });
 
@@ -1245,18 +1346,18 @@
         document.getElementById('modalAllianceRequestReceived').classList.remove('hidden');
       });
 
-      socket.on('alliance_confirmed', ({ allyCaid, musclesCount }) => {
+      socket.on('alliance_confirmed', async ({ allyCaid, musclesCount }) => {
         localPlayer.allianceActive = true;
         localPlayer.activeAlly = {
           caid: allyCaid,
           grosBrasCount: musclesCount || 0,
           bonusAtk: (musclesCount || 0) * 2
         };
-        alert(`🤝 Alliance confirmée avec ${allyCaid} ! Vos interfaces sont déverrouillées pour jouer ensemble ce tour.`);
+        await showAppAlert(`🤝 Alliance confirmée avec ${allyCaid} ! Vos interfaces sont déverrouillées pour jouer ensemble ce tour.`, "Pacte Scellé");
       });
 
-      socket.on('alliance_declined', () => {
-        alert("❌ Le Caïd adverse a décliné votre proposition d'alliance.");
+      socket.on('alliance_declined', async () => {
+        await showAppAlert("❌ Le Caïd adverse a décliné votre proposition d'alliance.", "Alliance Refusée");
       });
 
       socket.on('player_updated', (updatedPlayer) => {
@@ -1266,12 +1367,14 @@
         syncMultiplayerTargets();
       });
 
-      socket.on('error_msg', (msg) => alert(msg));
+      socket.on('error_msg', async (msg) => {
+        await showAppAlert(msg, "Erreur");
+      });
     }
 
-    function checkHospitalStatus() {
+    async function checkHospitalStatus() {
       if (localPlayer.hearts <= 0) {
-        alert("🚑 URGENCE MÉDICALE — TRANSFERT À L'HÔPITAL !\nVous n'avez plus aucun Cœur de Vie !\nVotre Caïd est évacué d'urgence à l'Hôpital pour y être soigné.");
+        await showAppAlert("🚑 URGENCE MÉDICALE — TRANSFERT À L'HÔPITAL !\nVous n'avez plus aucun Cœur de Vie !\nVotre Caïd est évacué d'urgence pour y recevoir des soins.", "Hôpital");
         localPlayer.hearts = 1;
       }
     }
@@ -1336,8 +1439,9 @@
       if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
     }
 
-    function confirmLeaveGame() {
-      if (confirm("Voulez-vous vraiment quitter définitivement cette partie ?")) {
+    async function confirmLeaveGame() {
+      const conf = await showAppConfirm("Voulez-vous vraiment quitter définitivement cette partie ?", "Quitter la partie");
+      if (conf) {
         localStorage.removeItem('g2s_room_id');
         if (socket) socket.emit('leave_room');
         window.location.reload();
@@ -1403,7 +1507,7 @@
 
       const available = getAvailableCaids();
       if (!available.length) {
-        alert("Tous les Caïds ont déjà été sélectionnés pour cette partie !");
+        showAppAlert("Tous les Caïds ont déjà été sélectionnés pour cette partie !", "Salon complet");
         return;
       }
 
@@ -1454,7 +1558,7 @@
       if (isDrawingCarousel) return;
       const available = getAvailableCaids();
       if (!available.length) {
-        alert("Tous les Caïds ont été pris par les autres joueurs !");
+        showAppAlert("Tous les Caïds ont été pris par les autres joueurs !", "Sélection impossible");
         return;
       }
 
@@ -1519,7 +1623,7 @@
       }, 3300);
     }
 
-    function startRoundPhase1() {
+    async function startRoundPhase1() {
       const ev = currentSession.currentRadioEvent || { title: "Descente massive", desc: "La police avance de +2 cases." };
       document.getElementById('radioRoundNumber').innerText = currentSession.round;
       document.getElementById('radioCardTitle').innerText = ev.title;
@@ -1528,7 +1632,7 @@
       if (localPlayer.prostitutesAtSafeList.length > 0) {
         const income = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || (p.level === 2 ? 2500 : 1000)), 0);
         localPlayer.safeCash += income;
-        alert(`💰 Rente QG perçue : +${income.toLocaleString()} € versés au coffre.`);
+        await showAppAlert(`+${income.toLocaleString()} € versés au coffre par vos prostituées.`, "💰 Rente QG perçue");
       }
       navTo('page-5');
     }
@@ -1574,46 +1678,49 @@
       refreshHud();
     }
 
-    function clickMuscleSlot(idx) {
+    async function clickMuscleSlot(idx) {
       if (!isMyTurnToPlay) return;
       if (localPlayer.musclesOnPerson[idx]) {
         const item = localPlayer.musclesOnPerson[idx];
-        if (confirm(`Congédier définitivement ${item.name} ?\n(Attention : il disparaîtra et n'ira pas dans l'inventaire)`)) {
+        const conf = await showAppConfirm(`Congédier définitivement ${item.name} ?\n(Attention : il disparaîtra et n'ira pas dans le Sac)`, "Congédier Homme de Main");
+        if (conf) {
           localPlayer.musclesOnPerson.splice(idx, 1);
           refreshHud();
         }
       }
     }
 
-    function clickProstituteTransitSlot() {
+    async function clickProstituteTransitSlot() {
       if (!isMyTurnToPlay) return;
       if (localPlayer.prostituteInTransit) {
         const p = localPlayer.prostituteInTransit;
-        if (confirm(`Congédier définitivement ${p.name} ?\n(Attention : elle disparaîtra et n'ira pas dans l'inventaire)`)) {
+        const conf = await showAppConfirm(`Congédier définitivement ${p.name} ?\n(Attention : elle disparaîtra et n'ira pas dans le Sac)`, "Congédier Escort");
+        if (conf) {
           localPlayer.prostituteInTransit = null;
           refreshHud();
         }
       } else {
-        alert("Aucune prostituée en transit. Flashez son QR Code pour la recruter !");
+        await showAppAlert("Aucune prostituée en transit. Flashez son QR Code pour la recruter !", "Slot Escort Vide");
       }
     }
 
-    function depositProstituteToSafe() {
+    async function depositProstituteToSafe() {
       if (!isMyTurnToPlay) return;
       if (!localPlayer.prostituteInTransit) return;
       localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
       localPlayer.prostituteInTransit = null;
-      alert("🎉 Prostituée installée au QG ! Sa rente sera versée au début de chaque manche.");
+      await showAppAlert("Prostituée installée au QG ! Sa rente sera versée au coffre au début de chaque manche.", "🎉 Sécurisation QG");
       refreshHud();
     }
 
-    // --- CAPACITÉ SPÉCIALE CIBLÉE OU PERSONNELLE ---
-    function openSpecialAbilityPrompt() {
+    async function openSpecialAbilityPrompt() {
       if (!isMyTurnToPlay) {
-        return alert("Ce n'est pas votre tour de jouer !");
+        await showAppAlert("Ce n'est pas votre tour de jouer !", "Tour Inactif");
+        return;
       }
       if (localPlayer.specialUsedThisTurn) {
-        return alert("Capacité spéciale déjà déclenchée durant ce tour !");
+        await showAppAlert("Capacité spéciale déjà déclenchée durant ce tour !", "Capacité Épuisée");
+        return;
       }
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
@@ -1622,31 +1729,36 @@
       if (targetedSkills.includes(caid.id)) {
         syncMultiplayerTargets();
         if (!connectedRivals || connectedRivals.length === 0) {
-          return alert("Aucun rival connecté à cibler pour votre capacité spéciale !");
+          await showAppAlert("Aucun rival connecté à cibler pour votre capacité spéciale !", "Cible Introuvable");
+          return;
         }
         document.getElementById('specialTargetDesc').innerText = `${caid.skillName} : ${caid.skillDesc}`;
         document.getElementById('modalTargetSpecial').classList.remove('hidden');
       } else {
-        if (!confirm(`⚡ DÉCLENCHER LA CAPACITÉ SPÉCIALE ?\n\n${caid.skillName} : ${caid.skillDesc}\n\nUtilisable strictement 1x par tour.`)) return;
+        const conf = await showAppConfirm(`${caid.skillName} : ${caid.skillDesc}\n\nUtilisable strictement 1x par tour. Confirmer ?`, "⚡ Déclencher Capacité");
+        if (!conf) return;
 
         if (caid.id === 'caid_3') {
           localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
-          alert("⚡ La Grosse Sieste : +1 Cœur de Vie restauré !");
+          await showAppAlert("+1 Cœur de Vie restauré !", "⚡ La Grosse Sieste");
         } else if (caid.id === 'caid_5') {
-          alert("⚡ Prière Miraculeuse prête !");
+          await showAppAlert("Prière Miraculeuse prête ! Elle s'activera lors du prochain contrôle ou agression.", "⚡ Protection Divine");
         } else {
-          alert(`⚡ Capacité Spéciale ${caid.skillName} activée !`);
+          await showAppAlert(`Capacité Spéciale ${caid.skillName} activée !`, "⚡ Capacité Déclenchée");
         }
         localPlayer.specialUsedThisTurn = true;
         refreshHud();
       }
     }
 
-    function executeTargetedSpecialPower() {
+    async function executeTargetedSpecialPower() {
       const sel = document.getElementById('specialTargetSelect');
       const targetToken = sel.value;
       const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
-      if (!target) return alert("Veuillez sélectionner un Caïd cible.");
+      if (!target) {
+        await showAppAlert("Veuillez sélectionner un Caïd cible.", "Cible Requise");
+        return;
+      }
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       closeModal('modalTargetSpecial');
@@ -1669,34 +1781,38 @@
 
       if (effect === 'siphon') {
         localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
-        alert(`🩸 Siphon Vital réussi sur ${target.caidName || 'le rival'} : vous gagnez +1 Cœur !`);
+        await showAppAlert(`Siphon Vital réussi sur ${target.caidName || 'le rival'} : vous gagnez +1 Cœur !`, "🩸 Siphon Vital");
       } else {
-        alert(`⚡ Capacité Spéciale ${caid.skillName} appliquée avec succès sur ${target.caidName || 'la cible'} !`);
+        await showAppAlert(`Capacité Spéciale ${caid.skillName} appliquée avec succès sur ${target.caidName || 'la cible'} !`, "⚡ Capacité Réussie");
       }
 
       localPlayer.specialUsedThisTurn = true;
       refreshHud();
     }
 
-    function triggerPoliceInspection() {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
+    async function triggerPoliceInspection() {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
+        return;
+      }
       const vehKey = localPlayer.equipped.vehicle ? (localPlayer.equipped.vehicle.key || 'veh') : 'none';
       const hasVehicle = vehKey !== 'none';
       const promptMsg = hasVehicle
-        ? "🚨 INTERCEPTION DE POLICE !\n\nLa patrouille vous croise.\nVéhicule actif (Tentative Go-Fast 4+ disponible).\n\nConfirmer et lancer le contrôle ?"
-        : "🚨 INTERCEPTION DE POLICE !\n\nLa patrouille vous croise (vous êtes à pied).\nFouille immédiate requise.\n\nConfirmer et lancer le contrôle ?";
-      if (!confirm(promptMsg)) return;
+        ? "La patrouille vous croise.\nVéhicule actif (Tentative Go-Fast 4+ disponible).\n\nConfirmer et lancer le contrôle ?"
+        : "La patrouille vous croise (vous êtes à pied).\nFouille immédiate requise.\n\nConfirmer et lancer le contrôle ?";
+      const conf = await showAppConfirm(promptMsg, "🚨 Interception Police");
+      if (!conf) return;
 
       if (localPlayer.caidId === 'caid_5' && !localPlayer.specialUsedThisTurn) {
-        const usePrayer = confirm("🙏 J-Lo Gramme : Souhaitez-vous tenter votre 'Prière Miraculeuse' (50% de chance d'annuler ce contrôle) ?\n\nRappel : Utilisable 1 seule fois par tour.");
+        const usePrayer = await showAppConfirm("Souhaitez-vous tenter votre 'Prière Miraculeuse' (50% de chance d'annuler ce contrôle) ?\n\nUtilisable 1 seule fois par tour.", "🙏 J-Lo Gramme");
         if (usePrayer) {
           localPlayer.specialUsedThisTurn = true;
           refreshHud();
           if (Math.random() >= 0.5) {
-            alert("🙏 Prière Miraculeuse : FACE !\n\nLe contrôle de police est miraculeusement annulé ce tour !");
+            await showAppAlert("Prière Miraculeuse : FACE !\n\nLe contrôle de police est miraculeusement annulé ce tour !", "🙏 Miracle");
             return;
           } else {
-            alert("🙏 Prière Miraculeuse : PILE !\n\nLa prière échoue, le contrôle se poursuit.");
+            await showAppAlert("Prière Miraculeuse : PILE !\n\nLa prière échoue, le contrôle se poursuit.", "🙏 Échec Prière");
           }
         }
       }
@@ -1704,52 +1820,60 @@
       if (hasVehicle) {
         const roll = Math.floor(Math.random() * 6) + 1;
         if (roll >= 4) {
-          alert(`⚡ Test Go-Fast (${roll} au dé) : SUCCÈS !\n\nVous forcez le barrage et semez la police à pleine vitesse !`);
+          await showAppAlert(`Test Go-Fast (${roll} au dé) : SUCCÈS !\n\nVous forcez le barrage et semez la police à pleine vitesse !`, "⚡ Go-Fast Réussi");
           return;
         } else {
-          alert(`🛑 Test Go-Fast (${roll} au dé) : ÉCHEC !\n\nLe barrage vous stoppe net. Contrôle forcé immédiat !`);
+          await showAppAlert(`Test Go-Fast (${roll} au dé) : ÉCHEC !\n\nLe barrage vous stoppe net. Contrôle forcé immédiat !`, "🛑 Barrage Forcé");
         }
       }
 
       const outcomes = ['CLEAN', 'DRUGS_FOUND', 'WEAPONS_FOUND'];
       const pick = outcomes[Math.floor(Math.random() * outcomes.length)];
       if (pick === 'CLEAN' || (pick === 'DRUGS_FOUND' && localPlayer.drugs === 0)) {
-        alert("👮 Contrôle de Police : R.A.S. !\n\nVos papiers sont en règle, la patrouille vous laisse repartir.");
+        await showAppAlert("Vos papiers sont en règle, la patrouille vous laisse repartir.", "👮 Contrôle : R.A.S.");
       } else if (pick === 'DRUGS_FOUND' && localPlayer.drugs > 0) {
         const seized = localPlayer.drugs;
         localPlayer.drugs = 0;
         refreshHud();
-        alert(`🚨 SAISIE DE MARCHANDISE ILLÉGALE !\n\nLes ${seized} kg de drogue sur vous ont été saisis !\n\n🚔 CONDUITE IMMÉDIATE AU POSTE !\nVous êtes arrêté en flagrant délit pour trafic et immédiatement conduit au commissariat !`);
+        await showAppAlert(`Les ${seized} kg de drogue sur vous ont été saisis !\n\nVous êtes arrêté pour trafic et conduit immédiatement au commissariat !`, "🚨 Saisie & Embarquement");
       } else {
         localPlayer.equipped.weapon = null;
         localPlayer.inventory = localPlayer.inventory.filter(it => it.type !== 'WEAPON');
         refreshHud();
-        alert("🔫 PORT D'ARMES ILLÉGAL !\n\nVotre arme et vos équipements offensifs ont été confisqués !\n\n🚔 CONDUITE IMMÉDIATE AU POSTE !\nVous êtes arrêté pour détention d'armes non autorisées et immédiatement conduit au commissariat !");
+        await showAppAlert("Votre arme et vos équipements offensifs ont été confisqués !\n\nVous êtes arrêté pour détention d'armes et conduit au commissariat !", "🔫 Saisie & Embarquement");
       }
     }
 
-    function sellItem(idx) {
-      if (!isMyTurnToPlay) return alert("Attendez votre tour pour effectuer une vente.");
+    async function sellItem(idx) {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Attendez votre tour pour effectuer une vente.", "Tour Inactif");
+        return;
+      }
       const item = localPlayer.inventory[idx];
       if (!item) return;
 
       const basePrice = item.price || item.p || (item.type === 'WEAPON' ? 3000 : (item.type === 'ARMOR' ? 3500 : 5000));
       const resellValue = Math.floor(basePrice * 0.5);
 
-      if (confirm(`Revendre "${item.name}" pour ${resellValue.toLocaleString()} € en liquide ?`)) {
+      const conf = await showAppConfirm(`Revendre "${item.name}" pour ${resellValue.toLocaleString()} € en liquide ?`, "💰 Vente d'équipement");
+      if (conf) {
         localPlayer.inventory.splice(idx, 1);
         localPlayer.pocketCash += resellValue;
-        alert(`💰 Vente conclue : vous récupérez +${resellValue.toLocaleString()} € en poche.`);
+        await showAppAlert(`Vous récupérez +${resellValue.toLocaleString()} € en poche.`, "💰 Vente Conclue");
         refreshHud();
       }
     }
 
-    function discardItem(idx) {
-      if (!isMyTurnToPlay) return alert("Attendez votre tour pour gérer votre inventaire.");
+    async function discardItem(idx) {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Attendez votre tour pour gérer votre inventaire.", "Tour Inactif");
+        return;
+      }
       const item = localPlayer.inventory[idx];
       if (!item) return;
 
-      if (confirm(`Voulez-vous vraiment jeter définitivement "${item.name}" ?`)) {
+      const conf = await showAppConfirm(`Voulez-vous vraiment jeter définitivement "${item.name}" ?`, "Jeter un objet");
+      if (conf) {
         localPlayer.inventory.splice(idx, 1);
         refreshHud();
       }
@@ -1904,8 +2028,11 @@
       });
     }
 
-    function equipItemFromInventory(idx) {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour !");
+    async function equipItemFromInventory(idx) {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
+        return;
+      }
       const item = localPlayer.inventory[idx];
       if (!item) return;
 
@@ -1924,8 +2051,11 @@
       refreshHud();
     }
 
-    function unequipSlot(slotKey) {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour !");
+    async function unequipSlot(slotKey) {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
+        return;
+      }
       const item = localPlayer.equipped[slotKey];
       if (!item) return;
 
@@ -1936,15 +2066,21 @@
       refreshHud();
     }
 
-    function useItem(idx) {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour !");
+    async function useItem(idx) {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
+        return;
+      }
       const it = localPlayer.inventory[idx];
       if (!it) return;
 
       if (it.eff === 'heal' || it.type === 'CONSUMABLE' || (it.name && it.name.includes('Kebab'))) {
-        if (localPlayer.hearts >= 3) return alert("Votre santé est déjà au maximum (3 Cœurs) !");
+        if (localPlayer.hearts >= 3) {
+          await showAppAlert("Votre santé est déjà au maximum (3 Cœurs) !", "Santé Pleine");
+          return;
+        }
         localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
-        alert("🥙 Kebab consommé : +1 Cœur de Vie restauré !");
+        await showAppAlert("+1 Cœur de Vie restauré !", "🥙 Kebab Consommé");
         localPlayer.inventory.splice(idx, 1);
         refreshHud();
         return;
@@ -1957,7 +2093,7 @@
           localPlayer.inventory.splice(idx, 1);
         } else {
           localPlayer.strayDogActive = true;
-          alert("🐕 Coup de sifflet ! Le Chien Errant vous rejoint (+2 Attaque / +2 Défense).");
+          await showAppAlert("Le Chien Errant vous rejoint (+2 Attaque / +2 Défense jusqu'à la fin du tour).", "🐕 Coup de sifflet");
           localPlayer.inventory.splice(idx, 1);
           refreshHud();
         }
@@ -1965,11 +2101,11 @@
       }
 
       if (it.dur === 'combat') {
-        alert(`Cet objet (${it.name}) s'active automatiquement pendant la phase de combat.`);
+        await showAppAlert(`Cet objet (${it.name}) s'active automatiquement pendant la phase d'affrontement.`, "Objet de Combat");
         return;
       }
 
-      alert(`${it.name} utilisé !`);
+      await showAppAlert(`${it.name} utilisé !`, "Objet Consommé");
       localPlayer.inventory.splice(idx, 1);
       refreshHud();
     }
@@ -2033,9 +2169,11 @@
       }
     }
 
-    // --- MODALE TRANSFERT QG ---
-    function openTransferModal(mode) {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'effectuer des transferts !");
+    async function openTransferModal(mode) {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'effectuer des transferts !", "Tour Inactif");
+        return;
+      }
       currentTransferMode = mode;
       document.getElementById('modalTransfer').classList.remove('hidden');
       updateTransferUI();
@@ -2111,10 +2249,13 @@
       document.getElementById('transferSliderPercentLabel').innerText = `${pct}%`;
     }
 
-    function confirmTransferAction() {
+    async function confirmTransferAction() {
       if (!isMyTurnToPlay) return;
       const amt = parseInt(document.getElementById('transferAmountInput').value) || 0;
-      if (amt <= 0) return alert("Veuillez sélectionner un montant supérieur à 0.");
+      if (amt <= 0) {
+        await showAppAlert("Veuillez sélectionner un montant supérieur à 0.", "Montant Invalide");
+        return;
+      }
 
       if (currentTransferResource === 'cash') {
         if (currentTransferMode === 'deposit') {
@@ -2182,24 +2323,28 @@
       document.getElementById('grossisteTotalPriceDisplay').innerText = `${total.toLocaleString()} €`;
     }
 
-    function confirmGrossistePurchase() {
+    async function confirmGrossistePurchase() {
       if (!isMyTurnToPlay) return;
       const kg = parseInt(document.getElementById('grossisteKgInput').value) || 0;
-      if (kg <= 0) return alert("Veuillez sélectionner au moins 1 kg de drogue.");
+      if (kg <= 0) {
+        await showAppAlert("Veuillez sélectionner au moins 1 kg de drogue.", "Achat Invalide");
+        return;
+      }
 
       const totalCost = kg * grossisteUnitCost;
       if (localPlayer.pocketCash < totalCost) {
-        return alert(`Cash insuffisant ! Vous avez ${localPlayer.pocketCash.toLocaleString()} € en poche (Requis : ${totalCost.toLocaleString()} €).`);
+        await showAppAlert(`Cash insuffisant ! Vous avez ${localPlayer.pocketCash.toLocaleString()} € en poche (Requis : ${totalCost.toLocaleString()} €).`, "Fonds Insuffisants");
+        return;
       }
 
       localPlayer.pocketCash -= totalCost;
       localPlayer.drugs += kg;
-      alert(`🌿 Achat Grossiste validé : +${kg} kg de drogue ajoutés à votre stock (-${totalCost.toLocaleString()} € en Cash).`);
+      await showAppAlert(`+${kg} kg de drogue ajoutés à votre stock (-${totalCost.toLocaleString()} € en Cash).`, "🌿 Achat Grossiste Réussi");
       closeModal('modalGrossiste');
       refreshHud();
     }
 
-    // --- PAIEMENT AVEC OPTION DE CUMUL ---
+    // --- PAIEMENT ---
     function openPaymentChoiceModal(purchaseData) {
       pendingPurchaseData = purchaseData;
       const cost = purchaseData.cost;
@@ -2240,33 +2385,40 @@
       document.getElementById('modalPaymentChoice').classList.remove('hidden');
     }
 
-    function confirmPaymentSource(source) {
+    async function confirmPaymentSource(source) {
       if (!pendingPurchaseData) return;
       const cost = pendingPurchaseData.cost;
 
       if (source === 'pocket') {
-        if (localPlayer.pocketCash < cost) return alert("Fonds en liquide insuffisants en poche !");
+        if (localPlayer.pocketCash < cost) {
+          await showAppAlert("Fonds en liquide insuffisants en poche !", "Paiement Rejeté");
+          return;
+        }
         localPlayer.pocketCash -= cost;
       } else if (source === 'safe') {
-        if (localPlayer.safeCash < cost) return alert("Fonds insuffisants au coffre du QG !");
+        if (localPlayer.safeCash < cost) {
+          await showAppAlert("Fonds insuffisants au coffre du QG !", "Paiement Rejeté");
+          return;
+        }
         localPlayer.safeCash -= cost;
       } else if (source === 'cumul') {
         const partPocket = Math.min(localPlayer.pocketCash, cost);
         const partSafe = cost - partPocket;
         if (localPlayer.pocketCash < partPocket || localPlayer.safeCash < partSafe) {
-          return alert("Fonds insuffisants pour finaliser le cumul !");
+          await showAppAlert("Fonds insuffisants pour finaliser le cumul !", "Paiement Rejeté");
+          return;
         }
         localPlayer.pocketCash -= partPocket;
         localPlayer.safeCash -= partSafe;
       }
 
-      finalizePurchaseExecution(pendingPurchaseData);
+      await finalizePurchaseExecution(pendingPurchaseData);
       closeModal('modalPaymentChoice');
       pendingPurchaseData = null;
       refreshHud();
     }
 
-    function finalizePurchaseExecution(pData) {
+    async function finalizePurchaseExecution(pData) {
       const type = pData.type;
       const data = pData.data;
 
@@ -2284,7 +2436,7 @@
           bonusLabel: bonusTxt,
           desc: `Équipement conférant ${bonusTxt}`
         });
-        alert(`📦 ${data.n} acheté et ajouté au Sac !`);
+        await showAppAlert(`${data.n} acheté et ajouté au Sac !`, "Achat Confirmé");
       } else if (type === 'gb') {
         const bonusAtk = data.atk || (data.lvl === 2 ? 2 : 1);
         localPlayer.musclesOnPerson.push({
@@ -2296,7 +2448,7 @@
           bonusLabel: `+${bonusAtk} Attaque`,
           desc: `Homme de main conférant +${bonusAtk} en Attaque`
         });
-        alert("💪 Gros Bras enrôlé ! Vos points d'Assaut ont augmenté.");
+        await showAppAlert("Gros Bras enrôlé ! Vos points d'Assaut ont augmenté.", "Recrutement Confirmé");
       } else if (type === 'pr') {
         localPlayer.prostituteInTransit = {
           id: 'pr_' + Date.now(),
@@ -2306,7 +2458,7 @@
           revenue: data.rev || 1000,
           desc: `Génère +${data.rev || 1000} € par manche au QG`
         };
-        alert("💃 Prostituée avec vous en transit. Cliquez sur le bouton QG de la boîte rose pour sécuriser sa rente.");
+        await showAppAlert("Prostituée avec vous en transit. Cliquez sur le bouton QG de la boîte rose pour sécuriser sa rente.", "Recrutement Confirmé");
       }
     }
 
@@ -2333,8 +2485,11 @@
       return localPlayer.inventory.filter(item => item && item.dur === 'combat');
     }
 
-    function openCombatModal() {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'attaquer !");
+    async function openCombatModal() {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'attaquer !", "Tour Inactif");
+        return;
+      }
       document.getElementById('combatTargetSelectionBox').classList.remove('hidden');
       document.getElementById('btnInitiateFightAction').classList.remove('hidden');
       document.getElementById('combatAdversaryTag').classList.add('hidden');
@@ -2346,11 +2501,14 @@
       document.getElementById('modalCombat').classList.remove('hidden');
     }
 
-    function initiateCombatEngagement() {
+    async function initiateCombatEngagement() {
       const sel = document.getElementById('combatTargetSelect');
       const targetToken = sel.value;
       const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
-      if (!target) return alert("Sélectionnez un Caïd adverse.");
+      if (!target) {
+        await showAppAlert("Sélectionnez un Caïd adverse.", "Cible Requise");
+        return;
+      }
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
 
@@ -2371,10 +2529,11 @@
       }
     }
 
-    function openCombatItemSelectorModal() {
+    async function openCombatItemSelectorModal() {
       const eligibleItems = getCombatEligibleItems();
       if (!eligibleItems.length) {
-        return alert("Aucun objet de combat utilisable dans votre sac !");
+        await showAppAlert("Aucun objet de combat utilisable dans votre sac !", "Sac Vide");
+        return;
       }
 
       const container = document.getElementById('combatItemsChecklist');
@@ -2450,8 +2609,11 @@
       document.getElementById('modalCombatItemSelector').classList.remove('hidden');
     }
 
-    function toggleCombatReadyState() {
-      if (!currentDuelInfo) return alert("Aucun affrontement en cours.");
+    async function toggleCombatReadyState() {
+      if (!currentDuelInfo) {
+        await showAppAlert("Aucun affrontement en cours.", "Erreur Combat");
+        return;
+      }
 
       isCombatReady = !isCombatReady;
       updateCombatReadyButtonUI();
@@ -2483,7 +2645,10 @@
 
     // --- SCANNER QR CODE ---
     async function openQrScannerModal() {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
+        return;
+      }
       document.getElementById('modalQrScanner').classList.remove('hidden');
       const statusEl = document.getElementById('qrScannerStatus');
       statusEl.innerText = "Initialisation de la caméra...";
@@ -2547,7 +2712,7 @@
             closeQrScannerModal();
           })
           .catch(() => {
-            alert("Aucun QR Code valide détecté sur cette photo.");
+            showAppAlert("Aucun QR Code valide détecté sur cette photo.", "Erreur Scan");
           });
       }
     }
@@ -2567,8 +2732,11 @@
       document.getElementById('modalLootDiscovery').classList.remove('hidden');
     }
 
-    function processQrPayload(payload) {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'effectuer des actions !");
+    async function processQrPayload(payload) {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'effectuer des actions !", "Tour Inactif");
+        return;
+      }
 
       closeQrScannerModal();
 
@@ -2585,7 +2753,8 @@
       }
 
       if (!data || typeof data !== 'object') {
-        return alert("QR Code invalide ou format non reconnu.");
+        await showAppAlert("QR Code invalide ou format non reconnu.", "Erreur Scan");
+        return;
       }
 
       const type = data.t;
@@ -2603,9 +2772,9 @@
             `+${cashVal.toLocaleString()} € en liquide à ajouter à vos poches`,
             '<i class="ph-bold ph-coins text-emerald-300"></i>',
             "Récupérer",
-            () => {
+            async () => {
               localPlayer.pocketCash += cashVal;
-              alert(`💰 +${cashVal.toLocaleString()} € récupérés et mis en poche !`);
+              await showAppAlert(`+${cashVal.toLocaleString()} € récupérés et mis en poche !`, "💰 Butin Cash");
               refreshHud();
             }
           );
@@ -2619,9 +2788,9 @@
             `+${drugVal} kg de drogue à ajouter à votre stock`,
             '<i class="ph-bold ph-plant text-emerald-400"></i>',
             "Récupérer",
-            () => {
+            async () => {
               localPlayer.drugs += drugVal;
-              alert(`🌿 +${drugVal} kg de drogue récupérés et ajoutés au stock !`);
+              await showAppAlert(`+${drugVal} kg de drogue récupérés et ajoutés au stock !`, "🌿 Butin Drogue");
               refreshHud();
             }
           );
@@ -2633,7 +2802,7 @@
           data.desc || "Objet à conserver dans votre inventaire",
           '<i class="ph-bold ph-backpack text-ghetto-gold"></i>',
           "Ajouter au sac",
-          () => {
+          async () => {
             localPlayer.inventory.push({
               id: 'obj_' + Date.now(),
               type: 'ITEM_CARD',
@@ -2643,7 +2812,7 @@
               dur: data.dur || 'instant',
               desc: data.desc || "Objet spécial de Caïd"
             });
-            alert(`🎒 ${data.n} a été rangé dans votre Sac !`);
+            await showAppAlert(`${data.n} a été rangé dans votre Sac !`, "🎒 Objet Récupéré");
             refreshHud();
           }
         );
@@ -2655,23 +2824,26 @@
         let itemName = data.n || (type === 'gb' ? `Gros Bras L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
 
         if (type === 'gb' && localPlayer.musclesOnPerson.length >= 3) {
-          return alert("Action impossible : vous avez déjà 3 Gros Bras déployés sur le terrain !");
+          await showAppAlert("Vous avez déjà 3 Gros Bras déployés sur le terrain !", "Limite Atteinte");
+          return;
         }
         if (type === 'pr' && localPlayer.prostituteInTransit) {
-          return alert("Action impossible : vous avez déjà une prostituée en transit sur vous ! Déposez-la au QG.");
+          await showAppAlert("Vous avez déjà une prostituée en transit sur vous ! Déposez-la d'abord au QG.", "Limite Atteinte");
+          return;
         }
 
         if (type === 'pr' && localPlayer.caidId === 'caid_4' && !localPlayer.freeProstituteClaimed && data.lvl === 1) {
           localPlayer.freeProstituteClaimed = true;
-          finalizePurchaseExecution({ type, data, cost: 0, name: itemName });
-          alert("💄 Bonus Mary J Blunt : 1ère Prostituée L1 recrutée GRATUITEMENT !");
+          await finalizePurchaseExecution({ type, data, cost: 0, name: itemName });
+          await showAppAlert("1ère Prostituée L1 recrutée GRATUITEMENT !", "💄 Mary J Blunt");
           refreshHud();
           return;
         }
 
         const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
         if (totalFunds < cost) {
-          return alert(`❌ ACHAT IMPOSSIBLE : Fonds totaux insuffisants !\nCoût de l'article : ${cost.toLocaleString()} €\nTotal disponible (Poche + Coffre QG) : ${totalFunds.toLocaleString()} €.`);
+          await showAppAlert(`Fonds totaux insuffisants !\nCoût de l'article : ${cost.toLocaleString()} €\nTotal disponible (Poche + Coffre QG) : ${totalFunds.toLocaleString()} €.`, "Achat Impossible");
+          return;
         }
 
         openPaymentChoiceModal({ type, data, cost, name: itemName });
@@ -2679,10 +2851,13 @@
       }
 
       if (type === 'yen') {
-        if (localPlayer.drugs < data.d) return alert(`Drogue insuffisante ! Le Yencli exige ${data.d} kg.`);
+        if (localPlayer.drugs < data.d) {
+          await showAppAlert(`Drogue insuffisante ! Le Yencli exige ${data.d} kg.`, "Transaction Refusée");
+          return;
+        }
         localPlayer.drugs -= data.d;
         localPlayer.pocketCash += data.c;
-        alert(`🤝 Deal réussi : -${data.d} kg de drogue / +${data.c.toLocaleString()} € en poche !`);
+        await showAppAlert(`Deal réussi : -${data.d} kg de drogue / +${data.c.toLocaleString()} € en poche !`, "🤝 Vente Yencli");
         refreshHud();
         return;
       }
@@ -2691,11 +2866,12 @@
         let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
         let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
         if (teamAtk < data.req || members < data.m) {
-          return alert(`💥 Échec Braquage ! Requis : ${data.req} Atk et ${data.m} membres d'équipe.`);
+          await showAppAlert(`Requis : ${data.req} Atk et ${data.m} membres d'équipe.`, "💥 Échec Braquage");
+          return;
         }
         localPlayer.pocketCash += data.c;
         localPlayer.drugs += (data.d || 0);
-        alert(`🏆 Braquage Réussi : +${data.c.toLocaleString()} €${data.d ? ` et +${data.d} kg` : ''} !`);
+        await showAppAlert(`Butin encaissé : +${data.c.toLocaleString()} €${data.d ? ` et +${data.d} kg` : ''} !`, "🏆 Braquage Réussi");
         refreshHud();
         return;
       }
@@ -2703,18 +2879,24 @@
       refreshHud();
     }
 
-    function openAllianceModal() {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
+    async function openAllianceModal() {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
+        return;
+      }
       syncMultiplayerTargets();
       document.getElementById('modalAlliance').classList.remove('hidden');
     }
 
-    function confirmAlliance() {
-      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
+    async function confirmAlliance() {
+      if (!isMyTurnToPlay) return;
       const sel = document.getElementById('allianceTargetSelect');
       const targetToken = sel.value;
       const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
-      if (!target) return alert("Choisissez un Caïd connecté.");
+      if (!target) {
+        await showAppAlert("Choisissez un Caïd connecté dans la liste.", "Alliance");
+        return;
+      }
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
 
@@ -2726,8 +2908,8 @@
           musclesCount: localPlayer.musclesOnPerson.length
         });
       }
-      alert(`Demande d'alliance envoyée à ${target.caidName || 'votre rival'}.`);
       closeModal('modalAlliance');
+      await showAppAlert(`Demande d'alliance envoyée à ${target.caidName || 'votre rival'}. En attente de sa réponse...`, "Demande Envoyée");
     }
 
     function endCurrentPlayerTurn() {
