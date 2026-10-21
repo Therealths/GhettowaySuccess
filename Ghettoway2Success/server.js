@@ -122,7 +122,9 @@ io.on('connection', (socket) => {
       drugs: 5,
       atk: 1,
       def: 0,
-      musclesCount: 0
+      musclesCount: 0,
+      hasProstituteInTransit: false,
+      hasStrayDog: false
     };
 
     rooms[roomId].players.push(hostPlayer);
@@ -175,7 +177,9 @@ io.on('connection', (socket) => {
       drugs: 5,
       atk: 1,
       def: 0,
-      musclesCount: 0
+      musclesCount: 0,
+      hasProstituteInTransit: false,
+      hasStrayDog: false
     };
 
     room.players.push(joiner);
@@ -197,7 +201,7 @@ io.on('connection', (socket) => {
 
     const alreadyTaken = room.players.some(p => p.playerToken !== playerToken && p.caidId === caidId);
     if (alreadyTaken) {
-      return socket.emit('error_msg', `Le Caïd ${caidName} est déjà pris par un autre joueur.`);
+      return socket.emit('error_msg', `Le Caïd ${caidName} a déjà été sélectionné par un autre joueur.`);
     }
 
     const p = room.players.find(x => x.socketId === socket.id || x.playerToken === playerToken);
@@ -253,6 +257,7 @@ io.on('connection', (socket) => {
 
     room.currentTurnAlliedTokens = [];
     room.strayDogHolderToken = null;
+    room.players.forEach(p => p.hasStrayDog = false);
 
     room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
 
@@ -267,8 +272,14 @@ io.on('connection', (socket) => {
     }
 
     broadcastTurnState(socket.roomId);
+    io.to(socket.roomId).emit('update_room_players', {
+      players: room.players,
+      isReady: true,
+      maxPlayers: room.maxPlayers
+    });
   });
 
+  // Gestion du Chien Errant : le dernier qui siffle le vole au propriétaire précédent
   socket.on('claim_stray_dog', ({ senderCaid, playerToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -277,6 +288,7 @@ io.on('connection', (socket) => {
     if (prevToken && prevToken !== playerToken) {
       const prevPlayer = room.players.find(p => p.playerToken === prevToken);
       if (prevPlayer) {
+        prevPlayer.hasStrayDog = false;
         io.to(prevPlayer.socketId).emit('lost_stray_dog', {
           thiefCaid: senderCaid || "Un rival"
         });
@@ -284,9 +296,19 @@ io.on('connection', (socket) => {
     }
 
     room.strayDogHolderToken = playerToken;
+    const curPlayer = room.players.find(p => p.playerToken === playerToken);
+    if (curPlayer) curPlayer.hasStrayDog = true;
+
     socket.emit('stray_dog_granted');
+
+    io.to(socket.roomId).emit('update_room_players', {
+      players: room.players,
+      isReady: true,
+      maxPlayers: room.maxPlayers
+    });
   });
 
+  // Combat interactif en duel
   socket.on('start_combat_engagement', ({ targetSocketId, targetPlayerToken, attackerCaid }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -311,13 +333,19 @@ io.on('connection', (socket) => {
     socket.emit('combat_duel_opened', {
       role: 'attacker',
       opponentCaid: room.activeCombat.targetCaid,
-      opponentSocketId: targetPlayer.socketId
+      opponentSocketId: targetPlayer.socketId,
+      targetMusclesCount: targetPlayer.musclesCount || 0,
+      targetHasProstitute: !!targetPlayer.hasProstituteInTransit,
+      targetHasStrayDog: !!targetPlayer.hasStrayDog
     });
 
     io.to(targetPlayer.socketId).emit('combat_duel_opened', {
       role: 'defender',
       opponentCaid: room.activeCombat.attackerCaid,
-      opponentSocketId: socket.id
+      opponentSocketId: socket.id,
+      targetMusclesCount: attackerPlayer ? (attackerPlayer.musclesCount || 0) : 0,
+      targetHasProstitute: attackerPlayer ? !!attackerPlayer.hasProstituteInTransit : false,
+      targetHasStrayDog: attackerPlayer ? !!attackerPlayer.hasStrayDog : false
     });
   });
 
@@ -397,7 +425,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Déclenchement de capacité spéciale ciblée
   socket.on('apply_special_to_target', ({ targetSocketId, targetPlayerToken, effectType, senderCaid }) => {
     const room = rooms[socket.roomId];
     let destSocketId = targetSocketId;
