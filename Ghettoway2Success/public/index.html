@@ -162,7 +162,7 @@
 <body>
   <div id="app-container">
 
-    <!-- PAGE 1 : ACCUEIL -->
+    <!-- PAGE 1 : ACCUEIL [1] -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full flex-shrink-0">
         <button onclick="navTo('page-2')" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:brightness-110 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl shadow-yellow-500/20 active:scale-95 transition">
@@ -174,7 +174,7 @@
       </div>
     </div>
 
-    <!-- PAGE 2 : CRÉER UN SALON -->
+    <!-- PAGE 2 : CRÉER UN SALON [1] -->
     <div id="page-2" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-5">
@@ -209,7 +209,7 @@
       </div>
     </div>
 
-    <!-- PAGE 3 : REJOINDRE -->
+    <!-- PAGE 3 : REJOINDRE [1] -->
     <div id="page-3" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center gap-3 pt-1 mb-4">
@@ -233,7 +233,7 @@
       </div>
     </div>
 
-    <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
+    <!-- PAGE 4 : CARROUSEL DE TIRAGE [1] -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center flex-col justify-between h-full">
       <div class="flex items-center justify-between w-full pt-1 flex-shrink-0 mb-1">
         <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition" title="Quitter la partie">
@@ -287,7 +287,7 @@
       </div>
     </div>
 
-    <!-- PAGE LOBBY : SALLE D'ATTENTE -->
+    <!-- PAGE LOBBY : SALLE D'ATTENTE [1] -->
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div class="flex-shrink-0">
         <div class="flex items-center justify-between pt-1 mb-3">
@@ -323,7 +323,7 @@
       </div>
     </div>
 
-    <!-- PAGE 5 : FLASH RADIO -->
+    <!-- PAGE 5 : FLASH RADIO [1] -->
     <div id="page-5" class="screen-view p-5 justify-between bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
       <div class="pt-1 text-center flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
@@ -357,7 +357,7 @@
       </div>
     </div>
 
-    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) -->
+    <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) [1] -->
     <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between relative">
 
       <!-- CALQUE GRISÉ DE BLOCAGE TOUR PAR TOUR -->
@@ -383,7 +383,7 @@
 
       <div class="flex flex-col h-full justify-between space-y-2">
 
-        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE -->
+        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE [1] -->
         <div id="caidTopBannerContainer" class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition z-10 shadow-md hover:bg-black/40" title="Retour au Flash Radio">
@@ -391,7 +391,7 @@
           </button>
         </div>
 
-        <!-- STATS -->
+        <!-- STATS [1] -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10">
             <span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️</span>
@@ -410,7 +410,7 @@
           </div>
         </div>
 
-        <!-- RECRUES (GROS BRAS & PROSTITUEE) -->
+        <!-- RECRUES (GROS BRAS & PROSTITUEE) [1] -->
         <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
           <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 shadow-lg flex items-center justify-between gap-1">
             <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl flex-shrink-0"><i class="ph-bold ph-barbell"></i></div>
@@ -431,7 +431,7 @@
           </div>
         </div>
 
-        <!-- FLASH RADIO MINI -->
+        <!-- FLASH RADIO MINI [1] -->
         <div class="w-full py-1.5 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 shadow-sm flex-shrink-0">
           <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
           <div class="overflow-hidden flex-1 min-w-0 flex flex-col justify-center">
@@ -446,7 +446,7 @@
           </div>
         </div>
 
-        <!-- ONGLETS -->
+        <!-- ONGLETS [1] -->
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex items-end gap-1.5 px-1 pt-1 flex-shrink-0">
             <button id="mainTabInteractions" onclick="switchMainCaidTab('interactions')" class="flex-1 py-2 px-2 rounded-t-xl font-black text-xs uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all text-amber-300 bg-[#141622] border-t-2 border-amber-400 shadow-lg">
@@ -462,7 +462,7 @@
 
           <div id="mainTabsContentContainer" class="flex-1 px-1 py-2 bg-gradient-to-b from-[#141622] via-[#0d0f17] to-[#090a10] border-t-2 border-b-2 border-x-0 border-amber-400 shadow-2xl flex flex-col justify-center overflow-hidden">
 
-            <!-- VOLET 1 : ACTIONS -->
+            <!-- VOLET 1 : ACTIONS [1] -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
               <button id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
                 <div class="flex items-start gap-2 flex-1 min-w-0">
@@ -484,9 +484,8 @@
               </div>
             </div>
 
-            <!-- VOLET 2 : ÉQUIPEMENT -->
+            <!-- VOLET 2 : ÉQUIPEMENT [1] -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
-              <!-- Arme -->
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Arme Principale</span>
@@ -498,7 +497,6 @@
                 </div>
               </div>
 
-              <!-- Protection -->
               <div class="p-3 bg-black/50 rounded-2xl border border-sky-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-sky-400 font-bold block mb-0.5">Protection / Gilet</span>
@@ -510,7 +508,6 @@
                 </div>
               </div>
 
-              <!-- Véhicule -->
               <div class="p-3 bg-black/50 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex-1 min-w-0">
                   <span class="text-[9px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-0.5">Véhicule Actif</span>
@@ -523,7 +520,7 @@
               </div>
             </div>
 
-            <!-- VOLET 3 : INVENTAIRE / SAC -->
+            <!-- VOLET 3 : INVENTAIRE / SAC [1] -->
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono shadow-md flex-shrink-0">
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
@@ -548,6 +545,53 @@
         <div class="flex-shrink-0 pt-1 pb-1 border-t border-white/10">
           <button id="btnEndTurn" onclick="endCurrentPlayerTurn()" class="w-full py-3 bg-gradient-to-r from-[#161822] via-[#24171d] to-[#450a0a] border border-rose-950/60 text-white font-bold tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition shadow-lg">
             <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé (Dé Patrouille)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALE CIBLAGE DE CAPACITÉ SPÉCIALE -->
+    <div id="modalTargetSpecial" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
+      <div class="glass-panel p-5 rounded-3xl space-y-4 border-purple-500/40 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <h3 class="text-sm font-black text-purple-300 uppercase flex items-center gap-1.5">
+            <i class="ph-bold ph-sparkle text-base"></i> Déclencher l'Attaque Spéciale
+          </h3>
+          <button onclick="closeModal('modalTargetSpecial')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
+        </div>
+        <div>
+          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
+          <select id="specialTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
+        </div>
+        <p id="specialTargetDesc" class="text-xs text-slate-300 italic"></p>
+        <button onclick="executeTargetedSpecialPower()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-purple-500/20">
+          Lancer l'Effet sur la Cible
+        </button>
+        <button onclick="closeModal('modalTargetSpecial')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
+      </div>
+    </div>
+
+    <!-- MODALE ALLIANCE REÇUE [1] -->
+    <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
+      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 shadow-2xl max-w-sm mx-auto w-full text-center">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-300 mx-auto flex items-center justify-center text-2xl border border-purple-400/40">
+          <i class="ph-bold ph-handshake"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white uppercase tracking-wider">Demande d'Alliance</h3>
+          <p class="text-xs text-slate-300 mt-1">
+            Le Caïd <strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose une alliance pour ce tour.
+          </p>
+          <span class="text-[10px] text-slate-400 font-mono block mt-2">
+            Si vous acceptez, vos deux interfaces seront déverrouillées pour jouer simultanément vos braquages !
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button onclick="respondToAllianceRequest(true)" class="py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-xl text-xs shadow-lg active:scale-95 transition">
+            Accepter
+          </button>
+          <button onclick="respondToAllianceRequest(false)" class="py-3 glass-panel text-slate-400 font-bold uppercase rounded-xl text-xs hover:text-white transition">
+            Refuser
           </button>
         </div>
       </div>
@@ -726,36 +770,36 @@
       </div>
     </div>
 
-    <!-- MODALE TRANSFERT QG -->
+    <!-- MODALE TRANSFERT QG [1] -->
     <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
           <h3 id="transferModalTitle" class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-vault text-base"></i> Coffre du QG
+            <i class="ph-bold ph-vault text-base"></i> Coffre du QG [1]
           </h3>
           <button onclick="closeModal('modalTransfer')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
         <div class="grid grid-cols-2 gap-1.5 p-1 bg-black/60 rounded-2xl font-mono text-xs">
           <button id="transferTabCash" onclick="switchTransferResource('cash')" class="py-2 rounded-xl font-bold bg-yellow-400 text-black flex items-center justify-center gap-1">
-            <i class="ph-bold ph-coins"></i> Argent (€)
+            <i class="ph-bold ph-coins"></i> Argent (€) [1]
           </button>
           <button id="transferTabDrugs" onclick="switchTransferResource('drugs')" class="py-2 rounded-xl font-bold text-slate-400 flex items-center justify-center gap-1">
-            <i class="ph-bold ph-plant"></i> Drogue (kg)
+            <i class="ph-bold ph-plant"></i> Drogue (kg) [1]
           </button>
         </div>
         <div class="p-3 bg-black/40 rounded-2xl border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
           <div class="border-r border-white/10 pr-2">
-            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous</span>
-            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 €</div>
+            <span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous [1]</span>
+            <div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 € [1]</div>
           </div>
           <div class="pl-2">
-            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre</span>
-            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 €</div>
+            <span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre [1]</span>
+            <div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 € [1]</div>
           </div>
         </div>
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs font-mono">
-            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer :</span>
+            <span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité à transférer : [1]</span>
             <span id="transferMaxAvailableLabel" class="text-[10px] text-ghetto-gold font-bold">Max dispo : 5 000 €</span>
           </div>
           <div class="relative flex items-center gap-2">
@@ -772,45 +816,22 @@
           </div>
           <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
             <button onclick="setTransferPercentage(0)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">0 %</button>
-            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 %</button>
-            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout)</button>
+            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-slate-300 font-bold transition">50 % [1]</button>
+            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel hover:bg-white/10 rounded-xl text-ghetto-gold font-bold transition">100 % (Tout) [1]</button>
           </div>
         </div>
         <button id="transferConfirmBtn" onclick="confirmTransferAction()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-yellow-500/20">
-          Confirmer le Transfert
+          Confirmer le Transfert [1]
         </button>
       </div>
     </div>
 
-    <!-- MODALE ALLIANCE -->
-    <div id="modalAlliance" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
-      <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 class="text-sm font-black text-purple-400 uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-handshake text-base"></i> Sceller une Alliance
-          </h3>
-          <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
-        </div>
-        <p class="text-xs text-slate-300">
-          L'allié recevra une demande. S'il accepte, ses forces s'additionneront aux vôtres et son écran se débloquera pour jouer simultanément avec vous !
-        </p>
-        <div>
-          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd :</label>
-          <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
-        </div>
-        <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase tracking-wider rounded-2xl text-xs active:scale-95 transition shadow-lg shadow-purple-500/20">
-          Envoyer la Demande
-        </button>
-        <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
-      </div>
-    </div>
-
-    <!-- MODALE SCANNER -->
+    <!-- MODALE SCANNER [1] -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-5 flex flex-col justify-between">
       <div class="pt-1">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
           <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-qr-code text-base"></i> Scanner Tactique
+            <i class="ph-bold ph-qr-code text-base"></i> Scanner Tactique [1]
           </h3>
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
@@ -833,19 +854,19 @@
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (Req: 3Atk/2M)</button>
         </div>
       </div>
-      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer</button>
+      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase mb-1">Fermer [1]</button>
     </div>
 
-    <!-- MODALE PATROUILLE -->
+    <!-- MODALE PATROUILLE [1] -->
     <div id="modalPatrolDice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
-        <h3 class="text-base font-black text-white uppercase">Patrouille de Police</h3>
-        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">?</div>
+        <h3 class="text-base font-black text-white uppercase">Patrouille de Police [1]</h3>
+        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">? [1]</div>
         <div>
-          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule...</span>
+          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule... [1]</span>
           <div id="patrolDiceDirectionLabel" class="text-sm font-black font-mono text-ghetto-gold uppercase mt-1"></div>
         </div>
-        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr;</button>
+        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl hover:text-white">Passer &rarr; [1]</button>
       </div>
     </div>
 
@@ -951,9 +972,10 @@
         }
       });
 
-      socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio }) => {
+      socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, players }) => {
         localStorage.setItem('g2s_room_id', roomId);
         localPlayer = Object.assign(localPlayer, player);
+        if (players) updateRivalsList(players);
 
         if (gameStarted) {
           currentSession.round = round || 1;
@@ -1072,7 +1094,8 @@
         startRoundPhase1();
       });
 
-      socket.on('new_round_started', ({ round, radio }) => {
+      socket.on('new_round_started', ({ round, radio, players }) => {
+        if (players) updateRivalsList(players);
         currentSession.round = round;
         currentSession.currentRadioEvent = radio;
         localPlayer.specialUsedThisTurn = false;
@@ -1295,7 +1318,7 @@
         }
         return connectedRivals.map(r => {
           const displayName = r.caidName || r.name || "Caïd Adverse";
-          return `<option value="${r.socketId}">${displayName}</option>`;
+          return `<option value="${r.playerToken}" data-socket="${r.socketId}">${displayName}</option>`;
         }).join('');
       };
 
@@ -1584,21 +1607,23 @@
       refreshHud();
     }
 
+    // --- CAPACITÉ SPÉCIALE CIBLÉE OU PERSONNELLE ---
     function openSpecialAbilityPrompt() {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) {
+        return alert("Ce n'est pas votre tour de jouer !");
+      }
       if (localPlayer.specialUsedThisTurn) {
-        alert("Capacité spéciale déjà déclenchée durant ce tour !");
-        return;
+        return alert("Capacité spéciale déjà déclenchée durant ce tour !");
       }
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
       const targetedSkills = ['caid_2', 'caid_4', 'caid_6', 'caid_7', 'caid_8'];
 
       if (targetedSkills.includes(caid.id)) {
-        if (!connectedRivals.length) {
+        syncMultiplayerTargets();
+        if (!connectedRivals || connectedRivals.length === 0) {
           return alert("Aucun rival connecté à cibler pour votre capacité spéciale !");
         }
-        syncMultiplayerTargets();
         document.getElementById('specialTargetDesc').innerText = `${caid.skillName} : ${caid.skillDesc}`;
         document.getElementById('modalTargetSpecial').classList.remove('hidden');
       } else {
@@ -1619,8 +1644,8 @@
 
     function executeTargetedSpecialPower() {
       const sel = document.getElementById('specialTargetSelect');
-      const targetSocketId = sel.value;
-      const target = connectedRivals.find(r => r.socketId === targetSocketId);
+      const targetToken = sel.value;
+      const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
       if (!target) return alert("Veuillez sélectionner un Caïd cible.");
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
@@ -1636,6 +1661,7 @@
       if (socket) {
         socket.emit('apply_special_to_target', {
           targetSocketId: target.socketId,
+          targetPlayerToken: target.playerToken,
           effectType: effect,
           senderCaid: caid.name
         });
@@ -1653,7 +1679,7 @@
     }
 
     function triggerPoliceInspection() {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
       const vehKey = localPlayer.equipped.vehicle ? (localPlayer.equipped.vehicle.key || 'veh') : 'none';
       const hasVehicle = vehKey !== 'none';
       const promptMsg = hasVehicle
@@ -1879,7 +1905,7 @@
     }
 
     function equipItemFromInventory(idx) {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour !");
       const item = localPlayer.inventory[idx];
       if (!item) return;
 
@@ -1899,7 +1925,7 @@
     }
 
     function unequipSlot(slotKey) {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour !");
       const item = localPlayer.equipped[slotKey];
       if (!item) return;
 
@@ -1911,7 +1937,7 @@
     }
 
     function useItem(idx) {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour !");
       const it = localPlayer.inventory[idx];
       if (!it) return;
 
@@ -2009,7 +2035,7 @@
 
     // --- MODALE TRANSFERT QG ---
     function openTransferModal(mode) {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'effectuer des transferts !");
       currentTransferMode = mode;
       document.getElementById('modalTransfer').classList.remove('hidden');
       updateTransferUI();
@@ -2308,7 +2334,7 @@
     }
 
     function openCombatModal() {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'attaquer !");
       document.getElementById('combatTargetSelectionBox').classList.remove('hidden');
       document.getElementById('btnInitiateFightAction').classList.remove('hidden');
       document.getElementById('combatAdversaryTag').classList.add('hidden');
@@ -2322,7 +2348,8 @@
 
     function initiateCombatEngagement() {
       const sel = document.getElementById('combatTargetSelect');
-      const target = connectedRivals.find(r => r.socketId === sel.value);
+      const targetToken = sel.value;
+      const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
       if (!target) return alert("Sélectionnez un Caïd adverse.");
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
@@ -2330,6 +2357,7 @@
       if (socket) {
         socket.emit('start_combat_engagement', {
           targetSocketId: target.socketId,
+          targetPlayerToken: target.playerToken,
           attackerCaid: caid.name
         });
       }
@@ -2455,7 +2483,7 @@
 
     // --- SCANNER QR CODE ---
     async function openQrScannerModal() {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
       document.getElementById('modalQrScanner').classList.remove('hidden');
       const statusEl = document.getElementById('qrScannerStatus');
       statusEl.innerText = "Initialisation de la caméra...";
@@ -2676,15 +2704,16 @@
     }
 
     function openAllianceModal() {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
       syncMultiplayerTargets();
       document.getElementById('modalAlliance').classList.remove('hidden');
     }
 
     function confirmAlliance() {
-      if (!isMyTurnToPlay) return;
+      if (!isMyTurnToPlay) return alert("Ce n'est pas votre tour d'agir !");
       const sel = document.getElementById('allianceTargetSelect');
-      const target = connectedRivals.find(r => r.socketId === sel.value);
+      const targetToken = sel.value;
+      const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
       if (!target) return alert("Choisissez un Caïd connecté.");
 
       const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
@@ -2692,6 +2721,7 @@
       if (socket) {
         socket.emit('propose_alliance', {
           targetSocketId: target.socketId,
+          targetPlayerToken: target.playerToken,
           senderName: caid.name,
           musclesCount: localPlayer.musclesOnPerson.length
         });
