@@ -553,7 +553,7 @@
       </div>
     </div>
 
-    <!-- MODALE COMBAT INTERACTIF (AVEC BOUTON OBJETS & PRÊT AU COMBAT) -->
+    <!-- MODALE COMBAT INTERACTIF EN DUEL -->
     <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -563,7 +563,6 @@
           <button onclick="abortCombat()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
 
-        <!-- Cible adverse masquée de toute statistique -->
         <div id="combatTargetSelectionBox">
           <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
           <select id="combatTargetSelect" class="w-full glass-input text-white p-2.5 rounded-xl text-xs font-bold outline-none"></select>
@@ -573,12 +572,10 @@
           <span>Adversaire : </span><strong id="combatOpponentNameDisplay" class="text-ghetto-gold uppercase">...</strong>
         </div>
 
-        <!-- Journal des objets joués en direct -->
         <div class="p-2.5 rounded-xl bg-black/50 border border-white/10 min-h-[60px] max-h-24 overflow-y-auto text-[11px] font-mono space-y-1" id="combatLiveLog">
-          <p class="text-slate-400 italic">En attente des actions de combat...</p>
+          <p class="text-slate-400 italic">Choisissez une cible pour débuter le combat...</p>
         </div>
 
-        <!-- Bouton pour jouer un ou plusieurs objets -->
         <div class="grid grid-cols-2 gap-2">
           <button onclick="openCombatItemSelectorModal()" class="py-3 glass-panel border border-amber-500/40 hover:border-amber-400 text-amber-300 font-black uppercase tracking-wider rounded-xl text-xs active:scale-95 transition flex items-center justify-center gap-1.5">
             <i class="ph-bold ph-backpack text-sm"></i>
@@ -921,7 +918,6 @@
     let pendingPurchaseData = null;
     let grossisteUnitCost = 1000;
 
-    // Modificateurs de combat dynamiques
     let combatModifiers = {
       flatAtkBonus: 0,
       doubleMuscles: false,
@@ -931,6 +927,16 @@
 
     let currentDuelInfo = null;
     let isCombatReady = false;
+
+    function updateRivalsList(players) {
+      if (!players || !Array.isArray(players)) return;
+      connectedRivals = players.filter(p => p.socketId !== socket.id && p.playerToken !== myPlayerToken);
+      if (players.length > 1 && connectedRivals.length === 0) {
+        connectedRivals = players.filter(p => p.socketId !== socket.id);
+      }
+      takenCaidsInGame = players.filter(p => p.caidId).map(p => p.caidId);
+      syncMultiplayerTargets();
+    }
 
     const socket = typeof io !== 'undefined' ? io() : null;
 
@@ -1004,8 +1010,7 @@
       });
 
       socket.on('update_room_players', ({ players, isReady, maxPlayers }) => {
-        connectedRivals = players.filter(p => p.playerToken !== myPlayerToken);
-        takenCaidsInGame = players.filter(p => p.caidId).map(p => p.caidId);
+        updateRivalsList(players);
 
         const countEl = document.getElementById('lobbyPlayerCount');
         if (countEl) countEl.innerText = `${players.length} / ${maxPlayers} Joueurs connectés`;
@@ -1058,11 +1063,10 @@
         if (document.getElementById('page-4').classList.contains('active') && !localPlayer.caidId) {
           initCarouselDOM();
         }
-
-        syncMultiplayerTargets();
       });
 
-      socket.on('game_started', ({ round, radio }) => {
+      socket.on('game_started', ({ round, radio, players }) => {
+        updateRivalsList(players);
         currentSession.round = round;
         currentSession.currentRadioEvent = radio;
         startRoundPhase1();
@@ -1098,7 +1102,6 @@
         }
       });
 
-      // --- DUEL EN TEMPS RÉEL VIA SOCKET ---
       socket.on('combat_duel_opened', ({ role, opponentCaid, opponentSocketId }) => {
         currentDuelInfo = { role, opponentCaid, opponentSocketId };
         resetCombatModifiers();
@@ -1172,7 +1175,6 @@
         alert("Le combat a été annulé.");
       });
 
-      // --- VOL DU CHIEN ERRANT ---
       socket.on('lost_stray_dog', ({ thiefCaid }) => {
         localPlayer.strayDogActive = false;
         alert(`🐕 ATTENTION : ${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant ! Vous perdez son bonus.`);
@@ -1235,8 +1237,9 @@
       });
 
       socket.on('player_updated', (updatedPlayer) => {
-        const idx = connectedRivals.findIndex(p => p.playerToken === updatedPlayer.playerToken);
+        const idx = connectedRivals.findIndex(p => p.playerToken === updatedPlayer.playerToken || p.socketId === updatedPlayer.socketId);
         if (idx >= 0) connectedRivals[idx] = updatedPlayer;
+        else connectedRivals.push(updatedPlayer);
         syncMultiplayerTargets();
       });
 
@@ -1285,18 +1288,21 @@
       const combatSel = document.getElementById('combatTargetSelect');
       const allySel = document.getElementById('allianceTargetSelect');
       const specialSel = document.getElementById('specialTargetSelect');
-      if (!combatSel || !allySel || !specialSel) return;
 
-      combatSel.innerHTML = '';
-      allySel.innerHTML = '';
-      specialSel.innerHTML = '';
+      const buildOptions = () => {
+        if (!connectedRivals || connectedRivals.length === 0) {
+          return '<option value="">Aucun rival connecté</option>';
+        }
+        return connectedRivals.map(r => {
+          const displayName = r.caidName || r.name || "Caïd Adverse";
+          return `<option value="${r.socketId}">${displayName}</option>`;
+        }).join('');
+      };
 
-      connectedRivals.forEach(r => {
-        const displayName = r.caidName || "Caïd Adverse";
-        combatSel.innerHTML += `<option value="${r.socketId}">${displayName}</option>`;
-        allySel.innerHTML += `<option value="${r.socketId}">${displayName}</option>`;
-        specialSel.innerHTML += `<option value="${r.socketId}">${displayName}</option>`;
-      });
+      const opts = buildOptions();
+      if (combatSel) combatSel.innerHTML = opts;
+      if (allySel) allySel.innerHTML = opts;
+      if (specialSel) specialSel.innerHTML = opts;
     }
 
     function navTo(pageId) {
@@ -1449,6 +1455,7 @@
         }
 
         localPlayer.caidId = chosenCaid.id;
+        localPlayer.caidName = chosenCaid.name;
         localPlayer.pocketCash = chosenCaid.startCash;
         localPlayer.drugs = chosenCaid.startDrug;
         localPlayer.safeCash = 0;
@@ -1482,7 +1489,8 @@
             startCash: chosenCaid.startCash,
             startDrug: chosenCaid.startDrug,
             startHearts: chosenCaid.startHearts,
-            unarmedAtk: chosenCaid.unarmedAtk
+            unarmedAtk: chosenCaid.unarmedAtk,
+            playerToken: myPlayerToken
           });
         }
       }, 3300);
@@ -1506,7 +1514,6 @@
       navTo('page-6');
     }
 
-    // Calcul de l'Attaque en duel
     function getTotalAtk() {
       let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
 
@@ -1903,13 +1910,11 @@
       refreshHud();
     }
 
-    // Utilisation d'objet hors combat
     function useItem(idx) {
       if (!isMyTurnToPlay) return;
       const it = localPlayer.inventory[idx];
       if (!it) return;
 
-      // Kebab / Soin
       if (it.eff === 'heal' || it.type === 'CONSUMABLE' || (it.name && it.name.includes('Kebab'))) {
         if (localPlayer.hearts >= 3) return alert("Votre santé est déjà au maximum (3 Cœurs) !");
         localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
@@ -1919,11 +1924,10 @@
         return;
       }
 
-      // Sifflet (Chien Errant exclusif et volable)
       if (it.eff === 'stray_dog') {
         const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
         if (socket) {
-          socket.emit('claim_stray_dog', { senderCaid: caid.name });
+          socket.emit('claim_stray_dog', { senderCaid: caid.name, playerToken: myPlayerToken });
           localPlayer.inventory.splice(idx, 1);
         } else {
           localPlayer.strayDogActive = true;
@@ -1935,7 +1939,7 @@
       }
 
       if (it.dur === 'combat') {
-        alert(`Cet objet (${it.name}) s'active automatiquement pendant la phase d'affrontement.`);
+        alert(`Cet objet (${it.name}) s'active automatiquement pendant la phase de combat.`);
         return;
       }
 
@@ -2280,7 +2284,7 @@
       }
     }
 
-    // --- SYSTÈME DE COMBAT INTERACTIF & PRÊT AU COMBAT ---
+    // --- GESTION DU COMBAT INTERACTIF & PRÊT AU COMBAT ---
     function resetCombatModifiers() {
       combatModifiers = {
         flatAtkBonus: 0,
@@ -2402,7 +2406,6 @@
         closeModal('modalCombatItemSelector');
         refreshHud();
 
-        // Envoi en temps réel à l'adversaire
         if (socket && currentDuelInfo) {
           const currentStat = (currentDuelInfo.role === 'attacker') ? getTotalAtk() : getTotalDef();
           socket.emit('combat_play_items', {
