@@ -39,7 +39,6 @@ const RADIO_EVENTS = [
   }
 ];
 
-// La salle est prête dès qu'au moins 2 joueurs sont présents et que chacun a validé son Caïd
 function checkRoomReady(room) {
   if (!room || room.players.length < 2) return false;
   return room.players.every(p => p.caidId !== null);
@@ -75,6 +74,7 @@ io.on('connection', (socket) => {
     socket.emit('reconnect_success', {
       roomId,
       room,
+      players: room.players,
       player: existingPlayer,
       gameStarted: room.gameStarted || false,
       round: room.round,
@@ -145,6 +145,7 @@ io.on('connection', (socket) => {
       socket.emit('reconnect_success', {
         roomId,
         room,
+        players: room.players,
         player: existing,
         gameStarted: room.gameStarted || false,
         round: room.round,
@@ -196,7 +197,7 @@ io.on('connection', (socket) => {
 
     const alreadyTaken = room.players.some(p => p.playerToken !== playerToken && p.caidId === caidId);
     if (alreadyTaken) {
-      return socket.emit('error_msg', `Le Caïd ${caidName} a déjà été sélectionné par un autre joueur.`);
+      return socket.emit('error_msg', `Le Caïd ${caidName} est déjà pris par un autre joueur.`);
     }
 
     const p = room.players.find(x => x.socketId === socket.id || x.playerToken === playerToken);
@@ -260,14 +261,14 @@ io.on('connection', (socket) => {
       room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
       io.to(socket.roomId).emit('new_round_started', {
         round: room.round,
-        radio: room.currentRadio
+        radio: room.currentRadio,
+        players: room.players
       });
     }
 
     broadcastTurnState(socket.roomId);
   });
 
-  // Gestion du Chien Errant volable en direct
   socket.on('claim_stray_dog', ({ senderCaid, playerToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -286,19 +287,21 @@ io.on('connection', (socket) => {
     socket.emit('stray_dog_granted');
   });
 
-  // Combat interactif en duel
-  socket.on('start_combat_engagement', ({ targetSocketId, attackerCaid }) => {
+  socket.on('start_combat_engagement', ({ targetSocketId, targetPlayerToken, attackerCaid }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
 
-    const targetPlayer = room.players.find(p => p.socketId === targetSocketId);
+    let targetPlayer = room.players.find(p => p.playerToken === targetPlayerToken);
+    if (!targetPlayer) targetPlayer = room.players.find(p => p.socketId === targetSocketId);
     const attackerPlayer = room.players.find(p => p.socketId === socket.id);
+
+    if (!targetPlayer) return;
 
     room.activeCombat = {
       attackerSocketId: socket.id,
-      targetSocketId,
+      targetSocketId: targetPlayer.socketId,
       attackerCaid: attackerCaid || (attackerPlayer ? attackerPlayer.caidName : "Attaquant"),
-      targetCaid: targetPlayer ? targetPlayer.caidName : "Défenseur",
+      targetCaid: targetPlayer.caidName || "Défenseur",
       attackerReady: false,
       targetReady: false,
       attackerAtk: 1,
@@ -308,10 +311,10 @@ io.on('connection', (socket) => {
     socket.emit('combat_duel_opened', {
       role: 'attacker',
       opponentCaid: room.activeCombat.targetCaid,
-      opponentSocketId: targetSocketId
+      opponentSocketId: targetPlayer.socketId
     });
 
-    io.to(targetSocketId).emit('combat_duel_opened', {
+    io.to(targetPlayer.socketId).emit('combat_duel_opened', {
       role: 'defender',
       opponentCaid: room.activeCombat.attackerCaid,
       opponentSocketId: socket.id
@@ -394,8 +397,17 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('apply_special_to_target', ({ targetSocketId, effectType, senderCaid }) => {
-    io.to(targetSocketId).emit('received_special_effect', {
+  // Déclenchement de capacité spéciale ciblée
+  socket.on('apply_special_to_target', ({ targetSocketId, targetPlayerToken, effectType, senderCaid }) => {
+    const room = rooms[socket.roomId];
+    let destSocketId = targetSocketId;
+
+    if (room && targetPlayerToken) {
+      const targetP = room.players.find(p => p.playerToken === targetPlayerToken);
+      if (targetP) destSocketId = targetP.socketId;
+    }
+
+    io.to(destSocketId).emit('received_special_effect', {
       effectType,
       senderCaid,
       senderSocketId: socket.id
@@ -406,13 +418,19 @@ io.on('connection', (socket) => {
     io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
-  socket.on('propose_alliance', ({ targetSocketId, senderName, musclesCount }) => {
+  socket.on('propose_alliance', ({ targetSocketId, targetPlayerToken, senderName, musclesCount }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
     const sender = room.players.find(p => p.socketId === socket.id);
     if (!sender) return;
 
-    io.to(targetSocketId).emit('alliance_request_received', {
+    let destSocketId = targetSocketId;
+    if (targetPlayerToken) {
+      const targetP = room.players.find(p => p.playerToken === targetPlayerToken);
+      if (targetP) destSocketId = targetP.socketId;
+    }
+
+    io.to(destSocketId).emit('alliance_request_received', {
       senderSocketId: socket.id,
       senderToken: sender.playerToken,
       senderCaid: sender.caidName || senderName,
@@ -475,6 +493,12 @@ io.on('connection', (socket) => {
 function handlePlayerDisconnect(socket) {
   const room = rooms[socket.roomId];
   if (room) {
+    if (room.strayDogHolderToken) {
+      const p = room.players.find(x => x.socketId === socket.id);
+      if (p && p.playerToken === room.strayDogHolderToken) {
+        room.strayDogHolderToken = null;
+      }
+    }
     room.players = room.players.filter(x => x.socketId !== socket.id);
     if (room.players.length === 0) {
       delete rooms[socket.roomId];
