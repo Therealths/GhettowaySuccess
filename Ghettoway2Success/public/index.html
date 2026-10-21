@@ -383,7 +383,7 @@
 
       <div class="flex flex-col h-full justify-between space-y-2">
 
-        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE (AUCUN TEXTE NI BOUTON QUITTER) -->
+        <!-- BANDEAU AVEC RETOUR INCRUSTÉ EN HAUT À GAUCHE -->
         <div id="caidTopBannerContainer" class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center active:scale-95 transition z-10 shadow-md hover:bg-black/40" title="Retour au Flash Radio">
@@ -466,13 +466,14 @@
 
             <!-- VOLET 1 : ACTIONS -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
+              <!-- Bouton Capacité Spéciale : sans Boule de Graisse par défaut ! -->
               <button id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 text-left flex items-start justify-between gap-2 shadow-sm active:scale-[0.99] transition">
                 <div class="flex items-start gap-2 flex-1 min-w-0">
                   <div class="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 flex-shrink-0 text-sm mt-0.5"><i class="ph-bold ph-sparkle animate-pulse"></i></div>
                   <div class="flex-1 min-w-0">
                     <span class="text-[9px] font-mono uppercase tracking-wider text-purple-300 font-black">Capacité Spéciale</span>
-                    <h4 id="hudSpecialPowerName" class="text-xs font-black text-white leading-tight">Boule de Graisse</h4>
-                    <p id="hudSpecialPowerDesc" class="text-[10px] text-slate-300 mt-0.5 leading-snug">Roule jusqu'à 5 cases de distance.</p>
+                    <h4 id="hudSpecialPowerName" class="text-xs font-black text-white leading-tight">—</h4>
+                    <p id="hudSpecialPowerDesc" class="text-[10px] text-slate-300 mt-0.5 leading-snug">—</p>
                   </div>
                 </div>
                 <div class="flex-shrink-0 self-center"><span id="hudSpecialActionBtnLabel" class="text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block shadow">Activer</span></div>
@@ -602,7 +603,7 @@
       </div>
     </div>
 
-    <!-- MODALE COMBAT INTERACTIF EN DUEL (AVEC VISIBILITÉ DES FORCES ENNEMIES ET DES STATS EN DIRECT) -->
+    <!-- MODALE COMBAT INTERACTIF EN DUEL (AVEC VISIBILITÉ DES FORCES ET DES STATS EN DIRECT) -->
     <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -612,7 +613,7 @@
           <button onclick="abortCombat()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
 
-        <!-- Sélection Cible avec aperçu des forces visibles (Lascars, Escort, Chien) -->
+        <!-- Choix Cible avec aperçu des forces ennemies -->
         <div id="combatTargetSelectionBox">
           <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
           <select id="combatTargetSelect" onchange="updateSelectedRivalDetailsCard()" class="w-full glass-input text-white p-2.5 rounded-xl text-xs font-bold outline-none"></select>
@@ -633,13 +634,13 @@
           </div>
         </div>
 
-        <!-- En-tête de duel une fois engagé -->
+        <!-- En-tête de duel -->
         <div id="combatAdversaryTag" class="hidden text-center p-2 rounded-xl bg-white/5 border border-white/10 font-mono text-xs">
           <span>Adversaire : </span><strong id="combatOpponentNameDisplay" class="text-ghetto-gold uppercase">...</strong>
           <div id="combatOpponentForcesBar" class="text-[10px] text-slate-300 mt-0.5"></div>
         </div>
 
-        <!-- Affichage en direct de NOS points d'Attaque et de Défense dans l'arène -->
+        <!-- Nos points d'Assaut et Défense en direct -->
         <div class="grid grid-cols-2 gap-2 text-center font-mono">
           <div class="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30">
             <span class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut</span>
@@ -661,7 +662,7 @@
             <span>Objets</span>
           </button>
 
-          <!-- Le bouton Prêt est MASQUÉ tant que le combat n'est pas engagé ! -->
+          <!-- Le bouton Prêt reste masqué tant que le combat n'est pas engagé ! -->
           <button id="btnToggleCombatReady" onclick="toggleCombatReadyState()" class="hidden py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black uppercase tracking-wider rounded-xl text-xs active:scale-95 transition shadow-lg flex items-center justify-center gap-1.5">
             <i class="ph-bold ph-check text-sm"></i>
             <span id="btnCombatReadyLabel">Prêt au combat</span>
@@ -1030,7 +1031,8 @@
     };
 
     let localPlayer = {
-      caidId: null,
+      caidId: localStorage.getItem('g2s_saved_caid_id') || null,
+      caidName: null,
       isHost: false,
       pocketCash: 5000,
       safeCash: 0,
@@ -1080,10 +1082,7 @@
 
     function updateRivalsList(players) {
       if (!players || !Array.isArray(players)) return;
-      connectedRivals = players.filter(p => p.socketId !== socket.id && p.playerToken !== myPlayerToken);
-      if (players.length > 1 && connectedRivals.length === 0) {
-        connectedRivals = players.filter(p => p.socketId !== socket.id);
-      }
+      connectedRivals = players.filter(p => p.playerToken !== myPlayerToken && p.socketId !== (socket ? socket.id : null));
       takenCaidsInGame = players.filter(p => p.caidId).map(p => p.caidId);
       syncMultiplayerTargets();
     }
@@ -1104,6 +1103,9 @@
       socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, players }) => {
         localStorage.setItem('g2s_room_id', roomId);
         localPlayer = Object.assign(localPlayer, player);
+        if (player && player.caidId) {
+          localStorage.setItem('g2s_saved_caid_id', player.caidId);
+        }
         if (players) updateRivalsList(players);
 
         if (gameStarted) {
@@ -1254,7 +1256,6 @@
         }
       });
 
-      // DUEL COMBAT
       socket.on('combat_duel_opened', ({ role, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog }) => {
         currentDuelInfo = { role, opponentCaid, opponentSocketId };
         resetCombatModifiers();
@@ -1272,7 +1273,6 @@
         const log = document.getElementById('combatLiveLog');
         log.innerHTML = `<p class="text-amber-300 font-bold">⚡ Duel engagé contre ${opponentCaid} ! Vous pouvez jouer des objets de combat ou valider votre état prêt.</p>`;
 
-        // Affiche le bouton "Prêt au combat" uniquement maintenant !
         document.getElementById('btnToggleCombatReady').classList.remove('hidden');
         updateCombatReadyButtonUI();
         updateArenaLiveStats();
@@ -1333,7 +1333,6 @@
         await showAppAlert("Le combat a été annulé par un joueur.", "Combat Interrompu");
       });
 
-      // CHIEN ERRANT VOLÉ
       socket.on('lost_stray_dog', async ({ thiefCaid }) => {
         localPlayer.strayDogActive = false;
         await showAppAlert(`🐕 ATTENTION : ${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant ! Vous perdez son bonus.`, "Chien Errant Volé");
@@ -1346,7 +1345,6 @@
         refreshHud();
       });
 
-      // EFFETS SPÉCIAUX CIBLÉS
       socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
         if (effectType === 'siphon') {
           localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
@@ -1446,7 +1444,6 @@
       pendingAllianceRequest = null;
     }
 
-    // Affiche les forces visibles dans les options et met à jour l'aperçu
     function syncMultiplayerTargets() {
       const combatSel = document.getElementById('combatTargetSelect');
       const allySel = document.getElementById('allianceTargetSelect');
@@ -1511,6 +1508,7 @@
       const conf = await showAppConfirm("Voulez-vous vraiment quitter définitivement cette partie ?", "Quitter la partie");
       if (conf) {
         localStorage.removeItem('g2s_room_id');
+        localStorage.removeItem('g2s_saved_caid_id');
         if (socket) socket.emit('leave_room');
         window.location.reload();
       }
@@ -1651,6 +1649,8 @@
 
         localPlayer.caidId = chosenCaid.id;
         localPlayer.caidName = chosenCaid.name;
+        localStorage.setItem('g2s_saved_caid_id', chosenCaid.id);
+
         localPlayer.pocketCash = chosenCaid.startCash;
         localPlayer.drugs = chosenCaid.startDrug;
         localPlayer.safeCash = 0;
@@ -1709,13 +1709,43 @@
       navTo('page-6');
     }
 
+    function getTotalAtk() {
+      let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
+
+      if (localPlayer.equipped.weapon) {
+        const multArme = combatModifiers.doubleWeapon ? 2 : 1;
+        atk += (localPlayer.equipped.weapon.bonusVal * multArme);
+      }
+
+      const multMuscles = combatModifiers.doubleMuscles ? 2 : 1;
+      localPlayer.musclesOnPerson.forEach(m => {
+        atk += (m.bonusVal * multMuscles);
+      });
+
+      if (localPlayer.strayDogActive) atk += 2;
+      atk += combatModifiers.flatAtkBonus;
+
+      return Math.max(0, atk);
+    }
+
+    function getTotalDef() {
+      let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0);
+      if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
+      if (localPlayer.strayDogActive) def += 2;
+      return Math.max(0, def);
+    }
+
+    function getTotalPm() {
+      const v = localPlayer.equipped.vehicle;
+      return 8 + (v ? v.bonusVal : 0);
+    }
+
     function cyclePlayerHearts() {
       if (!isMyTurnToPlay) return;
       localPlayer.hearts = localPlayer.hearts <= 1 ? 3 : localPlayer.hearts - 1;
       refreshHud();
     }
 
-    // Gestion des Lascars : congédiement direct sans aller dans le sac
     async function clickMuscleSlot(idx) {
       if (!isMyTurnToPlay) return;
       if (localPlayer.musclesOnPerson[idx]) {
@@ -1917,11 +1947,15 @@
       }
     }
 
-    // --- REFRESH HUD AVEC IMAGES DES LASCARS ET PROSTITUÉES ---
     function refreshHud() {
-      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
+      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId);
       const bannerImg = document.getElementById('caidBannerImg');
-      if (bannerImg && caid.bannerFile) bannerImg.src = caid.bannerFile;
+      
+      if (caid) {
+        if (bannerImg && caid.bannerFile) bannerImg.src = caid.bannerFile;
+        document.getElementById('hudSpecialPowerName').innerText = caid.skillName;
+        document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
+      }
 
       let heartsStr = '';
       for (let i = 0; i < localPlayer.hearts; i++) heartsStr += '❤️';
@@ -1931,7 +1965,6 @@
       document.getElementById('hudDef').innerText = getTotalDef();
       document.getElementById('hudCurrentPm').innerText = getTotalPm();
 
-      // Synchronisation Boîte Bleue : Images des Lascars (gblvl1.jpg et gblvl2.jpg)
       for (let i = 0; i < 3; i++) {
         const slotEl = document.getElementById(`muscleSlot_${i}`);
         if (localPlayer.musclesOnPerson[i]) {
@@ -1951,7 +1984,6 @@
         }
       }
 
-      // Synchronisation Boîte Rose : Images des Prostituées (plvl1.jpg et plvl2.jpg)
       const pSlot = document.getElementById('prostituteTransitSlot');
       if (localPlayer.prostituteInTransit) {
         const pr = localPlayer.prostituteInTransit;
@@ -1973,9 +2005,6 @@
       document.getElementById('hudSafeCash').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
       document.getElementById('hudDrugs').innerText = `🌿 ${localPlayer.drugs} kg`;
       document.getElementById('hudSafeDrugs').innerText = `📦 ${localPlayer.safeDrugs} kg`;
-
-      document.getElementById('hudSpecialPowerName').innerText = caid.skillName;
-      document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
 
       const btnSpec = document.getElementById('btnSpecialPower');
       const actionLabel = document.getElementById('hudSpecialActionBtnLabel');
@@ -2040,7 +2069,6 @@
         } else if (item.eff === 'stray_dog') {
           primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-purple-500 text-black font-black rounded-lg font-mono text-[9px] active:scale-95 transition flex-shrink-0 uppercase">Siffler</button>`;
         } else if (item.dur === 'combat') {
-          // Permet d'utiliser l'objet de combat hors duel pour préparer le prochain combat
           primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-lg font-mono text-[9px] uppercase font-bold active:scale-95 transition flex-shrink-0">Activer</button>`;
         } else {
           primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] active:scale-95 transition flex-shrink-0 uppercase">Utiliser</button>`;
@@ -2111,7 +2139,6 @@
       refreshHud();
     }
 
-    // Utilisation d'objet (y compris objets de combat utilisables hors duel)
     async function useItem(idx) {
       if (!isMyTurnToPlay) {
         await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
@@ -2146,7 +2173,6 @@
         return;
       }
 
-      // Activation directe d'un objet de combat depuis le Sac hors affrontement
       if (it.dur === 'combat') {
         if (it.eff === 'double_weapon_atk') {
           if (!isFirearm(localPlayer.equipped.weapon ? localPlayer.equipped.weapon.name : '')) {
@@ -2525,36 +2551,6 @@
       }
     }
 
-    function openAllianceModal() {
-      if (!isMyTurnToPlay) return;
-      syncMultiplayerTargets();
-      document.getElementById('modalAlliance').classList.remove('hidden');
-    }
-
-    async function confirmAlliance() {
-      if (!isMyTurnToPlay) return;
-      const sel = document.getElementById('allianceTargetSelect');
-      const targetToken = sel.value;
-      const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
-      if (!target) {
-        await showAppAlert("Choisissez un Caïd connecté dans la liste.", "Alliance");
-        return;
-      }
-
-      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
-
-      if (socket) {
-        socket.emit('propose_alliance', {
-          targetSocketId: target.socketId,
-          targetPlayerToken: target.playerToken,
-          senderName: caid.name,
-          musclesCount: localPlayer.musclesOnPerson.length
-        });
-      }
-      closeModal('modalAlliance');
-      await showAppAlert(`Demande d'alliance envoyée à ${target.caidName || 'votre rival'}. En attente de sa réponse...`, "Demande Envoyée");
-    }
-
     // --- SCANNER QR CODE ---
     async function openQrScannerModal() {
       if (!isMyTurnToPlay) {
@@ -2789,6 +2785,39 @@
       }
 
       refreshHud();
+    }
+
+    async function openAllianceModal() {
+      if (!isMyTurnToPlay) {
+        await showAppAlert("Ce n'est pas votre tour d'agir !", "Tour Inactif");
+        return;
+      }
+      syncMultiplayerTargets();
+      document.getElementById('modalAlliance').classList.remove('hidden');
+    }
+
+    async function confirmAlliance() {
+      if (!isMyTurnToPlay) return;
+      const sel = document.getElementById('allianceTargetSelect');
+      const targetToken = sel.value;
+      const target = connectedRivals.find(r => r.playerToken === targetToken || r.socketId === targetToken);
+      if (!target) {
+        await showAppAlert("Choisissez un Caïd connecté dans la liste.", "Alliance");
+        return;
+      }
+
+      const caid = CAID_ROSTER.find(c => c.id === localPlayer.caidId) || CAID_ROSTER[0];
+
+      if (socket) {
+        socket.emit('propose_alliance', {
+          targetSocketId: target.socketId,
+          targetPlayerToken: target.playerToken,
+          senderName: caid.name,
+          musclesCount: localPlayer.musclesOnPerson.length
+        });
+      }
+      closeModal('modalAlliance');
+      await showAppAlert(`Demande d'alliance envoyée à ${target.caidName || 'votre rival'}. En attente de sa réponse...`, "Demande Envoyée");
     }
 
     function endCurrentPlayerTurn() {
