@@ -29,18 +29,21 @@
     .screen-view { display: none !important; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; padding-bottom: max(16px, env(safe-area-inset-bottom)); animation: fadeIn 0.2s ease-out; }
     .screen-view.active { display: flex !important; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    .glass-panel { background: rgba(18, 20, 29, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-panel { background: rgba(18, 20, 29, 0.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
     .glass-input { background: rgba(8, 9, 14, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); }
     .carousel-wrapper { position: relative; width: 100%; overflow: hidden; padding: 4px 0; }
     .carousel-track { display: flex; gap: 16px; transition: transform 0.1s linear; will-change: transform; }
     .carousel-card { flex: 0 0 190px; height: 230px; border-radius: 22px; overflow: hidden; position: relative; background: #11131c; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.35; transform: scale(0.92); filter: grayscale(40%); }
     .carousel-card.is-active { opacity: 1; transform: scale(1.04); filter: grayscale(0%); border: 1.5px solid rgba(255, 255, 255, 0.35); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7); }
     .ghetto-home-bg { background-image: linear-gradient(to bottom, rgba(5,6,9,0) 0%, rgba(5,6,9,0.3) 45%, rgba(5,6,9,0.95) 85%), url('wallpaper.jpg'); background-size: cover; background-position: center; }
+    .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.75) 0%, rgba(9,10,16,0.88) 50%, rgba(9,10,16,0.98) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center; }
+    .shop-scroll-container { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 14px; -webkit-overflow-scrolling: touch; }
+    .shop-card { flex: 0 0 240px; scroll-snap-align: center; border-radius: 24px; transition: transform 0.2s ease; }
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.15); border-radius: 6px; }
     input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: #facc15; cursor: pointer; -webkit-appearance: none; margin-top: -6px; box-shadow: 0 0 10px rgba(250, 204, 21, 0.6); }
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+    ::-webkit-scrollbar { width: 3px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -314,6 +317,54 @@
       </div>
     </div>
 
+    <!-- ================= MODALE BOUTIQUE ARMURERIE (AVEC wp_armurerie.jpg & catalog.json) ================= -->
+    <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 p-5 flex flex-col justify-between armory-bg">
+      <div>
+        <!-- En-tête Boutique -->
+        <div class="flex items-center justify-between border-b border-white/15 pb-3 mb-3">
+          <div>
+            <span class="text-[9px] font-mono uppercase tracking-widest text-ghetto-gold block font-bold">Case Plateau</span>
+            <h3 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <i class="ph-bold ph-crosshair text-rose-500"></i> Boutique Armurerie
+            </h3>
+          </div>
+          <button onclick="closeModal('modalArmoryShop')" class="w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-300 hover:text-white"><i class="ph-bold ph-x text-base"></i></button>
+        </div>
+
+        <!-- Rappel des fonds disponibles -->
+        <div class="p-2.5 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono mb-3">
+          <div class="border-r border-white/10 pr-2">
+            <span class="text-[9px] text-amber-400 uppercase font-bold block">Cash en Poche</span>
+            <span id="armoryPocketCashDisplay" class="text-sm font-black text-white">5 000 €</span>
+          </div>
+          <div class="pl-2">
+            <span class="text-[9px] text-sky-400 uppercase font-bold block">Coffre QG</span>
+            <span id="armorySafeCashDisplay" class="text-sm font-black text-white">0 €</span>
+          </div>
+        </div>
+
+        <!-- 2 Onglets : Armes | Équipements -->
+        <div class="grid grid-cols-2 gap-2 p-1 bg-black/60 border border-white/10 rounded-2xl font-mono text-xs mb-2">
+          <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-2.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
+            <i class="ph-bold ph-sword"></i> Armes
+          </button>
+          <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-2.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
+            <i class="ph-bold ph-shield"></i> Équipements
+          </button>
+        </div>
+      </div>
+
+      <!-- Carrousel de Cartes d'Articles -->
+      <div class="my-auto">
+        <span class="text-[10px] font-mono text-slate-400 block text-center mb-1"><i class="ph-bold ph-arrows-left-right"></i> Faites glisser pour parcourir le catalogue</span>
+        <div id="armoryCardsContainer" class="shop-scroll-container"></div>
+      </div>
+
+      <button onclick="closeModal('modalArmoryShop')" class="w-full py-3.5 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
+        Quitter l'Armurerie
+      </button>
+    </div>
+
     <!-- MODALE CAPACITÉ SPÉCIALE CIBLÉE -->
     <div id="modalTargetSpecial" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-purple-500/40 shadow-2xl">
@@ -483,7 +534,7 @@
           <div class="pl-2"><span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre</span><div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 €</div></div>
         </div>
         <div class="space-y-2">
-          <div class="flex items-center justify-between text-xs font-mono"><span class="text-[10px] uppercase text-slate-400 font-bold">Quantité :</span><span id="transferMaxAvailableLabel" class="text-[10px] text-ghetto-gold font-bold">Max : 5 000 €</span></div>
+          <div class="flex items-center justify-between text-xs font-mono"><span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité :</span><span id="transferMaxAvailableLabel" class="text-[10px] text-ghetto-gold font-bold">Max : 5 000 €</span></div>
           <div class="relative flex items-center"><input type="number" id="transferAmountInput" value="0" min="0" oninput="syncTransferInputToSlider()" class="w-full glass-input text-white px-3 py-2.5 rounded-xl text-sm font-mono font-bold"><span id="transferUnitSuffix" class="text-xs font-mono text-slate-400 absolute right-3">€</span></div>
           <input type="range" id="transferRangeSlider" min="0" max="100" value="0" oninput="syncTransferSliderToInput()" class="w-full">
           <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
@@ -523,10 +574,10 @@
           <label class="px-3 py-1 glass-panel rounded-xl text-[10px] font-mono text-slate-300 cursor-pointer inline-flex items-center gap-1"><i class="ph-bold ph-image"></i> Photo QR<input type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
         </div>
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
-          <button onclick='processQrPayload("{\"t\":\"grossiste\",\"p\":1000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold">🌿 Grossiste (1000€/kg)</button>
+          <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
+          <button onclick='processQrPayload("{\"t\":\"grossiste\",\"p\":1000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold border border-emerald-500/40">🌿 Case Grossiste</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Balle perforante\",\"eff\":\"double_weapon_atk\",\"dur\":\"combat\",\"desc\":\"Dégâts arme à feu doublés\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">💥 Balle perforante</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>
-          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Vieille canette\",\"eff\":\"bonus_combat_atk\",\"val\":1,\"dur\":\"combat\",\"desc\":\"+1 Atk au combat\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🥫 Vieille canette (+1)</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Sifflet\",\"eff\":\"stray_dog\",\"dur\":\"tour\",\"desc\":\"Rallie le Chien Errant (+2 Atk / +2 Def)\"}")' class="p-2 glass-panel rounded-xl text-left text-purple-300">🐕 Sifflet (Chien)</button>
           <button onclick='processQrPayload("{\"t\":\"gb\",\"lvl\":1,\"p\":1500,\"atk\":1}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">💪 Lascar L1 (1500€)</button>
           <button onclick='processQrPayload("{\"t\":\"pr\",\"lvl\":1,\"p\":2000,\"rev\":1000}")' class="p-2 glass-panel rounded-xl text-left text-pink-300">👠 Prostituée L1</button>
@@ -572,6 +623,133 @@
   </div>
 
   <script>
+    // --- CATALOGUE ARMURERIE (Chargé depuis catalog.json + copie de secours) ---
+    let ARMORY_CATALOG = [
+      { id: "wp_poing", categorie: "arme", slot: "WEAPON", nom: "Poing Américain", prix: 1000, bonusVal: 2, bonusLabel: "+2 Attaque", isFirearm: false, image: "arme-poing.jpg", desc: "Patate de forain !" },
+      { id: "wp_knife", categorie: "arme", slot: "WEAPON", nom: "Cran d'arrêt", prix: 2000, bonusVal: 4, bonusLabel: "+4 Attaque", isFirearm: false, image: "arme-knife.jpg", desc: "Idéal pour intimider au corps à corps." },
+      { id: "wp_axe", categorie: "arme", slot: "WEAPON", nom: "Hache", prix: 5000, bonusVal: 6, bonusLabel: "+6 Attaque", isFirearm: false, image: "arme-axe.jpg", desc: "On peut même couper du bois avec..." },
+      { id: "wp_gun", categorie: "arme", slot: "WEAPON", nom: "Revolver", prix: 8000, bonusVal: 8, bonusLabel: "+8 Attaque", isFirearm: true, image: "arme-gun.jpg", desc: "Pan ! Pan ! Pan !" },
+      { id: "wp_pompe", categorie: "arme", slot: "WEAPON", nom: "Fusil a pompe", prix: 12000, bonusVal: 10, bonusLabel: "+10 Attaque", isFirearm: true, image: "arme-pompe.jpg", desc: "Hasta la vista baby !" },
+      { id: "ar_duck", categorie: "equipement", slot: "ARMOR", nom: "Bouée canard", prix: 0, bonusVal: 1, bonusLabel: "+1 Défense", isFirearm: false, image: "equip-duck.jpg", desc: "Coin !? Qu'est ce qu'y a !?" },
+      { id: "ar_roller", categorie: "equipement", slot: "ARMOR", nom: "Protections Rollers", prix: 2000, bonusVal: 3, bonusLabel: "+3 Défense", isFirearm: false, image: "equip-roller.jpg", desc: "Paré à la chute !" },
+      { id: "ar_hat", categorie: "equipement", slot: "ARMOR", nom: "Casque de soldat", prix: 5000, bonusVal: 5, bonusLabel: "+5 Défense", isFirearm: false, image: "equip-hat.jpg", desc: "J'ai la tête dure !" },
+      { id: "ar_gilet", categorie: "equipement", slot: "ARMOR", nom: "Gilet par balle", prix: 8000, bonusVal: 8, bonusLabel: "+8 Défense", isFirearm: false, image: "equip-gilet.jpg", desc: "J'ai mis une petite laine" },
+      { id: "ar_crs", categorie: "equipement", slot: "ARMOR", nom: "Armure de CRS", prix: 12000, bonusVal: 10, bonusLabel: "+10 Défense", isFirearm: false, image: "equip-crs.jpg", desc: "Robocop style" }
+    ];
+
+    fetch('/catalog.json')
+      .then(r => r.json())
+      .then(json => { if (json && Array.isArray(json.armurerie)) ARMORY_CATALOG = json.armurerie; })
+      .catch(() => {});
+
+    let currentArmoryCategory = 'arme';
+
+    function openArmoryShopModal() {
+      document.getElementById('armoryPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
+      document.getElementById('armorySafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
+      switchArmoryTab('arme');
+      document.getElementById('modalArmoryShop').classList.remove('hidden');
+    }
+
+    function switchArmoryTab(cat) {
+      currentArmoryCategory = cat;
+      const bW = document.getElementById('tabBtnArmoryWeapons');
+      const bA = document.getElementById('tabBtnArmoryArmor');
+      if (cat === 'arme') {
+        bW.className = "py-2.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition";
+        bA.className = "py-2.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+      } else {
+        bA.className = "py-2.5 rounded-xl font-black uppercase bg-sky-500 text-black flex items-center justify-center gap-1.5 shadow-lg transition";
+        bW.className = "py-2.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+      }
+      renderArmoryCards();
+    }
+
+    function renderArmoryCards() {
+      const container = document.getElementById('armoryCardsContainer');
+      const items = ARMORY_CATALOG.filter(it => it.categorie === currentArmoryCategory);
+      container.innerHTML = items.map(item => {
+        const isWeapon = item.categorie === 'arme';
+        const badgeColor = isWeapon ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40';
+        const displayBonus = isWeapon ? `+${item.bonusVal} Attaque` : `+${item.bonusVal} Défense`;
+        const firearmBadge = item.isFirearm ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[9px] font-bold">🔥 Arme à feu</span>` : '';
+
+        return `
+          <div class="shop-card glass-panel p-4 flex flex-col justify-between border border-white/15 shadow-2xl">
+            <div>
+              <div class="relative w-full h-36 rounded-2xl overflow-hidden bg-black/70 border border-white/10 mb-3 flex items-center justify-center">
+                <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="hidden flex-col items-center justify-center text-slate-500">
+                  <i class="ph-bold ${isWeapon ? 'ph-sword text-rose-400' : 'ph-shield text-sky-400'} text-4xl"></i>
+                  <span class="text-[9px] font-mono mt-1">${item.image}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-1 mb-1">
+                <span class="px-2 py-0.5 rounded-md border ${badgeColor} font-mono text-[10px] font-black">${displayBonus}</span>
+                ${firearmBadge}
+              </div>
+              <h4 class="text-sm font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+              <p class="text-[11px] text-slate-300 italic mt-0.5 leading-snug line-clamp-2">"${item.desc}"</p>
+            </div>
+            <div class="pt-3 mt-3 border-t border-white/10">
+              <div class="flex items-center justify-between font-mono mb-2">
+                <span class="text-[10px] text-slate-400 uppercase">Prix :</span>
+                <span class="text-sm font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT (0 €)' : item.prix.toLocaleString() + ' €'}</span>
+              </div>
+              <button onclick="buyArmoryCatalogItem('${item.id}')" class="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-1.5">
+                <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function buyArmoryCatalogItem(itemId) {
+      const item = ARMORY_CATALOG.find(i => i.id === itemId);
+      if (!item) return;
+
+      let cost = item.prix || 0;
+      const isWeapon = item.categorie === 'arme';
+
+      // Malus Tonteushi Kitano : 1er achat d'arme payé le double
+      if (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled && cost > 0) {
+        cost *= 2;
+        await showAppAlert(`Malus Tonteushi Kitano : votre premier achat d'arme à l'Armurerie coûte le double (${cost.toLocaleString()} €) !`, "🥋 Malus Kitano");
+      }
+
+      const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
+      if (totalFunds < cost) {
+        return showAppAlert(`Fonds totaux insuffisants !\nPrix requis : ${cost.toLocaleString()} €\nTotal disponible (Poche + QG) : ${totalFunds.toLocaleString()} €.`, "❌ Achat Impossible");
+      }
+
+      const pPayload = {
+        type: 'eq',
+        cost: cost,
+        name: item.nom,
+        markKitanoWeapon: (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled),
+        data: {
+          sl: isWeapon ? 'arme' : 'prot',
+          n: item.nom,
+          atk: isWeapon ? item.bonusVal : 0,
+          def: !isWeapon ? item.bonusVal : 0,
+          isFirearm: !!item.isFirearm,
+          desc: item.desc
+        }
+      };
+
+      closeModal('modalArmoryShop');
+
+      // Si l'objet est gratuit (ex. Bouée canard à 0 €)
+      if (cost === 0) {
+        await finalizePurchaseExecution(pPayload);
+        refreshHud();
+        return;
+      }
+
+      openPaymentChoiceModal(pPayload);
+    }
+
+    // --- MODALES SYSTÈME ---
     function showAppAlert(msg, title = "Information") {
       return new Promise(res => {
         document.getElementById('appAlertTitle').innerText = title;
@@ -624,6 +802,7 @@
       tempAtkMalus: 0,
       tempDefMalus: 0,
       strayDogActive: false,
+      firstWeaponDoubled: false,
       equipped: { weapon: null, armor: null, vehicle: null },
       musclesOnPerson: [],
       prostituteInTransit: null,
@@ -635,7 +814,6 @@
       activeAlly: null
     };
 
-    // Récupère toujours le bon Caïd (évite de retomber par erreur sur le joueur Bleu)
     function getMyCaid() {
       const id = localPlayer.caidId || localStorage.getItem('g2s_saved_caid_id');
       return CAID_ROSTER.find(c => c.id === id) || CAID_ROSTER[0];
@@ -660,7 +838,6 @@
 
     function updateRivalsList(players) {
       if (!players || !Array.isArray(players)) return;
-      // Synchroniser aussi notre propre caidId depuis le serveur s'il existe
       const meInServer = players.find(p => p.playerToken === myPlayerToken);
       if (meInServer && meInServer.caidId) {
         localPlayer.caidId = meInServer.caidId;
@@ -1064,7 +1241,6 @@
         const cardsAfter = document.querySelectorAll('.carousel-card');
         if (cardsAfter[finalIndex]) cardsAfter[finalIndex].classList.add('is-active');
 
-        // Verrouillage immédiat de l'ID du Caïd tiré
         localPlayer.caidId = chosenCaid.id;
         localPlayer.caidName = chosenCaid.name;
         localStorage.setItem('g2s_saved_caid_id', chosenCaid.id);
@@ -1175,7 +1351,6 @@
       refreshHud();
     }
 
-    // --- CAPACITÉ SPÉCIALE ---
     async function openSpecialAbilityPrompt() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour de jouer !", "Tour Inactif");
       if (localPlayer.specialUsedThisTurn) return showAppAlert("Capacité spéciale déjà utilisée durant ce tour !", "Capacité Épuisée");
@@ -1337,7 +1512,6 @@
       document.getElementById('hudDrugs').innerText = `🌿 ${localPlayer.drugs} kg`;
       document.getElementById('hudSafeDrugs').innerText = `📦 ${localPlayer.safeDrugs} kg`;
 
-      // Met toujours à jour la capacité spéciale selon le vrai Caïd du joueur !
       document.getElementById('hudSpecialPowerName').innerText = caid.skillName;
       document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
 
@@ -1393,6 +1567,8 @@
           primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Équiper</button>`;
         } else if (item.eff === 'stray_dog') {
           primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-purple-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Siffler</button>`;
+        } else if (item.dur === 'combat') {
+          primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-lg font-mono text-[9px] uppercase font-bold">Activer</button>`;
         } else {
           primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Utiliser</button>`;
         }
@@ -1451,7 +1627,7 @@
 
       if (it.dur === 'combat') {
         if (it.eff === 'double_weapon_atk') {
-          if (!isFirearm(localPlayer.equipped.weapon ? localPlayer.equipped.weapon.name : '')) {
+          if (!isFirearm(localPlayer.equipped.weapon)) {
             return showAppAlert("Requiert une arme à feu équipée !", "Arme Incompatible");
           }
           combatModifiers.doubleWeapon = true;
@@ -1493,7 +1669,6 @@
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
     }
 
-    // --- TRANSFERTS & GROSSISTE ---
     async function openTransferModal(mode) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       currentTransferMode = mode;
@@ -1632,33 +1807,57 @@
       closeModal('modalPaymentChoice');
       pendingPurchaseData = null;
 
-      if (pData.type === 'eq') {
-        const slot = pData.data.sl === 'arme' ? 'WEAPON' : (pData.data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
-        const bonus = pData.data.atk || pData.data.def || pData.data.pm || 1;
-        const bTxt = pData.data.atk ? `+${bonus} Attaque` : (pData.data.def ? `+${bonus} Défense` : `+${bonus} PM`);
-        localPlayer.inventory.push({ id: 'item_' + Date.now(), type: slot, name: pData.data.n, price: cost, bonusVal: bonus, bonusLabel: bTxt, desc: `Confère ${bTxt}` });
-        await showAppAlert(`${pData.data.n} ajouté au Sac !`, "📦 Achat Confirmé");
-      } else if (pData.type === 'gb') {
-        const bAtk = pData.data.atk || (pData.data.lvl === 2 ? 2 : 1);
-        localPlayer.musclesOnPerson.push({ id: 'gb_' + Date.now(), type: 'MUSCLE', level: pData.data.lvl || 1, name: `Lascar L${pData.data.lvl||1}`, bonusVal: bAtk, bonusLabel: `+${bAtk} Attaque` });
-        await showAppAlert("Lascar recruté !", "💪 Recrutement");
-      } else if (pData.type === 'pr') {
-        localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: pData.data.lvl || 1, name: `Prostituée L${pData.data.lvl||1}`, revenue: pData.data.rev || 1000 };
-        await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
-      }
+      await finalizePurchaseExecution(pData);
       refreshHud();
     }
 
-    // --- COMBAT & OBJETS DE COMBAT ---
+    async function finalizePurchaseExecution(pData) {
+      const type = pData.type;
+      const data = pData.data;
+
+      if (pData.markKitanoWeapon) {
+        localPlayer.firstWeaponDoubled = true;
+      }
+
+      if (type === 'eq') {
+        const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
+        const bonus = data.atk || data.def || data.pm || 1;
+        const bTxt = data.atk ? `+${bonus} Attaque` : (data.def ? `+${bonus} Défense` : `+${bonus} PM`);
+        localPlayer.inventory.push({
+          id: 'item_' + Date.now(),
+          type: slot,
+          name: data.n,
+          price: pData.cost,
+          bonusVal: bonus,
+          bonusLabel: bTxt,
+          isFirearm: !!data.isFirearm,
+          desc: data.desc || `Confère ${bTxt}`
+        });
+        await showAppAlert(`${data.n} ajouté au Sac !`, "📦 Achat Confirmé");
+      } else if (type === 'gb') {
+        const bAtk = data.atk || (data.lvl === 2 ? 2 : 1);
+        localPlayer.musclesOnPerson.push({ id: 'gb_' + Date.now(), type: 'MUSCLE', level: data.lvl || 1, name: `Lascar L${data.lvl||1}`, bonusVal: bAtk, bonusLabel: `+${bAtk} Attaque` });
+        await showAppAlert("Lascar recruté !", "💪 Recrutement");
+      } else if (type === 'pr') {
+        localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée L${data.lvl||1}`, revenue: data.rev || 1000 };
+        await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
+      }
+    }
+
     function resetCombatModifiers() {
       combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
     }
 
-    function isFirearm(wName) {
-      if (!wName) return false;
+    // Détection fiable d'arme à feu (via le booléen du catalog.json ou le nom)
+    function isFirearm(weaponObj) {
+      if (!weaponObj) return false;
+      if (typeof weaponObj === 'object' && weaponObj.isFirearm !== undefined) {
+        return weaponObj.isFirearm === true;
+      }
+      const wName = typeof weaponObj === 'string' ? weaponObj : (weaponObj.name || '');
       const l = wName.toLowerCase();
-      if (l.includes('batte') || l.includes('poing') || l.includes('couteau') || l.includes('mains')) return false;
-      return l.includes('revolver') || l.includes('pistolet') || l.includes('fusil') || l.includes('mitraillette') || l.includes('canon') || l.includes('gun');
+      if (l.includes('batte') || l.includes('poing') || l.includes('couteau') || l.includes('cran') || l.includes('hache') || l.includes('mains')) return false;
+      return l.includes('revolver') || l.includes('pistolet') || l.includes('fusil') || l.includes('pompe') || l.includes('mitraillette') || l.includes('canon') || l.includes('gun');
     }
 
     async function openCombatModal() {
@@ -1667,7 +1866,6 @@
       document.getElementById('combatTargetSelectionBox').classList.remove('hidden');
       document.getElementById('btnInitiateFightAction').classList.remove('hidden');
       document.getElementById('combatAdversaryTag').classList.add('hidden');
-      // Masque le bouton Prêt tant que le duel n'est pas engagé
       document.getElementById('btnToggleCombatReady').classList.add('hidden');
       document.getElementById('combatLiveLog').innerHTML = `<p class="text-slate-400 italic">Sélectionnez votre cible et cliquez sur Engager le Combat...</p>`;
       isCombatReady = false;
@@ -1701,7 +1899,7 @@
       const container = document.getElementById('combatItemsChecklist');
       container.innerHTML = items.map(item => {
         const isBP = (item.eff === 'double_weapon_atk');
-        const hasFA = isFirearm(localPlayer.equipped.weapon ? localPlayer.equipped.weapon.name : '');
+        const hasFA = isFirearm(localPlayer.equipped.weapon);
         const dis = isBP && !hasFA;
         return `
           <label class="p-2.5 glass-panel rounded-xl flex items-center justify-between border-white/10 ${dis ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}">
@@ -1764,7 +1962,6 @@
       }
     }
 
-    // --- SCANNER QR CODE ---
     async function openQrScannerModal() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       document.getElementById('modalQrScanner').classList.remove('hidden');
@@ -1810,8 +2007,16 @@
       if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
 
       const type = data.t;
+
+      // 1. OUVERTURE DE LA BOUTIQUE ARMURERIE
+      if (type === 'armurerie') {
+        return openArmoryShopModal();
+      }
+
+      // 2. CASE GROSSISTE
       if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
 
+      // 3. CARTES OBJETS
       if (type === 'obj') {
         if (data.eff === 'cash') {
           const v = data.val || 1000;
@@ -1854,9 +2059,11 @@
         let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
         let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
         if (teamAtk < data.req || members < data.m) return showAppAlert(`Requis : ${data.req} Atk et ${data.m} membres.`, "💥 Échec Braquage");
-        localPlayer.pocketCash += data.c; localPlayer.drugs += (data.d || 0);
+        localPlayer.pocketCash += data.c;
+        localPlayer.drugs += (data.d || 0);
         await showAppAlert(`+${data.c.toLocaleString()} € gagnés !`, "🏆 Braquage Réussi");
         refreshHud();
+        return;
       }
     }
 
@@ -1867,6 +2074,7 @@
     }
 
     async function confirmAlliance() {
+      if (!isMyTurnToPlay) return;
       const sel = document.getElementById('allianceTargetSelect');
       const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
       if (!target) return showAppAlert("Choisissez un Caïd.", "Alliance");
