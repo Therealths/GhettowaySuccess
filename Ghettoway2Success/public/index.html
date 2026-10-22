@@ -29,16 +29,23 @@
     .screen-view { display: none !important; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; padding-bottom: max(16px, env(safe-area-inset-bottom)); animation: fadeIn 0.2s ease-out; }
     .screen-view.active { display: flex !important; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    .glass-panel { background: rgba(18, 20, 29, 0.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .glass-panel { background: rgba(18, 20, 29, 0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.12); }
     .glass-input { background: rgba(8, 9, 14, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); }
     .carousel-wrapper { position: relative; width: 100%; overflow: hidden; padding: 4px 0; }
     .carousel-track { display: flex; gap: 16px; transition: transform 0.1s linear; will-change: transform; }
     .carousel-card { flex: 0 0 190px; height: 230px; border-radius: 22px; overflow: hidden; position: relative; background: #11131c; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.35; transform: scale(0.92); filter: grayscale(40%); }
     .carousel-card.is-active { opacity: 1; transform: scale(1.04); filter: grayscale(0%); border: 1.5px solid rgba(255, 255, 255, 0.35); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7); }
     .ghetto-home-bg { background-image: linear-gradient(to bottom, rgba(5,6,9,0) 0%, rgba(5,6,9,0.3) 45%, rgba(5,6,9,0.95) 85%), url('wallpaper.jpg'); background-size: cover; background-position: center; }
-    .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.75) 0%, rgba(9,10,16,0.88) 50%, rgba(9,10,16,0.98) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center; }
-    .shop-scroll-container { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 14px; -webkit-overflow-scrolling: touch; }
-    .shop-card { flex: 0 0 240px; scroll-snap-align: center; border-radius: 24px; transition: transform 0.2s ease; }
+    
+    /* Fonds d'écran boutiques épurés pour bien voir l'image et le titre intégré */
+    .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
+    .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
+    .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
+
+    /* Cartes réduites pour dégager le fond d'écran */
+    .shop-scroll-container { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 10px; -webkit-overflow-scrolling: touch; }
+    .shop-card { flex: 0 0 185px; scroll-snap-align: center; border-radius: 20px; transition: transform 0.2s ease; }
+
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.15); border-radius: 6px; }
     input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: #facc15; cursor: pointer; -webkit-appearance: none; margin-top: -6px; box-shadow: 0 0 10px rgba(250, 204, 21, 0.6); }
@@ -48,7 +55,6 @@
 </head>
 <body>
   <div id="app-container">
-
     <!-- PAGE 1 : ACCUEIL -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full">
@@ -60,7 +66,6 @@
         </button>
       </div>
     </div>
-
     <!-- PAGE 2 : CRÉER UN SALON -->
     <div id="page-2" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div>
@@ -90,7 +95,6 @@
         <span>Créer & Lancer le Tirage</span><i class="ph-bold ph-arrow-right"></i>
       </button>
     </div>
-
     <!-- PAGE 3 : REJOINDRE -->
     <div id="page-3" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div>
@@ -105,7 +109,6 @@
       </div>
       <button onclick="navTo('page-1')" class="w-full py-3 glass-panel text-slate-400 font-bold rounded-2xl text-xs uppercase">Retour Accueil</button>
     </div>
-
     <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center justify-between">
       <div class="flex items-center justify-between w-full pt-1">
@@ -139,7 +142,6 @@
         </button>
       </div>
     </div>
-
     <!-- PAGE LOBBY : SALLE D'ATTENTE -->
     <div id="page-lobby" class="screen-view p-5 justify-between bg-ghetto-surface">
       <div>
@@ -164,7 +166,6 @@
         </button>
       </div>
     </div>
-
     <!-- PAGE 5 : FLASH RADIO -->
     <div id="page-5" class="screen-view p-5 justify-between bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
       <div class="pt-1 text-center">
@@ -184,7 +185,6 @@
         <span>Passer à l'action des Caïds</span><i class="ph-bold ph-arrow-right"></i>
       </button>
     </div>
-
     <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) -->
     <div id="page-6" class="screen-view p-3 bg-ghetto-surface justify-between relative">
       <!-- OVERLAY TOUR PAR TOUR -->
@@ -198,14 +198,12 @@
           </div>
         </div>
       </div>
-
       <div class="flex flex-col h-full justify-between space-y-2">
         <!-- BANDEAU VISUEL AVEC BOUTON RETOUR EN HAUT À GAUCHE -->
         <div class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center z-10 shadow-md"><i class="ph-bold ph-caret-left text-sm"></i></button>
         </div>
-
         <!-- STATS -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10"><span id="hudHearts" class="text-base tracking-widest cursor-pointer select-none" onclick="cyclePlayerHearts()">❤️❤️❤️</span></div>
@@ -213,7 +211,6 @@
           <div class="flex items-center justify-center gap-1.5 border-r border-white/10"><i class="ph-bold ph-shield text-sky-400 text-sm"></i><span id="hudDef" class="text-base font-black text-white">0</span></div>
           <div class="flex items-center justify-center gap-1.5"><span class="text-emerald-400 text-sm"><i class="ph-bold ph-person-simple-walk"></i></span><span id="hudCurrentPm" class="text-base font-black text-white">8</span></div>
         </div>
-
         <!-- LASCARS & PROSTITUÉE -->
         <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
           <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 flex items-center justify-between gap-1">
@@ -234,7 +231,6 @@
             </div>
           </div>
         </div>
-
         <!-- FLASH RADIO MINI -->
         <div class="w-full py-1.5 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 flex-shrink-0">
           <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
@@ -243,7 +239,6 @@
             <div class="flex items-baseline gap-1 overflow-hidden text-xs truncate"><h4 id="hudRadioReminderTitle" class="font-black text-white truncate text-[11px]">Canicule Urbaine</h4><p id="hudRadioReminderDesc" class="text-[10px] text-slate-300 truncate">les véhicules motorisés perdent -2 PM</p></div>
           </div>
         </div>
-
         <!-- ONGLETS -->
         <div class="flex-1 flex flex-col min-h-0">
           <div class="flex items-end gap-1.5 px-1 pt-1 flex-shrink-0">
@@ -251,7 +246,6 @@
             <button id="mainTabEquipment" onclick="switchMainCaidTab('equipment')" class="flex-1 py-2 px-2 rounded-t-xl font-bold text-xs uppercase flex items-center justify-center gap-1.5 text-slate-400 bg-white/5 border border-white/10"><i class="ph-bold ph-shield-chevron text-sm"></i><span>Équip. (<span id="hudEquipCount">0/3</span>)</span></button>
             <button id="mainTabInventory" onclick="switchMainCaidTab('inventory')" class="flex-1 py-2 px-2 rounded-t-xl font-bold text-xs uppercase flex items-center justify-center gap-1.5 text-slate-400 bg-white/5 border border-white/10"><i class="ph-bold ph-backpack text-sm"></i><span>Sac (<span id="hudItemCount">0</span>)</span></button>
           </div>
-
           <div id="mainTabsContentContainer" class="flex-1 px-1 py-2 bg-gradient-to-b from-[#141622] via-[#0d0f17] to-[#090a10] border-t-2 border-b-2 border-amber-400 flex flex-col justify-center overflow-hidden">
             <!-- VOLET ACTIONS -->
             <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
@@ -273,7 +267,6 @@
                 <button onclick="triggerPoliceInspection()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-sky-500/10 to-sky-950/20 border border-sky-500/35 text-sky-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-siren text-sm"></i><span class="text-xs font-black uppercase text-white">Contrôle</span></button>
               </div>
             </div>
-
             <!-- VOLET ÉQUIPEMENT -->
             <div id="panelEquipment" class="hidden flex-1 overflow-y-auto space-y-2.5 py-1 my-auto">
               <div class="p-3 bg-black/50 rounded-2xl border border-rose-500/30 flex items-center justify-between gap-2">
@@ -289,7 +282,6 @@
                 <div id="slotVehicleStatusContainer"><span class="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span></div>
               </div>
             </div>
-
             <!-- VOLET SAC -->
             <div id="panelInventory" class="hidden flex-1 overflow-y-auto space-y-2 py-1 my-auto">
               <div class="w-full p-2.5 rounded-xl bg-black/50 border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
@@ -308,7 +300,6 @@
             </div>
           </div>
         </div>
-
         <div class="flex-shrink-0 pt-1 pb-1 border-t border-white/10">
           <button onclick="endCurrentPlayerTurn()" class="w-full py-3 bg-gradient-to-r from-[#161822] via-[#24171d] to-[#450a0a] border border-rose-950/60 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
             <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé (Dé Patrouille)</span>
@@ -317,52 +308,105 @@
       </div>
     </div>
 
-    <!-- ================= MODALE BOUTIQUE ARMURERIE (AVEC wp_armurerie.jpg & catalog.json) ================= -->
-    <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 p-5 flex flex-col justify-between armory-bg">
-      <div>
-        <!-- En-tête Boutique -->
-        <div class="flex items-center justify-between border-b border-white/15 pb-3 mb-3">
-          <div>
-            <span class="text-[9px] font-mono uppercase tracking-widest text-ghetto-gold block font-bold">Case Plateau</span>
-            <h3 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <i class="ph-bold ph-crosshair text-rose-500"></i> Boutique Armurerie
-            </h3>
-          </div>
-          <button onclick="closeModal('modalArmoryShop')" class="w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-300 hover:text-white"><i class="ph-bold ph-x text-base"></i></button>
-        </div>
+    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE ÉPURÉE (wp_armurerie.jpg, sans bandeau titre) ================= -->
+    <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end armory-bg">
+      <!-- Bouton fermeture discret en haut à droite -->
+      <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
+        <i class="ph-bold ph-x text-base"></i>
+      </button>
 
+      <!-- Bloc inférieur compact pour laisser voir le fond d'écran -->
+      <div class="w-full space-y-2 mt-auto">
         <!-- Rappel des fonds disponibles -->
-        <div class="p-2.5 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono mb-3">
-          <div class="border-r border-white/10 pr-2">
-            <span class="text-[9px] text-amber-400 uppercase font-bold block">Cash en Poche</span>
-            <span id="armoryPocketCashDisplay" class="text-sm font-black text-white">5 000 €</span>
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono">
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
+            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
+            <span id="armoryPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
           </div>
-          <div class="pl-2">
-            <span class="text-[9px] text-sky-400 uppercase font-bold block">Coffre QG</span>
-            <span id="armorySafeCashDisplay" class="text-sm font-black text-white">0 €</span>
+          <div class="pl-2 flex items-center justify-between">
+            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
+            <span id="armorySafeCashDisplay" class="text-xs font-black text-white">0 €</span>
           </div>
         </div>
 
         <!-- 2 Onglets : Armes | Équipements -->
-        <div class="grid grid-cols-2 gap-2 p-1 bg-black/60 border border-white/10 rounded-2xl font-mono text-xs mb-2">
-          <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-2.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
+        <div class="grid grid-cols-2 gap-2 p-1 bg-black/60 border border-white/10 rounded-2xl font-mono text-xs">
+          <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-2 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
             <i class="ph-bold ph-sword"></i> Armes
           </button>
-          <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-2.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
+          <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-2 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
             <i class="ph-bold ph-shield"></i> Équipements
           </button>
         </div>
-      </div>
 
-      <!-- Carrousel de Cartes d'Articles -->
-      <div class="my-auto">
-        <span class="text-[10px] font-mono text-slate-400 block text-center mb-1"><i class="ph-bold ph-arrows-left-right"></i> Faites glisser pour parcourir le catalogue</span>
-        <div id="armoryCardsContainer" class="shop-scroll-container"></div>
-      </div>
+        <!-- Carrousel de Cartes d'Articles réduites -->
+        <div>
+          <span class="text-[9px] font-mono text-slate-300 block text-center mb-0.5"><i class="ph-bold ph-arrows-left-right"></i> Glisser pour parcourir</span>
+          <div id="armoryCardsContainer" class="shop-scroll-container"></div>
+        </div>
 
-      <button onclick="closeModal('modalArmoryShop')" class="w-full py-3.5 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
-        Quitter l'Armurerie
+        <button onclick="closeModal('modalArmoryShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
+          Quitter l'Armurerie
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (wp_club.jpg, plvl1.jpg & plvl2.jpg) ================= -->
+    <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end nightclub-bg">
+      <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
+        <i class="ph-bold ph-x text-base"></i>
       </button>
+
+      <div class="w-full space-y-2 mt-auto">
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono">
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
+            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
+            <span id="nightclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
+          </div>
+          <div class="pl-2 flex items-center justify-between">
+            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
+            <span id="nightclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[9px] font-mono text-pink-200 block text-center mb-0.5"><i class="ph-bold ph-arrows-left-right"></i> Choisissez une Escort à recruter</span>
+          <div id="nightclubCardsContainer" class="shop-scroll-container justify-center"></div>
+        </div>
+
+        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
+          Quitter le Nightclub
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (wp_sport.jpg, gblvl1.jpg & gblvl2.jpg) ================= -->
+    <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end sportclub-bg">
+      <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
+        <i class="ph-bold ph-x text-base"></i>
+      </button>
+
+      <div class="w-full space-y-2 mt-auto">
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono">
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
+            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
+            <span id="sportclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
+          </div>
+          <div class="pl-2 flex items-center justify-between">
+            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
+            <span id="sportclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[9px] font-mono text-sky-200 block text-center mb-0.5"><i class="ph-bold ph-arrows-left-right"></i> Choisissez un Lascar à recruter</span>
+          <div id="sportclubCardsContainer" class="shop-scroll-container justify-center"></div>
+        </div>
+
+        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
+          Quitter le Sportclub
+        </button>
+      </div>
     </div>
 
     <!-- MODALE CAPACITÉ SPÉCIALE CIBLÉE -->
@@ -381,7 +425,6 @@
         <button onclick="closeModal('modalTargetSpecial')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
-
     <!-- MODALE ALLIANCE REÇUE -->
     <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 max-w-sm mx-auto w-full text-center">
@@ -394,7 +437,6 @@
         </div>
       </div>
     </div>
-
     <!-- MODALE COMBAT DE RUE -->
     <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
@@ -402,7 +444,6 @@
           <h3 class="text-sm font-black text-rose-500 uppercase flex items-center gap-1.5"><i class="ph-bold ph-sword"></i> Combat de Rue</h3>
           <button onclick="abortCombat()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-
         <div id="combatTargetSelectionBox">
           <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
           <select id="combatTargetSelect" onchange="updateSelectedRivalDetailsCard()" class="w-full glass-input text-white p-2.5 rounded-xl text-xs font-bold outline-none"></select>
@@ -412,30 +453,24 @@
             <div><span class="text-[9px] text-purple-400 uppercase block font-bold">Chien</span><span id="targetPreviewDog" class="text-white font-black">Non</span></div>
           </div>
         </div>
-
         <div id="combatAdversaryTag" class="hidden text-center p-2 rounded-xl bg-white/5 border border-white/10 font-mono text-xs">
           <span>Adversaire : </span><strong id="combatOpponentNameDisplay" class="text-ghetto-gold uppercase">...</strong>
           <div id="combatOpponentForcesBar" class="text-[10px] text-slate-300 mt-0.5"></div>
         </div>
-
         <div class="grid grid-cols-2 gap-2 text-center font-mono">
           <div class="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30"><span class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut</span><div class="text-xl font-black text-white mt-0.5" id="arenaPlayerLiveAtk">1</div></div>
           <div class="p-2.5 rounded-2xl bg-sky-500/10 border border-sky-500/30"><span class="text-[9px] text-sky-400 uppercase font-bold">Votre Défense</span><div class="text-xl font-black text-white mt-0.5" id="arenaPlayerLiveDef">0</div></div>
         </div>
-
         <div class="p-2.5 rounded-xl bg-black/50 border border-white/10 min-h-[50px] max-h-20 overflow-y-auto text-[11px] font-mono space-y-1" id="combatLiveLog">
           <p class="text-slate-400 italic">Prêt pour le combat...</p>
         </div>
-
         <div class="grid grid-cols-2 gap-2">
           <button onclick="openCombatItemSelectorModal()" class="py-3 glass-panel border border-amber-500/40 text-amber-300 font-black uppercase rounded-xl text-xs flex items-center justify-center gap-1.5"><i class="ph-bold ph-backpack text-sm"></i><span>Objets</span></button>
           <button id="btnToggleCombatReady" onclick="toggleCombatReadyState()" class="hidden py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black uppercase rounded-xl text-xs flex items-center justify-center gap-1.5"><i class="ph-bold ph-check text-sm"></i><span id="btnCombatReadyLabel">Prêt au combat</span></button>
         </div>
-
         <button id="btnInitiateFightAction" onclick="initiateCombatEngagement()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase rounded-2xl text-xs shadow-lg">Engager le Combat</button>
       </div>
     </div>
-
     <!-- MODALE SÉLECTEUR D'OBJETS DE COMBAT -->
     <div id="modalCombatItemSelector" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-rose-500/40 max-w-sm mx-auto w-full">
@@ -447,7 +482,6 @@
         <button id="btnConfirmCombatItems" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase rounded-2xl text-xs">Activer la Sélection</button>
       </div>
     </div>
-
     <!-- MODALE DÉCOUVERTE D'OBJET -->
     <div id="modalLootDiscovery" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">
@@ -460,7 +494,6 @@
         <button id="btnLootAction" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Récupérer</button>
       </div>
     </div>
-
     <!-- MODALE CHOIX DU COMPTE A DÉBITER -->
     <div id="modalPaymentChoice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full">
@@ -489,7 +522,6 @@
         <button onclick="closeModal('modalPaymentChoice')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
-
     <!-- MODALE GROSSISTE -->
     <div id="modalGrossiste" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-emerald-500/40 shadow-2xl">
@@ -517,7 +549,6 @@
         <button onclick="confirmGrossistePurchase()" class="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase rounded-2xl text-xs">Acheter (Cash uniquement)</button>
       </div>
     </div>
-
     <!-- MODALE TRANSFERT QG -->
     <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
@@ -546,7 +577,6 @@
         <button onclick="confirmTransferAction()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Confirmer le Transfert</button>
       </div>
     </div>
-
     <!-- MODALE ALLIANCE -->
     <div id="modalAlliance" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
@@ -560,7 +590,6 @@
         <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
-
     <!-- MODALE SCANNER -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-5 flex flex-col justify-between">
       <div class="pt-1">
@@ -575,18 +604,17 @@
         </div>
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
           <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
+          <button onclick='processQrPayload("{\"t\":\"nightclub\"}")' class="p-2 glass-panel rounded-xl text-left text-pink-300 font-bold border border-pink-500/40">👠 Nightclub (Prostituées)</button>
+          <button onclick='processQrPayload("{\"t\":\"sportclub\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300 font-bold border border-sky-500/40">💪 Sportclub (Lascars)</button>
           <button onclick='processQrPayload("{\"t\":\"grossiste\",\"p\":1000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold border border-emerald-500/40">🌿 Case Grossiste</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Balle perforante\",\"eff\":\"double_weapon_atk\",\"dur\":\"combat\",\"desc\":\"Dégâts arme à feu doublés\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">💥 Balle perforante</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Sifflet\",\"eff\":\"stray_dog\",\"dur\":\"tour\",\"desc\":\"Rallie le Chien Errant (+2 Atk / +2 Def)\"}")' class="p-2 glass-panel rounded-xl text-left text-purple-300">🐕 Sifflet (Chien)</button>
-          <button onclick='processQrPayload("{\"t\":\"gb\",\"lvl\":1,\"p\":1500,\"atk\":1}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">💪 Lascar L1 (1500€)</button>
-          <button onclick='processQrPayload("{\"t\":\"pr\",\"lvl\":1,\"p\":2000,\"rev\":1000}")' class="p-2 glass-panel rounded-xl text-left text-pink-300">👠 Prostituée L1</button>
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (3Atk/2M)</button>
         </div>
       </div>
       <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase">Fermer</button>
     </div>
-
     <!-- MODALE PATROUILLE -->
     <div id="modalPatrolDice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
@@ -599,7 +627,6 @@
         <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl">Passer &rarr;</button>
       </div>
     </div>
-
     <!-- MODALES SYSTÈME STYLISÉES -->
     <div id="modalAppAlert" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">
@@ -608,7 +635,6 @@
         <button id="btnAppAlertOk" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Compris</button>
       </div>
     </div>
-
     <div id="modalAppConfirm" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-cyan-500/40 max-w-sm mx-auto w-full text-center">
         <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-300 mx-auto flex items-center justify-center text-2xl border border-sky-400/40"><i class="ph-bold ph-question"></i></div>
@@ -619,9 +645,7 @@
         </div>
       </div>
     </div>
-
   </div>
-
   <script>
     // --- CATALOGUE ARMURERIE (Chargé depuis catalog.json + copie de secours) ---
     let ARMORY_CATALOG = [
@@ -637,91 +661,104 @@
       { id: "ar_crs", categorie: "equipement", slot: "ARMOR", nom: "Armure de CRS", prix: 12000, bonusVal: 10, bonusLabel: "+10 Défense", isFirearm: false, image: "equip-crs.jpg", desc: "Robocop style" }
     ];
 
+    // --- CATALOGUE NIGHTCLUB (Prostituées : plvl1.jpg & plvl2.jpg) ---
+    const NIGHTCLUB_CATALOG = [
+      { id: "pr_lvl1", lvl: 1, nom: "Prostituée Niv. 1", prix: 2000, rev: 1000, bonusLabel: "+1 000 € / tour au QG", image: "plvl1.jpg", desc: "Escort débutante à ramener au QG." },
+      { id: "pr_lvl2", lvl: 2, nom: "Prostituée Niv. 2", prix: 4000, rev: 2500, bonusLabel: "+2 500 € / tour au QG", image: "plvl2.jpg", desc: "Escort VIP haut de gamme, rente élevée." }
+    ];
+
+    // --- CATALOGUE SPORTCLUB (Lascars : gblvl1.jpg & gblvl2.jpg) ---
+    const SPORTCLUB_CATALOG = [
+      { id: "gb_lvl1", lvl: 1, nom: "Lascar Niv. 1", prix: 1500, atk: 1, bonusLabel: "+1 Attaque", image: "gblvl1.jpg", desc: "Homme de main solide pour épauler ton Caïd." },
+      { id: "gb_lvl2", lvl: 2, nom: "Lascar Niv. 2", prix: 3000, atk: 2, bonusLabel: "+2 Attaque", image: "gblvl2.jpg", desc: "Gros bras surentraîné à la salle de sport." }
+    ];
+
     fetch('/catalog.json')
       .then(r => r.json())
-      .then(json => { if (json && Array.isArray(json.armurerie)) ARMORY_CATALOG = json.armurerie; })
+      .then(json => {
+        if (json && Array.isArray(json.armurerie)) {
+          ARMORY_CATALOG = json.armurerie.map(item => {
+            if (item.id === 'wp_axe' || (item.nom && item.nom.toLowerCase().includes('hache'))) {
+              item.image = 'arme-axe.jpg';
+            }
+            return item;
+          });
+        }
+      })
       .catch(() => {});
 
     let currentArmoryCategory = 'arme';
-
     function openArmoryShopModal() {
       document.getElementById('armoryPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('armorySafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
       switchArmoryTab('arme');
       document.getElementById('modalArmoryShop').classList.remove('hidden');
     }
-
     function switchArmoryTab(cat) {
       currentArmoryCategory = cat;
       const bW = document.getElementById('tabBtnArmoryWeapons');
       const bA = document.getElementById('tabBtnArmoryArmor');
       if (cat === 'arme') {
-        bW.className = "py-2.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition";
-        bA.className = "py-2.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+        bW.className = "py-2 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition";
+        bA.className = "py-2 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
       } else {
-        bA.className = "py-2.5 rounded-xl font-black uppercase bg-sky-500 text-black flex items-center justify-center gap-1.5 shadow-lg transition";
-        bW.className = "py-2.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+        bA.className = "py-2 rounded-xl font-black uppercase bg-sky-500 text-black flex items-center justify-center gap-1.5 shadow-lg transition";
+        bW.className = "py-2 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
       }
       renderArmoryCards();
     }
-
     function renderArmoryCards() {
       const container = document.getElementById('armoryCardsContainer');
       const items = ARMORY_CATALOG.filter(it => it.categorie === currentArmoryCategory);
       container.innerHTML = items.map(item => {
         const isWeapon = item.categorie === 'arme';
+        const imgFile = (item.id === 'wp_axe' || (item.nom && item.nom.toLowerCase().includes('hache'))) ? 'arme-axe.jpg' : item.image;
         const badgeColor = isWeapon ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40';
         const displayBonus = isWeapon ? `+${item.bonusVal} Attaque` : `+${item.bonusVal} Défense`;
-        const firearmBadge = item.isFirearm ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[9px] font-bold">🔥 Arme à feu</span>` : '';
-
+        const firearmBadge = item.isFirearm ? `<span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[8px] font-bold">🔥 Feu</span>` : '';
         return `
-          <div class="shop-card glass-panel p-4 flex flex-col justify-between border border-white/15 shadow-2xl">
+          <div class="shop-card glass-panel p-3 flex flex-col justify-between border border-white/15 shadow-2xl">
             <div>
-              <div class="relative w-full h-36 rounded-2xl overflow-hidden bg-black/70 border border-white/10 mb-3 flex items-center justify-center">
-                <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+                <img src="${imgFile}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="hidden flex-col items-center justify-center text-slate-500">
-                  <i class="ph-bold ${isWeapon ? 'ph-sword text-rose-400' : 'ph-shield text-sky-400'} text-4xl"></i>
-                  <span class="text-[9px] font-mono mt-1">${item.image}</span>
+                  <i class="ph-bold ${isWeapon ? 'ph-sword text-rose-400' : 'ph-shield text-sky-400'} text-3xl"></i>
+                  <span class="text-[8px] font-mono mt-1">${imgFile}</span>
                 </div>
               </div>
-              <div class="flex items-center justify-between gap-1 mb-1">
-                <span class="px-2 py-0.5 rounded-md border ${badgeColor} font-mono text-[10px] font-black">${displayBonus}</span>
+              <div class="flex items-center justify-between gap-1 mb-0.5">
+                <span class="px-1.5 py-0.5 rounded-md border ${badgeColor} font-mono text-[9px] font-black">${displayBonus}</span>
                 ${firearmBadge}
               </div>
-              <h4 class="text-sm font-black text-white uppercase truncate mt-1">${item.nom}</h4>
-              <p class="text-[11px] text-slate-300 italic mt-0.5 leading-snug line-clamp-2">"${item.desc}"</p>
+              <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+              <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
             </div>
-            <div class="pt-3 mt-3 border-t border-white/10">
-              <div class="flex items-center justify-between font-mono mb-2">
-                <span class="text-[10px] text-slate-400 uppercase">Prix :</span>
-                <span class="text-sm font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT (0 €)' : item.prix.toLocaleString() + ' €'}</span>
+            <div class="pt-2 mt-2 border-t border-white/10">
+              <div class="flex items-center justify-between font-mono mb-1.5">
+                <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+                <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
               </div>
-              <button onclick="buyArmoryCatalogItem('${item.id}')" class="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-1.5">
+              <button onclick="buyArmoryCatalogItem('${item.id}')" class="w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
                 <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
               </button>
             </div>
           </div>`;
       }).join('');
     }
-
     async function buyArmoryCatalogItem(itemId) {
       const item = ARMORY_CATALOG.find(i => i.id === itemId);
       if (!item) return;
-
       let cost = item.prix || 0;
       const isWeapon = item.categorie === 'arme';
-
       // Malus Tonteushi Kitano : 1er achat d'arme payé le double
       if (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled && cost > 0) {
         cost *= 2;
         await showAppAlert(`Malus Tonteushi Kitano : votre premier achat d'arme à l'Armurerie coûte le double (${cost.toLocaleString()} €) !`, "🥋 Malus Kitano");
       }
-
       const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
       if (totalFunds < cost) {
         return showAppAlert(`Fonds totaux insuffisants !\nPrix requis : ${cost.toLocaleString()} €\nTotal disponible (Poche + QG) : ${totalFunds.toLocaleString()} €.`, "❌ Achat Impossible");
       }
-
       const pPayload = {
         type: 'eq',
         cost: cost,
@@ -736,17 +773,117 @@
           desc: item.desc
         }
       };
-
       closeModal('modalArmoryShop');
-
-      // Si l'objet est gratuit (ex. Bouée canard à 0 €)
       if (cost === 0) {
         await finalizePurchaseExecution(pPayload);
         refreshHud();
         return;
       }
-
       openPaymentChoiceModal(pPayload);
+    }
+
+    // --- NIGHTCLUB (Prostituées) ---
+    function openNightclubShopModal() {
+      document.getElementById('nightclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
+      document.getElementById('nightclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
+      const container = document.getElementById('nightclubCardsContainer');
+      const isMaryFree = (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed);
+      container.innerHTML = NIGHTCLUB_CATALOG.map(item => {
+        const displayPrice = (item.lvl === 1 && isMaryFree) ? 'GRATUIT (Bonus)' : `${item.prix.toLocaleString()} €`;
+        return `
+          <div class="shop-card glass-panel p-3 flex flex-col justify-between border border-pink-500/30 shadow-2xl">
+            <div>
+              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+                <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="hidden flex-col items-center justify-center text-pink-400">
+                  <i class="ph-bold ph-high-heel text-3xl"></i>
+                  <span class="text-[8px] font-mono mt-1">${item.image}</span>
+                </div>
+              </div>
+              <span class="px-1.5 py-0.5 rounded-md border bg-pink-500/20 text-pink-300 border-pink-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
+              <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+              <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
+            </div>
+            <div class="pt-2 mt-2 border-t border-white/10">
+              <div class="flex items-center justify-between font-mono mb-1.5">
+                <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+                <span class="text-xs font-black text-ghetto-gold">${displayPrice}</span>
+              </div>
+              <button onclick="buyNightclubItem(${item.lvl})" class="w-full py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+                <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+      document.getElementById('modalNightclubShop').classList.remove('hidden');
+    }
+
+    async function buyNightclubItem(lvl) {
+      const item = NIGHTCLUB_CATALOG.find(i => i.lvl === lvl);
+      if (!item) return;
+      if (localPlayer.prostituteInTransit) {
+        return showAppAlert("Vous avez déjà 1 prostituée en transit ! Déposez-la d'abord au QG.", "Limite Atteinte");
+      }
+      let cost = item.prix;
+      const dataPayload = { t: 'pr', lvl: item.lvl, p: item.prix, rev: item.rev, n: item.nom };
+      closeModal('modalNightclubShop');
+      if (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed && item.lvl === 1) {
+        localPlayer.freeProstituteClaimed = true;
+        await finalizePurchaseExecution({ type: 'pr', data: dataPayload, cost: 0, name: item.nom });
+        refreshHud();
+        return;
+      }
+      if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
+        return showAppAlert("Fonds totaux insuffisants !", "❌ Achat Impossible");
+      }
+      openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
+    }
+
+    // --- SPORTCLUB (Lascars) ---
+    function openSportclubShopModal() {
+      document.getElementById('sportclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
+      document.getElementById('sportclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
+      const container = document.getElementById('sportclubCardsContainer');
+      container.innerHTML = SPORTCLUB_CATALOG.map(item => `
+        <div class="shop-card glass-panel p-3 flex flex-col justify-between border border-sky-500/30 shadow-2xl">
+          <div>
+            <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+              <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="hidden flex-col items-center justify-center text-sky-400">
+                <i class="ph-bold ph-barbell text-3xl"></i>
+                <span class="text-[8px] font-mono mt-1">${item.image}</span>
+              </div>
+            </div>
+            <span class="px-1.5 py-0.5 rounded-md border bg-sky-500/20 text-sky-300 border-sky-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
+            <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+            <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
+          </div>
+          <div class="pt-2 mt-2 border-t border-white/10">
+            <div class="flex items-center justify-between font-mono mb-1.5">
+              <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+              <span class="text-xs font-black text-ghetto-gold">${item.prix.toLocaleString()} €</span>
+            </div>
+            <button onclick="buySportclubItem(${item.lvl})" class="w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+              <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
+            </button>
+          </div>
+        </div>`).join('');
+      document.getElementById('modalSportclubShop').classList.remove('hidden');
+    }
+
+    async function buySportclubItem(lvl) {
+      const item = SPORTCLUB_CATALOG.find(i => i.lvl === lvl);
+      if (!item) return;
+      if (localPlayer.musclesOnPerson.length >= 3) {
+        return showAppAlert("Vous avez déjà 3 Lascars maximum sur le terrain !", "Limite Atteinte");
+      }
+      const cost = item.prix;
+      if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
+        return showAppAlert("Fonds totaux insuffisants !", "❌ Achat Impossible");
+      }
+      const dataPayload = { t: 'gb', lvl: item.lvl, p: item.prix, atk: item.atk, n: item.nom };
+      closeModal('modalSportclubShop');
+      openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
     }
 
     // --- MODALES SYSTÈME ---
@@ -759,7 +896,6 @@
         document.getElementById('btnAppAlertOk').onclick = () => { m.classList.add('hidden'); res(); };
       });
     }
-
     function showAppConfirm(msg, title = "Confirmation") {
       return new Promise(res => {
         document.getElementById('appConfirmTitle').innerText = title;
@@ -770,13 +906,11 @@
         document.getElementById('btnAppConfirmNo').onclick = () => { m.classList.add('hidden'); res(false); };
       });
     }
-
     const myPlayerToken = (() => {
       let t = localStorage.getItem('g2s_player_token');
       if (!t) { t = 'tok_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36); localStorage.setItem('g2s_player_token', t); }
       return t;
     })();
-
     const CAID_ROSTER = [
       { id: 'caid_1', name: 'Burger Queen', imageFile: 'bleu.jpg', bannerFile: 'bandeau-bleu.jpg', hex: '#3b82f6', bonus: 'Démarre avec 1 Kebab en inventaire (soigne 1 Cœur).', malus: 'Démarrage poussif : commence le tour 1 avec 0 PM.', skillName: 'Boule de Graisse', skillDesc: 'Se met en boule et roule jusqu\'à 5 cases.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'kebab_1', type: 'CONSUMABLE', name: 'Kebab', desc: 'Restaure 1 Cœur de Vie' }], unarmedAtk: 1 },
       { id: 'caid_2', name: 'Joint Dujardin', imageFile: 'rouge.jpg', bannerFile: 'bandeau-rouge.jpg', hex: '#ef4444', bonus: '+2 000 € au départ (7 000 € cash).', malus: '0 kg de drogue au départ.', skillName: 'Tour de Passe-Passe', skillDesc: 'Échange sa position avec un rival à 5 cases max.', startCash: 7000, startDrug: 0, startHearts: 3, startItems: [], unarmedAtk: 1 },
@@ -787,7 +921,6 @@
       { id: 'caid_7', name: 'Jamel Pépouze', imageFile: 'orange.jpg', bannerFile: 'bandeau-orange.jpg', hex: '#f97316', bonus: 'Démarre avec 1 Gilet pare-balles en main.', malus: 'Commence devant le Commissariat.', skillName: 'Vol à la Tire', skillDesc: 'Dérobe 1 objet à un rival à 1 case max.', startCash: 5000, startDrug: 5, startHearts: 3, startItems: [{ id: 'armor_jamel', type: 'ARMOR', name: 'Gilet pare-balles usagé', price: 2000, bonusVal: 1, bonusLabel: '+1 Défense', desc: 'Confère +1 en Défense' }], unarmedAtk: 1 },
       { id: 'caid_8', name: 'Weed-Nesday', imageFile: 'noir.jpg', bannerFile: 'bandeau-noir.jpg', hex: '#64748b', bonus: 'Démarre avec un Poing Américain (+1 Atk).', malus: 'Commence avec 2 Cœurs sur 3.', skillName: 'Siphon Vital', skillDesc: 'Aspire et vole 1 Cœur de Vie à un rival.', startCash: 5000, startDrug: 5, startHearts: 2, startItems: [{ id: 'weapon_poing', type: 'WEAPON', name: 'Poing Américain', price: 1500, bonusVal: 1, bonusLabel: '+1 Attaque', desc: 'Confère +1 en Attaque' }], unarmedAtk: 1 }
     ];
-
     let localPlayer = {
       caidId: localStorage.getItem('g2s_saved_caid_id') || null,
       caidName: null,
@@ -813,12 +946,10 @@
       allianceActive: false,
       activeAlly: null
     };
-
     function getMyCaid() {
       const id = localPlayer.caidId || localStorage.getItem('g2s_saved_caid_id');
       return CAID_ROSTER.find(c => c.id === id) || CAID_ROSTER[0];
     }
-
     let currentSession = { round: 1, currentRadioEvent: null };
     let selectedPlayerCount = 4;
     let carouselItems = [];
@@ -835,7 +966,6 @@
     let combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
     let currentDuelInfo = null;
     let isCombatReady = false;
-
     function updateRivalsList(players) {
       if (!players || !Array.isArray(players)) return;
       const meInServer = players.find(p => p.playerToken === myPlayerToken);
@@ -851,15 +981,12 @@
       takenCaidsInGame = players.filter(p => p.caidId).map(p => p.caidId);
       syncMultiplayerTargets();
     }
-
     const socket = typeof io !== 'undefined' ? io() : null;
-
     if (socket) {
       socket.on('connect', () => {
         const savedRoomId = localStorage.getItem('g2s_room_id');
         if (savedRoomId) socket.emit('reconnect_player', { roomId: savedRoomId, playerToken: myPlayerToken });
       });
-
       socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, players }) => {
         localStorage.setItem('g2s_room_id', roomId);
         if (player && player.caidId) {
@@ -876,9 +1003,7 @@
         } else if (localPlayer.caidId) navTo('page-lobby');
         else navTo('page-4');
       });
-
       socket.on('reconnect_failed', () => { localStorage.removeItem('g2s_room_id'); });
-
       socket.on('rooms_list', (list) => {
         const container = document.getElementById('gamesListContainer');
         if (!container) return;
@@ -891,10 +1016,8 @@
           container.appendChild(div);
         });
       });
-
       socket.on('room_created', ({ roomId }) => { localStorage.setItem('g2s_room_id', roomId); localPlayer.isHost = true; navTo('page-4'); });
       socket.on('room_joined', ({ roomId }) => { localStorage.setItem('g2s_room_id', roomId); localPlayer.isHost = false; navTo('page-4'); });
-
       socket.on('update_room_players', ({ players, isReady, maxPlayers }) => {
         updateRivalsList(players);
         const countEl = document.getElementById('lobbyPlayerCount');
@@ -924,14 +1047,12 @@
         }
         if (document.getElementById('page-4').classList.contains('active') && !localPlayer.caidId) initCarouselDOM();
       });
-
       socket.on('game_started', ({ round, radio, players }) => {
         updateRivalsList(players);
         currentSession.round = round;
         currentSession.currentRadioEvent = radio;
         startRoundPhase1();
       });
-
       socket.on('new_round_started', ({ round, radio, players }) => {
         if (players) updateRivalsList(players);
         currentSession.round = round;
@@ -944,7 +1065,6 @@
         localPlayer.activeAlly = null;
         startRoundPhase1();
       });
-
       socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens }) => {
         isMyTurnToPlay = (activePlayerToken === myPlayerToken) || (alliedTokens && alliedTokens.includes(myPlayerToken));
         const blocker = document.getElementById('turnBlockerOverlay');
@@ -954,7 +1074,6 @@
           document.getElementById('blockerCaidName').innerText = activeCaidName || "Caïd Adverse";
         }
       });
-
       socket.on('combat_duel_opened', ({ role, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog }) => {
         currentDuelInfo = { role, opponentCaid, opponentSocketId };
         isCombatReady = false;
@@ -970,22 +1089,18 @@
         updateArenaLiveStats();
         document.getElementById('modalCombat').classList.remove('hidden');
       });
-
       socket.on('combat_opponent_played_items', async ({ senderCaid, itemNames }) => {
         const log = document.getElementById('combatLiveLog');
         log.innerHTML += `<p class="text-rose-300">⚠️ <strong>${senderCaid}</strong> a joué : ${itemNames.join(', ')} !</p>`;
         log.scrollTop = log.scrollHeight;
         await showAppAlert(`${senderCaid} vient d'activer : ${itemNames.join(', ')} !\nVous pouvez aussi jouer des objets.`, "⚠️ Action Adverse");
       });
-
       socket.on('combat_opponent_is_ready', () => {
         const log = document.getElementById('combatLiveLog');
         log.innerHTML += `<p class="text-emerald-400 font-bold">✅ L'adversaire est prêt au combat !</p>`;
         log.scrollTop = log.scrollHeight;
       });
-
       socket.on('combat_ready_state_reset', () => { isCombatReady = false; updateCombatReadyButtonUI(); });
-
       socket.on('combat_finished_result', async ({ success, dmgNet, isAttacker, opponentCaid }) => {
         closeModal('modalCombat');
         closeModal('modalCombatItemSelector');
@@ -1007,7 +1122,6 @@
         currentDuelInfo = null;
         refreshHud();
       });
-
       socket.on('combat_aborted', async () => {
         closeModal('modalCombat');
         closeModal('modalCombatItemSelector');
@@ -1015,19 +1129,16 @@
         currentDuelInfo = null;
         await showAppAlert("Le combat a été annulé.", "Combat Interrompu");
       });
-
       socket.on('lost_stray_dog', async ({ thiefCaid }) => {
         localPlayer.strayDogActive = false;
         await showAppAlert(`${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant !`, "🐕 Chien Errant Volé");
         refreshHud();
       });
-
       socket.on('stray_dog_granted', async () => {
         localPlayer.strayDogActive = true;
         await showAppAlert("Le Chien Errant vous rejoint (+2 Atk / +2 Def pour ce tour) !", "🐕 Chien Rallié");
         refreshHud();
       });
-
       socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
         if (effectType === 'siphon') {
           localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
@@ -1050,59 +1161,48 @@
         }
         refreshHud();
       });
-
       socket.on('gain_stolen_item', async ({ item }) => {
         localPlayer.inventory.push(item);
         await showAppAlert(`${item.name} a été ajouté à votre Sac !`, "🎁 Butin Dérobé");
         refreshHud();
       });
-
       socket.on('alliance_request_received', (data) => {
         pendingAllianceRequest = data;
         document.getElementById('allianceReqSenderName').innerText = data.senderCaid || 'Un rival';
         document.getElementById('modalAllianceRequestReceived').classList.remove('hidden');
       });
-
       socket.on('alliance_confirmed', async ({ allyCaid, musclesCount }) => {
         localPlayer.allianceActive = true;
         localPlayer.activeAlly = { caid: allyCaid, grosBrasCount: musclesCount || 0, bonusAtk: (musclesCount || 0) * 2 };
         await showAppAlert(`Alliance scellée avec ${allyCaid} ! Vos interfaces sont débloquées.`, "🤝 Pacte Scellé");
       });
-
       socket.on('alliance_declined', async () => { await showAppAlert("Le Caïd adverse a refusé votre alliance.", "Alliance Refusée"); });
-
       socket.on('player_updated', (updatedPlayer) => {
         const idx = connectedRivals.findIndex(p => p.playerToken === updatedPlayer.playerToken || p.socketId === updatedPlayer.socketId);
         if (idx >= 0) connectedRivals[idx] = updatedPlayer;
         else connectedRivals.push(updatedPlayer);
         syncMultiplayerTargets();
       });
-
       socket.on('error_msg', async (msg) => { await showAppAlert(msg, "Erreur"); });
     }
-
     async function checkHospitalStatus() {
       if (localPlayer.hearts <= 0) {
         await showAppAlert("Vous n'avez plus aucun Cœur de Vie !\nVotre Caïd est évacué d'urgence à l'Hôpital.", "🚑 Transfert Hôpital");
         localPlayer.hearts = 1;
       }
     }
-
     function emitCreateGame() {
       const gName = document.getElementById('createGameName').value || 'Ghetto War';
       if (socket) socket.emit('create_room', { gameName: gName, maxPlayers: selectedPlayerCount, playerToken: myPlayerToken });
       else navTo('page-4');
     }
-
     function emitStartGame() { if (socket) socket.emit('start_game'); }
-
     function respondToAllianceRequest(accepted) {
       document.getElementById('modalAllianceRequestReceived').classList.add('hidden');
       if (!pendingAllianceRequest) return;
       if (socket) socket.emit('respond_alliance', { accepted, senderSocketId: pendingAllianceRequest.senderSocketId, senderToken: pendingAllianceRequest.senderToken });
       pendingAllianceRequest = null;
     }
-
     function syncMultiplayerTargets() {
       const combatSel = document.getElementById('combatTargetSelect');
       const allySel = document.getElementById('allianceTargetSelect');
@@ -1115,7 +1215,6 @@
       if (specialSel) specialSel.innerHTML = opts;
       updateSelectedRivalDetailsCard();
     }
-
     function updateSelectedRivalDetailsCard() {
       const sel = document.getElementById('combatTargetSelect');
       if (!sel) return;
@@ -1124,14 +1223,12 @@
       document.getElementById('targetPreviewEscort').innerText = (target && target.hasProstituteInTransit) ? 'Oui' : 'Non';
       document.getElementById('targetPreviewDog').innerText = (target && target.hasStrayDog) ? 'Oui' : 'Non';
     }
-
     function updateArenaLiveStats() {
       const a = document.getElementById('arenaPlayerLiveAtk');
       const d = document.getElementById('arenaPlayerLiveDef');
       if (a) a.innerText = getTotalAtk();
       if (d) d.innerText = getTotalDef();
     }
-
     function navTo(pageId) {
       document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
       const target = document.getElementById(pageId);
@@ -1139,7 +1236,6 @@
       if (pageId === 'page-4') initCarouselDOM();
       if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
     }
-
     async function confirmLeaveGame() {
       if (await showAppConfirm("Voulez-vous quitter définitivement cette partie ?", "Quitter")) {
         localStorage.removeItem('g2s_room_id');
@@ -1148,7 +1244,6 @@
         window.location.reload();
       }
     }
-
     function switchMainCaidTab(tabKey) {
       const pInter = document.getElementById('panelInteractions');
       const pEquip = document.getElementById('panelEquipment');
@@ -1176,9 +1271,7 @@
         renderInventoryList();
       }
     }
-
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
     function selectPlayerCount(count) {
       selectedPlayerCount = count;
       [2, 3, 4].forEach(c => {
@@ -1186,9 +1279,7 @@
         if (btn) btn.className = c === count ? "py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold" : "py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400";
       });
     }
-
     function getAvailableCaids() { return CAID_ROSTER.filter(c => !takenCaidsInGame.includes(c.id)); }
-
     function initCarouselDOM() {
       const track = document.getElementById('carouselTrack');
       const btnSpin = document.getElementById('btnSpinWheel');
@@ -1210,7 +1301,6 @@
         </div>`).join('');
       centerCarouselIndex(1, false, false);
     }
-
     function centerCarouselIndex(index, animate = true, applyActive = false) {
       const track = document.getElementById('carouselTrack');
       const wrapper = document.getElementById('carouselWrapper');
@@ -1223,7 +1313,6 @@
         else c.classList.remove('is-active');
       });
     }
-
     function startCarouselDraw() {
       if (isDrawingCarousel) return;
       const available = getAvailableCaids();
@@ -1236,15 +1325,12 @@
       const chosenCaid = available[chosenIdx];
       const finalIndex = available.length + chosenIdx;
       centerCarouselIndex(finalIndex, true, false);
-
       setTimeout(() => {
         const cardsAfter = document.querySelectorAll('.carousel-card');
         if (cardsAfter[finalIndex]) cardsAfter[finalIndex].classList.add('is-active');
-
         localPlayer.caidId = chosenCaid.id;
         localPlayer.caidName = chosenCaid.name;
         localStorage.setItem('g2s_saved_caid_id', chosenCaid.id);
-
         localPlayer.pocketCash = chosenCaid.startCash;
         localPlayer.drugs = chosenCaid.startDrug;
         localPlayer.safeCash = 0;
@@ -1258,18 +1344,15 @@
         localPlayer.prostituteInTransit = null;
         localPlayer.prostitutesAtSafeList = [];
         localPlayer.freeProstituteClaimed = false;
-
         document.getElementById('revealedName').innerText = chosenCaid.name;
         document.getElementById('revealedBonusText').innerText = chosenCaid.bonus;
         document.getElementById('revealedMalusText').innerText = chosenCaid.malus;
         document.getElementById('revealedSkill').innerText = `${chosenCaid.skillName} : ${chosenCaid.skillDesc}`;
         document.getElementById('revealedCash').innerText = `Cash: ${chosenCaid.startCash.toLocaleString()} €`;
         document.getElementById('revealedDrug').innerText = `Drogue: ${chosenCaid.startDrug} kg`;
-
         btnSpin.classList.add('hidden');
         document.getElementById('btnProceedLobby').classList.remove('hidden');
         takenCaidsInGame.push(chosenCaid.id);
-
         if (socket) {
           socket.emit('assign_caid', {
             caidId: chosenCaid.id,
@@ -1283,7 +1366,6 @@
         }
       }, 3300);
     }
-
     async function startRoundPhase1() {
       const ev = currentSession.currentRadioEvent || { title: "Descente massive", desc: "La police avance de +2 cases." };
       document.getElementById('radioRoundNumber').innerText = currentSession.round;
@@ -1296,9 +1378,7 @@
       }
       navTo('page-5');
     }
-
     function acknowledgeRadioCard() { navTo('page-6'); }
-
     function getTotalAtk() {
       let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
       if (localPlayer.equipped.weapon) atk += (localPlayer.equipped.weapon.bonusVal * (combatModifiers.doubleWeapon ? 2 : 1));
@@ -1308,22 +1388,18 @@
       atk += combatModifiers.flatAtkBonus;
       return Math.max(0, atk);
     }
-
     function getTotalDef() {
       let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0);
       if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
       if (localPlayer.strayDogActive) def += 2;
       return Math.max(0, def);
     }
-
     function getTotalPm() { return 8 + (localPlayer.equipped.vehicle ? localPlayer.equipped.vehicle.bonusVal : 0); }
-
     function cyclePlayerHearts() {
       if (!isMyTurnToPlay) return;
       localPlayer.hearts = localPlayer.hearts <= 1 ? 3 : localPlayer.hearts - 1;
       refreshHud();
     }
-
     async function clickMuscleSlot(idx) {
       if (!isMyTurnToPlay || !localPlayer.musclesOnPerson[idx]) return;
       const item = localPlayer.musclesOnPerson[idx];
@@ -1332,7 +1408,6 @@
         refreshHud();
       }
     }
-
     async function clickProstituteTransitSlot() {
       if (!isMyTurnToPlay) return;
       if (localPlayer.prostituteInTransit) {
@@ -1340,9 +1415,8 @@
           localPlayer.prostituteInTransit = null;
           refreshHud();
         }
-      } else await showAppAlert("Aucune prostituée en transit. Flashez son QR Code pour la recruter !", "Slot Vide");
+      } else await showAppAlert("Aucune prostituée en transit. Flashez le Nightclub pour en recruter !", "Slot Vide");
     }
-
     async function depositProstituteToSafe() {
       if (!isMyTurnToPlay || !localPlayer.prostituteInTransit) return;
       localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
@@ -1350,14 +1424,11 @@
       await showAppAlert("Prostituée installée au QG ! Sa rente sera versée au coffre à chaque manche.", "🎉 Sécurisation QG");
       refreshHud();
     }
-
     async function openSpecialAbilityPrompt() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour de jouer !", "Tour Inactif");
       if (localPlayer.specialUsedThisTurn) return showAppAlert("Capacité spéciale déjà utilisée durant ce tour !", "Capacité Épuisée");
-
       const caid = getMyCaid();
       const targetedSkills = ['caid_2', 'caid_4', 'caid_6', 'caid_7', 'caid_8'];
-
       if (targetedSkills.includes(caid.id)) {
         syncMultiplayerTargets();
         if (!connectedRivals || !connectedRivals.length) return showAppAlert("Aucun rival connecté à cibler !", "Cible Introuvable");
@@ -1377,22 +1448,18 @@
         refreshHud();
       }
     }
-
     async function executeTargetedSpecialPower() {
       const sel = document.getElementById('specialTargetSelect');
       const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
       if (!target) return showAppAlert("Sélectionnez une cible.", "Cible Requise");
-
       const caid = getMyCaid();
       closeModal('modalTargetSpecial');
-
       let effect = '';
       if (caid.id === 'caid_8') effect = 'siphon';
       else if (caid.id === 'caid_6') effect = 'shuriken';
       else if (caid.id === 'caid_4') effect = 'danse';
       else if (caid.id === 'caid_7') effect = 'steal_item';
       else if (caid.id === 'caid_2') effect = 'swap_pos';
-
       if (socket) {
         socket.emit('apply_special_to_target', {
           targetSocketId: target.socketId,
@@ -1401,23 +1468,19 @@
           senderCaid: caid.name
         });
       }
-
       if (effect === 'siphon') {
         localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
         await showAppAlert(`Siphon Vital réussi sur ${target.caidName || 'le rival'} : +1 Cœur !`, "🩸 Siphon Vital");
       } else {
         await showAppAlert(`${caid.skillName} lancée sur ${target.caidName || 'la cible'} !`, "⚡ Attaque Spéciale");
       }
-
       localPlayer.specialUsedThisTurn = true;
       refreshHud();
     }
-
     async function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const hasVehicle = !!localPlayer.equipped.vehicle;
       if (!await showAppConfirm(hasVehicle ? "Véhicule actif (Go-Fast 4+ disponible). Lancer le contrôle ?" : "Vous êtes à pied. Lancer la fouille ?", "🚨 Contrôle de Police")) return;
-
       const caid = getMyCaid();
       if (caid.id === 'caid_5' && !localPlayer.specialUsedThisTurn) {
         if (await showAppConfirm("Tenter votre 'Prière Miraculeuse' (50% d'annuler ce contrôle) ?", "🙏 J-Lo Gramme")) {
@@ -1427,13 +1490,11 @@
           await showAppAlert("PILE ! La prière échoue.", "🙏 Échec");
         }
       }
-
       if (hasVehicle) {
         const roll = Math.floor(Math.random() * 6) + 1;
         if (roll >= 4) return showAppAlert(`Go-Fast (${roll}) : SUCCÈS ! Vous semez la police !`, "⚡ Go-Fast");
         await showAppAlert(`Go-Fast (${roll}) : ÉCHEC ! Contrôle immédiat !`, "🛑 Barrage");
       }
-
       const pick = ['CLEAN', 'DRUGS_FOUND', 'WEAPONS_FOUND'][Math.floor(Math.random() * 3)];
       if (pick === 'CLEAN' || (pick === 'DRUGS_FOUND' && localPlayer.drugs === 0)) {
         await showAppAlert("R.A.S. ! La patrouille vous laisse repartir.", "👮 Contrôle");
@@ -1447,7 +1508,6 @@
         await showAppAlert("Armes saisies !\nVous êtes conduit immédiatement au poste de police !", "🚔 Embarquement au Poste");
       }
     }
-
     async function sellItem(idx) {
       if (!isMyTurnToPlay) return;
       const item = localPlayer.inventory[idx];
@@ -1459,7 +1519,6 @@
         refreshHud();
       }
     }
-
     async function discardItem(idx) {
       if (!isMyTurnToPlay) return;
       const item = localPlayer.inventory[idx];
@@ -1469,12 +1528,10 @@
         refreshHud();
       }
     }
-
     function refreshHud() {
       const caid = getMyCaid();
       const bannerImg = document.getElementById('caidBannerImg');
       if (bannerImg && caid.bannerFile) bannerImg.src = caid.bannerFile;
-
       let heartsStr = '';
       for (let i = 0; i < localPlayer.hearts; i++) heartsStr += '❤️';
       for (let i = localPlayer.hearts; i < 3; i++) heartsStr += '🖤';
@@ -1482,7 +1539,6 @@
       document.getElementById('hudAtk').innerText = getTotalAtk();
       document.getElementById('hudDef').innerText = getTotalDef();
       document.getElementById('hudCurrentPm').innerText = getTotalPm();
-
       for (let i = 0; i < 3; i++) {
         const slotEl = document.getElementById(`muscleSlot_${i}`);
         if (localPlayer.musclesOnPerson[i]) {
@@ -1495,7 +1551,6 @@
           slotEl.className = "w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer";
         }
       }
-
       const pSlot = document.getElementById('prostituteTransitSlot');
       if (localPlayer.prostituteInTransit) {
         const pr = localPlayer.prostituteInTransit;
@@ -1506,15 +1561,12 @@
         pSlot.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold">✕</span>`;
         pSlot.className = "w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer";
       }
-
       document.getElementById('hudPocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('hudSafeCash').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
       document.getElementById('hudDrugs').innerText = `🌿 ${localPlayer.drugs} kg`;
       document.getElementById('hudSafeDrugs').innerText = `📦 ${localPlayer.safeDrugs} kg`;
-
       document.getElementById('hudSpecialPowerName').innerText = caid.skillName;
       document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
-
       const btnSpec = document.getElementById('btnSpecialPower');
       const actionLabel = document.getElementById('hudSpecialActionBtnLabel');
       if (localPlayer.specialUsedThisTurn) {
@@ -1526,15 +1578,12 @@
         actionLabel.innerText = "Activer";
         actionLabel.className = "text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block";
       }
-
       let eqCount = (localPlayer.equipped.weapon ? 1 : 0) + (localPlayer.equipped.armor ? 1 : 0) + (localPlayer.equipped.vehicle ? 1 : 0);
       document.getElementById('hudEquipCount').innerText = `${eqCount}/3`;
       document.getElementById('hudItemCount').innerText = localPlayer.inventory.length;
-
       renderInventoryList();
       renderEquipmentSlotsView();
       updateArenaLiveStats();
-
       if (socket) {
         socket.emit('sync_player', {
           caidId: localPlayer.caidId,
@@ -1551,7 +1600,6 @@
         });
       }
     }
-
     function renderInventoryList() {
       const c = document.getElementById('inventoryItemsList');
       if (!c) return;
@@ -1582,7 +1630,6 @@
           </div>`;
       }).join('');
     }
-
     async function equipItemFromInventory(idx) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const item = localPlayer.inventory[idx];
@@ -1593,7 +1640,6 @@
       localPlayer.inventory.splice(idx, 1);
       refreshHud();
     }
-
     async function unequipSlot(slotKey) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const item = localPlayer.equipped[slotKey];
@@ -1602,12 +1648,10 @@
       localPlayer.equipped[slotKey] = null;
       refreshHud();
     }
-
     async function useItem(idx) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const it = localPlayer.inventory[idx];
       if (!it) return;
-
       if (it.eff === 'heal' || it.type === 'CONSUMABLE' || (it.name && it.name.includes('Kebab'))) {
         if (localPlayer.hearts >= 3) return showAppAlert("Vos Cœurs sont déjà au maximum !", "Santé Pleine");
         localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
@@ -1616,7 +1660,6 @@
         refreshHud();
         return;
       }
-
       if (it.eff === 'stray_dog') {
         const caid = getMyCaid();
         localPlayer.inventory.splice(idx, 1);
@@ -1624,7 +1667,6 @@
         else { localPlayer.strayDogActive = true; refreshHud(); }
         return;
       }
-
       if (it.dur === 'combat') {
         if (it.eff === 'double_weapon_atk') {
           if (!isFirearm(localPlayer.equipped.weapon)) {
@@ -1634,18 +1676,15 @@
         } else if (it.eff === 'double_muscles_atk') combatModifiers.doubleMuscles = true;
         else if (it.eff === 'bonus_combat_atk') combatModifiers.flatAtkBonus += (it.val || 1);
         else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
-
         localPlayer.inventory.splice(idx, 1);
         refreshHud();
         await showAppAlert(`${it.name} activé ! Vos statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
         return;
       }
-
       localPlayer.inventory.splice(idx, 1);
       await showAppAlert(`${it.name} utilisé !`, "Objet");
       refreshHud();
     }
-
     function renderEquipmentSlotsView() {
       const w = localPlayer.equipped.weapon;
       document.getElementById('slotWeaponTitle').innerText = w ? w.name : "Mains nues";
@@ -1653,14 +1692,12 @@
       document.getElementById('slotWeaponStatusContainer').innerHTML = w
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('weapon')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
-
       const a = localPlayer.equipped.armor;
       document.getElementById('slotArmorTitle').innerText = a ? a.name : "Aucune protection";
       document.getElementById('slotArmorStats').innerText = a ? `Défense +${a.bonusVal}` : "Défense +0";
       document.getElementById('slotArmorStatusContainer').innerHTML = a
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-sky-500/20 text-sky-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('armor')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
-
       const v = localPlayer.equipped.vehicle;
       document.getElementById('slotVehicleTitle').innerText = v ? v.name : "À pied";
       document.getElementById('slotVehicleStats').innerText = v ? `Déplacement +${v.bonusVal} PM (${8 + v.bonusVal} PM)` : "Déplacement 8 PM";
@@ -1668,22 +1705,18 @@
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('vehicle')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
     }
-
     async function openTransferModal(mode) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       currentTransferMode = mode;
       document.getElementById('modalTransfer').classList.remove('hidden');
       updateTransferUI();
     }
-
     function switchTransferResource(res) { currentTransferResource = res; updateTransferUI(); }
-
     function getTransferMaxLimit() {
       return currentTransferResource === 'cash'
         ? (currentTransferMode === 'deposit' ? localPlayer.pocketCash : localPlayer.safeCash)
         : (currentTransferMode === 'deposit' ? localPlayer.drugs : (localPlayer.safeDrugs || 0));
     }
-
     function updateTransferUI() {
       const maxLimit = getTransferMaxLimit();
       const unit = currentTransferResource === 'cash' ? '€' : 'kg';
@@ -1695,25 +1728,21 @@
       document.getElementById('transferMaxAvailableLabel').innerText = `Max : ${maxLimit.toLocaleString()} ${unit}`;
       setTransferPercentage(0);
     }
-
     function setTransferPercentage(pct) {
       const maxLimit = getTransferMaxLimit();
       document.getElementById('transferAmountInput').value = Math.floor((maxLimit * pct) / 100);
       document.getElementById('transferRangeSlider').value = pct;
     }
-
     function syncTransferSliderToInput() {
       const pct = parseInt(document.getElementById('transferRangeSlider').value) || 0;
       document.getElementById('transferAmountInput').value = Math.floor((getTransferMaxLimit() * pct) / 100);
     }
-
     function syncTransferInputToSlider() {
       const maxLimit = getTransferMaxLimit();
       let val = Math.min(maxLimit, parseInt(document.getElementById('transferAmountInput').value) || 0);
       document.getElementById('transferAmountInput').value = val;
       document.getElementById('transferRangeSlider').value = maxLimit > 0 ? Math.round((val / maxLimit) * 100) : 0;
     }
-
     async function confirmTransferAction() {
       if (!isMyTurnToPlay) return;
       const amt = parseInt(document.getElementById('transferAmountInput').value) || 0;
@@ -1728,7 +1757,6 @@
       closeModal('modalTransfer');
       refreshHud();
     }
-
     function openGrossisteModal(unitPrice) {
       grossisteUnitCost = unitPrice || 1000;
       document.getElementById('grossistePocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
@@ -1737,7 +1765,6 @@
       setGrossistePercentage(0);
       document.getElementById('modalGrossiste').classList.remove('hidden');
     }
-
     function setGrossistePercentage(pct) {
       const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
       const kg = Math.floor((maxKg * pct) / 100);
@@ -1745,14 +1772,12 @@
       document.getElementById('grossisteRangeSlider').value = pct;
       document.getElementById('grossisteTotalPriceDisplay').innerText = `${(kg * grossisteUnitCost).toLocaleString()} €`;
     }
-
     function syncGrossisteSliderToInput() {
       const pct = parseInt(document.getElementById('grossisteRangeSlider').value) || 0;
       const kg = Math.floor((Math.floor(localPlayer.pocketCash / grossisteUnitCost) * pct) / 100);
       document.getElementById('grossisteKgInput').value = kg;
       document.getElementById('grossisteTotalPriceDisplay').innerText = `${(kg * grossisteUnitCost).toLocaleString()} €`;
     }
-
     function syncGrossisteInputToSlider() {
       const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
       let kg = Math.min(maxKg, parseInt(document.getElementById('grossisteKgInput').value) || 0);
@@ -1760,7 +1785,6 @@
       document.getElementById('grossisteRangeSlider').value = maxKg > 0 ? Math.round((kg / maxKg) * 100) : 0;
       document.getElementById('grossisteTotalPriceDisplay').innerText = `${(kg * grossisteUnitCost).toLocaleString()} €`;
     }
-
     async function confirmGrossistePurchase() {
       const kg = parseInt(document.getElementById('grossisteKgInput').value) || 0;
       if (kg <= 0) return showAppAlert("Sélectionnez au moins 1 kg.", "Achat");
@@ -1772,7 +1796,6 @@
       await showAppAlert(`+${kg} kg de drogue achetés (-${cost.toLocaleString()} €).`, "🌿 Grossiste");
       refreshHud();
     }
-
     function openPaymentChoiceModal(purchaseData) {
       pendingPurchaseData = purchaseData;
       const cost = purchaseData.cost;
@@ -1780,19 +1803,16 @@
       document.getElementById('paymentItemPriceDisplay').innerText = `${cost.toLocaleString()} €`;
       document.getElementById('paymentPocketAvailable').innerText = `Solde : ${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('paymentSafeAvailable').innerText = `Solde : ${localPlayer.safeCash.toLocaleString()} €`;
-
       const bP = document.getElementById('btnPayWithPocket');
       const bS = document.getElementById('btnPayWithSafe');
       if (localPlayer.pocketCash < cost) bP.classList.add('opacity-40', 'pointer-events-none');
       else bP.classList.remove('opacity-40', 'pointer-events-none');
       if (localPlayer.safeCash < cost) bS.classList.add('opacity-40', 'pointer-events-none');
       else bS.classList.remove('opacity-40', 'pointer-events-none');
-
       const partP = Math.min(localPlayer.pocketCash, cost);
       document.getElementById('paymentCumulDetail').innerText = `Prendre ${partP.toLocaleString()} € en poche + ${(cost - partP).toLocaleString()} € au coffre`;
       document.getElementById('modalPaymentChoice').classList.remove('hidden');
     }
-
     async function confirmPaymentSource(source) {
       if (!pendingPurchaseData) return;
       const cost = pendingPurchaseData.cost;
@@ -1806,19 +1826,15 @@
       const pData = pendingPurchaseData;
       closeModal('modalPaymentChoice');
       pendingPurchaseData = null;
-
       await finalizePurchaseExecution(pData);
       refreshHud();
     }
-
     async function finalizePurchaseExecution(pData) {
       const type = pData.type;
       const data = pData.data;
-
       if (pData.markKitanoWeapon) {
         localPlayer.firstWeaponDoubled = true;
       }
-
       if (type === 'eq') {
         const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
         const bonus = data.atk || data.def || data.pm || 1;
@@ -1839,16 +1855,13 @@
         localPlayer.musclesOnPerson.push({ id: 'gb_' + Date.now(), type: 'MUSCLE', level: data.lvl || 1, name: `Lascar L${data.lvl||1}`, bonusVal: bAtk, bonusLabel: `+${bAtk} Attaque` });
         await showAppAlert("Lascar recruté !", "💪 Recrutement");
       } else if (type === 'pr') {
-        localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée L${data.lvl||1}`, revenue: data.rev || 1000 };
+        localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée L${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
         await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
       }
     }
-
     function resetCombatModifiers() {
       combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
     }
-
-    // Détection fiable d'arme à feu (via le booléen du catalog.json ou le nom)
     function isFirearm(weaponObj) {
       if (!weaponObj) return false;
       if (typeof weaponObj === 'object' && weaponObj.isFirearm !== undefined) {
@@ -1859,7 +1872,6 @@
       if (l.includes('batte') || l.includes('poing') || l.includes('couteau') || l.includes('cran') || l.includes('hache') || l.includes('mains')) return false;
       return l.includes('revolver') || l.includes('pistolet') || l.includes('fusil') || l.includes('pompe') || l.includes('mitraillette') || l.includes('canon') || l.includes('gun');
     }
-
     async function openCombatModal() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour d'attaquer !", "Tour Inactif");
       syncMultiplayerTargets();
@@ -1872,7 +1884,6 @@
       updateArenaLiveStats();
       document.getElementById('modalCombat').classList.remove('hidden');
     }
-
     async function initiateCombatEngagement() {
       const sel = document.getElementById('combatTargetSelect');
       const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
@@ -1886,16 +1897,13 @@
         });
       }
     }
-
     function abortCombat() {
       if (socket && currentDuelInfo) socket.emit('combat_cancel');
       else closeModal('modalCombat');
     }
-
     async function openCombatItemSelectorModal() {
       const items = localPlayer.inventory.filter(i => i && i.dur === 'combat');
       if (!items.length) return showAppAlert("Aucun objet de combat dans votre Sac !", "Sac Vide");
-
       const container = document.getElementById('combatItemsChecklist');
       container.innerHTML = items.map(item => {
         const isBP = (item.eff === 'double_weapon_atk');
@@ -1907,7 +1915,6 @@
             <input type="checkbox" value="${item.id}" ${dis ? 'disabled' : ''} class="combat-item-checkbox w-4 h-4 rounded">
           </label>`;
       }).join('');
-
       document.getElementById('btnConfirmCombatItems').onclick = () => {
         const checked = Array.from(document.querySelectorAll('.combat-item-checkbox:checked')).map(cb => cb.value);
         if (!checked.length) return closeModal('modalCombatItemSelector');
@@ -1936,7 +1943,6 @@
       };
       document.getElementById('modalCombatItemSelector').classList.remove('hidden');
     }
-
     async function toggleCombatReadyState() {
       if (!currentDuelInfo) return;
       isCombatReady = !isCombatReady;
@@ -1949,7 +1955,6 @@
       log.innerHTML += isCombatReady ? `<p class="text-emerald-400 font-bold">⏳ Vous êtes prêt ! En attente de l'adversaire...</p>` : `<p class="text-amber-300">Non prêt.</p>`;
       log.scrollTop = log.scrollHeight;
     }
-
     function updateCombatReadyButtonUI() {
       const btn = document.getElementById('btnToggleCombatReady');
       const lbl = document.getElementById('btnCombatReadyLabel');
@@ -1961,7 +1966,6 @@
         lbl.innerText = "Prêt au combat";
       }
     }
-
     async function openQrScannerModal() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       document.getElementById('modalQrScanner').classList.remove('hidden');
@@ -1975,18 +1979,15 @@
         } catch(e) { statusEl.innerText = "Caméra indisponible."; }
       }
     }
-
     async function closeQrScannerModal() {
       if (html5QrScannerInstance && html5QrScannerInstance.isScanning) { try { await html5QrScannerInstance.stop(); } catch(e){} }
       closeModal('modalQrScanner');
     }
-
     function scanFromImageFile(input) {
       if (!input.files || !input.files[0]) return;
       const sc = new Html5Qrcode("qr-reader");
       sc.scanFile(input.files[0], true).then(txt => { processQrPayload(txt); closeQrScannerModal(); }).catch(() => showAppAlert("QR Code illisible.", "Erreur"));
     }
-
     function openLootDiscoveryModal(title, desc, iconHtml, buttonText, onClaim) {
       document.getElementById('lootDiscoveryTitle').innerText = title;
       document.getElementById('lootDiscoveryDesc').innerText = desc;
@@ -1996,22 +1997,26 @@
       btn.onclick = () => { closeModal('modalLootDiscovery'); onClaim(); };
       document.getElementById('modalLootDiscovery').classList.remove('hidden');
     }
-
     async function processQrPayload(payload) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       closeQrScannerModal();
       let data = payload;
       if (typeof payload === 'string') {
-        try { data = JSON.parse(payload.trim().replace(/[\u201C\u201D]/g, '"')); } catch(e){}
+        const cleanStr = payload.trim().replace(/[\u201C\u201D]/g, '"');
+        try {
+          data = JSON.parse(cleanStr);
+          if (typeof data === 'string') data = { t: data.toLowerCase() };
+        } catch(e) {
+          data = { t: cleanStr.toLowerCase() };
+        }
       }
       if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
+      const type = (data.t || data.type || '').toLowerCase();
 
-      const type = data.t;
-
-      // 1. OUVERTURE DE LA BOUTIQUE ARMURERIE
-      if (type === 'armurerie') {
-        return openArmoryShopModal();
-      }
+      // 1. OUVERTURE DES BOUTIQUES : ARMURERIE / NIGHTCLUB / SPORTCLUB
+      if (type === 'armurerie') return openArmoryShopModal();
+      if (type === 'nightclub') return openNightclubShopModal();
+      if (type === 'sportclub') return openSportclubShopModal();
 
       // 2. CASE GROSSISTE
       if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
@@ -2031,7 +2036,6 @@
           refreshHud();
         });
       }
-
       if (type === 'eq' || type === 'gb' || type === 'pr') {
         let cost = data.p || (type === 'gb' ? (data.lvl === 2 ? 3000 : 1500) : (data.lvl === 2 ? 4000 : 2000));
         let itemName = data.n || (type === 'gb' ? `Lascar L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
@@ -2046,7 +2050,6 @@
         if (localPlayer.pocketCash + localPlayer.safeCash < cost) return showAppAlert("Fonds totaux insuffisants !", "Achat Impossible");
         return openPaymentChoiceModal({ type, data, cost, name: itemName });
       }
-
       if (type === 'yen') {
         if (localPlayer.drugs < data.d) return showAppAlert(`Drogue insuffisante (${data.d} kg requis).`, "Deal Refusé");
         localPlayer.drugs -= data.d; localPlayer.pocketCash += data.c;
@@ -2054,7 +2057,6 @@
         refreshHud();
         return;
       }
-
       if (type === 'brq') {
         let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
         let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
@@ -2066,13 +2068,11 @@
         return;
       }
     }
-
     async function openAllianceModal() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       syncMultiplayerTargets();
       document.getElementById('modalAlliance').classList.remove('hidden');
     }
-
     async function confirmAlliance() {
       if (!isMyTurnToPlay) return;
       const sel = document.getElementById('allianceTargetSelect');
@@ -2083,7 +2083,6 @@
       closeModal('modalAlliance');
       await showAppAlert(`Demande envoyée à ${target.caidName || 'votre rival'}.`, "Alliance");
     }
-
     function endCurrentPlayerTurn() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalPatrolDice').classList.remove('hidden');
@@ -2096,7 +2095,6 @@
         document.getElementById('patrolDiceDirectionLabel').innerText = `Direction : ${dir}`;
       }, 600);
     }
-
     function skipPatrolWait() {
       closeModal('modalPatrolDice');
       if (socket) socket.emit('next_player_turn');
