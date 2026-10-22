@@ -79,13 +79,15 @@ io.on('connection', (socket) => {
       gameStarted: room.gameStarted || false,
       round: room.round,
       radio: room.currentRadio,
-      isReady: checkRoomReady(room)
+      isReady: checkRoomReady(room),
+      selectionMode: room.selectionMode || 'random'
     });
 
     io.to(roomId).emit('update_room_players', {
       players: room.players,
       isReady: checkRoomReady(room),
-      maxPlayers: room.maxPlayers
+      maxPlayers: room.maxPlayers,
+      selectionMode: room.selectionMode || 'random'
     });
 
     if (room.gameStarted) {
@@ -93,12 +95,13 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('create_room', ({ gameName, maxPlayers, playerToken }) => {
+  socket.on('create_room', ({ gameName, maxPlayers, selectionMode, playerToken }) => {
     const roomId = 'GW_' + Math.random().toString(36).substring(2, 7).toUpperCase();
     rooms[roomId] = {
       id: roomId,
       name: gameName || 'Ghetto War #1',
       maxPlayers: Math.min(4, Math.max(2, parseInt(maxPlayers) || 4)),
+      selectionMode: selectionMode === 'manual' ? 'manual' : 'random',
       hostSocketId: socket.id,
       round: 1,
       currentTurnIndex: 0,
@@ -131,7 +134,12 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     socket.roomId = roomId;
 
-    socket.emit('room_created', { roomId, room: rooms[roomId], player: hostPlayer });
+    socket.emit('room_created', {
+      roomId,
+      room: rooms[roomId],
+      player: hostPlayer,
+      selectionMode: rooms[roomId].selectionMode
+    });
     io.emit('rooms_list', getAvailableRooms());
   });
 
@@ -152,12 +160,14 @@ io.on('connection', (socket) => {
         gameStarted: room.gameStarted || false,
         round: room.round,
         radio: room.currentRadio,
-        isReady: checkRoomReady(room)
+        isReady: checkRoomReady(room),
+        selectionMode: room.selectionMode || 'random'
       });
       return io.to(roomId).emit('update_room_players', {
         players: room.players,
         isReady: checkRoomReady(room),
-        maxPlayers: room.maxPlayers
+        maxPlayers: room.maxPlayers,
+        selectionMode: room.selectionMode || 'random'
       });
     }
 
@@ -186,11 +196,17 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     socket.roomId = roomId;
 
-    socket.emit('room_joined', { roomId, room, player: joiner });
+    socket.emit('room_joined', {
+      roomId,
+      room,
+      player: joiner,
+      selectionMode: room.selectionMode || 'random'
+    });
     io.to(roomId).emit('update_room_players', {
       players: room.players,
       isReady: checkRoomReady(room),
-      maxPlayers: room.maxPlayers
+      maxPlayers: room.maxPlayers,
+      selectionMode: room.selectionMode || 'random'
     });
     io.emit('rooms_list', getAvailableRooms());
   });
@@ -201,7 +217,9 @@ io.on('connection', (socket) => {
 
     const alreadyTaken = room.players.some(p => p.playerToken !== playerToken && p.caidId === caidId);
     if (alreadyTaken) {
-      return socket.emit('error_msg', `Le Caïd ${caidName} a déjà été sélectionné.`);
+      return socket.emit('caid_already_taken', {
+        message: `Le Caïd ${caidName} vient d'être sélectionné par un autre joueur !`
+      });
     }
 
     const p = room.players.find(x => x.socketId === socket.id || x.playerToken === playerToken);
@@ -213,10 +231,13 @@ io.on('connection', (socket) => {
       p.hearts = startHearts;
       p.atk = unarmedAtk;
 
+      socket.emit('caid_assigned_ok', { caidId, caidName });
+
       io.to(socket.roomId).emit('update_room_players', {
         players: room.players,
         isReady: checkRoomReady(room),
-        maxPlayers: room.maxPlayers
+        maxPlayers: room.maxPlayers,
+        selectionMode: room.selectionMode || 'random'
       });
     }
   });
@@ -275,11 +296,11 @@ io.on('connection', (socket) => {
     io.to(socket.roomId).emit('update_room_players', {
       players: room.players,
       isReady: true,
-      maxPlayers: room.maxPlayers
+      maxPlayers: room.maxPlayers,
+      selectionMode: room.selectionMode || 'random'
     });
   });
 
-  // Chien Errant : le dernier qui siffle vole le chien
   socket.on('claim_stray_dog', ({ senderCaid, playerToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -304,11 +325,11 @@ io.on('connection', (socket) => {
     io.to(socket.roomId).emit('update_room_players', {
       players: room.players,
       isReady: true,
-      maxPlayers: room.maxPlayers
+      maxPlayers: room.maxPlayers,
+      selectionMode: room.selectionMode || 'random'
     });
   });
 
-  // Combat : duel engagé
   socket.on('start_combat_engagement', ({ targetPlayerToken, targetSocketId, attackerCaid }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -537,7 +558,8 @@ function handlePlayerDisconnect(socket) {
       io.to(socket.roomId).emit('update_room_players', {
         players: room.players,
         isReady: checkRoomReady(room),
-        maxPlayers: room.maxPlayers
+        maxPlayers: room.maxPlayers,
+        selectionMode: room.selectionMode || 'random'
       });
     }
     io.emit('rooms_list', getAvailableRooms());
@@ -551,7 +573,8 @@ function getAvailableRooms() {
       id: r.id,
       name: r.name,
       maxPlayers: r.maxPlayers,
-      connectedCount: r.players.length
+      connectedCount: r.players.length,
+      selectionMode: r.selectionMode || 'random'
     }));
 }
 
