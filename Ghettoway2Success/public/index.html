@@ -39,47 +39,62 @@
     
     /* Fonds d'écran boutiques épurés */
     .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
-    .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
-    .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
+    .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.92) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
+    .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.92) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
 
     /* Cartes réduites pour l'Armurerie */
     .shop-scroll-container { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 10px; -webkit-overflow-scrolling: touch; }
     .shop-card { flex: 0 0 185px; scroll-snap-align: center; border-radius: 20px; transition: transform 0.2s ease; }
 
-    /* Effet de pile (Deck Stack) pour Nightclub & Sportclub : 1 carte devant, l'autre devinée derrière */
+    /* Pile de cartes 3D (Deck Stack) avec espace dégagé en haut et en bas + animation fluide */
     .deck-stack-wrapper {
       position: relative;
       width: 100%;
-      height: 270px;
+      height: 290px;
+      margin: 6px 0 10px 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      perspective: 900px;
       touch-action: pan-y;
       user-select: none;
     }
     .deck-card {
       position: absolute;
-      width: 195px;
-      border-radius: 22px;
-      transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 190px;
+      border-radius: 20px;
+      transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.45s ease,
+                  filter 0.45s ease,
+                  box-shadow 0.45s ease;
       will-change: transform, opacity, filter;
     }
     .deck-card.is-front {
       z-index: 20;
-      transform: translateX(-10px) translateY(0) scale(1);
+      transform: translate3d(-12px, 4px, 0) scale(1) rotate(0deg);
       opacity: 1;
-      filter: brightness(1) blur(0px);
-      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.85);
+      filter: brightness(1) grayscale(0%);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.85);
     }
     .deck-card.is-back {
       z-index: 10;
-      transform: translateX(34px) translateY(-12px) scale(0.88) rotate(5deg);
-      opacity: 0.55;
-      filter: brightness(0.65) grayscale(25%);
+      transform: translate3d(38px, -10px, -60px) scale(0.86) rotate(6deg);
+      opacity: 0.58;
+      filter: brightness(0.6) grayscale(30%);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
       cursor: pointer;
     }
     .deck-card.is-back .deck-buy-btn {
       pointer-events: none;
+      opacity: 0.5;
+    }
+    @keyframes deckSwapPulse {
+      0% { transform: translate3d(-12px, 4px, 0) scale(1); }
+      40% { transform: translate3d(-28px, -6px, 30px) scale(1.05) rotate(-3deg); }
+      100% { transform: translate3d(-12px, 4px, 0) scale(1) rotate(0deg); }
+    }
+    .deck-card.is-front.animating-swap {
+      animation: deckSwapPulse 0.48s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
@@ -165,7 +180,6 @@
       </div>
       <div class="flex flex-col items-center justify-center w-full overflow-hidden my-auto relative">
         <div class="text-slate-300 text-xl -mb-1 z-20 animate-bounce"><i class="ph-fill ph-caret-down"></i></div>
-        <!-- Flèches de navigation affichées uniquement en mode "Au Choix" -->
         <div id="manualCarouselArrows" class="hidden absolute inset-x-1 top-1/2 -translate-y-1/2 flex justify-between items-center z-30 pointer-events-none">
           <button type="button" onclick="stepManualCaid(-1)" class="w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center pointer-events-auto shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <button type="button" onclick="stepManualCaid(1)" class="w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center pointer-events-auto shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
@@ -401,14 +415,14 @@
       </div>
     </div>
 
-    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (CARTES EMPILÉES LVL 1 / LVL 2) ================= -->
-    <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end nightclub-bg">
-      <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
+    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (REMONTÉE & ANIMÉE) ================= -->
+    <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-6 flex flex-col justify-end nightclub-bg">
+      <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
       </button>
 
-      <div class="w-full space-y-2 mt-auto">
-        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono">
+      <div class="w-full flex flex-col gap-2.5 mb-2">
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between">
             <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
             <span id="nightclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
@@ -419,25 +433,28 @@
           </div>
         </div>
 
-        <div>
-          <span class="text-[9px] font-mono text-pink-200 block text-center mb-1"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez la carte arrière pour permuter (Niv.1 ↔ Niv.2)</span>
-          <div id="nightclubStackContainer" class="deck-stack-wrapper"></div>
+        <!-- Bandeau d'instruction bien lisible et dégagé au-dessus des cartes -->
+        <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/75 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
+          <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
         </div>
 
-        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
+        <!-- Pile de cartes avec hauteur dédiée pour ne jamais manger le texte ni le bouton du bas -->
+        <div id="nightclubStackContainer" class="deck-stack-wrapper"></div>
+
+        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3.5 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
           Quitter le Nightclub
         </button>
       </div>
     </div>
 
-    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (CARTES EMPILÉES LVL 1 / LVL 2) ================= -->
-    <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end sportclub-bg">
-      <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
+    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (REMONTÉE & ANIMÉE) ================= -->
+    <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-6 flex flex-col justify-end sportclub-bg">
+      <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
       </button>
 
-      <div class="w-full space-y-2 mt-auto">
-        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono">
+      <div class="w-full flex flex-col gap-2.5 mb-2">
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between">
             <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
             <span id="sportclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
@@ -448,12 +465,15 @@
           </div>
         </div>
 
-        <div>
-          <span class="text-[9px] font-mono text-sky-200 block text-center mb-1"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez la carte arrière pour permuter (Niv.1 ↔ Niv.2)</span>
-          <div id="sportclubStackContainer" class="deck-stack-wrapper"></div>
+        <!-- Bandeau d'instruction bien lisible et dégagé au-dessus des cartes -->
+        <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/75 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
+          <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
         </div>
 
-        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
+        <!-- Pile de cartes avec hauteur dédiée -->
+        <div id="sportclubStackContainer" class="deck-stack-wrapper"></div>
+
+        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3.5 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
           Quitter le Sportclub
         </button>
       </div>
@@ -832,7 +852,7 @@
     }
 
     // =========================================================================
-    // PILE DE CARTES INTERVERTIBLE (SLIDE / CLIC) POUR NIGHTCLUB & SPORTCLUB
+    // PILE DE CARTES 3D AVEC VRAIE ANIMATION FLUIDE (NIGHTCLUB & SPORTCLUB)
     // =========================================================================
     let activeNightclubIndex = 0;
     let activeSportclubIndex = 0;
@@ -848,26 +868,21 @@
       el.addEventListener('touchend', e => {
         if (!e.changedTouches || !e.changedTouches[0]) return;
         const diffX = e.changedTouches[0].clientX - startX;
-        if (Math.abs(diffX) > 25) onSwap();
+        if (Math.abs(diffX) > 22) onSwap();
       }, { passive: true });
     }
 
-    // --- NIGHTCLUB (Prostituées : 1 carte devant, l'autre en arrière-plan) ---
+    // --- NIGHTCLUB (Prostituées) ---
     function openNightclubShopModal() {
       document.getElementById('nightclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('nightclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
       activeNightclubIndex = 0;
-      renderNightclubStack();
+      buildNightclubStackDOM();
       attachSwipeDeckEvents('nightclubStackContainer', toggleNightclubStackCard);
       document.getElementById('modalNightclubShop').classList.remove('hidden');
     }
 
-    function toggleNightclubStackCard() {
-      activeNightclubIndex = activeNightclubIndex === 0 ? 1 : 0;
-      renderNightclubStack();
-    }
-
-    function renderNightclubStack() {
+    function buildNightclubStackDOM() {
       const container = document.getElementById('nightclubStackContainer');
       const isMaryFree = (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed);
       container.innerHTML = NIGHTCLUB_CATALOG.map((item, idx) => {
@@ -875,9 +890,9 @@
         const stateClass = isFront ? 'is-front' : 'is-back';
         const displayPrice = (item.lvl === 1 && isMaryFree) ? 'GRATUIT (Bonus)' : `${item.prix.toLocaleString()} €`;
         return `
-          <div onclick="${!isFront ? 'toggleNightclubStackCard()' : ''}" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-pink-500/40">
+          <div id="nightclubCard_${idx}" onclick="handleNightclubCardClick(${idx})" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-pink-500/40">
             <div>
-              <div class="relative w-full h-32 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
                 <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="hidden flex-col items-center justify-center text-pink-400">
                   <i class="ph-bold ph-high-heel text-3xl"></i>
@@ -904,6 +919,23 @@
       }).join('');
     }
 
+    function handleNightclubCardClick(idx) {
+      if (idx !== activeNightclubIndex) toggleNightclubStackCard();
+    }
+
+    function toggleNightclubStackCard() {
+      activeNightclubIndex = activeNightclubIndex === 0 ? 1 : 0;
+      NIGHTCLUB_CATALOG.forEach((_, idx) => {
+        const cardEl = document.getElementById(`nightclubCard_${idx}`);
+        if (!cardEl) return;
+        const isFront = (idx === activeNightclubIndex);
+        cardEl.classList.remove('is-front', 'is-back', 'animating-swap');
+        void cardEl.offsetWidth; // Force reflow pour déclencher l'animation CSS
+        cardEl.classList.add(isFront ? 'is-front' : 'is-back');
+        if (isFront) cardEl.classList.add('animating-swap');
+      });
+    }
+
     async function buyNightclubItem(lvl) {
       const item = NIGHTCLUB_CATALOG.find(i => i.lvl === lvl);
       if (!item) return;
@@ -925,30 +957,25 @@
       openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- SPORTCLUB (Lascars : 1 carte devant, l'autre en arrière-plan) ---
+    // --- SPORTCLUB (Lascars) ---
     function openSportclubShopModal() {
       document.getElementById('sportclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('sportclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
       activeSportclubIndex = 0;
-      renderSportclubStack();
+      buildSportclubStackDOM();
       attachSwipeDeckEvents('sportclubStackContainer', toggleSportclubStackCard);
       document.getElementById('modalSportclubShop').classList.remove('hidden');
     }
 
-    function toggleSportclubStackCard() {
-      activeSportclubIndex = activeSportclubIndex === 0 ? 1 : 0;
-      renderSportclubStack();
-    }
-
-    function renderSportclubStack() {
+    function buildSportclubStackDOM() {
       const container = document.getElementById('sportclubStackContainer');
       container.innerHTML = SPORTCLUB_CATALOG.map((item, idx) => {
         const isFront = (idx === activeSportclubIndex);
         const stateClass = isFront ? 'is-front' : 'is-back';
         return `
-          <div onclick="${!isFront ? 'toggleSportclubStackCard()' : ''}" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-sky-500/40">
+          <div id="sportclubCard_${idx}" onclick="handleSportclubCardClick(${idx})" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-sky-500/40">
             <div>
-              <div class="relative w-full h-32 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
                 <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="hidden flex-col items-center justify-center text-sky-400">
                   <i class="ph-bold ph-barbell text-3xl"></i>
@@ -973,6 +1000,23 @@
             </div>
           </div>`;
       }).join('');
+    }
+
+    function handleSportclubCardClick(idx) {
+      if (idx !== activeSportclubIndex) toggleSportclubStackCard();
+    }
+
+    function toggleSportclubStackCard() {
+      activeSportclubIndex = activeSportclubIndex === 0 ? 1 : 0;
+      SPORTCLUB_CATALOG.forEach((_, idx) => {
+        const cardEl = document.getElementById(`sportclubCard_${idx}`);
+        if (!cardEl) return;
+        const isFront = (idx === activeSportclubIndex);
+        cardEl.classList.remove('is-front', 'is-back', 'animating-swap');
+        void cardEl.offsetWidth; // Force reflow pour déclencher l'animation CSS
+        cardEl.classList.add(isFront ? 'is-front' : 'is-back');
+        if (isFront) cardEl.classList.add('animating-swap');
+      });
     }
 
     async function buySportclubItem(lvl) {
@@ -1056,7 +1100,7 @@
     }
     let currentSession = { round: 1, currentRadioEvent: null };
     let selectedPlayerCount = 4;
-    let selectedCaidMode = 'random'; // 'random' ou 'manual'
+    let selectedCaidMode = 'random';
     let roomSelectionMode = 'random';
     let manualFocusIndex = 0;
     let caidLocked = false;
@@ -1221,7 +1265,6 @@
           btnStart.classList.add('opacity-30', 'cursor-not-allowed');
           btnText.innerText = `En attente (${players.filter(p=>p.caidId).length}/${maxPlayers} prêts)`;
         }
-        // Ne rafraîchit le carrousel que si le joueur n'est pas en train de tirer et n'a pas encore verrouillé son Caïd
         if (document.getElementById('page-4').classList.contains('active') && !localPlayer.caidId && !isDrawingCarousel && !caidLocked) {
           initCarouselDOM();
         }
@@ -1480,9 +1523,6 @@
       if (bMan) bMan.className = mode === 'manual' ? activeCls : inactiveCls;
     }
 
-    // =========================================================================
-    // SÉLECTION DU CAÏD : MODE ALÉATOIRE OU MODE AU CHOIX (SANS DÉCALAGE)
-    // =========================================================================
     function getAvailableCaids() {
       return CAID_ROSTER.filter(c => !takenCaidsInGame.includes(c.id));
     }
@@ -1513,7 +1553,6 @@
       if (!available.length) return;
 
       if (roomSelectionMode === 'manual') {
-        // Mode "Au Choix"
         headerTitle.innerText = "Choisissez votre Caïd";
         btnSpin.classList.add('hidden');
         btnManual.classList.remove('hidden');
@@ -1534,7 +1573,6 @@
         bindManualCarouselSwipe();
         focusManualCaid(manualFocusIndex);
       } else {
-        // Mode "Aléatoire"
         headerTitle.innerText = "Tirage au Sort du Caïd";
         btnSpin.classList.remove('hidden');
         btnSpin.disabled = false;
@@ -1615,7 +1653,6 @@
       if (btnSpin) btnSpin.disabled = true;
       document.querySelectorAll('.carousel-card').forEach(c => c.classList.remove('is-active'));
 
-      // Choisit un index dans la 2e moitié de carouselItems pour garantir que la carte affichée === le Caïd attribué
       const minIdx = Math.floor(carouselItems.length / 2);
       const maxIdx = carouselItems.length - 2;
       const finalIndex = Math.floor(Math.random() * (maxIdx - minIdx + 1)) + minIdx;
@@ -1764,6 +1801,11 @@
       localPlayer.specialUsedThisTurn = true;
       refreshHud();
     }
+
+    // =========================================================================
+    // CONTRÔLE DE POLICE : 30% CLEAR / 35% DROGUE / 35% ARMES
+    // Si ça tombe sur Armes mais que le joueur n'a aucune arme -> R.A.S. (Clear)
+    // =========================================================================
     async function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const hasVehicle = !!localPlayer.equipped.vehicle;
@@ -1782,19 +1824,43 @@
         if (roll >= 4) return showAppAlert(`Go-Fast (${roll}) : SUCCÈS ! Vous semez la police !`, "⚡ Go-Fast");
         await showAppAlert(`Go-Fast (${roll}) : ÉCHEC ! Contrôle immédiat !`, "🛑 Barrage");
       }
-      const pick = ['CLEAN', 'DRUGS_FOUND', 'WEAPONS_FOUND'][Math.floor(Math.random() * 3)];
-      if (pick === 'CLEAN' || (pick === 'DRUGS_FOUND' && localPlayer.drugs === 0)) {
-        await showAppAlert("R.A.S. ! La patrouille vous laisse repartir.", "👮 Contrôle");
-      } else if (pick === 'DRUGS_FOUND' && localPlayer.drugs > 0) {
-        const s = localPlayer.drugs; localPlayer.drugs = 0; refreshHud();
-        await showAppAlert(`${s} kg de drogue saisis !\nVous êtes conduit immédiatement au poste de police !`, "🚔 Embarquement au Poste");
+
+      // Tirage pondéré : 30% CLEAN, 35% DRUGS_FOUND, 35% WEAPONS_FOUND
+      const r = Math.random();
+      let pick = 'CLEAN';
+      if (r < 0.30) {
+        pick = 'CLEAN';
+      } else if (r < 0.65) {
+        pick = 'DRUGS_FOUND';
       } else {
-        localPlayer.equipped.weapon = null;
-        localPlayer.inventory = localPlayer.inventory.filter(it => it.type !== 'WEAPON');
-        refreshHud();
-        await showAppAlert("Armes saisies !\nVous êtes conduit immédiatement au poste de police !", "🚔 Embarquement au Poste");
+        pick = 'WEAPONS_FOUND';
+      }
+
+      const hasAnyWeapon = !!localPlayer.equipped.weapon || localPlayer.inventory.some(it => it && it.type === 'WEAPON');
+
+      if (pick === 'CLEAN') {
+        await showAppAlert("R.A.S. ! La patrouille ne trouve rien et vous laisse repartir.", "👮 Contrôle");
+      } else if (pick === 'DRUGS_FOUND') {
+        if (localPlayer.drugs > 0) {
+          const s = localPlayer.drugs;
+          localPlayer.drugs = 0;
+          refreshHud();
+          await showAppAlert(`${s} kg de drogue saisis !\nVous êtes conduit immédiatement au poste de police !`, "🚔 Embarquement au Poste");
+        } else {
+          await showAppAlert("La police cherchait de la drogue mais vous n'en avez pas sur vous : R.A.S., vous repartez libre !", "👮 Contrôle");
+        }
+      } else if (pick === 'WEAPONS_FOUND') {
+        if (hasAnyWeapon) {
+          localPlayer.equipped.weapon = null;
+          localPlayer.inventory = localPlayer.inventory.filter(it => !it || it.type !== 'WEAPON');
+          refreshHud();
+          await showAppAlert("Armes saisies !\nVous êtes conduit immédiatement au poste de police !", "🚔 Embarquement au Poste");
+        } else {
+          await showAppAlert("La police cherchait des armes mais vous n'en possédez aucune : R.A.S., vous repartez libre !", "👮 Contrôle");
+        }
       }
     }
+
     async function sellItem(idx) {
       if (!isMyTurnToPlay) return;
       const item = localPlayer.inventory[idx];
