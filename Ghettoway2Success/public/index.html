@@ -41,16 +41,15 @@
     .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
     .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
     .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
+    .dealer-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_concessionnaire.jpg'); background-size: cover; background-position: center top; }
 
     /* =========================================================================
-       SYSTÈME DE PILE DE CARTES 3D (DECK STACK) POUR ARMURERIE, NIGHTCLUB & SPORTCLUB
-       - Hauteur strictement contenue (aucun chevauchement avec le haut ou le bas)
-       - Vraie transition 3D fluide sans blocage GPU
+       SYSTÈME DE PILE DE CARTES 3D (DECK STACK) POUR TOUTES LES BOUTIQUES
        ========================================================================= */
     .deck-stage {
       position: relative;
       width: 100%;
-      height: 266px; /* Plus grand que la carte (244px) pour qu'elle ne déborde jamais */
+      height: 266px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -62,7 +61,7 @@
     .deck-card-item {
       position: absolute;
       width: 192px;
-      height: 244px; /* Hauteur fixe compacte */
+      height: 244px;
       border-radius: 20px;
       background: rgba(16, 18, 27, 0.94);
       padding: 10px;
@@ -356,14 +355,13 @@
       </div>
     </div>
 
-    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE (DECK EMPILÉ 3D ANIMÉ) ================= -->
+    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE (DECK EMPILÉ 3D BILATÉRAL) ================= -->
     <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end armory-bg">
       <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
       </button>
 
       <div class="w-full flex flex-col gap-2">
-        <!-- Soldes -->
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between">
             <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
@@ -375,7 +373,6 @@
           </div>
         </div>
 
-        <!-- Onglets Armes / Équipements -->
         <div class="grid grid-cols-2 gap-2 p-1 bg-black/75 border border-white/15 rounded-2xl font-mono text-xs">
           <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-1.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
             <i class="ph-bold ph-sword"></i> Armes
@@ -385,12 +382,10 @@
           </button>
         </div>
 
-        <!-- Bandeau d'instruction bien dégagé -->
         <div onclick="stepArmoryDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-rose-500/40 text-[10px] font-mono text-rose-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
-          <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour faire défiler les cartes
+          <i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir
         </div>
 
-        <!-- Zone de Pile 3D + Flèches latérales -->
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="stepArmoryDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="armoryCardsContainer" class="deck-stage"></div>
@@ -403,7 +398,7 @@
       </div>
     </div>
 
-    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (DECK EMPILÉ 3D ANIMÉ) ================= -->
+    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES ================= -->
     <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end nightclub-bg">
       <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
@@ -421,12 +416,10 @@
           </div>
         </div>
 
-        <!-- Bandeau d'instruction bien dégagé -->
         <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
           <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
         </div>
 
-        <!-- Zone de Pile 3D + Flèches latérales -->
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="toggleNightclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="nightclubStackContainer" class="deck-stage"></div>
@@ -439,7 +432,7 @@
       </div>
     </div>
 
-    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (DECK EMPILÉ 3D ANIMÉ) ================= -->
+    <!-- ================= 3. MODALE SPORTCLUB — LASCARS ================= -->
     <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end sportclub-bg">
       <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
@@ -457,12 +450,10 @@
           </div>
         </div>
 
-        <!-- Bandeau d'instruction bien dégagé -->
         <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
           <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
         </div>
 
-        <!-- Zone de Pile 3D + Flèches latérales -->
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="toggleSportclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="sportclubStackContainer" class="deck-stage"></div>
@@ -471,6 +462,40 @@
 
         <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
           Quitter le Sportclub
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= 4. MODALE BOUTIQUE CONCESSIONNAIRE (VÉHICULES) ================= -->
+    <div id="modalDealerShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end dealer-bg">
+      <button onclick="closeModal('modalDealerShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
+        <i class="ph-bold ph-x text-base"></i>
+      </button>
+
+      <div class="w-full flex flex-col gap-2.5">
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
+            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
+            <span id="dealerPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
+          </div>
+          <div class="pl-2 flex items-center justify-between">
+            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
+            <span id="dealerSafeCashDisplay" class="text-xs font-black text-white">0 €</span>
+          </div>
+        </div>
+
+        <div onclick="stepDealerDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-amber-500/40 text-[10px] font-mono text-amber-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
+          <i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir les véhicules
+        </div>
+
+        <div class="relative w-full flex items-center justify-center">
+          <button type="button" onclick="stepDealerDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
+          <div id="dealerCardsContainer" class="deck-stage"></div>
+          <button type="button" onclick="stepDealerDeck(1)" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+
+        <button onclick="closeModal('modalDealerShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
+          Quitter le Concessionnaire
         </button>
       </div>
     </div>
@@ -663,20 +688,21 @@
           <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5"><i class="ph-bold ph-qr-code"></i> Scanner Tactique</h3>
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-        <div id="qr-reader" class="w-full h-44 bg-black rounded-2xl overflow-hidden border border-white/15"></div>
+        <div id="qr-reader" class="w-full h-40 bg-black rounded-2xl overflow-hidden border border-white/15"></div>
         <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1">Capteur vidéo...</div>
-        <div class="mt-1.5 text-center">
+        <div class="mt-1 text-center">
           <label class="px-3 py-1 glass-panel rounded-xl text-[10px] font-mono text-slate-300 cursor-pointer inline-flex items-center gap-1"><i class="ph-bold ph-image"></i> Photo QR<input type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
         </div>
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
           <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
+          <button onclick='processQrPayload("{\"t\":\"concessionnaire\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🚗 Concessionnaire</button>
           <button onclick='processQrPayload("{\"t\":\"nightclub\"}")' class="p-2 glass-panel rounded-xl text-left text-pink-300 font-bold border border-pink-500/40">👠 Nightclub (Prostituées)</button>
           <button onclick='processQrPayload("{\"t\":\"sportclub\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300 font-bold border border-sky-500/40">💪 Sportclub (Lascars)</button>
           <button onclick='processQrPayload("{\"t\":\"grossiste\",\"p\":1000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold border border-emerald-500/40">🌿 Case Grossiste</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Balle perforante\",\"eff\":\"double_weapon_atk\",\"dur\":\"combat\",\"desc\":\"Dégâts arme à feu doublés\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">💥 Balle perforante</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Sifflet\",\"eff\":\"stray_dog\",\"dur\":\"tour\",\"desc\":\"Rallie le Chien Errant (+2 Atk / +2 Def)\"}")' class="p-2 glass-panel rounded-xl text-left text-purple-300">🐕 Sifflet (Chien)</button>
-          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="p-2 glass-panel rounded-xl text-left text-ghetto-gold">💥 Braquage (3Atk/2M)</button>
+          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M)</button>
         </div>
       </div>
       <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase">Fermer</button>
@@ -739,6 +765,14 @@
       { id: "gb_lvl2", lvl: 2, nom: "Lascar Niv. 2", prix: 3000, atk: 2, bonusLabel: "+2 Attaque", image: "gblvl2.jpg", desc: "Gros bras surentraîné à la salle de sport." }
     ];
 
+    // --- CATALOGUE CONCESSIONNAIRE (Véhicules + surcharge dynamique via catalog.json si présente) ---
+    let DEALER_CATALOG = [
+      { id: "vh_scooter", slot: "VEHICLE", nom: "Scooter Trafiqué", prix: 2000, bonusVal: 2, bonusLabel: "+2 PM (Go-Fast)", image: "vehicule-scooter.jpg", desc: "Faufile-toi partout dans la cité !" },
+      { id: "vh_cross", slot: "VEHICLE", nom: "Moto Cross", prix: 4000, bonusVal: 4, bonusLabel: "+4 PM (Go-Fast)", image: "vehicule-cross.jpg", desc: "Cabre devant le commissariat !" },
+      { id: "vh_berline", slot: "VEHICLE", nom: "Berline Allemande", prix: 7000, bonusVal: 6, bonusLabel: "+6 PM (Go-Fast)", image: "vehicule-berline.jpg", desc: "Vitres teintées, coffre spacieux." },
+      { id: "vh_sport", slot: "VEHICLE", nom: "Bolide Sport", prix: 12000, bonusVal: 8, bonusLabel: "+8 PM (Go-Fast)", image: "vehicule-sport.jpg", desc: "Intouchable sur le périphérique !" }
+    ];
+
     fetch('/catalog.json')
       .then(r => r.json())
       .then(json => {
@@ -750,45 +784,90 @@
             return item;
           });
         }
+        if (json && Array.isArray(json.concessionnaire)) {
+          DEALER_CATALOG = json.concessionnaire;
+        }
       })
       .catch(() => {});
 
     // =========================================================================
-    // MOTEUR UNIVERSEL D'ANIMATION 3D POUR LES PILES DE CARTES
-    // (Fonctionne au doigt Touch, à la souris Drag, au clic sur la carte arrière et aux flèches)
+    // MOTEUR D'ANIMATION 3D POUR LES PILES DE CARTES :
+    // - Si totalCount === 2 (Nightclub / Sportclub) : 1 devant, l'autre derrière à droite
+    // - Si totalCount > 2 (Armurerie / Concessionnaire) :
+    //     * Sur la 1re carte (activeIndex === 0) : carte suivante visible derrière à droite
+    //     * Dès la 2e carte (activeIndex >= 1) : carte précédente visible derrière à GAUCHE
+    //       ET carte suivante visible derrière à DROITE pour souligner qu'on peut revenir !
     // =========================================================================
     function applyDeckStackPositions(prefix, totalCount, activeIndex) {
       for (let i = 0; i < totalCount; i++) {
         const el = document.getElementById(`${prefix}_${i}`);
         if (!el) continue;
         const buyBtn = el.querySelector('.deck-buy-btn');
-        const diff = (i - activeIndex + totalCount) % totalCount;
 
-        if (diff === 0) {
-          // Carte au 1er plan
-          el.style.zIndex = '25';
-          el.style.opacity = '1';
-          el.style.transform = 'translate3d(-10px, 2px, 0px) scale(1) rotate(0deg)';
-          el.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.88)';
-          el.style.pointerEvents = 'auto';
-          el.style.cursor = 'default';
-          if (buyBtn) buyBtn.style.pointerEvents = 'auto';
-        } else if (diff === 1) {
-          // Carte juste derrière (qu'on devine à droite)
-          el.style.zIndex = '15';
-          el.style.opacity = '0.52';
-          el.style.transform = 'translate3d(38px, -8px, -60px) scale(0.86) rotate(7deg)';
-          el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
-          el.style.pointerEvents = 'auto';
-          el.style.cursor = 'pointer';
-          if (buyBtn) buyBtn.style.pointerEvents = 'none';
+        if (totalCount <= 2) {
+          const diff = (i - activeIndex + totalCount) % totalCount;
+          if (diff === 0) {
+            el.style.zIndex = '25';
+            el.style.opacity = '1';
+            el.style.transform = 'translate3d(-10px, 2px, 0px) scale(1) rotate(0deg)';
+            el.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.88)';
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'default';
+            if (buyBtn) buyBtn.style.pointerEvents = 'auto';
+          } else {
+            el.style.zIndex = '15';
+            el.style.opacity = '0.52';
+            el.style.transform = 'translate3d(38px, -8px, -60px) scale(0.86) rotate(7deg)';
+            el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'pointer';
+            if (buyBtn) buyBtn.style.pointerEvents = 'none';
+          }
         } else {
-          // Autres cartes de la pile (Armurerie) cachées en dessous
-          el.style.zIndex = '5';
-          el.style.opacity = '0';
-          el.style.transform = 'translate3d(-45px, 10px, -120px) scale(0.75) rotate(-8deg)';
-          el.style.pointerEvents = 'none';
-          if (buyBtn) buyBtn.style.pointerEvents = 'none';
+          // Cas multi-cartes (Armurerie & Concessionnaire) : affichage bilatéral dès la 2e carte
+          if (i === activeIndex) {
+            // Carte active au centre (légèrement décalée à gauche uniquement sur la toute 1re carte)
+            const xOffset = (activeIndex === 0) ? '-10px' : '0px';
+            el.style.zIndex = '25';
+            el.style.opacity = '1';
+            el.style.transform = `translate3d(${xOffset}, 2px, 0px) scale(1) rotate(0deg)`;
+            el.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.88)';
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'default';
+            if (buyBtn) buyBtn.style.pointerEvents = 'auto';
+          } else if (i === activeIndex - 1) {
+            // Carte précédente déjà passée -> devinée derrière à GAUCHE
+            el.style.zIndex = '15';
+            el.style.opacity = '0.52';
+            el.style.transform = 'translate3d(-44px, -8px, -60px) scale(0.86) rotate(-7deg)';
+            el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'pointer';
+            if (buyBtn) buyBtn.style.pointerEvents = 'none';
+          } else if (i === activeIndex + 1) {
+            // Carte suivante à venir -> devinée derrière à DROITE
+            el.style.zIndex = '16';
+            el.style.opacity = '0.52';
+            el.style.transform = 'translate3d(44px, -8px, -60px) scale(0.86) rotate(7deg)';
+            el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'pointer';
+            if (buyBtn) buyBtn.style.pointerEvents = 'none';
+          } else if (i < activeIndex - 1) {
+            // Cartes plus anciennes rangées à gauche
+            el.style.zIndex = '5';
+            el.style.opacity = '0';
+            el.style.transform = 'translate3d(-75px, 6px, -120px) scale(0.75) rotate(-12deg)';
+            el.style.pointerEvents = 'none';
+            if (buyBtn) buyBtn.style.pointerEvents = 'none';
+          } else {
+            // Cartes futures rangées à droite
+            el.style.zIndex = '5';
+            el.style.opacity = '0';
+            el.style.transform = 'translate3d(75px, 6px, -120px) scale(0.75) rotate(12deg)';
+            el.style.pointerEvents = 'none';
+            if (buyBtn) buyBtn.style.pointerEvents = 'none';
+          }
         }
       }
     }
@@ -799,7 +878,6 @@
       el.dataset.swipeBound = '1';
 
       let startX = null;
-      // Tactile (Mobile)
       el.addEventListener('touchstart', e => {
         if (e.touches && e.touches[0]) startX = e.touches[0].clientX;
       }, { passive: true });
@@ -811,7 +889,6 @@
         else if (dx > 22) onStep(-1);
       }, { passive: true });
 
-      // Souris (PC / Preview)
       el.addEventListener('mousedown', e => { startX = e.clientX; });
       el.addEventListener('mouseup', e => {
         if (startX === null) return;
@@ -822,7 +899,7 @@
       });
     }
 
-    // --- 1. ARMURERIE (DECK EMPILÉ 3D) ---
+    // --- 1. ARMURERIE (DECK EMPILÉ 3D BILATÉRAL) ---
     let currentArmoryCategory = 'arme';
     let activeArmoryIndex = 0;
     let currentArmoryItems = [];
@@ -899,7 +976,9 @@
     function stepArmoryDeck(dir = 1) {
       const total = currentArmoryItems.length;
       if (!total) return;
-      activeArmoryIndex = (activeArmoryIndex + dir + total) % total;
+      const nextIdx = activeArmoryIndex + dir;
+      if (nextIdx < 0 || nextIdx >= total) return;
+      activeArmoryIndex = nextIdx;
       applyDeckStackPositions('armoryDeckCard', total, activeArmoryIndex);
     }
 
@@ -946,7 +1025,7 @@
       openPaymentChoiceModal(pPayload);
     }
 
-    // --- 2. NIGHTCLUB — PROSTITUÉES (DECK EMPILÉ 3D) ---
+    // --- 2. NIGHTCLUB — PROSTITUÉES ---
     let activeNightclubIndex = 0;
 
     function openNightclubShopModal() {
@@ -1025,7 +1104,7 @@
       openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- 3. SPORTCLUB — LASCARS (DECK EMPILÉ 3D) ---
+    // --- 3. SPORTCLUB — LASCARS ---
     let activeSportclubIndex = 0;
 
     function openSportclubShopModal() {
@@ -1092,6 +1171,97 @@
       const dataPayload = { t: 'gb', lvl: item.lvl, p: item.prix, atk: item.atk, n: item.nom };
       closeModal('modalSportclubShop');
       openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
+    }
+
+    // --- 4. CONCESSIONNAIRE — VÉHICULES (DECK EMPILÉ 3D BILATÉRAL) ---
+    let activeDealerIndex = 0;
+
+    function openDealerShopModal() {
+      document.getElementById('dealerPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
+      document.getElementById('dealerSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
+      activeDealerIndex = 0;
+      buildDealerStackDOM();
+      bindDeckSwipeAndDrag('dealerCardsContainer', stepDealerDeck);
+      document.getElementById('modalDealerShop').classList.remove('hidden');
+    }
+
+    function buildDealerStackDOM() {
+      const container = document.getElementById('dealerCardsContainer');
+      const total = DEALER_CATALOG.length;
+
+      container.innerHTML = DEALER_CATALOG.map((item, idx) => `
+        <div id="dealerDeckCard_${idx}" onclick="onDealerCardClick(${idx})" class="deck-card-item border border-amber-500/45">
+          <div>
+            <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
+              <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="hidden flex-col items-center justify-center text-amber-400">
+                <i class="ph-bold ph-car-profile text-3xl"></i>
+                <span class="text-[8px] font-mono mt-1">${item.image}</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between gap-1">
+              <span class="px-1.5 py-0.5 rounded-md border bg-amber-500/20 text-amber-300 border-amber-500/40 font-mono text-[9px] font-black">${item.bonusLabel || ('+' + item.bonusVal + ' PM')}</span>
+              <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${total}</span>
+            </div>
+            <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+            <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
+          </div>
+          <div class="pt-1.5 border-t border-white/10">
+            <div class="flex items-center justify-between font-mono mb-1">
+              <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+              <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
+            </div>
+            <button onclick="event.stopPropagation(); buyDealerCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+              <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
+            </button>
+          </div>
+        </div>`).join('');
+
+      applyDeckStackPositions('dealerDeckCard', total, activeDealerIndex);
+    }
+
+    function stepDealerDeck(dir = 1) {
+      const total = DEALER_CATALOG.length;
+      if (!total) return;
+      const nextIdx = activeDealerIndex + dir;
+      if (nextIdx < 0 || nextIdx >= total) return;
+      activeDealerIndex = nextIdx;
+      applyDeckStackPositions('dealerDeckCard', total, activeDealerIndex);
+    }
+
+    function onDealerCardClick(idx) {
+      if (idx !== activeDealerIndex) {
+        activeDealerIndex = idx;
+        applyDeckStackPositions('dealerDeckCard', DEALER_CATALOG.length, activeDealerIndex);
+      }
+    }
+
+    async function buyDealerCatalogItem(itemId) {
+      const item = DEALER_CATALOG.find(i => i.id === itemId);
+      if (!item) return;
+      const cost = item.prix || 0;
+      const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
+      if (totalFunds < cost) {
+        return showAppAlert(`Fonds totaux insuffisants !\nPrix requis : ${cost.toLocaleString()} €\nTotal disponible (Poche + QG) : ${totalFunds.toLocaleString()} €.`, "❌ Achat Impossible");
+      }
+      const pPayload = {
+        type: 'eq',
+        cost: cost,
+        name: item.nom,
+        data: {
+          sl: 'veh',
+          n: item.nom,
+          pm: item.bonusVal || 2,
+          desc: item.desc
+        }
+      };
+      closeModal('modalDealerShop');
+      if (cost === 0) {
+        await finalizePurchaseExecution(pPayload);
+        refreshHud();
+        return;
+      }
+      openPaymentChoiceModal(pPayload);
     }
 
     // --- MODALES SYSTÈME ---
@@ -1864,6 +2034,7 @@
 
     // =========================================================================
     // CONTRÔLE DE POLICE : 30% CLEAR / 35% DROGUE / 35% ARMES
+    // Si embarqué au poste : Garde à vue + Fin du tour automatique après "Compris"
     // =========================================================================
     async function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
@@ -1903,7 +2074,11 @@
           const s = localPlayer.drugs;
           localPlayer.drugs = 0;
           refreshHud();
-          await showAppAlert(`${s} kg de drogue saisis !\nVous êtes conduit immédiatement au poste de police !`, "🚔 Embarquement au Poste");
+          await showAppAlert(
+            `${s} kg de drogue saisis !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !`,
+            "🚔 Garde à Vue"
+          );
+          endCurrentPlayerTurn();
         } else {
           await showAppAlert("La police cherchait de la drogue mais vous n'en avez pas sur vous : R.A.S., vous repartez libre !", "👮 Contrôle");
         }
@@ -1912,7 +2087,11 @@
           localPlayer.equipped.weapon = null;
           localPlayer.inventory = localPlayer.inventory.filter(it => !it || it.type !== 'WEAPON');
           refreshHud();
-          await showAppAlert("Armes saisies !\nVous êtes conduit immédiatement au poste de police !", "🚔 Embarquement au Poste");
+          await showAppAlert(
+            "Armes saisies !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !",
+            "🚔 Garde à Vue"
+          );
+          endCurrentPlayerTurn();
         } else {
           await showAppAlert("La police cherchait des armes mais vous n'en possédez aucune : R.A.S., vous repartez libre !", "👮 Contrôle");
         }
@@ -2424,10 +2603,11 @@
       if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
       const type = (data.t || data.type || '').toLowerCase();
 
-      // 1. OUVERTURE DES BOUTIQUES : ARMURERIE / NIGHTCLUB / SPORTCLUB
+      // 1. OUVERTURE DES BOUTIQUES : ARMURERIE / NIGHTCLUB / SPORTCLUB / CONCESSIONNAIRE
       if (type === 'armurerie') return openArmoryShopModal();
       if (type === 'nightclub') return openNightclubShopModal();
       if (type === 'sportclub') return openSportclubShopModal();
+      if (type === 'concessionnaire' || type === 'dealer') return openDealerShopModal();
 
       // 2. CASE GROSSISTE
       if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
