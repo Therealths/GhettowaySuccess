@@ -33,18 +33,54 @@
     .glass-input { background: rgba(8, 9, 14, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); }
     .carousel-wrapper { position: relative; width: 100%; overflow: hidden; padding: 4px 0; }
     .carousel-track { display: flex; gap: 16px; transition: transform 0.1s linear; will-change: transform; }
-    .carousel-card { flex: 0 0 190px; height: 230px; border-radius: 22px; overflow: hidden; position: relative; background: #11131c; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.35; transform: scale(0.92); filter: grayscale(40%); }
+    .carousel-card { flex: 0 0 190px; height: 230px; border-radius: 22px; overflow: hidden; position: relative; background: #11131c; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.35; transform: scale(0.92); filter: grayscale(40%); cursor: pointer; }
     .carousel-card.is-active { opacity: 1; transform: scale(1.04); filter: grayscale(0%); border: 1.5px solid rgba(255, 255, 255, 0.35); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7); }
     .ghetto-home-bg { background-image: linear-gradient(to bottom, rgba(5,6,9,0) 0%, rgba(5,6,9,0.3) 45%, rgba(5,6,9,0.95) 85%), url('wallpaper.jpg'); background-size: cover; background-position: center; }
     
-    /* Fonds d'écran boutiques épurés pour bien voir l'image et le titre intégré */
+    /* Fonds d'écran boutiques épurés */
     .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
     .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
     .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
 
-    /* Cartes réduites pour dégager le fond d'écran */
+    /* Cartes réduites pour l'Armurerie */
     .shop-scroll-container { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 10px; -webkit-overflow-scrolling: touch; }
     .shop-card { flex: 0 0 185px; scroll-snap-align: center; border-radius: 20px; transition: transform 0.2s ease; }
+
+    /* Effet de pile (Deck Stack) pour Nightclub & Sportclub : 1 carte devant, l'autre devinée derrière */
+    .deck-stack-wrapper {
+      position: relative;
+      width: 100%;
+      height: 270px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: pan-y;
+      user-select: none;
+    }
+    .deck-card {
+      position: absolute;
+      width: 195px;
+      border-radius: 22px;
+      transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity, filter;
+    }
+    .deck-card.is-front {
+      z-index: 20;
+      transform: translateX(-10px) translateY(0) scale(1);
+      opacity: 1;
+      filter: brightness(1) blur(0px);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.85);
+    }
+    .deck-card.is-back {
+      z-index: 10;
+      transform: translateX(34px) translateY(-12px) scale(0.88) rotate(5deg);
+      opacity: 0.55;
+      filter: brightness(0.65) grayscale(25%);
+      cursor: pointer;
+    }
+    .deck-card.is-back .deck-buy-btn {
+      pointer-events: none;
+    }
 
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.15); border-radius: 6px; }
@@ -89,10 +125,21 @@
               <button type="button" onclick="selectPlayerCount(4)" id="btnCount-4" class="py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold">4 Caïds</button>
             </div>
           </div>
+          <div>
+            <label class="text-[10px] font-mono uppercase text-slate-400 block mb-2">Attribution des Caïds</label>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button type="button" onclick="selectCaidMode('random')" id="btnMode-random" class="py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold flex items-center justify-center gap-1.5">
+                <i class="ph-bold ph-dice-five text-base"></i> Aléatoire
+              </button>
+              <button type="button" onclick="selectCaidMode('manual')" id="btnMode-manual" class="py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 flex items-center justify-center gap-1.5">
+                <i class="ph-bold ph-hand-pointing text-base"></i> Au Choix
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <button type="button" onclick="emitCreateGame()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2">
-        <span>Créer & Lancer le Tirage</span><i class="ph-bold ph-arrow-right"></i>
+        <span>Créer & Continuer</span><i class="ph-bold ph-arrow-right"></i>
       </button>
     </div>
     <!-- PAGE 3 : REJOINDRE -->
@@ -109,15 +156,20 @@
       </div>
       <button onclick="navTo('page-1')" class="w-full py-3 glass-panel text-slate-400 font-bold rounded-2xl text-xs uppercase">Retour Accueil</button>
     </div>
-    <!-- PAGE 4 : CARROUSEL DE TIRAGE -->
+    <!-- PAGE 4 : CARROUSEL DE TIRAGE OU CHOIX MANUEL -->
     <div id="page-4" class="screen-view p-4 bg-ghetto-surface text-center justify-between">
       <div class="flex items-center justify-between w-full pt-1">
         <button onclick="confirmLeaveGame()" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center"><i class="ph-bold ph-caret-left text-base"></i></button>
-        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">Sélection du Caïd</span>
+        <span id="caidSelectionHeaderTitle" class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">Sélection du Caïd</span>
         <div class="w-9"></div>
       </div>
-      <div class="flex flex-col items-center justify-center w-full overflow-hidden my-auto">
+      <div class="flex flex-col items-center justify-center w-full overflow-hidden my-auto relative">
         <div class="text-slate-300 text-xl -mb-1 z-20 animate-bounce"><i class="ph-fill ph-caret-down"></i></div>
+        <!-- Flèches de navigation affichées uniquement en mode "Au Choix" -->
+        <div id="manualCarouselArrows" class="hidden absolute inset-x-1 top-1/2 -translate-y-1/2 flex justify-between items-center z-30 pointer-events-none">
+          <button type="button" onclick="stepManualCaid(-1)" class="w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center pointer-events-auto shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
+          <button type="button" onclick="stepManualCaid(1)" class="w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center pointer-events-auto shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
         <div class="carousel-wrapper" id="carouselWrapper"><div class="carousel-track" id="carouselTrack"></div></div>
       </div>
       <div class="w-full max-w-[340px] h-[190px] glass-panel p-3.5 rounded-2xl text-left flex flex-col justify-between shadow-2xl mx-auto my-auto">
@@ -136,6 +188,9 @@
       <div class="space-y-2 mt-2 w-full">
         <button type="button" id="btnSpinWheel" onclick="startCarouselDraw()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2">
           <i class="ph-bold ph-dice-five text-xl"></i><span>Tirage au sort</span>
+        </button>
+        <button type="button" id="btnConfirmManualCaid" onclick="confirmManualCaidChoice()" class="hidden w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2">
+          <i class="ph-bold ph-check-circle text-xl"></i><span>Valider ce Caïd</span>
         </button>
         <button type="button" id="btnProceedLobby" onclick="navTo('page-lobby')" class="hidden w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xl">
           <span>Rejoindre la Salle d'Attente</span><i class="ph-bold ph-arrow-right"></i>
@@ -159,7 +214,7 @@
       <div class="space-y-3 mt-4 w-full">
         <div class="p-3 glass-panel rounded-2xl text-center border-amber-500/30">
           <p id="waitingMessage" class="text-xs font-mono font-bold text-amber-300">En attente des Caïds...</p>
-          <span id="waitingSubMessage" class="text-[10px] text-slate-400 font-mono block mt-0.5">Chaque joueur doit avoir tiré son Caïd.</span>
+          <span id="waitingSubMessage" class="text-[10px] text-slate-400 font-mono block mt-0.5">Chaque joueur doit avoir sélectionné son Caïd.</span>
         </div>
         <button type="button" id="btnStartGame" onclick="emitStartGame()" disabled class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2 opacity-30 cursor-not-allowed">
           <i class="ph-bold ph-play text-base"></i><span id="btnStartGameText">En attente...</span>
@@ -308,16 +363,13 @@
       </div>
     </div>
 
-    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE ÉPURÉE (wp_armurerie.jpg, sans bandeau titre) ================= -->
+    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE ÉPURÉE ================= -->
     <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end armory-bg">
-      <!-- Bouton fermeture discret en haut à droite -->
       <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
         <i class="ph-bold ph-x text-base"></i>
       </button>
 
-      <!-- Bloc inférieur compact pour laisser voir le fond d'écran -->
       <div class="w-full space-y-2 mt-auto">
-        <!-- Rappel des fonds disponibles -->
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between">
             <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
@@ -329,7 +381,6 @@
           </div>
         </div>
 
-        <!-- 2 Onglets : Armes | Équipements -->
         <div class="grid grid-cols-2 gap-2 p-1 bg-black/60 border border-white/10 rounded-2xl font-mono text-xs">
           <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-2 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
             <i class="ph-bold ph-sword"></i> Armes
@@ -339,7 +390,6 @@
           </button>
         </div>
 
-        <!-- Carrousel de Cartes d'Articles réduites -->
         <div>
           <span class="text-[9px] font-mono text-slate-300 block text-center mb-0.5"><i class="ph-bold ph-arrows-left-right"></i> Glisser pour parcourir</span>
           <div id="armoryCardsContainer" class="shop-scroll-container"></div>
@@ -351,7 +401,7 @@
       </div>
     </div>
 
-    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (wp_club.jpg, plvl1.jpg & plvl2.jpg) ================= -->
+    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (CARTES EMPILÉES LVL 1 / LVL 2) ================= -->
     <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end nightclub-bg">
       <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
         <i class="ph-bold ph-x text-base"></i>
@@ -370,8 +420,8 @@
         </div>
 
         <div>
-          <span class="text-[9px] font-mono text-pink-200 block text-center mb-0.5"><i class="ph-bold ph-arrows-left-right"></i> Choisissez une Escort à recruter</span>
-          <div id="nightclubCardsContainer" class="shop-scroll-container justify-center"></div>
+          <span class="text-[9px] font-mono text-pink-200 block text-center mb-1"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez la carte arrière pour permuter (Niv.1 ↔ Niv.2)</span>
+          <div id="nightclubStackContainer" class="deck-stack-wrapper"></div>
         </div>
 
         <button onclick="closeModal('modalNightclubShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
@@ -380,7 +430,7 @@
       </div>
     </div>
 
-    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (wp_sport.jpg, gblvl1.jpg & gblvl2.jpg) ================= -->
+    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (CARTES EMPILÉES LVL 1 / LVL 2) ================= -->
     <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end sportclub-bg">
       <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
         <i class="ph-bold ph-x text-base"></i>
@@ -399,8 +449,8 @@
         </div>
 
         <div>
-          <span class="text-[9px] font-mono text-sky-200 block text-center mb-0.5"><i class="ph-bold ph-arrows-left-right"></i> Choisissez un Lascar à recruter</span>
-          <div id="sportclubCardsContainer" class="shop-scroll-container justify-center"></div>
+          <span class="text-[9px] font-mono text-sky-200 block text-center mb-1"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez la carte arrière pour permuter (Niv.1 ↔ Niv.2)</span>
+          <div id="sportclubStackContainer" class="deck-stack-wrapper"></div>
         </div>
 
         <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
@@ -750,7 +800,6 @@
       if (!item) return;
       let cost = item.prix || 0;
       const isWeapon = item.categorie === 'arme';
-      // Malus Tonteushi Kitano : 1er achat d'arme payé le double
       if (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled && cost > 0) {
         cost *= 2;
         await showAppAlert(`Malus Tonteushi Kitano : votre premier achat d'arme à l'Armurerie coûte le double (${cost.toLocaleString()} €) !`, "🥋 Malus Kitano");
@@ -782,25 +831,63 @@
       openPaymentChoiceModal(pPayload);
     }
 
-    // --- NIGHTCLUB (Prostituées) ---
+    // =========================================================================
+    // PILE DE CARTES INTERVERTIBLE (SLIDE / CLIC) POUR NIGHTCLUB & SPORTCLUB
+    // =========================================================================
+    let activeNightclubIndex = 0;
+    let activeSportclubIndex = 0;
+
+    function attachSwipeDeckEvents(containerId, onSwap) {
+      const el = document.getElementById(containerId);
+      if (!el || el.dataset.swipeBound === '1') return;
+      el.dataset.swipeBound = '1';
+      let startX = 0;
+      el.addEventListener('touchstart', e => {
+        if (e.touches && e.touches[0]) startX = e.touches[0].clientX;
+      }, { passive: true });
+      el.addEventListener('touchend', e => {
+        if (!e.changedTouches || !e.changedTouches[0]) return;
+        const diffX = e.changedTouches[0].clientX - startX;
+        if (Math.abs(diffX) > 25) onSwap();
+      }, { passive: true });
+    }
+
+    // --- NIGHTCLUB (Prostituées : 1 carte devant, l'autre en arrière-plan) ---
     function openNightclubShopModal() {
       document.getElementById('nightclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('nightclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
-      const container = document.getElementById('nightclubCardsContainer');
+      activeNightclubIndex = 0;
+      renderNightclubStack();
+      attachSwipeDeckEvents('nightclubStackContainer', toggleNightclubStackCard);
+      document.getElementById('modalNightclubShop').classList.remove('hidden');
+    }
+
+    function toggleNightclubStackCard() {
+      activeNightclubIndex = activeNightclubIndex === 0 ? 1 : 0;
+      renderNightclubStack();
+    }
+
+    function renderNightclubStack() {
+      const container = document.getElementById('nightclubStackContainer');
       const isMaryFree = (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed);
-      container.innerHTML = NIGHTCLUB_CATALOG.map(item => {
+      container.innerHTML = NIGHTCLUB_CATALOG.map((item, idx) => {
+        const isFront = (idx === activeNightclubIndex);
+        const stateClass = isFront ? 'is-front' : 'is-back';
         const displayPrice = (item.lvl === 1 && isMaryFree) ? 'GRATUIT (Bonus)' : `${item.prix.toLocaleString()} €`;
         return `
-          <div class="shop-card glass-panel p-3 flex flex-col justify-between border border-pink-500/30 shadow-2xl">
+          <div onclick="${!isFront ? 'toggleNightclubStackCard()' : ''}" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-pink-500/40">
             <div>
-              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+              <div class="relative w-full h-32 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
                 <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="hidden flex-col items-center justify-center text-pink-400">
                   <i class="ph-bold ph-high-heel text-3xl"></i>
                   <span class="text-[8px] font-mono mt-1">${item.image}</span>
                 </div>
               </div>
-              <span class="px-1.5 py-0.5 rounded-md border bg-pink-500/20 text-pink-300 border-pink-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
+              <div class="flex items-center justify-between">
+                <span class="px-1.5 py-0.5 rounded-md border bg-pink-500/20 text-pink-300 border-pink-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
+                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/2</span>
+              </div>
               <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
               <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
             </div>
@@ -809,13 +896,12 @@
                 <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
                 <span class="text-xs font-black text-ghetto-gold">${displayPrice}</span>
               </div>
-              <button onclick="buyNightclubItem(${item.lvl})" class="w-full py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+              <button onclick="event.stopPropagation(); buyNightclubItem(${item.lvl})" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
                 <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
               </button>
             </div>
           </div>`;
       }).join('');
-      document.getElementById('modalNightclubShop').classList.remove('hidden');
     }
 
     async function buyNightclubItem(lvl) {
@@ -839,36 +925,54 @@
       openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- SPORTCLUB (Lascars) ---
+    // --- SPORTCLUB (Lascars : 1 carte devant, l'autre en arrière-plan) ---
     function openSportclubShopModal() {
       document.getElementById('sportclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('sportclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
-      const container = document.getElementById('sportclubCardsContainer');
-      container.innerHTML = SPORTCLUB_CATALOG.map(item => `
-        <div class="shop-card glass-panel p-3 flex flex-col justify-between border border-sky-500/30 shadow-2xl">
-          <div>
-            <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
-              <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div class="hidden flex-col items-center justify-center text-sky-400">
-                <i class="ph-bold ph-barbell text-3xl"></i>
-                <span class="text-[8px] font-mono mt-1">${item.image}</span>
-              </div>
-            </div>
-            <span class="px-1.5 py-0.5 rounded-md border bg-sky-500/20 text-sky-300 border-sky-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
-            <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
-            <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
-          </div>
-          <div class="pt-2 mt-2 border-t border-white/10">
-            <div class="flex items-center justify-between font-mono mb-1.5">
-              <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-              <span class="text-xs font-black text-ghetto-gold">${item.prix.toLocaleString()} €</span>
-            </div>
-            <button onclick="buySportclubItem(${item.lvl})" class="w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
-              <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
-            </button>
-          </div>
-        </div>`).join('');
+      activeSportclubIndex = 0;
+      renderSportclubStack();
+      attachSwipeDeckEvents('sportclubStackContainer', toggleSportclubStackCard);
       document.getElementById('modalSportclubShop').classList.remove('hidden');
+    }
+
+    function toggleSportclubStackCard() {
+      activeSportclubIndex = activeSportclubIndex === 0 ? 1 : 0;
+      renderSportclubStack();
+    }
+
+    function renderSportclubStack() {
+      const container = document.getElementById('sportclubStackContainer');
+      container.innerHTML = SPORTCLUB_CATALOG.map((item, idx) => {
+        const isFront = (idx === activeSportclubIndex);
+        const stateClass = isFront ? 'is-front' : 'is-back';
+        return `
+          <div onclick="${!isFront ? 'toggleSportclubStackCard()' : ''}" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-sky-500/40">
+            <div>
+              <div class="relative w-full h-32 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+                <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="hidden flex-col items-center justify-center text-sky-400">
+                  <i class="ph-bold ph-barbell text-3xl"></i>
+                  <span class="text-[8px] font-mono mt-1">${item.image}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="px-1.5 py-0.5 rounded-md border bg-sky-500/20 text-sky-300 border-sky-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
+                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/2</span>
+              </div>
+              <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+              <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
+            </div>
+            <div class="pt-2 mt-2 border-t border-white/10">
+              <div class="flex items-center justify-between font-mono mb-1.5">
+                <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+                <span class="text-xs font-black text-ghetto-gold">${item.prix.toLocaleString()} €</span>
+              </div>
+              <button onclick="event.stopPropagation(); buySportclubItem(${item.lvl})" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+                <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
+              </button>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     async function buySportclubItem(lvl) {
@@ -922,7 +1026,7 @@
       { id: 'caid_8', name: 'Weed-Nesday', imageFile: 'noir.jpg', bannerFile: 'bandeau-noir.jpg', hex: '#64748b', bonus: 'Démarre avec un Poing Américain (+1 Atk).', malus: 'Commence avec 2 Cœurs sur 3.', skillName: 'Siphon Vital', skillDesc: 'Aspire et vole 1 Cœur de Vie à un rival.', startCash: 5000, startDrug: 5, startHearts: 2, startItems: [{ id: 'weapon_poing', type: 'WEAPON', name: 'Poing Américain', price: 1500, bonusVal: 1, bonusLabel: '+1 Attaque', desc: 'Confère +1 en Attaque' }], unarmedAtk: 1 }
     ];
     let localPlayer = {
-      caidId: localStorage.getItem('g2s_saved_caid_id') || null,
+      caidId: null,
       caidName: null,
       isHost: false,
       pocketCash: 5000,
@@ -952,6 +1056,10 @@
     }
     let currentSession = { round: 1, currentRadioEvent: null };
     let selectedPlayerCount = 4;
+    let selectedCaidMode = 'random'; // 'random' ou 'manual'
+    let roomSelectionMode = 'random';
+    let manualFocusIndex = 0;
+    let caidLocked = false;
     let carouselItems = [];
     let isDrawingCarousel = false;
     let html5QrScannerInstance = null;
@@ -966,32 +1074,69 @@
     let combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
     let currentDuelInfo = null;
     let isCombatReady = false;
+
+    function applyCaidToLocalPlayer(chosenCaid) {
+      if (!chosenCaid) return;
+      caidLocked = true;
+      localPlayer.caidId = chosenCaid.id;
+      localPlayer.caidName = chosenCaid.name;
+      localStorage.setItem('g2s_saved_caid_id', chosenCaid.id);
+      localPlayer.pocketCash = chosenCaid.startCash;
+      localPlayer.drugs = chosenCaid.startDrug;
+      localPlayer.safeCash = 0;
+      localPlayer.safeDrugs = 0;
+      localPlayer.hearts = chosenCaid.startHearts;
+      localPlayer.baseAtk = chosenCaid.unarmedAtk;
+      localPlayer.baseDef = 0;
+      localPlayer.inventory = JSON.parse(JSON.stringify(chosenCaid.startItems));
+      localPlayer.equipped = { weapon: null, armor: null, vehicle: null };
+      localPlayer.musclesOnPerson = [];
+      localPlayer.prostituteInTransit = null;
+      localPlayer.prostitutesAtSafeList = [];
+      localPlayer.freeProstituteClaimed = false;
+    }
+
     function updateRivalsList(players) {
       if (!players || !Array.isArray(players)) return;
       const meInServer = players.find(p => p.playerToken === myPlayerToken);
       if (meInServer && meInServer.caidId) {
-        localPlayer.caidId = meInServer.caidId;
-        localPlayer.caidName = meInServer.caidName;
-        localStorage.setItem('g2s_saved_caid_id', meInServer.caidId);
+        if (localPlayer.caidId !== meInServer.caidId) {
+          const officialCaid = CAID_ROSTER.find(c => c.id === meInServer.caidId);
+          if (officialCaid && !caidLocked) {
+            applyCaidToLocalPlayer(officialCaid);
+          } else {
+            localPlayer.caidId = meInServer.caidId;
+            localPlayer.caidName = meInServer.caidName;
+            localStorage.setItem('g2s_saved_caid_id', meInServer.caidId);
+          }
+        }
       }
       connectedRivals = players.filter(p => p.socketId !== socket?.id && p.playerToken !== myPlayerToken);
       if (players.length > 1 && connectedRivals.length === 0) {
         connectedRivals = players.filter(p => p.socketId !== socket?.id);
       }
-      takenCaidsInGame = players.filter(p => p.caidId).map(p => p.caidId);
+      takenCaidsInGame = players.filter(p => p.caidId && p.playerToken !== myPlayerToken).map(p => p.caidId);
       syncMultiplayerTargets();
     }
+
     const socket = typeof io !== 'undefined' ? io() : null;
     if (socket) {
       socket.on('connect', () => {
         const savedRoomId = localStorage.getItem('g2s_room_id');
         if (savedRoomId) socket.emit('reconnect_player', { roomId: savedRoomId, playerToken: myPlayerToken });
       });
-      socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, players }) => {
+      socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, players, selectionMode }) => {
         localStorage.setItem('g2s_room_id', roomId);
+        if (selectionMode) roomSelectionMode = selectionMode;
         if (player && player.caidId) {
+          caidLocked = true;
           localPlayer.caidId = player.caidId;
+          localPlayer.caidName = player.caidName;
           localStorage.setItem('g2s_saved_caid_id', player.caidId);
+          const refCaid = CAID_ROSTER.find(c => c.id === player.caidId);
+          if (refCaid && (!localPlayer.inventory || localPlayer.inventory.length === 0) && !gameStarted) {
+            localPlayer.inventory = JSON.parse(JSON.stringify(refCaid.startItems));
+          }
         }
         localPlayer = Object.assign(localPlayer, player);
         if (players) updateRivalsList(players);
@@ -1009,16 +1154,47 @@
         if (!container) return;
         container.innerHTML = list.length ? '' : '<p class="text-xs text-slate-500 italic p-3 text-center">Aucun salon actif détecté.</p>';
         list.forEach(r => {
+          const modeBadge = r.selectionMode === 'manual' ? '👆 Au Choix' : '🎲 Aléatoire';
           const div = document.createElement('div');
           div.className = "p-3.5 glass-panel rounded-2xl flex items-center justify-between cursor-pointer hover:border-cyan-400/40";
-          div.onclick = () => { localStorage.setItem('g2s_room_id', r.id); socket.emit('join_room', { roomId: r.id, playerToken: myPlayerToken }); };
-          div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${r.name}</h4><span class="text-[10px] text-slate-400 font-mono">${r.connectedCount} / ${r.maxPlayers} Caïds</span></div><span class="text-[10px] font-bold text-ghetto-cyan bg-cyan-950/60 px-3 py-1 rounded-lg border border-cyan-500/30">Rejoindre</span>`;
+          div.onclick = () => {
+            caidLocked = false;
+            localPlayer.caidId = null;
+            localStorage.removeItem('g2s_saved_caid_id');
+            localStorage.setItem('g2s_room_id', r.id);
+            socket.emit('join_room', { roomId: r.id, playerToken: myPlayerToken });
+          };
+          div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${r.name}</h4><span class="text-[10px] text-slate-400 font-mono">${r.connectedCount} / ${r.maxPlayers} Caïds • ${modeBadge}</span></div><span class="text-[10px] font-bold text-ghetto-cyan bg-cyan-950/60 px-3 py-1 rounded-lg border border-cyan-500/30">Rejoindre</span>`;
           container.appendChild(div);
         });
       });
-      socket.on('room_created', ({ roomId }) => { localStorage.setItem('g2s_room_id', roomId); localPlayer.isHost = true; navTo('page-4'); });
-      socket.on('room_joined', ({ roomId }) => { localStorage.setItem('g2s_room_id', roomId); localPlayer.isHost = false; navTo('page-4'); });
-      socket.on('update_room_players', ({ players, isReady, maxPlayers }) => {
+      socket.on('room_created', ({ roomId, selectionMode }) => {
+        localStorage.setItem('g2s_room_id', roomId);
+        localStorage.removeItem('g2s_saved_caid_id');
+        localPlayer.caidId = null;
+        caidLocked = false;
+        localPlayer.isHost = true;
+        roomSelectionMode = selectionMode || selectedCaidMode;
+        navTo('page-4');
+      });
+      socket.on('room_joined', ({ roomId, selectionMode }) => {
+        localStorage.setItem('g2s_room_id', roomId);
+        localStorage.removeItem('g2s_saved_caid_id');
+        localPlayer.caidId = null;
+        caidLocked = false;
+        localPlayer.isHost = false;
+        roomSelectionMode = selectionMode || 'random';
+        navTo('page-4');
+      });
+      socket.on('caid_already_taken', async ({ message }) => {
+        caidLocked = false;
+        localPlayer.caidId = null;
+        localStorage.removeItem('g2s_saved_caid_id');
+        await showAppAlert(message || "Ce Caïd vient d'être pris !", "Caïd Indisponible");
+        initCarouselDOM();
+      });
+      socket.on('update_room_players', ({ players, isReady, maxPlayers, selectionMode }) => {
+        if (selectionMode) roomSelectionMode = selectionMode;
         updateRivalsList(players);
         const countEl = document.getElementById('lobbyPlayerCount');
         if (countEl) countEl.innerText = `${players.length} / ${maxPlayers} Joueurs connectés`;
@@ -1026,7 +1202,7 @@
         if (container) {
           container.innerHTML = players.map((p, idx) => `
             <div class="p-3 glass-panel rounded-2xl flex items-center justify-between">
-              <div><span class="font-black text-white text-xs block">${p.caidName || ('Joueur ' + (idx + 1))}</span><span class="text-[10px] font-mono text-slate-400">${p.caidId ? 'Caïd sélectionné' : 'Tirage en cours...'}</span></div>
+              <div><span class="font-black text-white text-xs block">${p.caidName || ('Joueur ' + (idx + 1))}</span><span class="text-[10px] font-mono text-slate-400">${p.caidId ? 'Caïd validé' : 'Sélection en cours...'}</span></div>
               <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${p.caidId ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">${p.caidId ? 'Prêt' : 'En attente'}</span>
             </div>`).join('');
         }
@@ -1045,7 +1221,10 @@
           btnStart.classList.add('opacity-30', 'cursor-not-allowed');
           btnText.innerText = `En attente (${players.filter(p=>p.caidId).length}/${maxPlayers} prêts)`;
         }
-        if (document.getElementById('page-4').classList.contains('active') && !localPlayer.caidId) initCarouselDOM();
+        // Ne rafraîchit le carrousel que si le joueur n'est pas en train de tirer et n'a pas encore verrouillé son Caïd
+        if (document.getElementById('page-4').classList.contains('active') && !localPlayer.caidId && !isDrawingCarousel && !caidLocked) {
+          initCarouselDOM();
+        }
       });
       socket.on('game_started', ({ round, radio, players }) => {
         updateRivalsList(players);
@@ -1193,8 +1372,20 @@
     }
     function emitCreateGame() {
       const gName = document.getElementById('createGameName').value || 'Ghetto War';
-      if (socket) socket.emit('create_room', { gameName: gName, maxPlayers: selectedPlayerCount, playerToken: myPlayerToken });
-      else navTo('page-4');
+      roomSelectionMode = selectedCaidMode;
+      localPlayer.caidId = null;
+      caidLocked = false;
+      localStorage.removeItem('g2s_saved_caid_id');
+      if (socket) {
+        socket.emit('create_room', {
+          gameName: gName,
+          maxPlayers: selectedPlayerCount,
+          selectionMode: selectedCaidMode,
+          playerToken: myPlayerToken
+        });
+      } else {
+        navTo('page-4');
+      }
     }
     function emitStartGame() { if (socket) socket.emit('start_game'); }
     function respondToAllianceRequest(accepted) {
@@ -1233,7 +1424,7 @@
       document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
       const target = document.getElementById(pageId);
       if (target) target.classList.add('active');
-      if (pageId === 'page-4') initCarouselDOM();
+      if (pageId === 'page-4' && !caidLocked) initCarouselDOM();
       if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
     }
     async function confirmLeaveGame() {
@@ -1279,93 +1470,189 @@
         if (btn) btn.className = c === count ? "py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold" : "py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400";
       });
     }
-    function getAvailableCaids() { return CAID_ROSTER.filter(c => !takenCaidsInGame.includes(c.id)); }
+    function selectCaidMode(mode) {
+      selectedCaidMode = mode;
+      const bRand = document.getElementById('btnMode-random');
+      const bMan = document.getElementById('btnMode-manual');
+      const activeCls = "py-3 rounded-xl font-black font-mono text-xs border border-ghetto-gold bg-ghetto-gold/15 text-ghetto-gold flex items-center justify-center gap-1.5";
+      const inactiveCls = "py-3 rounded-xl font-bold font-mono text-xs border border-white/10 glass-panel text-slate-400 flex items-center justify-center gap-1.5";
+      if (bRand) bRand.className = mode === 'random' ? activeCls : inactiveCls;
+      if (bMan) bMan.className = mode === 'manual' ? activeCls : inactiveCls;
+    }
+
+    // =========================================================================
+    // SÉLECTION DU CAÏD : MODE ALÉATOIRE OU MODE AU CHOIX (SANS DÉCALAGE)
+    // =========================================================================
+    function getAvailableCaids() {
+      return CAID_ROSTER.filter(c => !takenCaidsInGame.includes(c.id));
+    }
+
+    function displayCaidPreviewDetails(caid, badgeLabel = "Aperçu") {
+      if (!caid) return;
+      document.getElementById('revealedName').innerText = caid.name;
+      document.getElementById('revealedIdBadge').innerText = badgeLabel;
+      document.getElementById('revealedBonusText').innerText = caid.bonus;
+      document.getElementById('revealedMalusText').innerText = caid.malus;
+      document.getElementById('revealedSkill').innerText = `${caid.skillName} : ${caid.skillDesc}`;
+      document.getElementById('revealedCash').innerText = `Cash: ${caid.startCash.toLocaleString()} €`;
+      document.getElementById('revealedDrug').innerText = `Drogue: ${caid.startDrug} kg`;
+    }
+
     function initCarouselDOM() {
+      if (caidLocked || isDrawingCarousel) return;
       const track = document.getElementById('carouselTrack');
       const btnSpin = document.getElementById('btnSpinWheel');
+      const btnManual = document.getElementById('btnConfirmManualCaid');
       const btnProceed = document.getElementById('btnProceedLobby');
-      if (btnSpin) { btnSpin.classList.remove('hidden'); btnSpin.disabled = false; }
+      const arrows = document.getElementById('manualCarouselArrows');
+      const headerTitle = document.getElementById('caidSelectionHeaderTitle');
+
       if (btnProceed) btnProceed.classList.add('hidden');
-      isDrawingCarousel = false;
+
       const available = getAvailableCaids();
       if (!available.length) return;
-      carouselItems = [];
-      const repeat = Math.max(3, Math.ceil(12 / available.length));
-      for (let i = 0; i < repeat; i++) carouselItems = carouselItems.concat(available);
-      track.innerHTML = carouselItems.map(c => `
-        <div class="carousel-card flex flex-col justify-between p-3 select-none">
-          <div class="relative w-full h-36 my-auto rounded-xl overflow-hidden bg-black/60 flex items-center justify-center border border-white/10">
-            <img src="${c.imageFile}" alt="${c.name}" class="w-full h-full object-cover" onerror="this.style.display='none';">
-          </div>
-          <div class="text-center pb-1"><h4 class="text-xs font-black text-white uppercase truncate">${c.name}</h4><span class="text-[9px] text-slate-400 font-mono block truncate">${c.skillName}</span></div>
-        </div>`).join('');
-      centerCarouselIndex(1, false, false);
+
+      if (roomSelectionMode === 'manual') {
+        // Mode "Au Choix"
+        headerTitle.innerText = "Choisissez votre Caïd";
+        btnSpin.classList.add('hidden');
+        btnManual.classList.remove('hidden');
+        btnManual.disabled = false;
+        arrows.classList.remove('hidden');
+
+        carouselItems = available.slice();
+        manualFocusIndex = Math.min(manualFocusIndex, carouselItems.length - 1);
+
+        track.innerHTML = carouselItems.map((c, idx) => `
+          <div onclick="focusManualCaid(${idx})" class="carousel-card flex flex-col justify-between p-3 select-none">
+            <div class="relative w-full h-36 my-auto rounded-xl overflow-hidden bg-black/60 flex items-center justify-center border border-white/10">
+              <img src="${c.imageFile}" alt="${c.name}" class="w-full h-full object-cover" onerror="this.style.display='none';">
+            </div>
+            <div class="text-center pb-1"><h4 class="text-xs font-black text-white uppercase truncate">${c.name}</h4><span class="text-[9px] text-slate-400 font-mono block truncate">${c.skillName}</span></div>
+          </div>`).join('');
+
+        bindManualCarouselSwipe();
+        focusManualCaid(manualFocusIndex);
+      } else {
+        // Mode "Aléatoire"
+        headerTitle.innerText = "Tirage au Sort du Caïd";
+        btnSpin.classList.remove('hidden');
+        btnSpin.disabled = false;
+        btnManual.classList.add('hidden');
+        arrows.classList.add('hidden');
+
+        carouselItems = [];
+        const repeat = Math.max(4, Math.ceil(16 / available.length));
+        for (let i = 0; i < repeat; i++) carouselItems = carouselItems.concat(available);
+
+        track.innerHTML = carouselItems.map(c => `
+          <div class="carousel-card flex flex-col justify-between p-3 select-none">
+            <div class="relative w-full h-36 my-auto rounded-xl overflow-hidden bg-black/60 flex items-center justify-center border border-white/10">
+              <img src="${c.imageFile}" alt="${c.name}" class="w-full h-full object-cover" onerror="this.style.display='none';">
+            </div>
+            <div class="text-center pb-1"><h4 class="text-xs font-black text-white uppercase truncate">${c.name}</h4><span class="text-[9px] text-slate-400 font-mono block truncate">${c.skillName}</span></div>
+          </div>`).join('');
+
+        centerCarouselIndex(1, false, false, 0.35);
+      }
     }
-    function centerCarouselIndex(index, animate = true, applyActive = false) {
+
+    function bindManualCarouselSwipe() {
+      const wrapper = document.getElementById('carouselWrapper');
+      if (!wrapper || wrapper.dataset.manualSwipe === '1') return;
+      wrapper.dataset.manualSwipe = '1';
+      let startX = 0;
+      wrapper.addEventListener('touchstart', e => {
+        if (roomSelectionMode !== 'manual' || caidLocked) return;
+        if (e.touches && e.touches[0]) startX = e.touches[0].clientX;
+      }, { passive: true });
+      wrapper.addEventListener('touchend', e => {
+        if (roomSelectionMode !== 'manual' || caidLocked) return;
+        if (!e.changedTouches || !e.changedTouches[0]) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        if (dx < -30) stepManualCaid(1);
+        else if (dx > 30) stepManualCaid(-1);
+      }, { passive: true });
+    }
+
+    function stepManualCaid(delta) {
+      if (roomSelectionMode !== 'manual' || caidLocked || !carouselItems.length) return;
+      manualFocusIndex = (manualFocusIndex + delta + carouselItems.length) % carouselItems.length;
+      focusManualCaid(manualFocusIndex);
+    }
+
+    function focusManualCaid(idx) {
+      if (roomSelectionMode !== 'manual' || caidLocked || !carouselItems[idx]) return;
+      manualFocusIndex = idx;
+      centerCarouselIndex(idx, true, true, 0.45);
+      displayCaidPreviewDetails(carouselItems[idx], "Disponible");
+    }
+
+    function confirmManualCaidChoice() {
+      if (caidLocked || !carouselItems[manualFocusIndex]) return;
+      const chosenCaid = carouselItems[manualFocusIndex];
+      finalizeCaidSelection(chosenCaid);
+    }
+
+    function centerCarouselIndex(index, animate = true, applyActive = false, durationSec = 3.2) {
       const track = document.getElementById('carouselTrack');
       const wrapper = document.getElementById('carouselWrapper');
       if (!track || !wrapper) return;
       const targetOffset = (index * 206) - ((wrapper.offsetWidth || 380) / 2) + 95;
-      track.style.transition = animate ? 'transform 3.2s cubic-bezier(0.12, 0.88, 0.18, 1)' : 'none';
+      track.style.transition = animate ? `transform ${durationSec}s cubic-bezier(0.12, 0.88, 0.18, 1)` : 'none';
       track.style.transform = `translateX(-${targetOffset}px)`;
       track.querySelectorAll('.carousel-card').forEach((c, idx) => {
         if (applyActive && idx === index) c.classList.add('is-active');
         else c.classList.remove('is-active');
       });
     }
+
     function startCarouselDraw() {
-      if (isDrawingCarousel) return;
-      const available = getAvailableCaids();
-      if (!available.length) return;
+      if (isDrawingCarousel || caidLocked) return;
+      if (!carouselItems.length) return;
       isDrawingCarousel = true;
       const btnSpin = document.getElementById('btnSpinWheel');
       if (btnSpin) btnSpin.disabled = true;
       document.querySelectorAll('.carousel-card').forEach(c => c.classList.remove('is-active'));
-      const chosenIdx = Math.floor(Math.random() * available.length);
-      const chosenCaid = available[chosenIdx];
-      const finalIndex = available.length + chosenIdx;
-      centerCarouselIndex(finalIndex, true, false);
+
+      // Choisit un index dans la 2e moitié de carouselItems pour garantir que la carte affichée === le Caïd attribué
+      const minIdx = Math.floor(carouselItems.length / 2);
+      const maxIdx = carouselItems.length - 2;
+      const finalIndex = Math.floor(Math.random() * (maxIdx - minIdx + 1)) + minIdx;
+      const chosenCaid = carouselItems[finalIndex];
+
+      centerCarouselIndex(finalIndex, true, false, 3.2);
       setTimeout(() => {
+        isDrawingCarousel = false;
         const cardsAfter = document.querySelectorAll('.carousel-card');
         if (cardsAfter[finalIndex]) cardsAfter[finalIndex].classList.add('is-active');
-        localPlayer.caidId = chosenCaid.id;
-        localPlayer.caidName = chosenCaid.name;
-        localStorage.setItem('g2s_saved_caid_id', chosenCaid.id);
-        localPlayer.pocketCash = chosenCaid.startCash;
-        localPlayer.drugs = chosenCaid.startDrug;
-        localPlayer.safeCash = 0;
-        localPlayer.safeDrugs = 0;
-        localPlayer.hearts = chosenCaid.startHearts;
-        localPlayer.baseAtk = chosenCaid.unarmedAtk;
-        localPlayer.baseDef = 0;
-        localPlayer.inventory = JSON.parse(JSON.stringify(chosenCaid.startItems));
-        localPlayer.equipped = { weapon: null, armor: null, vehicle: null };
-        localPlayer.musclesOnPerson = [];
-        localPlayer.prostituteInTransit = null;
-        localPlayer.prostitutesAtSafeList = [];
-        localPlayer.freeProstituteClaimed = false;
-        document.getElementById('revealedName').innerText = chosenCaid.name;
-        document.getElementById('revealedBonusText').innerText = chosenCaid.bonus;
-        document.getElementById('revealedMalusText').innerText = chosenCaid.malus;
-        document.getElementById('revealedSkill').innerText = `${chosenCaid.skillName} : ${chosenCaid.skillDesc}`;
-        document.getElementById('revealedCash').innerText = `Cash: ${chosenCaid.startCash.toLocaleString()} €`;
-        document.getElementById('revealedDrug').innerText = `Drogue: ${chosenCaid.startDrug} kg`;
-        btnSpin.classList.add('hidden');
-        document.getElementById('btnProceedLobby').classList.remove('hidden');
-        takenCaidsInGame.push(chosenCaid.id);
-        if (socket) {
-          socket.emit('assign_caid', {
-            caidId: chosenCaid.id,
-            caidName: chosenCaid.name,
-            startCash: chosenCaid.startCash,
-            startDrug: chosenCaid.startDrug,
-            startHearts: chosenCaid.startHearts,
-            unarmedAtk: chosenCaid.unarmedAtk,
-            playerToken: myPlayerToken
-          });
-        }
+        finalizeCaidSelection(chosenCaid);
       }, 3300);
     }
+
+    function finalizeCaidSelection(chosenCaid) {
+      if (!chosenCaid) return;
+      applyCaidToLocalPlayer(chosenCaid);
+      displayCaidPreviewDetails(chosenCaid, "Sélectionné");
+
+      document.getElementById('btnSpinWheel').classList.add('hidden');
+      document.getElementById('btnConfirmManualCaid').classList.add('hidden');
+      document.getElementById('manualCarouselArrows').classList.add('hidden');
+      document.getElementById('btnProceedLobby').classList.remove('hidden');
+
+      if (socket) {
+        socket.emit('assign_caid', {
+          caidId: chosenCaid.id,
+          caidName: chosenCaid.name,
+          startCash: chosenCaid.startCash,
+          startDrug: chosenCaid.startDrug,
+          startHearts: chosenCaid.startHearts,
+          unarmedAtk: chosenCaid.unarmedAtk,
+          playerToken: myPlayerToken
+        });
+      }
+    }
+
     async function startRoundPhase1() {
       const ev = currentSession.currentRadioEvent || { title: "Descente massive", desc: "La police avance de +2 cases." };
       document.getElementById('radioRoundNumber').innerText = currentSession.round;
