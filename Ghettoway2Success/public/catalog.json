@@ -1,124 +1,230 @@
 {
-    "armurerie": [
-        {
-            "id": "wp_poing",
-            "categorie": "arme",
-            "slot": "WEAPON",
-            "nom": "Poing Américain",
-            "prix": 1000,
-            "bonusVal": 2,
-            "bonusLabel": "+2 Attaque",
-            "isFirearm": false,
-            "image": "arme-poing.jpg",
-            "desc": "Patate de forain !"
-        },
-        {
-            "id": "wp_knife",
-            "categorie": "arme",
-            "slot": "WEAPON",
-            "nom": "Cran d'arrêt",
-            "prix": 2000,
-            "bonusVal": 4,
-            "bonusLabel": "+4 Attaque",
-            "isFirearm": false,
-            "image": "arme-knife.jpg",
-            "desc": "Idéal pour intimider au corps à corps."
-        },
-        {
-            "id": "wp_axe",
-            "categorie": "arme",
-            "slot": "WEAPON",
-            "nom": "Hache",
-            "prix": 5000,
-            "bonusVal": 6,
-            "bonusLabel": "+6 Attaque",
-            "isFirearm": false,
-            "image": "arme-revolver.jpg",
-            "desc": "On peut même couper du bois avec..."
-        },
-        {
-            "id": "wp_gun",
-            "categorie": "arme",
-            "slot": "WEAPON",
-            "nom": "Revolver",
-            "prix": 8000,
-            "bonusVal": 8,
-            "bonusLabel": "+8 Attaque",
-            "isFirearm": true,
-            "image": "arme-gun.jpg",
-            "desc": "Pan ! Pan ! Pan !"
-        },
-        {
-            "id": "wp_pompe",
-            "categorie": "arme",
-            "slot": "WEAPON",
-            "nom": "Fusil a pompe",
-            "prix": 12000,
-            "bonusVal": 10,
-            "bonusLabel": "+10 Défense",
-            "isFirearm": true,
-            "image": "arme-pompe.jpg",
-            "desc": "Hasta la vista baby !"
-        },
-        {
-            "id": "ar_duck",
-            "categorie": "equipement",
-            "slot": "ARMOR",
-            "nom": "Bouée canard",
-            "prix": 0,
-            "bonusVal": 1,
-            "bonusLabel": "+1 Défense",
-            "isFirearm": false,
-            "image": "equip-duck.jpg",
-            "desc": "Coin !? Qu'est ce qu'y a !?"
-        },
-        {
-            "id": "ar_roller",
-            "categorie": "equipement",
-            "slot": "ARMOR",
-            "nom": "Protections Rollers",
-            "prix": 2000,
-            "bonusVal": 3,
-            "bonusLabel": "+3 Défense",
-            "isFirearm": false,
-            "image": "equip-roller.jpg",
-            "desc": "Paré à la chute !"
-        },
-        {
-            "id": "ar_hat",
-            "categorie": "equipement",
-            "slot": "ARMOR",
-            "nom": "Casque de soldat",
-            "prix": 5000,
-            "bonusVal": 5,
-            "bonusLabel": "+5 Défense",
-            "isFirearm": false,
-            "image": "equip-hat.jpg",
-            "desc": "J'ai la tête dure !"
-        },
-        {
-            "id": "ar_gilet",
-            "categorie": "equipement",
-            "slot": "ARMOR",
-            "nom": "Gilet par balle",
-            "prix": 8000,
-            "bonusVal": 8,
-            "bonusLabel": "+8 Défense",
-            "isFirearm": false,
-            "image": "equip-gilet.jpg",
-            "desc": "J'ai mis une petite laine"
-        },
-        {
-            "id": "ar_crs",
-            "categorie": "equipement",
-            "slot": "ARMOR",
-            "nom": "Armure de CRS",
-            "prix": 12000,
-            "bonusVal": 10,
-            "bonusLabel": "+10 Défense",
-            "isFirearm": false,
-            "image": "equip-crs.jpg",
-            "desc": "Robocop style"
-        }
-    ]
+  "armurerie": [
+    {
+      "id": "wp_poing",
+      "categorie": "arme",
+      "slot": "WEAPON",
+      "nom": "Poing Américain",
+      "prix": 1000,
+      "bonusVal": 2,
+      "bonusLabel": "+2 Attaque",
+      "isFirearm": false,
+      "image": "arme-poing.jpg",
+      "desc": "Patate de forain !"
+    },
+    {
+      "id": "wp_knife",
+      "categorie": "arme",
+      "slot": "WEAPON",
+      "nom": "Cran d'arrêt",
+      "prix": 2000,
+      "bonusVal": 4,
+      "bonusLabel": "+4 Attaque",
+      "isFirearm": false,
+      "image": "arme-knife.jpg",
+      "desc": "Idéal pour intimider au corps à corps."
+    },
+    {
+      "id": "wp_axe",
+      "categorie": "arme",
+      "slot": "WEAPON",
+      "nom": "Hache",
+      "prix": 5000,
+      "bonusVal": 6,
+      "bonusLabel": "+6 Attaque",
+      "isFirearm": false,
+      "image": "arme-axe.jpg",
+      "desc": "On peut même couper du bois avec..."
+    },
+    {
+      "id": "wp_gun",
+      "categorie": "arme",
+      "slot": "WEAPON",
+      "nom": "Revolver",
+      "prix": 8000,
+      "bonusVal": 8,
+      "bonusLabel": "+8 Attaque",
+      "isFirearm": true,
+      "image": "arme-gun.jpg",
+      "desc": "Pan ! Pan ! Pan !"
+    },
+    {
+      "id": "wp_pompe",
+      "categorie": "arme",
+      "slot": "WEAPON",
+      "nom": "Fusil a pompe",
+      "prix": 12000,
+      "bonusVal": 10,
+      "bonusLabel": "+10 Attaque",
+      "isFirearm": true,
+      "image": "arme-pompe.jpg",
+      "desc": "Hasta la vista baby !"
+    },
+    {
+      "id": "ar_duck",
+      "categorie": "equipement",
+      "slot": "ARMOR",
+      "nom": "Bouée canard",
+      "prix": 0,
+      "bonusVal": 1,
+      "bonusLabel": "+1 Défense",
+      "isFirearm": false,
+      "image": "equip-duck.jpg",
+      "desc": "Coin !? Qu'est ce qu'y a !?"
+    },
+    {
+      "id": "ar_roller",
+      "categorie": "equipement",
+      "slot": "ARMOR",
+      "nom": "Protections Rollers",
+      "prix": 2000,
+      "bonusVal": 3,
+      "bonusLabel": "+3 Défense",
+      "isFirearm": false,
+      "image": "equip-roller.jpg",
+      "desc": "Paré à la chute !"
+    },
+    {
+      "id": "ar_hat",
+      "categorie": "equipement",
+      "slot": "ARMOR",
+      "nom": "Casque de soldat",
+      "prix": 5000,
+      "bonusVal": 5,
+      "bonusLabel": "+5 Défense",
+      "isFirearm": false,
+      "image": "equip-hat.jpg",
+      "desc": "J'ai la tête dure !"
+    },
+    {
+      "id": "ar_gilet",
+      "categorie": "equipement",
+      "slot": "ARMOR",
+      "nom": "Gilet par balle",
+      "prix": 8000,
+      "bonusVal": 8,
+      "bonusLabel": "+8 Défense",
+      "isFirearm": false,
+      "image": "equip-gilet.jpg",
+      "desc": "J'ai mis une petite laine"
+    },
+    {
+      "id": "ar_crs",
+      "categorie": "equipement",
+      "slot": "ARMOR",
+      "nom": "Armure de CRS",
+      "prix": 12000,
+      "bonusVal": 10,
+      "bonusLabel": "+10 Défense",
+      "isFirearm": false,
+      "image": "equip-crs.jpg",
+      "desc": "Robocop style"
+    }
+  ],
+  "nightclub": [
+    {
+      "id": "pr_lvl1",
+      "categorie": "prostituee",
+      "slot": "PROSTITUTE",
+      "lvl": 1,
+      "nom": "Prostituée Niv. 1",
+      "prix": 2000,
+      "rev": 1000,
+      "bonusVal": 1000,
+      "bonusLabel": "+1 000 € / tour au QG",
+      "image": "plvl1.jpg",
+      "desc": "Escort débutante à ramener au QG."
+    },
+    {
+      "id": "pr_lvl2",
+      "categorie": "prostituee",
+      "slot": "PROSTITUTE",
+      "lvl": 2,
+      "nom": "Prostituée Niv. 2",
+      "prix": 4000,
+      "rev": 2500,
+      "bonusVal": 2500,
+      "bonusLabel": "+2 500 € / tour au QG",
+      "image": "plvl2.jpg",
+      "desc": "Escort VIP haut de gamme, rente élevée."
+    }
+  ],
+  "sportclub": [
+    {
+      "id": "gb_lvl1",
+      "categorie": "lascar",
+      "slot": "MUSCLE",
+      "lvl": 1,
+      "nom": "Lascar Niv. 1",
+      "prix": 1500,
+      "atk": 1,
+      "bonusVal": 1,
+      "bonusLabel": "+1 Attaque",
+      "image": "gblvl1.jpg",
+      "desc": "Homme de main solide pour épauler ton Caïd."
+    },
+    {
+      "id": "gb_lvl2",
+      "categorie": "lascar",
+      "slot": "MUSCLE",
+      "lvl": 2,
+      "nom": "Lascar Niv. 2",
+      "prix": 3000,
+      "atk": 2,
+      "bonusVal": 2,
+      "bonusLabel": "+2 Attaque",
+      "image": "gblvl2.jpg",
+      "desc": "Gros bras surentraîné à la salle de sport."
+    }
+  ],
+  "concessionnaire": [
+    {
+      "id": "vh_scooter",
+      "categorie": "vehicule",
+      "slot": "VEHICLE",
+      "nom": "Scooter Trafiqué",
+      "prix": 2000,
+      "bonusVal": 2,
+      "goFastTarget": 6,
+      "bonusLabel": "+2 PM • Go-Fast 6+",
+      "image": "vehicule-scooter.jpg",
+      "desc": "Faufile-toi dans la cité (Go-Fast réussi sur 6)."
+    },
+    {
+      "id": "vh_cross",
+      "categorie": "vehicule",
+      "slot": "VEHICLE",
+      "nom": "Moto Cross",
+      "prix": 4000,
+      "bonusVal": 4,
+      "goFastTarget": 5,
+      "bonusLabel": "+4 PM • Go-Fast 5+",
+      "image": "vehicule-cross.jpg",
+      "desc": "Cabre devant le commissariat (Go-Fast sur 5 ou 6)."
+    },
+    {
+      "id": "vh_berline",
+      "categorie": "vehicule",
+      "slot": "VEHICLE",
+      "nom": "Berline Allemande",
+      "prix": 7000,
+      "bonusVal": 6,
+      "goFastTarget": 4,
+      "bonusLabel": "+6 PM • Go-Fast 4+",
+      "image": "vehicule-berline.jpg",
+      "desc": "Vitres teintées, gros moteur (Go-Fast sur 4, 5 ou 6)."
+    },
+    {
+      "id": "vh_sport",
+      "categorie": "vehicule",
+      "slot": "VEHICLE",
+      "nom": "Bolide Sport",
+      "prix": 12000,
+      "bonusVal": 8,
+      "goFastTarget": 3,
+      "bonusLabel": "+8 PM • Go-Fast 3+",
+      "image": "vehicule-sport.jpg",
+      "desc": "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !"
+    }
+  ]
 }
