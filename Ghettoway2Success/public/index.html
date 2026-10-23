@@ -739,7 +739,9 @@
     </div>
   </div>
   <script>
-    // --- CATALOGUE ARMURERIE (Chargé depuis catalog.json + copie de secours) ---
+    // =========================================================================
+    // CATALOGUES DES 4 BOUTIQUES (Chargés depuis catalog.json + copies de secours)
+    // =========================================================================
     let ARMORY_CATALOG = [
       { id: "wp_poing", categorie: "arme", slot: "WEAPON", nom: "Poing Américain", prix: 1000, bonusVal: 2, bonusLabel: "+2 Attaque", isFirearm: false, image: "arme-poing.jpg", desc: "Patate de forain !" },
       { id: "wp_knife", categorie: "arme", slot: "WEAPON", nom: "Cran d'arrêt", prix: 2000, bonusVal: 4, bonusLabel: "+4 Attaque", isFirearm: false, image: "arme-knife.jpg", desc: "Idéal pour intimider au corps à corps." },
@@ -753,30 +755,29 @@
       { id: "ar_crs", categorie: "equipement", slot: "ARMOR", nom: "Armure de CRS", prix: 12000, bonusVal: 10, bonusLabel: "+10 Défense", isFirearm: false, image: "equip-crs.jpg", desc: "Robocop style" }
     ];
 
-    // --- CATALOGUE NIGHTCLUB (Prostituées : plvl1.jpg & plvl2.jpg) ---
-    const NIGHTCLUB_CATALOG = [
-      { id: "pr_lvl1", lvl: 1, nom: "Prostituée Niv. 1", prix: 2000, rev: 1000, bonusLabel: "+1 000 € / tour au QG", image: "plvl1.jpg", desc: "Escort débutante à ramener au QG." },
-      { id: "pr_lvl2", lvl: 2, nom: "Prostituée Niv. 2", prix: 4000, rev: 2500, bonusLabel: "+2 500 € / tour au QG", image: "plvl2.jpg", desc: "Escort VIP haut de gamme, rente élevée." }
+    let NIGHTCLUB_CATALOG = [
+      { id: "pr_lvl1", categorie: "prostituee", slot: "PROSTITUTE", lvl: 1, nom: "Prostituée Niv. 1", prix: 2000, rev: 1000, bonusVal: 1000, bonusLabel: "+1 000 € / tour au QG", image: "plvl1.jpg", desc: "Escort débutante à ramener au QG." },
+      { id: "pr_lvl2", categorie: "prostituee", slot: "PROSTITUTE", lvl: 2, nom: "Prostituée Niv. 2", prix: 4000, rev: 2500, bonusVal: 2500, bonusLabel: "+2 500 € / tour au QG", image: "plvl2.jpg", desc: "Escort VIP haut de gamme, rente élevée." }
     ];
 
-    // --- CATALOGUE SPORTCLUB (Lascars : gblvl1.jpg & gblvl2.jpg) ---
-    const SPORTCLUB_CATALOG = [
-      { id: "gb_lvl1", lvl: 1, nom: "Lascar Niv. 1", prix: 1500, atk: 1, bonusLabel: "+1 Attaque", image: "gblvl1.jpg", desc: "Homme de main solide pour épauler ton Caïd." },
-      { id: "gb_lvl2", lvl: 2, nom: "Lascar Niv. 2", prix: 3000, atk: 2, bonusLabel: "+2 Attaque", image: "gblvl2.jpg", desc: "Gros bras surentraîné à la salle de sport." }
+    let SPORTCLUB_CATALOG = [
+      { id: "gb_lvl1", categorie: "lascar", slot: "MUSCLE", lvl: 1, nom: "Lascar Niv. 1", prix: 1500, atk: 1, bonusVal: 1, bonusLabel: "+1 Attaque", image: "gblvl1.jpg", desc: "Homme de main solide pour épauler ton Caïd." },
+      { id: "gb_lvl2", categorie: "lascar", slot: "MUSCLE", lvl: 2, nom: "Lascar Niv. 2", prix: 3000, atk: 2, bonusVal: 2, bonusLabel: "+2 Attaque", image: "gblvl2.jpg", desc: "Gros bras surentraîné à la salle de sport." }
     ];
 
-    // --- CATALOGUE CONCESSIONNAIRE (Véhicules + surcharge dynamique via catalog.json si présente) ---
     let DEALER_CATALOG = [
-      { id: "vh_scooter", slot: "VEHICLE", nom: "Scooter Trafiqué", prix: 2000, bonusVal: 2, bonusLabel: "+2 PM (Go-Fast)", image: "vehicule-scooter.jpg", desc: "Faufile-toi partout dans la cité !" },
-      { id: "vh_cross", slot: "VEHICLE", nom: "Moto Cross", prix: 4000, bonusVal: 4, bonusLabel: "+4 PM (Go-Fast)", image: "vehicule-cross.jpg", desc: "Cabre devant le commissariat !" },
-      { id: "vh_berline", slot: "VEHICLE", nom: "Berline Allemande", prix: 7000, bonusVal: 6, bonusLabel: "+6 PM (Go-Fast)", image: "vehicule-berline.jpg", desc: "Vitres teintées, coffre spacieux." },
-      { id: "vh_sport", slot: "VEHICLE", nom: "Bolide Sport", prix: 12000, bonusVal: 8, bonusLabel: "+8 PM (Go-Fast)", image: "vehicule-sport.jpg", desc: "Intouchable sur le périphérique !" }
+      { id: "vh_scooter", categorie: "vehicule", slot: "VEHICLE", nom: "Scooter Trafiqué", prix: 2000, bonusVal: 2, goFastTarget: 6, bonusLabel: "+2 PM • Go-Fast 6+", image: "vehicule-scooter.jpg", desc: "Faufile-toi dans la cité (Go-Fast réussi sur 6)." },
+      { id: "vh_cross", categorie: "vehicule", slot: "VEHICLE", nom: "Moto Cross", prix: 4000, bonusVal: 4, goFastTarget: 5, bonusLabel: "+4 PM • Go-Fast 5+", image: "vehicule-cross.jpg", desc: "Cabre devant le commissariat (Go-Fast sur 5 ou 6)." },
+      { id: "vh_berline", categorie: "vehicule", slot: "VEHICLE", nom: "Berline Allemande", prix: 7000, bonusVal: 6, goFastTarget: 4, bonusLabel: "+6 PM • Go-Fast 4+", image: "vehicule-berline.jpg", desc: "Vitres teintées, gros moteur (Go-Fast sur 4, 5 ou 6)." },
+      { id: "vh_sport", categorie: "vehicule", slot: "VEHICLE", nom: "Bolide Sport", prix: 12000, bonusVal: 8, goFastTarget: 3, bonusLabel: "+8 PM • Go-Fast 3+", image: "vehicule-sport.jpg", desc: "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !" }
     ];
 
+    // Chargement dynamique de toutes les boutiques depuis catalog.json
     fetch('/catalog.json')
       .then(r => r.json())
       .then(json => {
-        if (json && Array.isArray(json.armurerie)) {
+        if (!json) return;
+        if (Array.isArray(json.armurerie)) {
           ARMORY_CATALOG = json.armurerie.map(item => {
             if (item.id === 'wp_axe' || (item.nom && item.nom.toLowerCase().includes('hache'))) {
               item.image = 'arme-axe.jpg';
@@ -784,19 +785,25 @@
             return item;
           });
         }
-        if (json && Array.isArray(json.concessionnaire)) {
-          DEALER_CATALOG = json.concessionnaire;
-        }
+        if (Array.isArray(json.nightclub)) NIGHTCLUB_CATALOG = json.nightclub;
+        if (Array.isArray(json.sportclub)) SPORTCLUB_CATALOG = json.sportclub;
+        if (Array.isArray(json.concessionnaire)) DEALER_CATALOG = json.concessionnaire;
       })
       .catch(() => {});
 
+    // Calcule le seuil Go-Fast dégressif d'un véhicule (6+, 5+, 4+, 3+)
+    function getVehicleGoFastTarget(vehicleObj) {
+      if (!vehicleObj) return 7; // Impossible sans véhicule
+      if (vehicleObj.goFastTarget) return vehicleObj.goFastTarget;
+      const pm = vehicleObj.bonusVal || 2;
+      if (pm >= 8) return 3;
+      if (pm >= 6) return 4;
+      if (pm >= 4) return 5;
+      return 6;
+    }
+
     // =========================================================================
-    // MOTEUR D'ANIMATION 3D POUR LES PILES DE CARTES :
-    // - Si totalCount === 2 (Nightclub / Sportclub) : 1 devant, l'autre derrière à droite
-    // - Si totalCount > 2 (Armurerie / Concessionnaire) :
-    //     * Sur la 1re carte (activeIndex === 0) : carte suivante visible derrière à droite
-    //     * Dès la 2e carte (activeIndex >= 1) : carte précédente visible derrière à GAUCHE
-    //       ET carte suivante visible derrière à DROITE pour souligner qu'on peut revenir !
+    // MOTEUR D'ANIMATION 3D POUR LES PILES DE CARTES
     // =========================================================================
     function applyDeckStackPositions(prefix, totalCount, activeIndex) {
       for (let i = 0; i < totalCount; i++) {
@@ -824,9 +831,8 @@
             if (buyBtn) buyBtn.style.pointerEvents = 'none';
           }
         } else {
-          // Cas multi-cartes (Armurerie & Concessionnaire) : affichage bilatéral dès la 2e carte
+          // Cas multi-cartes (Armurerie & Concessionnaire) : éventail bilatéral dès la 2e carte
           if (i === activeIndex) {
-            // Carte active au centre (légèrement décalée à gauche uniquement sur la toute 1re carte)
             const xOffset = (activeIndex === 0) ? '-10px' : '0px';
             el.style.zIndex = '25';
             el.style.opacity = '1';
@@ -836,7 +842,6 @@
             el.style.cursor = 'default';
             if (buyBtn) buyBtn.style.pointerEvents = 'auto';
           } else if (i === activeIndex - 1) {
-            // Carte précédente déjà passée -> devinée derrière à GAUCHE
             el.style.zIndex = '15';
             el.style.opacity = '0.52';
             el.style.transform = 'translate3d(-44px, -8px, -60px) scale(0.86) rotate(-7deg)';
@@ -845,7 +850,6 @@
             el.style.cursor = 'pointer';
             if (buyBtn) buyBtn.style.pointerEvents = 'none';
           } else if (i === activeIndex + 1) {
-            // Carte suivante à venir -> devinée derrière à DROITE
             el.style.zIndex = '16';
             el.style.opacity = '0.52';
             el.style.transform = 'translate3d(44px, -8px, -60px) scale(0.86) rotate(7deg)';
@@ -854,14 +858,12 @@
             el.style.cursor = 'pointer';
             if (buyBtn) buyBtn.style.pointerEvents = 'none';
           } else if (i < activeIndex - 1) {
-            // Cartes plus anciennes rangées à gauche
             el.style.zIndex = '5';
             el.style.opacity = '0';
             el.style.transform = 'translate3d(-75px, 6px, -120px) scale(0.75) rotate(-12deg)';
             el.style.pointerEvents = 'none';
             if (buyBtn) buyBtn.style.pointerEvents = 'none';
           } else {
-            // Cartes futures rangées à droite
             el.style.zIndex = '5';
             el.style.opacity = '0';
             el.style.transform = 'translate3d(75px, 6px, -120px) scale(0.75) rotate(12deg)';
@@ -899,7 +901,7 @@
       });
     }
 
-    // --- 1. ARMURERIE (DECK EMPILÉ 3D BILATÉRAL) ---
+    // --- 1. ARMURERIE ---
     let currentArmoryCategory = 'arme';
     let activeArmoryIndex = 0;
     let currentArmoryItems = [];
@@ -1054,7 +1056,7 @@
               </div>
               <div class="flex items-center justify-between">
                 <span class="px-1.5 py-0.5 rounded-md border bg-pink-500/20 text-pink-300 border-pink-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
-                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/2</span>
+                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${NIGHTCLUB_CATALOG.length}</span>
               </div>
               <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
               <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
@@ -1064,7 +1066,7 @@
                 <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
                 <span class="text-xs font-black text-ghetto-gold">${displayPrice}</span>
               </div>
-              <button onclick="event.stopPropagation(); buyNightclubItem(${item.lvl})" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+              <button onclick="event.stopPropagation(); buyNightclubItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
                 <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
               </button>
             </div>
@@ -1083,16 +1085,17 @@
       applyDeckStackPositions('nightclubDeckCard', NIGHTCLUB_CATALOG.length, activeNightclubIndex);
     }
 
-    async function buyNightclubItem(lvl) {
-      const item = NIGHTCLUB_CATALOG.find(i => i.lvl === lvl);
+    async function buyNightclubItem(itemId) {
+      const item = NIGHTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
       if (!item) return;
       if (localPlayer.prostituteInTransit) {
         return showAppAlert("Vous avez déjà 1 prostituée en transit ! Déposez-la d'abord au QG.", "Limite Atteinte");
       }
       let cost = item.prix;
-      const dataPayload = { t: 'pr', lvl: item.lvl, p: item.prix, rev: item.rev, n: item.nom };
+      const rev = item.rev || item.bonusVal || (item.lvl === 2 ? 2500 : 1000);
+      const dataPayload = { t: 'pr', lvl: item.lvl || 1, p: item.prix, rev: rev, n: item.nom };
       closeModal('modalNightclubShop');
-      if (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed && item.lvl === 1) {
+      if (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed && (item.lvl === 1 || item.id === 'pr_lvl1')) {
         localPlayer.freeProstituteClaimed = true;
         await finalizePurchaseExecution({ type: 'pr', data: dataPayload, cost: 0, name: item.nom });
         refreshHud();
@@ -1130,7 +1133,7 @@
             </div>
             <div class="flex items-center justify-between">
               <span class="px-1.5 py-0.5 rounded-md border bg-sky-500/20 text-sky-300 border-sky-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
-              <span class="text-[9px] font-mono text-slate-400">${idx + 1}/2</span>
+              <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${SPORTCLUB_CATALOG.length}</span>
             </div>
             <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
             <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
@@ -1140,7 +1143,7 @@
               <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
               <span class="text-xs font-black text-ghetto-gold">${item.prix.toLocaleString()} €</span>
             </div>
-            <button onclick="event.stopPropagation(); buySportclubItem(${item.lvl})" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+            <button onclick="event.stopPropagation(); buySportclubItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
               <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
             </button>
           </div>
@@ -1158,8 +1161,8 @@
       applyDeckStackPositions('sportclubDeckCard', SPORTCLUB_CATALOG.length, activeSportclubIndex);
     }
 
-    async function buySportclubItem(lvl) {
-      const item = SPORTCLUB_CATALOG.find(i => i.lvl === lvl);
+    async function buySportclubItem(itemId) {
+      const item = SPORTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
       if (!item) return;
       if (localPlayer.musclesOnPerson.length >= 3) {
         return showAppAlert("Vous avez déjà 3 Lascars maximum sur le terrain !", "Limite Atteinte");
@@ -1168,12 +1171,13 @@
       if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
         return showAppAlert("Fonds totaux insuffisants !", "❌ Achat Impossible");
       }
-      const dataPayload = { t: 'gb', lvl: item.lvl, p: item.prix, atk: item.atk, n: item.nom };
+      const atkVal = item.atk || item.bonusVal || (item.lvl === 2 ? 2 : 1);
+      const dataPayload = { t: 'gb', lvl: item.lvl || 1, p: item.prix, atk: atkVal, n: item.nom };
       closeModal('modalSportclubShop');
       openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- 4. CONCESSIONNAIRE — VÉHICULES (DECK EMPILÉ 3D BILATÉRAL) ---
+    // --- 4. CONCESSIONNAIRE — VÉHICULES (AVEC GO-FAST DÉGRESSIF) ---
     let activeDealerIndex = 0;
 
     function openDealerShopModal() {
@@ -1189,33 +1193,36 @@
       const container = document.getElementById('dealerCardsContainer');
       const total = DEALER_CATALOG.length;
 
-      container.innerHTML = DEALER_CATALOG.map((item, idx) => `
-        <div id="dealerDeckCard_${idx}" onclick="onDealerCardClick(${idx})" class="deck-card-item border border-amber-500/45">
-          <div>
-            <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
-              <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div class="hidden flex-col items-center justify-center text-amber-400">
-                <i class="ph-bold ph-car-profile text-3xl"></i>
-                <span class="text-[8px] font-mono mt-1">${item.image}</span>
+      container.innerHTML = DEALER_CATALOG.map((item, idx) => {
+        const gfTarget = getVehicleGoFastTarget(item);
+        return `
+          <div id="dealerDeckCard_${idx}" onclick="onDealerCardClick(${idx})" class="deck-card-item border border-amber-500/45">
+            <div>
+              <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
+                <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="hidden flex-col items-center justify-center text-amber-400">
+                  <i class="ph-bold ph-car-profile text-3xl"></i>
+                  <span class="text-[8px] font-mono mt-1">${item.image}</span>
+                </div>
               </div>
+              <div class="flex items-center justify-between gap-1">
+                <span class="px-1.5 py-0.5 rounded-md border bg-amber-500/20 text-amber-300 border-amber-500/40 font-mono text-[9px] font-black">+${item.bonusVal} PM • Go-Fast ${gfTarget}+</span>
+                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${total}</span>
+              </div>
+              <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+              <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
             </div>
-            <div class="flex items-center justify-between gap-1">
-              <span class="px-1.5 py-0.5 rounded-md border bg-amber-500/20 text-amber-300 border-amber-500/40 font-mono text-[9px] font-black">${item.bonusLabel || ('+' + item.bonusVal + ' PM')}</span>
-              <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${total}</span>
+            <div class="pt-1.5 border-t border-white/10">
+              <div class="flex items-center justify-between font-mono mb-1">
+                <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+                <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
+              </div>
+              <button onclick="event.stopPropagation(); buyDealerCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+                <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
+              </button>
             </div>
-            <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
-            <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
-          </div>
-          <div class="pt-1.5 border-t border-white/10">
-            <div class="flex items-center justify-between font-mono mb-1">
-              <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-              <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
-            </div>
-            <button onclick="event.stopPropagation(); buyDealerCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
-              <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
-            </button>
-          </div>
-        </div>`).join('');
+          </div>`;
+      }).join('');
 
       applyDeckStackPositions('dealerDeckCard', total, activeDealerIndex);
     }
@@ -1244,6 +1251,7 @@
       if (totalFunds < cost) {
         return showAppAlert(`Fonds totaux insuffisants !\nPrix requis : ${cost.toLocaleString()} €\nTotal disponible (Poche + QG) : ${totalFunds.toLocaleString()} €.`, "❌ Achat Impossible");
       }
+      const gfTarget = getVehicleGoFastTarget(item);
       const pPayload = {
         type: 'eq',
         cost: cost,
@@ -1252,6 +1260,7 @@
           sl: 'veh',
           n: item.nom,
           pm: item.bonusVal || 2,
+          goFastTarget: gfTarget,
           desc: item.desc
         }
       };
@@ -2033,13 +2042,23 @@
     }
 
     // =========================================================================
-    // CONTRÔLE DE POLICE : 30% CLEAR / 35% DROGUE / 35% ARMES
-    // Si embarqué au poste : Garde à vue + Fin du tour automatique après "Compris"
+    // CONTRÔLE DE POLICE :
+    // - Go-Fast DÉGRESSIF selon le véhicule équipé (Scooter 6+, Cross 5+, Berline 4+, Sport 3+)
+    // - Fouille : 30% CLEAR / 35% DROGUE / 35% ARMES
+    // - Si embarqué au poste : Garde à vue + Fin de tour automatique après "Compris"
     // =========================================================================
     async function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
-      const hasVehicle = !!localPlayer.equipped.vehicle;
-      if (!await showAppConfirm(hasVehicle ? "Véhicule actif (Go-Fast 4+ disponible). Lancer le contrôle ?" : "Vous êtes à pied. Lancer la fouille ?", "🚨 Contrôle de Police")) return;
+      const eqVeh = localPlayer.equipped.vehicle;
+      const hasVehicle = !!eqVeh;
+      const gfTarget = hasVehicle ? getVehicleGoFastTarget(eqVeh) : 7;
+
+      const confirmPrompt = hasVehicle
+        ? `Véhicule actif : ${eqVeh.name} (Go-Fast réussi sur ${gfTarget}+ au dé).\nLancer le contrôle ?`
+        : "Vous êtes à pied. Lancer la fouille ?";
+
+      if (!await showAppConfirm(confirmPrompt, "🚨 Contrôle de Police")) return;
+
       const caid = getMyCaid();
       if (caid.id === 'caid_5' && !localPlayer.specialUsedThisTurn) {
         if (await showAppConfirm("Tenter votre 'Prière Miraculeuse' (50% d'annuler ce contrôle) ?", "🙏 J-Lo Gramme")) {
@@ -2049,10 +2068,13 @@
           await showAppAlert("PILE ! La prière échoue.", "🙏 Échec");
         }
       }
+
       if (hasVehicle) {
         const roll = Math.floor(Math.random() * 6) + 1;
-        if (roll >= 4) return showAppAlert(`Go-Fast (${roll}) : SUCCÈS ! Vous semez la police !`, "⚡ Go-Fast");
-        await showAppAlert(`Go-Fast (${roll}) : ÉCHEC ! Contrôle immédiat !`, "🛑 Barrage");
+        if (roll >= gfTarget) {
+          return showAppAlert(`Jet de Go-Fast : ${roll} (Requis : ${gfTarget}+ avec ${eqVeh.name}) !\nSUCCÈS ! Vous semez la patrouille de police !`, "⚡ Go-Fast Réussi");
+        }
+        await showAppAlert(`Jet de Go-Fast : ${roll} (Requis : ${gfTarget}+ avec ${eqVeh.name}).\nÉCHEC ! La police vous bloque et procède au contrôle immédiat !`, "🛑 Barrage de Police");
       }
 
       const r = Math.random();
@@ -2215,7 +2237,7 @@
         const sellBtn = isSellable ? `<button onclick="sellItem(${realIdx})" class="px-2 py-1 glass-panel text-amber-300 border border-amber-500/30 rounded-lg font-mono text-[9px] font-bold">Vendre (${resellVal}€)</button>` : '';
         return `
           <div class="p-2.5 bg-black/60 rounded-xl border border-white/10 flex items-center justify-between text-xs gap-2">
-            <div class="min-w-0 flex-1"><span class="font-bold text-white block truncate">${item.name}</span><span class="text-[10px] text-ghetto-gold font-mono block">${item.desc || item.bonusLabel || 'Objet spécial'}</span></div>
+            <div class="min-w-0 flex-1"><span class="font-bold text-white block truncate">${item.name}</span><span class="text-[10px] text-ghetto-gold font-mono block">${item.bonusLabel || item.desc || 'Objet spécial'}</span></div>
             <div class="flex items-center gap-1.5 flex-shrink-0">${primaryBtn}${sellBtn}<button onclick="discardItem(${realIdx})" class="px-2 py-1 glass-panel text-rose-400 border border-rose-500/30 rounded-lg font-mono text-[9px]">Jeter</button></div>
           </div>`;
       }).join('');
@@ -2289,8 +2311,9 @@
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-sky-500/20 text-sky-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('armor')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
       const v = localPlayer.equipped.vehicle;
+      const gfTarget = v ? getVehicleGoFastTarget(v) : null;
       document.getElementById('slotVehicleTitle').innerText = v ? v.name : "À pied";
-      document.getElementById('slotVehicleStats').innerText = v ? `Déplacement +${v.bonusVal} PM (${8 + v.bonusVal} PM)` : "Déplacement 8 PM";
+      document.getElementById('slotVehicleStats').innerText = v ? `+${v.bonusVal} PM (${8 + v.bonusVal} PM) • Go-Fast ${gfTarget}+` : "Déplacement 8 PM";
       document.getElementById('slotVehicleStatusContainer').innerHTML = v
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('vehicle')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
@@ -2428,13 +2451,17 @@
       if (type === 'eq') {
         const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
         const bonus = data.atk || data.def || data.pm || 1;
-        const bTxt = data.atk ? `+${bonus} Attaque` : (data.def ? `+${bonus} Défense` : `+${bonus} PM`);
+        const gfTarget = slot === 'VEHICLE' ? (data.goFastTarget || getVehicleGoFastTarget({ bonusVal: bonus })) : undefined;
+        const bTxt = data.atk
+          ? `+${bonus} Attaque`
+          : (data.def ? `+${bonus} Défense` : `+${bonus} PM • Go-Fast ${gfTarget}+`);
         localPlayer.inventory.push({
           id: 'item_' + Date.now(),
           type: slot,
           name: data.n,
           price: pData.cost,
           bonusVal: bonus,
+          goFastTarget: gfTarget,
           bonusLabel: bTxt,
           isFirearm: !!data.isFirearm,
           desc: data.desc || `Confère ${bTxt}`
