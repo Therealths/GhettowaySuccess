@@ -29,7 +29,7 @@
     .screen-view { display: none !important; flex-direction: column; height: 100%; width: 100%; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; padding-bottom: max(16px, env(safe-area-inset-bottom)); animation: fadeIn 0.2s ease-out; }
     .screen-view.active { display: flex !important; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    .glass-panel { background: rgba(18, 20, 29, 0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.12); }
+    .glass-panel { background: rgba(18, 20, 29, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.14); }
     .glass-input { background: rgba(8, 9, 14, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); }
     .carousel-wrapper { position: relative; width: 100%; overflow: hidden; padding: 4px 0; }
     .carousel-track { display: flex; gap: 16px; transition: transform 0.1s linear; will-change: transform; }
@@ -38,63 +38,42 @@
     .ghetto-home-bg { background-image: linear-gradient(to bottom, rgba(5,6,9,0) 0%, rgba(5,6,9,0.3) 45%, rgba(5,6,9,0.95) 85%), url('wallpaper.jpg'); background-size: cover; background-position: center; }
     
     /* Fonds d'écran boutiques épurés */
-    .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.88) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
-    .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.92) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
-    .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.05) 0%, rgba(9,10,16,0.25) 45%, rgba(9,10,16,0.92) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
+    .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
+    .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
+    .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
 
-    /* Cartes réduites pour l'Armurerie */
-    .shop-scroll-container { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 10px; -webkit-overflow-scrolling: touch; }
-    .shop-card { flex: 0 0 185px; scroll-snap-align: center; border-radius: 20px; transition: transform 0.2s ease; }
-
-    /* Pile de cartes 3D (Deck Stack) avec espace dégagé en haut et en bas + animation fluide */
-    .deck-stack-wrapper {
+    /* =========================================================================
+       SYSTÈME DE PILE DE CARTES 3D (DECK STACK) POUR ARMURERIE, NIGHTCLUB & SPORTCLUB
+       - Hauteur strictement contenue (aucun chevauchement avec le haut ou le bas)
+       - Vraie transition 3D fluide sans blocage GPU
+       ========================================================================= */
+    .deck-stage {
       position: relative;
       width: 100%;
-      height: 290px;
-      margin: 6px 0 10px 0;
+      height: 266px; /* Plus grand que la carte (244px) pour qu'elle ne déborde jamais */
       display: flex;
       align-items: center;
       justify-content: center;
-      perspective: 900px;
-      touch-action: pan-y;
+      perspective: 1000px;
       user-select: none;
+      touch-action: pan-y;
+      overflow: visible;
     }
-    .deck-card {
+    .deck-card-item {
       position: absolute;
-      width: 190px;
+      width: 192px;
+      height: 244px; /* Hauteur fixe compacte */
       border-radius: 20px;
-      transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-                  opacity 0.45s ease,
-                  filter 0.45s ease,
-                  box-shadow 0.45s ease;
-      will-change: transform, opacity, filter;
-    }
-    .deck-card.is-front {
-      z-index: 20;
-      transform: translate3d(-12px, 4px, 0) scale(1) rotate(0deg);
-      opacity: 1;
-      filter: brightness(1) grayscale(0%);
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.85);
-    }
-    .deck-card.is-back {
-      z-index: 10;
-      transform: translate3d(38px, -10px, -60px) scale(0.86) rotate(6deg);
-      opacity: 0.58;
-      filter: brightness(0.6) grayscale(30%);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-      cursor: pointer;
-    }
-    .deck-card.is-back .deck-buy-btn {
-      pointer-events: none;
-      opacity: 0.5;
-    }
-    @keyframes deckSwapPulse {
-      0% { transform: translate3d(-12px, 4px, 0) scale(1); }
-      40% { transform: translate3d(-28px, -6px, 30px) scale(1.05) rotate(-3deg); }
-      100% { transform: translate3d(-12px, 4px, 0) scale(1) rotate(0deg); }
-    }
-    .deck-card.is-front.animating-swap {
-      animation: deckSwapPulse 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+      background: rgba(16, 18, 27, 0.94);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.55s cubic-bezier(0.2, 0.9, 0.25, 1),
+                  opacity 0.55s cubic-bezier(0.2, 0.9, 0.25, 1),
+                  box-shadow 0.55s ease;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
     }
 
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
@@ -377,14 +356,15 @@
       </div>
     </div>
 
-    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE ÉPURÉE ================= -->
-    <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 p-4 flex flex-col justify-end armory-bg">
-      <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg">
+    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE (DECK EMPILÉ 3D ANIMÉ) ================= -->
+    <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end armory-bg">
+      <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
       </button>
 
-      <div class="w-full space-y-2 mt-auto">
-        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono">
+      <div class="w-full flex flex-col gap-2">
+        <!-- Soldes -->
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between">
             <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
             <span id="armoryPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
@@ -395,33 +375,41 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 p-1 bg-black/60 border border-white/10 rounded-2xl font-mono text-xs">
-          <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-2 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
+        <!-- Onglets Armes / Équipements -->
+        <div class="grid grid-cols-2 gap-2 p-1 bg-black/75 border border-white/15 rounded-2xl font-mono text-xs">
+          <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-1.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
             <i class="ph-bold ph-sword"></i> Armes
           </button>
-          <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-2 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
+          <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-1.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
             <i class="ph-bold ph-shield"></i> Équipements
           </button>
         </div>
 
-        <div>
-          <span class="text-[9px] font-mono text-slate-300 block text-center mb-0.5"><i class="ph-bold ph-arrows-left-right"></i> Glisser pour parcourir</span>
-          <div id="armoryCardsContainer" class="shop-scroll-container"></div>
+        <!-- Bandeau d'instruction bien dégagé -->
+        <div onclick="stepArmoryDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-rose-500/40 text-[10px] font-mono text-rose-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
+          <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour faire défiler les cartes
         </div>
 
-        <button onclick="closeModal('modalArmoryShop')" class="w-full py-3 glass-panel text-slate-200 font-bold rounded-2xl text-xs uppercase hover:text-white transition">
+        <!-- Zone de Pile 3D + Flèches latérales -->
+        <div class="relative w-full flex items-center justify-center">
+          <button type="button" onclick="stepArmoryDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
+          <div id="armoryCardsContainer" class="deck-stage"></div>
+          <button type="button" onclick="stepArmoryDeck(1)" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+
+        <button onclick="closeModal('modalArmoryShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
           Quitter l'Armurerie
         </button>
       </div>
     </div>
 
-    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (REMONTÉE & ANIMÉE) ================= -->
-    <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-6 flex flex-col justify-end nightclub-bg">
+    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES (DECK EMPILÉ 3D ANIMÉ) ================= -->
+    <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end nightclub-bg">
       <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
       </button>
 
-      <div class="w-full flex flex-col gap-2.5 mb-2">
+      <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between">
             <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
@@ -433,27 +421,31 @@
           </div>
         </div>
 
-        <!-- Bandeau d'instruction bien lisible et dégagé au-dessus des cartes -->
-        <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/75 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
+        <!-- Bandeau d'instruction bien dégagé -->
+        <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
           <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
         </div>
 
-        <!-- Pile de cartes avec hauteur dédiée pour ne jamais manger le texte ni le bouton du bas -->
-        <div id="nightclubStackContainer" class="deck-stack-wrapper"></div>
+        <!-- Zone de Pile 3D + Flèches latérales -->
+        <div class="relative w-full flex items-center justify-center">
+          <button type="button" onclick="toggleNightclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
+          <div id="nightclubStackContainer" class="deck-stage"></div>
+          <button type="button" onclick="toggleNightclubStackCard()" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
 
-        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3.5 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
+        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
           Quitter le Nightclub
         </button>
       </div>
     </div>
 
-    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (REMONTÉE & ANIMÉE) ================= -->
-    <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-6 flex flex-col justify-end sportclub-bg">
+    <!-- ================= 3. MODALE SPORTCLUB — LASCARS (DECK EMPILÉ 3D ANIMÉ) ================= -->
+    <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end sportclub-bg">
       <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
         <i class="ph-bold ph-x text-base"></i>
       </button>
 
-      <div class="w-full flex flex-col gap-2.5 mb-2">
+      <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between">
             <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
@@ -465,15 +457,19 @@
           </div>
         </div>
 
-        <!-- Bandeau d'instruction bien lisible et dégagé au-dessus des cartes -->
-        <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/75 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
+        <!-- Bandeau d'instruction bien dégagé -->
+        <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
           <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
         </div>
 
-        <!-- Pile de cartes avec hauteur dédiée -->
-        <div id="sportclubStackContainer" class="deck-stack-wrapper"></div>
+        <!-- Zone de Pile 3D + Flèches latérales -->
+        <div class="relative w-full flex items-center justify-center">
+          <button type="button" onclick="toggleSportclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
+          <div id="sportclubStackContainer" class="deck-stage"></div>
+          <button type="button" onclick="toggleSportclubStackCard()" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
 
-        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3.5 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
+        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
           Quitter le Sportclub
         </button>
       </div>
@@ -757,64 +753,163 @@
       })
       .catch(() => {});
 
+    // =========================================================================
+    // MOTEUR UNIVERSEL D'ANIMATION 3D POUR LES PILES DE CARTES
+    // (Fonctionne au doigt Touch, à la souris Drag, au clic sur la carte arrière et aux flèches)
+    // =========================================================================
+    function applyDeckStackPositions(prefix, totalCount, activeIndex) {
+      for (let i = 0; i < totalCount; i++) {
+        const el = document.getElementById(`${prefix}_${i}`);
+        if (!el) continue;
+        const buyBtn = el.querySelector('.deck-buy-btn');
+        const diff = (i - activeIndex + totalCount) % totalCount;
+
+        if (diff === 0) {
+          // Carte au 1er plan
+          el.style.zIndex = '25';
+          el.style.opacity = '1';
+          el.style.transform = 'translate3d(-10px, 2px, 0px) scale(1) rotate(0deg)';
+          el.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.88)';
+          el.style.pointerEvents = 'auto';
+          el.style.cursor = 'default';
+          if (buyBtn) buyBtn.style.pointerEvents = 'auto';
+        } else if (diff === 1) {
+          // Carte juste derrière (qu'on devine à droite)
+          el.style.zIndex = '15';
+          el.style.opacity = '0.52';
+          el.style.transform = 'translate3d(38px, -8px, -60px) scale(0.86) rotate(7deg)';
+          el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
+          el.style.pointerEvents = 'auto';
+          el.style.cursor = 'pointer';
+          if (buyBtn) buyBtn.style.pointerEvents = 'none';
+        } else {
+          // Autres cartes de la pile (Armurerie) cachées en dessous
+          el.style.zIndex = '5';
+          el.style.opacity = '0';
+          el.style.transform = 'translate3d(-45px, 10px, -120px) scale(0.75) rotate(-8deg)';
+          el.style.pointerEvents = 'none';
+          if (buyBtn) buyBtn.style.pointerEvents = 'none';
+        }
+      }
+    }
+
+    function bindDeckSwipeAndDrag(containerId, onStep) {
+      const el = document.getElementById(containerId);
+      if (!el || el.dataset.swipeBound === '1') return;
+      el.dataset.swipeBound = '1';
+
+      let startX = null;
+      // Tactile (Mobile)
+      el.addEventListener('touchstart', e => {
+        if (e.touches && e.touches[0]) startX = e.touches[0].clientX;
+      }, { passive: true });
+      el.addEventListener('touchend', e => {
+        if (startX === null || !e.changedTouches || !e.changedTouches[0]) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        startX = null;
+        if (dx < -22) onStep(1);
+        else if (dx > 22) onStep(-1);
+      }, { passive: true });
+
+      // Souris (PC / Preview)
+      el.addEventListener('mousedown', e => { startX = e.clientX; });
+      el.addEventListener('mouseup', e => {
+        if (startX === null) return;
+        const dx = e.clientX - startX;
+        startX = null;
+        if (dx < -22) onStep(1);
+        else if (dx > 22) onStep(-1);
+      });
+    }
+
+    // --- 1. ARMURERIE (DECK EMPILÉ 3D) ---
     let currentArmoryCategory = 'arme';
+    let activeArmoryIndex = 0;
+    let currentArmoryItems = [];
+
     function openArmoryShopModal() {
       document.getElementById('armoryPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('armorySafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
+      bindDeckSwipeAndDrag('armoryCardsContainer', stepArmoryDeck);
       switchArmoryTab('arme');
       document.getElementById('modalArmoryShop').classList.remove('hidden');
     }
+
     function switchArmoryTab(cat) {
       currentArmoryCategory = cat;
+      activeArmoryIndex = 0;
       const bW = document.getElementById('tabBtnArmoryWeapons');
       const bA = document.getElementById('tabBtnArmoryArmor');
       if (cat === 'arme') {
-        bW.className = "py-2 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition";
-        bA.className = "py-2 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+        bW.className = "py-1.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition";
+        bA.className = "py-1.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
       } else {
-        bA.className = "py-2 rounded-xl font-black uppercase bg-sky-500 text-black flex items-center justify-center gap-1.5 shadow-lg transition";
-        bW.className = "py-2 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+        bA.className = "py-1.5 rounded-xl font-black uppercase bg-sky-500 text-black flex items-center justify-center gap-1.5 shadow-lg transition";
+        bW.className = "py-1.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
       }
-      renderArmoryCards();
+      buildArmoryStackDOM();
     }
-    function renderArmoryCards() {
+
+    function buildArmoryStackDOM() {
       const container = document.getElementById('armoryCardsContainer');
-      const items = ARMORY_CATALOG.filter(it => it.categorie === currentArmoryCategory);
-      container.innerHTML = items.map(item => {
+      currentArmoryItems = ARMORY_CATALOG.filter(it => it.categorie === currentArmoryCategory);
+      const total = currentArmoryItems.length;
+
+      container.innerHTML = currentArmoryItems.map((item, idx) => {
         const isWeapon = item.categorie === 'arme';
         const imgFile = (item.id === 'wp_axe' || (item.nom && item.nom.toLowerCase().includes('hache'))) ? 'arme-axe.jpg' : item.image;
+        const borderColor = isWeapon ? 'border-rose-500/45' : 'border-sky-500/45';
         const badgeColor = isWeapon ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40';
         const displayBonus = isWeapon ? `+${item.bonusVal} Attaque` : `+${item.bonusVal} Défense`;
         const firearmBadge = item.isFirearm ? `<span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[8px] font-bold">🔥 Feu</span>` : '';
+
         return `
-          <div class="shop-card glass-panel p-3 flex flex-col justify-between border border-white/15 shadow-2xl">
+          <div id="armoryDeckCard_${idx}" onclick="onArmoryCardClick(${idx})" class="deck-card-item border ${borderColor}">
             <div>
-              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+              <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
                 <img src="${imgFile}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="hidden flex-col items-center justify-center text-slate-500">
                   <i class="ph-bold ${isWeapon ? 'ph-sword text-rose-400' : 'ph-shield text-sky-400'} text-3xl"></i>
                   <span class="text-[8px] font-mono mt-1">${imgFile}</span>
                 </div>
               </div>
-              <div class="flex items-center justify-between gap-1 mb-0.5">
+              <div class="flex items-center justify-between gap-1">
                 <span class="px-1.5 py-0.5 rounded-md border ${badgeColor} font-mono text-[9px] font-black">${displayBonus}</span>
                 ${firearmBadge}
+                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${total}</span>
               </div>
               <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
               <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
             </div>
-            <div class="pt-2 mt-2 border-t border-white/10">
-              <div class="flex items-center justify-between font-mono mb-1.5">
+            <div class="pt-1.5 border-t border-white/10">
+              <div class="flex items-center justify-between font-mono mb-1">
                 <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
                 <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
               </div>
-              <button onclick="buyArmoryCatalogItem('${item.id}')" class="w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+              <button onclick="event.stopPropagation(); buyArmoryCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
                 <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
               </button>
             </div>
           </div>`;
       }).join('');
+
+      applyDeckStackPositions('armoryDeckCard', total, activeArmoryIndex);
     }
+
+    function stepArmoryDeck(dir = 1) {
+      const total = currentArmoryItems.length;
+      if (!total) return;
+      activeArmoryIndex = (activeArmoryIndex + dir + total) % total;
+      applyDeckStackPositions('armoryDeckCard', total, activeArmoryIndex);
+    }
+
+    function onArmoryCardClick(idx) {
+      if (idx !== activeArmoryIndex) {
+        activeArmoryIndex = idx;
+        applyDeckStackPositions('armoryDeckCard', currentArmoryItems.length, activeArmoryIndex);
+      }
+    }
+
     async function buyArmoryCatalogItem(itemId) {
       const item = ARMORY_CATALOG.find(i => i.id === itemId);
       if (!item) return;
@@ -851,34 +946,15 @@
       openPaymentChoiceModal(pPayload);
     }
 
-    // =========================================================================
-    // PILE DE CARTES 3D AVEC VRAIE ANIMATION FLUIDE (NIGHTCLUB & SPORTCLUB)
-    // =========================================================================
+    // --- 2. NIGHTCLUB — PROSTITUÉES (DECK EMPILÉ 3D) ---
     let activeNightclubIndex = 0;
-    let activeSportclubIndex = 0;
 
-    function attachSwipeDeckEvents(containerId, onSwap) {
-      const el = document.getElementById(containerId);
-      if (!el || el.dataset.swipeBound === '1') return;
-      el.dataset.swipeBound = '1';
-      let startX = 0;
-      el.addEventListener('touchstart', e => {
-        if (e.touches && e.touches[0]) startX = e.touches[0].clientX;
-      }, { passive: true });
-      el.addEventListener('touchend', e => {
-        if (!e.changedTouches || !e.changedTouches[0]) return;
-        const diffX = e.changedTouches[0].clientX - startX;
-        if (Math.abs(diffX) > 22) onSwap();
-      }, { passive: true });
-    }
-
-    // --- NIGHTCLUB (Prostituées) ---
     function openNightclubShopModal() {
       document.getElementById('nightclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('nightclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
       activeNightclubIndex = 0;
       buildNightclubStackDOM();
-      attachSwipeDeckEvents('nightclubStackContainer', toggleNightclubStackCard);
+      bindDeckSwipeAndDrag('nightclubStackContainer', () => toggleNightclubStackCard());
       document.getElementById('modalNightclubShop').classList.remove('hidden');
     }
 
@@ -886,13 +962,11 @@
       const container = document.getElementById('nightclubStackContainer');
       const isMaryFree = (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed);
       container.innerHTML = NIGHTCLUB_CATALOG.map((item, idx) => {
-        const isFront = (idx === activeNightclubIndex);
-        const stateClass = isFront ? 'is-front' : 'is-back';
         const displayPrice = (item.lvl === 1 && isMaryFree) ? 'GRATUIT (Bonus)' : `${item.prix.toLocaleString()} €`;
         return `
-          <div id="nightclubCard_${idx}" onclick="handleNightclubCardClick(${idx})" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-pink-500/40">
+          <div id="nightclubDeckCard_${idx}" onclick="onNightclubCardClick(${idx})" class="deck-card-item border border-pink-500/45">
             <div>
-              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
+              <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
                 <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="hidden flex-col items-center justify-center text-pink-400">
                   <i class="ph-bold ph-high-heel text-3xl"></i>
@@ -906,8 +980,8 @@
               <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
               <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
             </div>
-            <div class="pt-2 mt-2 border-t border-white/10">
-              <div class="flex items-center justify-between font-mono mb-1.5">
+            <div class="pt-1.5 border-t border-white/10">
+              <div class="flex items-center justify-between font-mono mb-1">
                 <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
                 <span class="text-xs font-black text-ghetto-gold">${displayPrice}</span>
               </div>
@@ -917,23 +991,17 @@
             </div>
           </div>`;
       }).join('');
+
+      applyDeckStackPositions('nightclubDeckCard', NIGHTCLUB_CATALOG.length, activeNightclubIndex);
     }
 
-    function handleNightclubCardClick(idx) {
+    function onNightclubCardClick(idx) {
       if (idx !== activeNightclubIndex) toggleNightclubStackCard();
     }
 
     function toggleNightclubStackCard() {
       activeNightclubIndex = activeNightclubIndex === 0 ? 1 : 0;
-      NIGHTCLUB_CATALOG.forEach((_, idx) => {
-        const cardEl = document.getElementById(`nightclubCard_${idx}`);
-        if (!cardEl) return;
-        const isFront = (idx === activeNightclubIndex);
-        cardEl.classList.remove('is-front', 'is-back', 'animating-swap');
-        void cardEl.offsetWidth; // Force reflow pour déclencher l'animation CSS
-        cardEl.classList.add(isFront ? 'is-front' : 'is-back');
-        if (isFront) cardEl.classList.add('animating-swap');
-      });
+      applyDeckStackPositions('nightclubDeckCard', NIGHTCLUB_CATALOG.length, activeNightclubIndex);
     }
 
     async function buyNightclubItem(lvl) {
@@ -957,66 +1025,58 @@
       openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- SPORTCLUB (Lascars) ---
+    // --- 3. SPORTCLUB — LASCARS (DECK EMPILÉ 3D) ---
+    let activeSportclubIndex = 0;
+
     function openSportclubShopModal() {
       document.getElementById('sportclubPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('sportclubSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
       activeSportclubIndex = 0;
       buildSportclubStackDOM();
-      attachSwipeDeckEvents('sportclubStackContainer', toggleSportclubStackCard);
+      bindDeckSwipeAndDrag('sportclubStackContainer', () => toggleSportclubStackCard());
       document.getElementById('modalSportclubShop').classList.remove('hidden');
     }
 
     function buildSportclubStackDOM() {
       const container = document.getElementById('sportclubStackContainer');
-      container.innerHTML = SPORTCLUB_CATALOG.map((item, idx) => {
-        const isFront = (idx === activeSportclubIndex);
-        const stateClass = isFront ? 'is-front' : 'is-back';
-        return `
-          <div id="sportclubCard_${idx}" onclick="handleSportclubCardClick(${idx})" class="deck-card ${stateClass} glass-panel p-3 flex flex-col justify-between border border-sky-500/40">
-            <div>
-              <div class="relative w-full h-28 rounded-xl overflow-hidden bg-black/70 border border-white/10 mb-2 flex items-center justify-center">
-                <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="hidden flex-col items-center justify-center text-sky-400">
-                  <i class="ph-bold ph-barbell text-3xl"></i>
-                  <span class="text-[8px] font-mono mt-1">${item.image}</span>
-                </div>
+      container.innerHTML = SPORTCLUB_CATALOG.map((item, idx) => `
+        <div id="sportclubDeckCard_${idx}" onclick="onSportclubCardClick(${idx})" class="deck-card-item border border-sky-500/45">
+          <div>
+            <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
+              <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="hidden flex-col items-center justify-center text-sky-400">
+                <i class="ph-bold ph-barbell text-3xl"></i>
+                <span class="text-[8px] font-mono mt-1">${item.image}</span>
               </div>
-              <div class="flex items-center justify-between">
-                <span class="px-1.5 py-0.5 rounded-md border bg-sky-500/20 text-sky-300 border-sky-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
-                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/2</span>
-              </div>
-              <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
-              <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
             </div>
-            <div class="pt-2 mt-2 border-t border-white/10">
-              <div class="flex items-center justify-between font-mono mb-1.5">
-                <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-                <span class="text-xs font-black text-ghetto-gold">${item.prix.toLocaleString()} €</span>
-              </div>
-              <button onclick="event.stopPropagation(); buySportclubItem(${item.lvl})" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
-                <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
-              </button>
+            <div class="flex items-center justify-between">
+              <span class="px-1.5 py-0.5 rounded-md border bg-sky-500/20 text-sky-300 border-sky-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
+              <span class="text-[9px] font-mono text-slate-400">${idx + 1}/2</span>
             </div>
-          </div>`;
-      }).join('');
+            <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+            <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
+          </div>
+          <div class="pt-1.5 border-t border-white/10">
+            <div class="flex items-center justify-between font-mono mb-1">
+              <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+              <span class="text-xs font-black text-ghetto-gold">${item.prix.toLocaleString()} €</span>
+            </div>
+            <button onclick="event.stopPropagation(); buySportclubItem(${item.lvl})" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+              <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
+            </button>
+          </div>
+        </div>`).join('');
+
+      applyDeckStackPositions('sportclubDeckCard', SPORTCLUB_CATALOG.length, activeSportclubIndex);
     }
 
-    function handleSportclubCardClick(idx) {
+    function onSportclubCardClick(idx) {
       if (idx !== activeSportclubIndex) toggleSportclubStackCard();
     }
 
     function toggleSportclubStackCard() {
       activeSportclubIndex = activeSportclubIndex === 0 ? 1 : 0;
-      SPORTCLUB_CATALOG.forEach((_, idx) => {
-        const cardEl = document.getElementById(`sportclubCard_${idx}`);
-        if (!cardEl) return;
-        const isFront = (idx === activeSportclubIndex);
-        cardEl.classList.remove('is-front', 'is-back', 'animating-swap');
-        void cardEl.offsetWidth; // Force reflow pour déclencher l'animation CSS
-        cardEl.classList.add(isFront ? 'is-front' : 'is-back');
-        if (isFront) cardEl.classList.add('animating-swap');
-      });
+      applyDeckStackPositions('sportclubDeckCard', SPORTCLUB_CATALOG.length, activeSportclubIndex);
     }
 
     async function buySportclubItem(lvl) {
@@ -1804,7 +1864,6 @@
 
     // =========================================================================
     // CONTRÔLE DE POLICE : 30% CLEAR / 35% DROGUE / 35% ARMES
-    // Si ça tombe sur Armes mais que le joueur n'a aucune arme -> R.A.S. (Clear)
     // =========================================================================
     async function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
@@ -1825,7 +1884,6 @@
         await showAppAlert(`Go-Fast (${roll}) : ÉCHEC ! Contrôle immédiat !`, "🛑 Barrage");
       }
 
-      // Tirage pondéré : 30% CLEAN, 35% DRUGS_FOUND, 35% WEAPONS_FOUND
       const r = Math.random();
       let pick = 'CLEAN';
       if (r < 0.30) {
