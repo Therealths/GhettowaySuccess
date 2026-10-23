@@ -301,6 +301,7 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Chien Errant : le dernier qui siffle vole le chien
   socket.on('claim_stray_dog', ({ senderCaid, playerToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -330,6 +331,7 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Combat : duel engagé
   socket.on('start_combat_engagement', ({ targetPlayerToken, targetSocketId, attackerCaid }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
