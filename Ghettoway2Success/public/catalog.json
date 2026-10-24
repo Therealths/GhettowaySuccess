@@ -179,51 +179,55 @@
   ],
   "concessionnaire": [
     {
+      "id": "vh_roller",
+      "categorie": "vehicule",
+      "slot": "VEHICLE",
+      "nom": "Paire de rollers",
+      "prix": 1500,
+      "bonusVal": 2,
+      "goFastTarget": 6,
+      "isMotorized": false,
+      "bonusLabel": "+2 PM • Go-Fast 6+",
+      "image": "veh-roller.jpg",
+      "desc": "Ça roule ma poule ! (Go-Fast réussi sur 6)."
+    },
+    {
+      "id": "vh_trott",
+      "categorie": "vehicule",
+      "slot": "VEHICLE",
+      "nom": "Trottinette",
+      "prix": 3000,
+      "bonusVal": 4,
+      "goFastTarget": 5,
+      "isMotorized": false,
+      "bonusLabel": "+4 PM • Go-Fast 5+",
+      "image": "veh-trott.jpg",
+      "desc": "Pratique pour couper par les ruelles (Go-Fast sur 5 ou 6)."
+    },
+    {
       "id": "vh_scooter",
       "categorie": "vehicule",
       "slot": "VEHICLE",
-      "nom": "Scooter Trafiqué",
-      "prix": 2000,
-      "bonusVal": 2,
-      "goFastTarget": 6,
-      "bonusLabel": "+2 PM • Go-Fast 6+",
-      "image": "vehicule-scooter.jpg",
-      "desc": "Faufile-toi dans la cité (Go-Fast réussi sur 6)."
-    },
-    {
-      "id": "vh_cross",
-      "categorie": "vehicule",
-      "slot": "VEHICLE",
-      "nom": "Moto Cross",
-      "prix": 4000,
-      "bonusVal": 4,
-      "goFastTarget": 5,
-      "bonusLabel": "+4 PM • Go-Fast 5+",
-      "image": "vehicule-cross.jpg",
-      "desc": "Cabre devant le commissariat (Go-Fast sur 5 ou 6)."
-    },
-    {
-      "id": "vh_berline",
-      "categorie": "vehicule",
-      "slot": "VEHICLE",
-      "nom": "Berline Allemande",
-      "prix": 7000,
+      "nom": "Scooter",
+      "prix": 6000,
       "bonusVal": 6,
       "goFastTarget": 4,
+      "isMotorized": true,
       "bonusLabel": "+6 PM • Go-Fast 4+",
-      "image": "vehicule-berline.jpg",
-      "desc": "Vitres teintées, gros moteur (Go-Fast sur 4, 5 ou 6)."
+      "image": "veh-scooter.jpg",
+      "desc": "Ça cabre dans toute la cité ! (Go-Fast sur 4, 5 ou 6)."
     },
     {
-      "id": "vh_sport",
+      "id": "vh_moto",
       "categorie": "vehicule",
       "slot": "VEHICLE",
-      "nom": "Bolide Sport",
-      "prix": 12000,
+      "nom": "Grosse cylindrée",
+      "prix": 10000,
       "bonusVal": 8,
       "goFastTarget": 3,
+      "isMotorized": true,
       "bonusLabel": "+8 PM • Go-Fast 3+",
-      "image": "vehicule-sport.jpg",
+      "image": "veh-moto.jpg",
       "desc": "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !"
     }
   ]
