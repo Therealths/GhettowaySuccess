@@ -766,10 +766,10 @@
     ];
 
     let DEALER_CATALOG = [
-      { id: "vh_scooter", categorie: "vehicule", slot: "VEHICLE", nom: "Scooter Trafiqué", prix: 2000, bonusVal: 2, goFastTarget: 6, bonusLabel: "+2 PM • Go-Fast 6+", image: "vehicule-scooter.jpg", desc: "Faufile-toi dans la cité (Go-Fast réussi sur 6)." },
-      { id: "vh_cross", categorie: "vehicule", slot: "VEHICLE", nom: "Moto Cross", prix: 4000, bonusVal: 4, goFastTarget: 5, bonusLabel: "+4 PM • Go-Fast 5+", image: "vehicule-cross.jpg", desc: "Cabre devant le commissariat (Go-Fast sur 5 ou 6)." },
-      { id: "vh_berline", categorie: "vehicule", slot: "VEHICLE", nom: "Berline Allemande", prix: 7000, bonusVal: 6, goFastTarget: 4, bonusLabel: "+6 PM • Go-Fast 4+", image: "vehicule-berline.jpg", desc: "Vitres teintées, gros moteur (Go-Fast sur 4, 5 ou 6)." },
-      { id: "vh_sport", categorie: "vehicule", slot: "VEHICLE", nom: "Bolide Sport", prix: 12000, bonusVal: 8, goFastTarget: 3, bonusLabel: "+8 PM • Go-Fast 3+", image: "vehicule-sport.jpg", desc: "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !" }
+      { id: "vh_roller", categorie: "vehicule", slot: "VEHICLE", nom: "Paire de rollers", prix: 1500, bonusVal: 2, goFastTarget: 6, isMotorized: false, bonusLabel: "+2 PM • Go-Fast 6+", image: "veh-roller.jpg", desc: "Ça roule ma poule ! (Go-Fast réussi sur 6)." },
+      { id: "vh_trott", categorie: "vehicule", slot: "VEHICLE", nom: "Trottinette", prix: 3000, bonusVal: 4, goFastTarget: 5, isMotorized: false, bonusLabel: "+4 PM • Go-Fast 5+", image: "veh-trott.jpg", desc: "Pratique pour couper par les ruelles (Go-Fast sur 5 ou 6)." },
+      { id: "vh_scooter", categorie: "vehicule", slot: "VEHICLE", nom: "Scooter", prix: 6000, bonusVal: 6, goFastTarget: 4, isMotorized: true, bonusLabel: "+6 PM • Go-Fast 4+", image: "veh-scooter.jpg", desc: "Ça cabre dans toute la cité ! (Go-Fast sur 4, 5 ou 6)." },
+      { id: "vh_moto", categorie: "vehicule", slot: "VEHICLE", nom: "Grosse cylindrée", prix: 10000, bonusVal: 8, goFastTarget: 3, isMotorized: true, bonusLabel: "+8 PM • Go-Fast 3+", image: "veh-moto.jpg", desc: "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !" }
     ];
 
     // Chargement dynamique de toutes les boutiques depuis catalog.json
@@ -791,9 +791,9 @@
       })
       .catch(() => {});
 
-    // Calcule le seuil Go-Fast dégressif d'un véhicule (6+, 5+, 4+, 3+)
+    // Calcule le seuil Go-Fast dégressif d'un véhicule (Rollers 6+, Trottinette 5+, Scooter 4+, Grosse cylindrée 3+)
     function getVehicleGoFastTarget(vehicleObj) {
-      if (!vehicleObj) return 7; // Impossible sans véhicule
+      if (!vehicleObj) return 7;
       if (vehicleObj.goFastTarget) return vehicleObj.goFastTarget;
       const pm = vehicleObj.bonusVal || 2;
       if (pm >= 8) return 3;
@@ -1177,7 +1177,7 @@
       openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- 4. CONCESSIONNAIRE — VÉHICULES (AVEC GO-FAST DÉGRESSIF) ---
+    // --- 4. CONCESSIONNAIRE — VÉHICULES (PAIRE DE ROLLERS, TROTTINETTE, SCOOTER, GROSSE CYLINDRÉE) ---
     let activeDealerIndex = 0;
 
     function openDealerShopModal() {
@@ -1201,7 +1201,7 @@
               <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
                 <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="hidden flex-col items-center justify-center text-amber-400">
-                  <i class="ph-bold ph-car-profile text-3xl"></i>
+                  <i class="ph-bold ph-moped text-3xl"></i>
                   <span class="text-[8px] font-mono mt-1">${item.image}</span>
                 </div>
               </div>
@@ -1261,6 +1261,7 @@
           n: item.nom,
           pm: item.bonusVal || 2,
           goFastTarget: gfTarget,
+          isMotorized: item.isMotorized !== undefined ? item.isMotorized : (item.bonusVal >= 6),
           desc: item.desc
         }
       };
@@ -2043,7 +2044,8 @@
 
     // =========================================================================
     // CONTRÔLE DE POLICE :
-    // - Go-Fast DÉGRESSIF selon le véhicule équipé (Scooter 6+, Cross 5+, Berline 4+, Sport 3+)
+    // - Go-Fast DÉGRESSIF selon le véhicule équipé :
+    //   Paire de rollers (6+), Trottinette (5+), Scooter (4+), Grosse cylindrée (3+)
     // - Fouille : 30% CLEAR / 35% DROGUE / 35% ARMES
     // - Si embarqué au poste : Garde à vue + Fin de tour automatique après "Compris"
     // =========================================================================
@@ -2462,6 +2464,7 @@
           price: pData.cost,
           bonusVal: bonus,
           goFastTarget: gfTarget,
+          isMotorized: data.isMotorized,
           bonusLabel: bTxt,
           isFirearm: !!data.isFirearm,
           desc: data.desc || `Confère ${bTxt}`
