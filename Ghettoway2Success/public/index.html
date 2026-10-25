@@ -75,6 +75,45 @@
       backface-visibility: hidden;
     }
 
+    /* =========================================================================
+       CORRECTION DU CADRAGE VIDÉO ET PHOTO DU SCANNER QR
+       - Force la vidéo html5-qrcode à s'aligner et couvrir 100% du carré visible
+       ========================================================================= */
+    #qr-reader {
+      position: relative !important;
+      width: 224px !important;
+      height: 224px !important;
+      margin: 0 auto !important;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #qr-reader video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      border-radius: 20px;
+    }
+    #qr-reader img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+    }
+    #qr-reader__scan_region {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    #qr-reader__dashboard {
+      display: none !important;
+    }
+
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.15); border-radius: 6px; }
     input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: #facc15; cursor: pointer; -webkit-appearance: none; margin-top: -6px; box-shadow: 0 0 10px rgba(250, 204, 21, 0.6); }
@@ -681,18 +720,36 @@
         <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
-    <!-- MODALE SCANNER -->
-    <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-5 flex flex-col justify-between">
-      <div class="pt-1">
+    <!-- ================= MODALE SCANNER TACTIQUE CORRIGÉE (CAMÉRA CARRÉE + APERÇU PHOTO + ANNULER PHOTO) ================= -->
+    <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-4 flex flex-col justify-between">
+      <div class="pt-0.5">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
           <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5"><i class="ph-bold ph-qr-code"></i> Scanner Tactique</h3>
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-        <div id="qr-reader" class="w-full h-40 bg-black rounded-2xl overflow-hidden border border-white/15"></div>
-        <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1">Capteur vidéo...</div>
-        <div class="mt-1 text-center">
-          <label class="px-3 py-1 glass-panel rounded-xl text-[10px] font-mono text-slate-300 cursor-pointer inline-flex items-center gap-1"><i class="ph-bold ph-image"></i> Photo QR<input type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
+
+        <!-- Zone Caméra & Aperçu Photo bien cadrée (224x224) -->
+        <div class="relative w-[224px] h-[224px] mx-auto">
+          <div id="qr-reader" class="border-2 border-amber-400/50 shadow-2xl"></div>
+          <!-- Aperçu de la photo sélectionnée (visible à 100% avec object-contain) -->
+          <div id="qr-photo-preview-box" class="hidden absolute inset-0 bg-black/95 rounded-[20px] border-2 border-amber-400/70 flex flex-col items-center justify-center p-2 z-20">
+            <img id="qr-photo-preview-img" src="" alt="Photo QR" class="w-full h-full object-contain rounded-xl">
+          </div>
         </div>
+
+        <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1.5">Capteur vidéo...</div>
+
+        <!-- Boutons Photo QR & Annuler Photo / Retour Caméra -->
+        <div class="mt-1.5 flex items-center justify-center gap-2">
+          <label class="px-3 py-1.5 glass-panel rounded-xl text-[10px] font-mono text-slate-200 cursor-pointer inline-flex items-center gap-1.5 border border-white/15 active:scale-95 transition">
+            <i class="ph-bold ph-image text-amber-300"></i><span>Choisir Photo QR</span>
+            <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)">
+          </label>
+          <button type="button" id="btnCancelQrPhoto" onclick="cancelSelectedQrPhoto()" class="hidden px-3 py-1.5 bg-rose-500/20 border border-rose-500/50 rounded-xl text-[10px] font-mono text-rose-300 font-bold inline-flex items-center gap-1 active:scale-95 transition">
+            <i class="ph-bold ph-arrow-counter-clockwise"></i><span>Annuler Photo / Caméra</span>
+          </button>
+        </div>
+
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
           <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
           <button onclick='processQrPayload("{\"t\":\"concessionnaire\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🚗 Concessionnaire</button>
@@ -772,7 +829,6 @@
       { id: "vh_moto", categorie: "vehicule", slot: "VEHICLE", nom: "Grosse cylindrée", prix: 10000, bonusVal: 8, goFastTarget: 3, isMotorized: true, bonusLabel: "+8 PM • Go-Fast 3+", image: "veh-moto.jpg", desc: "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !" }
     ];
 
-    // Chargement dynamique de toutes les boutiques depuis catalog.json
     fetch('/catalog.json')
       .then(r => r.json())
       .then(json => {
@@ -791,7 +847,6 @@
       })
       .catch(() => {});
 
-    // Calcule le seuil Go-Fast dégressif d'un véhicule (Rollers 6+, Trottinette 5+, Scooter 4+, Grosse cylindrée 3+)
     function getVehicleGoFastTarget(vehicleObj) {
       if (!vehicleObj) return 7;
       if (vehicleObj.goFastTarget) return vehicleObj.goFastTarget;
@@ -831,7 +886,6 @@
             if (buyBtn) buyBtn.style.pointerEvents = 'none';
           }
         } else {
-          // Cas multi-cartes (Armurerie & Concessionnaire) : éventail bilatéral dès la 2e carte
           if (i === activeIndex) {
             const xOffset = (activeIndex === 0) ? '-10px' : '0px';
             el.style.zIndex = '25';
@@ -1177,7 +1231,7 @@
       openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- 4. CONCESSIONNAIRE — VÉHICULES (PAIRE DE ROLLERS, TROTTINETTE, SCOOTER, GROSSE CYLINDRÉE) ---
+    // --- 4. CONCESSIONNAIRE — VÉHICULES ---
     let activeDealerIndex = 0;
 
     function openDealerShopModal() {
@@ -1347,6 +1401,7 @@
     let carouselItems = [];
     let isDrawingCarousel = false;
     let html5QrScannerInstance = null;
+    let currentQrPhotoObjectUrl = null;
     let currentTransferMode = 'deposit';
     let currentTransferResource = 'cash';
     let connectedRivals = [];
@@ -2044,8 +2099,7 @@
 
     // =========================================================================
     // CONTRÔLE DE POLICE :
-    // - Go-Fast DÉGRESSIF selon le véhicule équipé :
-    //   Paire de rollers (6+), Trottinette (5+), Scooter (4+), Grosse cylindrée (3+)
+    // - Go-Fast DÉGRESSIF selon le véhicule équipé
     // - Fouille : 30% CLEAR / 35% DROGUE / 35% ARMES
     // - Si embarqué au poste : Garde à vue + Fin de tour automatique après "Compris"
     // =========================================================================
@@ -2586,28 +2640,132 @@
         lbl.innerText = "Prêt au combat";
       }
     }
+
+    // =========================================================================
+    // SCANNER QR CORRIGÉ :
+    // - Caméra carrée 1:1 centrée sans décalage vertical
+    // - Import de photo avec aperçu complet + bouton Annuler Photo / Retour Caméra
+    // =========================================================================
+    async function startLiveQrCamera() {
+      const statusEl = document.getElementById('qrScannerStatus');
+      const previewBox = document.getElementById('qr-photo-preview-box');
+      const cancelBtn = document.getElementById('btnCancelQrPhoto');
+      const fileInput = document.getElementById('qrFileInput');
+
+      if (previewBox) previewBox.classList.add('hidden');
+      if (cancelBtn) cancelBtn.classList.add('hidden');
+      if (fileInput) fileInput.value = '';
+      if (currentQrPhotoObjectUrl) {
+        URL.revokeObjectURL(currentQrPhotoObjectUrl);
+        currentQrPhotoObjectUrl = null;
+      }
+
+      if (typeof Html5Qrcode === 'undefined') {
+        statusEl.innerText = "Librairie QR non disponible.";
+        return;
+      }
+
+      statusEl.innerText = "Initialisation caméra...";
+      try {
+        if (!html5QrScannerInstance) {
+          html5QrScannerInstance = new Html5Qrcode("qr-reader");
+        } else if (html5QrScannerInstance.isScanning) {
+          await html5QrScannerInstance.stop();
+        }
+        await html5QrScannerInstance.start(
+          { facingMode: "environment" },
+          {
+            fps: 15,
+            aspectRatio: 1.0,
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+              const boxSize = Math.floor(minEdge * 0.78);
+              return { width: boxSize, height: boxSize };
+            }
+          },
+          (txt) => {
+            processQrPayload(txt);
+            closeQrScannerModal();
+          },
+          () => {}
+        );
+        statusEl.innerText = "Placez le QR Code au centre du carré...";
+      } catch (e) {
+        statusEl.innerText = "Caméra indisponible (utilisez Choisir Photo QR).";
+      }
+    }
+
     async function openQrScannerModal() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       document.getElementById('modalQrScanner').classList.remove('hidden');
-      const statusEl = document.getElementById('qrScannerStatus');
-      statusEl.innerText = "Initialisation caméra...";
-      if (typeof Html5Qrcode !== 'undefined') {
-        try {
-          if (!html5QrScannerInstance) html5QrScannerInstance = new Html5Qrcode("qr-reader");
-          await html5QrScannerInstance.start({ facingMode: "environment" }, { fps: 15, qrbox: 200 }, (txt) => { processQrPayload(txt); closeQrScannerModal(); }, () => {});
-          statusEl.innerText = "Visez le QR Code...";
-        } catch(e) { statusEl.innerText = "Caméra indisponible."; }
-      }
+      await startLiveQrCamera();
     }
+
     async function closeQrScannerModal() {
-      if (html5QrScannerInstance && html5QrScannerInstance.isScanning) { try { await html5QrScannerInstance.stop(); } catch(e){} }
+      if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
+        try { await html5QrScannerInstance.stop(); } catch (e) {}
+      }
+      try { if (html5QrScannerInstance) html5QrScannerInstance.clear(); } catch (e) {}
+      if (currentQrPhotoObjectUrl) {
+        URL.revokeObjectURL(currentQrPhotoObjectUrl);
+        currentQrPhotoObjectUrl = null;
+      }
+      const previewBox = document.getElementById('qr-photo-preview-box');
+      const cancelBtn = document.getElementById('btnCancelQrPhoto');
+      const fileInput = document.getElementById('qrFileInput');
+      if (previewBox) previewBox.classList.add('hidden');
+      if (cancelBtn) cancelBtn.classList.add('hidden');
+      if (fileInput) fileInput.value = '';
       closeModal('modalQrScanner');
     }
-    function scanFromImageFile(input) {
+
+    async function scanFromImageFile(input) {
       if (!input.files || !input.files[0]) return;
-      const sc = new Html5Qrcode("qr-reader");
-      sc.scanFile(input.files[0], true).then(txt => { processQrPayload(txt); closeQrScannerModal(); }).catch(() => showAppAlert("QR Code illisible.", "Erreur"));
+      const file = input.files[0];
+      const statusEl = document.getElementById('qrScannerStatus');
+      const previewBox = document.getElementById('qr-photo-preview-box');
+      const previewImg = document.getElementById('qr-photo-preview-img');
+      const cancelBtn = document.getElementById('btnCancelQrPhoto');
+
+      // 1. Arrête proprement le flux caméra en direct avant de scanner le fichier
+      if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
+        try { await html5QrScannerInstance.stop(); } catch (e) {}
+      }
+
+      // 2. Affiche immédiatement la photo complète dans le cadre + le bouton Annuler
+      if (currentQrPhotoObjectUrl) URL.revokeObjectURL(currentQrPhotoObjectUrl);
+      currentQrPhotoObjectUrl = URL.createObjectURL(file);
+      previewImg.src = currentQrPhotoObjectUrl;
+      previewBox.classList.remove('hidden');
+      cancelBtn.classList.remove('hidden');
+      statusEl.innerText = "Analyse de la photo en cours...";
+
+      try {
+        if (!html5QrScannerInstance) {
+          html5QrScannerInstance = new Html5Qrcode("qr-reader");
+        }
+        const decodedText = await html5QrScannerInstance.scanFile(file, false);
+        statusEl.innerText = "✅ QR Code détecté sur la photo !";
+        setTimeout(() => {
+          processQrPayload(decodedText);
+          closeQrScannerModal();
+        }, 350);
+      } catch (err) {
+        statusEl.innerText = "❌ Aucun QR Code détecté sur cette photo.";
+        await showAppAlert(
+          "Impossible de lire un QR Code sur cette photo.\nVous pouvez cliquer sur « Annuler Photo / Caméra » ou choisir une autre image.",
+          "QR Code Illisible"
+        );
+      } finally {
+        // Réinitialise l'input pour permettre de re-sélectionner une photo
+        input.value = '';
+      }
     }
+
+    async function cancelSelectedQrPhoto() {
+      await startLiveQrCamera();
+    }
+
     function openLootDiscoveryModal(title, desc, iconHtml, buttonText, onClaim) {
       document.getElementById('lootDiscoveryTitle').innerText = title;
       document.getElementById('lootDiscoveryDesc').innerText = desc;
