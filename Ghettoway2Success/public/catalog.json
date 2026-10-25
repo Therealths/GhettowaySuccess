@@ -185,11 +185,10 @@
       "nom": "Paire de rollers",
       "prix": 1500,
       "bonusVal": 2,
-      "goFastTarget": 6,
       "isMotorized": false,
-      "bonusLabel": "+2 PM • Go-Fast 6+",
+      "bonusLabel": "+2 PM",
       "image": "veh-roller.jpg",
-      "desc": "Ça roule ma poule ! (Go-Fast réussi sur 6)."
+      "desc": "Ça roule ma poule !"
     },
     {
       "id": "vh_trott",
@@ -198,11 +197,10 @@
       "nom": "Trottinette",
       "prix": 3000,
       "bonusVal": 4,
-      "goFastTarget": 5,
       "isMotorized": false,
-      "bonusLabel": "+4 PM • Go-Fast 5+",
+      "bonusLabel": "+4 PM",
       "image": "veh-trott.jpg",
-      "desc": "Pratique pour couper par les ruelles (Go-Fast sur 5 ou 6)."
+      "desc": "Pratique pour couper par les ruelles."
     },
     {
       "id": "vh_scooter",
@@ -211,11 +209,10 @@
       "nom": "Scooter",
       "prix": 6000,
       "bonusVal": 6,
-      "goFastTarget": 4,
       "isMotorized": true,
-      "bonusLabel": "+6 PM • Go-Fast 4+",
+      "bonusLabel": "+6 PM",
       "image": "veh-scooter.jpg",
-      "desc": "Ça cabre dans toute la cité ! (Go-Fast sur 4, 5 ou 6)."
+      "desc": "Ça cabre dans toute la cité !"
     },
     {
       "id": "vh_moto",
@@ -224,11 +221,10 @@
       "nom": "Grosse cylindrée",
       "prix": 10000,
       "bonusVal": 8,
-      "goFastTarget": 3,
       "isMotorized": true,
-      "bonusLabel": "+8 PM • Go-Fast 3+",
+      "bonusLabel": "+8 PM",
       "image": "veh-moto.jpg",
-      "desc": "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !"
+      "desc": "Intouchable sur le périph' !"
     }
   ]
 }
