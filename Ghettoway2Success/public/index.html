@@ -77,7 +77,6 @@
 
     /* =========================================================================
        CORRECTION DU CADRAGE VIDÉO ET PHOTO DU SCANNER QR
-       - Force la vidéo html5-qrcode à s'aligner et couvrir 100% du carré visible
        ========================================================================= */
     #qr-reader {
       position: relative !important;
@@ -720,7 +719,7 @@
         <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
-    <!-- ================= MODALE SCANNER TACTIQUE CORRIGÉE (CAMÉRA CARRÉE + APERÇU PHOTO + ANNULER PHOTO) ================= -->
+    <!-- ================= MODALE SCANNER TACTIQUE CORRIGÉE ================= -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-4 flex flex-col justify-between">
       <div class="pt-0.5">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
@@ -728,10 +727,8 @@
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
 
-        <!-- Zone Caméra & Aperçu Photo bien cadrée (224x224) -->
         <div class="relative w-[224px] h-[224px] mx-auto">
           <div id="qr-reader" class="border-2 border-amber-400/50 shadow-2xl"></div>
-          <!-- Aperçu de la photo sélectionnée (visible à 100% avec object-contain) -->
           <div id="qr-photo-preview-box" class="hidden absolute inset-0 bg-black/95 rounded-[20px] border-2 border-amber-400/70 flex flex-col items-center justify-center p-2 z-20">
             <img id="qr-photo-preview-img" src="" alt="Photo QR" class="w-full h-full object-contain rounded-xl">
           </div>
@@ -739,7 +736,6 @@
 
         <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1.5">Capteur vidéo...</div>
 
-        <!-- Boutons Photo QR & Annuler Photo / Retour Caméra -->
         <div class="mt-1.5 flex items-center justify-center gap-2">
           <label class="px-3 py-1.5 glass-panel rounded-xl text-[10px] font-mono text-slate-200 cursor-pointer inline-flex items-center gap-1.5 border border-white/15 active:scale-95 transition">
             <i class="ph-bold ph-image text-amber-300"></i><span>Choisir Photo QR</span>
@@ -823,10 +819,10 @@
     ];
 
     let DEALER_CATALOG = [
-      { id: "vh_roller", categorie: "vehicule", slot: "VEHICLE", nom: "Paire de rollers", prix: 1500, bonusVal: 2, goFastTarget: 6, isMotorized: false, bonusLabel: "+2 PM • Go-Fast 6+", image: "veh-roller.jpg", desc: "Ça roule ma poule ! (Go-Fast réussi sur 6)." },
-      { id: "vh_trott", categorie: "vehicule", slot: "VEHICLE", nom: "Trottinette", prix: 3000, bonusVal: 4, goFastTarget: 5, isMotorized: false, bonusLabel: "+4 PM • Go-Fast 5+", image: "veh-trott.jpg", desc: "Pratique pour couper par les ruelles (Go-Fast sur 5 ou 6)." },
-      { id: "vh_scooter", categorie: "vehicule", slot: "VEHICLE", nom: "Scooter", prix: 6000, bonusVal: 6, goFastTarget: 4, isMotorized: true, bonusLabel: "+6 PM • Go-Fast 4+", image: "veh-scooter.jpg", desc: "Ça cabre dans toute la cité ! (Go-Fast sur 4, 5 ou 6)." },
-      { id: "vh_moto", categorie: "vehicule", slot: "VEHICLE", nom: "Grosse cylindrée", prix: 10000, bonusVal: 8, goFastTarget: 3, isMotorized: true, bonusLabel: "+8 PM • Go-Fast 3+", image: "veh-moto.jpg", desc: "Intouchable sur le périph' (Go-Fast dès 3+ au dé) !" }
+      { id: "vh_roller", categorie: "vehicule", slot: "VEHICLE", nom: "Paire de rollers", prix: 1500, bonusVal: 2, isMotorized: false, bonusLabel: "+2 PM", image: "veh-roller.jpg", desc: "Ça roule ma poule !" },
+      { id: "vh_trott", categorie: "vehicule", slot: "VEHICLE", nom: "Trottinette", prix: 3000, bonusVal: 4, isMotorized: false, bonusLabel: "+4 PM", image: "veh-trott.jpg", desc: "Pratique pour couper par les ruelles." },
+      { id: "vh_scooter", categorie: "vehicule", slot: "VEHICLE", nom: "Scooter", prix: 6000, bonusVal: 6, isMotorized: true, bonusLabel: "+6 PM", image: "veh-scooter.jpg", desc: "Ça cabre dans toute la cité !" },
+      { id: "vh_moto", categorie: "vehicule", slot: "VEHICLE", nom: "Grosse cylindrée", prix: 10000, bonusVal: 8, isMotorized: true, bonusLabel: "+8 PM", image: "veh-moto.jpg", desc: "Intouchable sur le périph' !" }
     ];
 
     fetch('/catalog.json')
@@ -846,16 +842,6 @@
         if (Array.isArray(json.concessionnaire)) DEALER_CATALOG = json.concessionnaire;
       })
       .catch(() => {});
-
-    function getVehicleGoFastTarget(vehicleObj) {
-      if (!vehicleObj) return 7;
-      if (vehicleObj.goFastTarget) return vehicleObj.goFastTarget;
-      const pm = vehicleObj.bonusVal || 2;
-      if (pm >= 8) return 3;
-      if (pm >= 6) return 4;
-      if (pm >= 4) return 5;
-      return 6;
-    }
 
     // =========================================================================
     // MOTEUR D'ANIMATION 3D POUR LES PILES DE CARTES
@@ -1231,7 +1217,7 @@
       openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- 4. CONCESSIONNAIRE — VÉHICULES ---
+    // --- 4. CONCESSIONNAIRE — VÉHICULES (SANS GO-FAST) ---
     let activeDealerIndex = 0;
 
     function openDealerShopModal() {
@@ -1247,36 +1233,33 @@
       const container = document.getElementById('dealerCardsContainer');
       const total = DEALER_CATALOG.length;
 
-      container.innerHTML = DEALER_CATALOG.map((item, idx) => {
-        const gfTarget = getVehicleGoFastTarget(item);
-        return `
-          <div id="dealerDeckCard_${idx}" onclick="onDealerCardClick(${idx})" class="deck-card-item border border-amber-500/45">
-            <div>
-              <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
-                <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="hidden flex-col items-center justify-center text-amber-400">
-                  <i class="ph-bold ph-moped text-3xl"></i>
-                  <span class="text-[8px] font-mono mt-1">${item.image}</span>
-                </div>
+      container.innerHTML = DEALER_CATALOG.map((item, idx) => `
+        <div id="dealerDeckCard_${idx}" onclick="onDealerCardClick(${idx})" class="deck-card-item border border-amber-500/45">
+          <div>
+            <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5 flex items-center justify-center">
+              <img src="${item.image}" alt="${item.nom}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="hidden flex-col items-center justify-center text-amber-400">
+                <i class="ph-bold ph-moped text-3xl"></i>
+                <span class="text-[8px] font-mono mt-1">${item.image}</span>
               </div>
-              <div class="flex items-center justify-between gap-1">
-                <span class="px-1.5 py-0.5 rounded-md border bg-amber-500/20 text-amber-300 border-amber-500/40 font-mono text-[9px] font-black">+${item.bonusVal} PM • Go-Fast ${gfTarget}+</span>
-                <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${total}</span>
-              </div>
-              <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
-              <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
             </div>
-            <div class="pt-1.5 border-t border-white/10">
-              <div class="flex items-center justify-between font-mono mb-1">
-                <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-                <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
-              </div>
-              <button onclick="event.stopPropagation(); buyDealerCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
-                <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
-              </button>
+            <div class="flex items-center justify-between gap-1">
+              <span class="px-1.5 py-0.5 rounded-md border bg-amber-500/20 text-amber-300 border-amber-500/40 font-mono text-[9px] font-black">+${item.bonusVal} PM</span>
+              <span class="text-[9px] font-mono text-slate-400">${idx + 1}/${total}</span>
             </div>
-          </div>`;
-      }).join('');
+            <h4 class="text-xs font-black text-white uppercase truncate mt-1">${item.nom}</h4>
+            <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${item.desc}"</p>
+          </div>
+          <div class="pt-1.5 border-t border-white/10">
+            <div class="flex items-center justify-between font-mono mb-1">
+              <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
+              <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
+            </div>
+            <button onclick="event.stopPropagation(); buyDealerCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+              <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
+            </button>
+          </div>
+        </div>`).join('');
 
       applyDeckStackPositions('dealerDeckCard', total, activeDealerIndex);
     }
@@ -1305,7 +1288,6 @@
       if (totalFunds < cost) {
         return showAppAlert(`Fonds totaux insuffisants !\nPrix requis : ${cost.toLocaleString()} €\nTotal disponible (Poche + QG) : ${totalFunds.toLocaleString()} €.`, "❌ Achat Impossible");
       }
-      const gfTarget = getVehicleGoFastTarget(item);
       const pPayload = {
         type: 'eq',
         cost: cost,
@@ -1314,7 +1296,6 @@
           sl: 'veh',
           n: item.nom,
           pm: item.bonusVal || 2,
-          goFastTarget: gfTarget,
           isMotorized: item.isMotorized !== undefined ? item.isMotorized : (item.bonusVal >= 6),
           desc: item.desc
         }
@@ -2098,22 +2079,13 @@
     }
 
     // =========================================================================
-    // CONTRÔLE DE POLICE :
-    // - Go-Fast DÉGRESSIF selon le véhicule équipé
-    // - Fouille : 30% CLEAR / 35% DROGUE / 35% ARMES
+    // CONTRÔLE DE POLICE (SANS GO-FAST) :
+    // - Fouille directe : 30% CLEAR / 35% DROGUE / 35% ARMES
     // - Si embarqué au poste : Garde à vue + Fin de tour automatique après "Compris"
     // =========================================================================
     async function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
-      const eqVeh = localPlayer.equipped.vehicle;
-      const hasVehicle = !!eqVeh;
-      const gfTarget = hasVehicle ? getVehicleGoFastTarget(eqVeh) : 7;
-
-      const confirmPrompt = hasVehicle
-        ? `Véhicule actif : ${eqVeh.name} (Go-Fast réussi sur ${gfTarget}+ au dé).\nLancer le contrôle ?`
-        : "Vous êtes à pied. Lancer la fouille ?";
-
-      if (!await showAppConfirm(confirmPrompt, "🚨 Contrôle de Police")) return;
+      if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
 
       const caid = getMyCaid();
       if (caid.id === 'caid_5' && !localPlayer.specialUsedThisTurn) {
@@ -2123,14 +2095,6 @@
           if (Math.random() >= 0.5) return showAppAlert("FACE ! Contrôle annulé ce tour !", "🙏 Miracle");
           await showAppAlert("PILE ! La prière échoue.", "🙏 Échec");
         }
-      }
-
-      if (hasVehicle) {
-        const roll = Math.floor(Math.random() * 6) + 1;
-        if (roll >= gfTarget) {
-          return showAppAlert(`Jet de Go-Fast : ${roll} (Requis : ${gfTarget}+ avec ${eqVeh.name}) !\nSUCCÈS ! Vous semez la patrouille de police !`, "⚡ Go-Fast Réussi");
-        }
-        await showAppAlert(`Jet de Go-Fast : ${roll} (Requis : ${gfTarget}+ avec ${eqVeh.name}).\nÉCHEC ! La police vous bloque et procède au contrôle immédiat !`, "🛑 Barrage de Police");
       }
 
       const r = Math.random();
@@ -2367,9 +2331,8 @@
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-sky-500/20 text-sky-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('armor')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
       const v = localPlayer.equipped.vehicle;
-      const gfTarget = v ? getVehicleGoFastTarget(v) : null;
       document.getElementById('slotVehicleTitle').innerText = v ? v.name : "À pied";
-      document.getElementById('slotVehicleStats').innerText = v ? `+${v.bonusVal} PM (${8 + v.bonusVal} PM) • Go-Fast ${gfTarget}+` : "Déplacement 8 PM";
+      document.getElementById('slotVehicleStats').innerText = v ? `Déplacement +${v.bonusVal} PM (${8 + v.bonusVal} PM)` : "Déplacement 8 PM";
       document.getElementById('slotVehicleStatusContainer').innerHTML = v
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('vehicle')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
@@ -2507,17 +2470,15 @@
       if (type === 'eq') {
         const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
         const bonus = data.atk || data.def || data.pm || 1;
-        const gfTarget = slot === 'VEHICLE' ? (data.goFastTarget || getVehicleGoFastTarget({ bonusVal: bonus })) : undefined;
         const bTxt = data.atk
           ? `+${bonus} Attaque`
-          : (data.def ? `+${bonus} Défense` : `+${bonus} PM • Go-Fast ${gfTarget}+`);
+          : (data.def ? `+${bonus} Défense` : `+${bonus} PM`);
         localPlayer.inventory.push({
           id: 'item_' + Date.now(),
           type: slot,
           name: data.n,
           price: pData.cost,
           bonusVal: bonus,
-          goFastTarget: gfTarget,
           isMotorized: data.isMotorized,
           bonusLabel: bTxt,
           isFirearm: !!data.isFirearm,
@@ -2642,9 +2603,7 @@
     }
 
     // =========================================================================
-    // SCANNER QR CORRIGÉ :
-    // - Caméra carrée 1:1 centrée sans décalage vertical
-    // - Import de photo avec aperçu complet + bouton Annuler Photo / Retour Caméra
+    // SCANNER QR CORRIGÉ
     // =========================================================================
     async function startLiveQrCamera() {
       const statusEl = document.getElementById('qrScannerStatus');
@@ -2727,12 +2686,10 @@
       const previewImg = document.getElementById('qr-photo-preview-img');
       const cancelBtn = document.getElementById('btnCancelQrPhoto');
 
-      // 1. Arrête proprement le flux caméra en direct avant de scanner le fichier
       if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
         try { await html5QrScannerInstance.stop(); } catch (e) {}
       }
 
-      // 2. Affiche immédiatement la photo complète dans le cadre + le bouton Annuler
       if (currentQrPhotoObjectUrl) URL.revokeObjectURL(currentQrPhotoObjectUrl);
       currentQrPhotoObjectUrl = URL.createObjectURL(file);
       previewImg.src = currentQrPhotoObjectUrl;
@@ -2757,7 +2714,6 @@
           "QR Code Illisible"
         );
       } finally {
-        // Réinitialise l'input pour permettre de re-sélectionner une photo
         input.value = '';
       }
     }
@@ -2791,16 +2747,13 @@
       if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
       const type = (data.t || data.type || '').toLowerCase();
 
-      // 1. OUVERTURE DES BOUTIQUES : ARMURERIE / NIGHTCLUB / SPORTCLUB / CONCESSIONNAIRE
       if (type === 'armurerie') return openArmoryShopModal();
       if (type === 'nightclub') return openNightclubShopModal();
       if (type === 'sportclub') return openSportclubShopModal();
       if (type === 'concessionnaire' || type === 'dealer') return openDealerShopModal();
 
-      // 2. CASE GROSSISTE
       if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
 
-      // 3. CARTES OBJETS
       if (type === 'obj') {
         if (data.eff === 'cash') {
           const v = data.val || 1000;
