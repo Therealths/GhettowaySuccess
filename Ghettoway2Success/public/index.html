@@ -844,6 +844,32 @@
       .catch(() => {});
 
     // =========================================================================
+    // MOTEUR DE LECTURE & CALCUL DES EFFETS FLASH RADIO (radio_events.json)
+    // =========================================================================
+    function isRadioEffectActive(type) {
+      const ev = currentSession.currentRadioEvent;
+      return !!(ev && ev.effectType === type);
+    }
+
+    function getRadioEffectValue(type, fallbackVal = 0) {
+      const ev = currentSession.currentRadioEvent;
+      if (ev && ev.effectType === type && ev.effectVal !== undefined) {
+        return Number(ev.effectVal);
+      }
+      return fallbackVal;
+    }
+
+    function getArmoryItemEffectivePrice(item) {
+      let price = item.prix || 0;
+      if (item.categorie === 'arme' && isRadioEffectActive('WEAPON_PRICE_MULT')) {
+        price = Math.round(price * getRadioEffectValue('WEAPON_PRICE_MULT', 0.7));
+      } else if (item.categorie === 'equipement' && isRadioEffectActive('ARMOR_PRICE_MULT')) {
+        price = Math.round(price * getRadioEffectValue('ARMOR_PRICE_MULT', 0.5));
+      }
+      return price;
+    }
+
+    // =========================================================================
     // MOTEUR D'ANIMATION 3D POUR LES PILES DE CARTES
     // =========================================================================
     function applyDeckStackPositions(prefix, totalCount, activeIndex) {
@@ -981,6 +1007,13 @@
         const badgeColor = isWeapon ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40';
         const displayBonus = isWeapon ? `+${item.bonusVal} Attaque` : `+${item.bonusVal} Défense`;
         const firearmBadge = item.isFirearm ? `<span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[8px] font-bold">🔥 Feu</span>` : '';
+        const effectivePrice = getArmoryItemEffectivePrice(item);
+        const hasDiscount = effectivePrice < (item.prix || 0);
+        const priceHtml = item.prix === 0
+          ? 'GRATUIT'
+          : (hasDiscount
+              ? `<span class="line-through text-[9px] text-slate-500 mr-1">${item.prix.toLocaleString()}€</span><span class="text-emerald-400">${effectivePrice.toLocaleString()} €</span>`
+              : `${effectivePrice.toLocaleString()} €`);
 
         return `
           <div id="armoryDeckCard_${idx}" onclick="onArmoryCardClick(${idx})" class="deck-card-item border ${borderColor}">
@@ -1003,7 +1036,7 @@
             <div class="pt-1.5 border-t border-white/10">
               <div class="flex items-center justify-between font-mono mb-1">
                 <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-                <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
+                <span class="text-xs font-black text-ghetto-gold">${priceHtml}</span>
               </div>
               <button onclick="event.stopPropagation(); buyArmoryCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
                 <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
@@ -1034,7 +1067,7 @@
     async function buyArmoryCatalogItem(itemId) {
       const item = ARMORY_CATALOG.find(i => i.id === itemId);
       if (!item) return;
-      let cost = item.prix || 0;
+      let cost = getArmoryItemEffectivePrice(item);
       const isWeapon = item.categorie === 'arme';
       if (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled && cost > 0) {
         cost *= 2;
@@ -1967,34 +2000,60 @@
     }
 
     async function startRoundPhase1() {
-      const ev = currentSession.currentRadioEvent || { title: "Descente massive", desc: "La police avance de +2 cases." };
+      const ev = currentSession.currentRadioEvent || { title: "Descente massive", impact: "Police +2 cases", desc: "La police avance de +2 cases." };
       document.getElementById('radioRoundNumber').innerText = currentSession.round;
       document.getElementById('radioCardTitle').innerText = ev.title;
       document.getElementById('radioCardEffect').innerText = ev.desc;
+      document.getElementById('hudRadioRoundTag').innerText = currentSession.round;
+      document.getElementById('hudRadioReminderTitle').innerText = ev.title;
+      document.getElementById('hudRadioReminderDesc').innerText = ev.impact || ev.desc;
+
       if (localPlayer.prostitutesAtSafeList.length > 0) {
-        const income = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || (p.level === 2 ? 2500 : 1000)), 0);
+        const revMult = isRadioEffectActive('PROSTITUTE_REV_MULT') ? getRadioEffectValue('PROSTITUTE_REV_MULT', 2) : 1;
+        const baseIncome = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || (p.level === 2 ? 2500 : 1000)), 0);
+        const income = baseIncome * revMult;
         localPlayer.safeCash += income;
-        await showAppAlert(`+${income.toLocaleString()} € versés au coffre par vos prostituées.`, "💰 Rente QG perçue");
+        const vipNote = revMult > 1 ? ` (Soirée VIP x${revMult} !)` : '';
+        await showAppAlert(`+${income.toLocaleString()} € versés au coffre par vos prostituées${vipNote}.`, "💰 Rente QG perçue");
       }
       navTo('page-5');
     }
     function acknowledgeRadioCard() { navTo('page-6'); }
+
     function getTotalAtk() {
       let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
       if (localPlayer.equipped.weapon) atk += (localPlayer.equipped.weapon.bonusVal * (combatModifiers.doubleWeapon ? 2 : 1));
       const multM = combatModifiers.doubleMuscles ? 2 : 1;
-      localPlayer.musclesOnPerson.forEach(m => { atk += (m.bonusVal * multM); });
+      const radioLascarBonus = isRadioEffectActive('LASCAR_ATK_BONUS') ? getRadioEffectValue('LASCAR_ATK_BONUS', 1) : 0;
+      localPlayer.musclesOnPerson.forEach(m => {
+        atk += ((m.bonusVal + radioLascarBonus) * multM);
+      });
       if (localPlayer.strayDogActive) atk += 2;
       atk += combatModifiers.flatAtkBonus;
       return Math.max(0, atk);
     }
+
     function getTotalDef() {
       let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0);
       if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
       if (localPlayer.strayDogActive) def += 2;
       return Math.max(0, def);
     }
-    function getTotalPm() { return 8 + (localPlayer.equipped.vehicle ? localPlayer.equipped.vehicle.bonusVal : 0); }
+
+    function getTotalPm() {
+      const eqVeh = localPlayer.equipped.vehicle;
+      let pm = 8 + (eqVeh ? eqVeh.bonusVal : 0);
+      if (eqVeh) {
+        const isMotor = eqVeh.isMotorized !== undefined ? eqVeh.isMotorized : (eqVeh.bonusVal >= 6);
+        if (isMotor && isRadioEffectActive('MOTOR_PM_MOD')) {
+          pm += getRadioEffectValue('MOTOR_PM_MOD', -2);
+        }
+      } else if (isRadioEffectActive('FOOT_PM_MOD')) {
+        pm += getRadioEffectValue('FOOT_PM_MOD', -2);
+      }
+      return Math.max(1, pm);
+    }
+
     function cyclePlayerHearts() {
       if (!isMyTurnToPlay) return;
       localPlayer.hearts = localPlayer.hearts <= 1 ? 3 : localPlayer.hearts - 1;
@@ -2171,6 +2230,11 @@
       document.getElementById('hudAtk').innerText = getTotalAtk();
       document.getElementById('hudDef').innerText = getTotalDef();
       document.getElementById('hudCurrentPm').innerText = getTotalPm();
+      if (currentSession.currentRadioEvent) {
+        document.getElementById('hudRadioRoundTag').innerText = currentSession.round;
+        document.getElementById('hudRadioReminderTitle').innerText = currentSession.currentRadioEvent.title;
+        document.getElementById('hudRadioReminderDesc').innerText = currentSession.currentRadioEvent.impact || currentSession.currentRadioEvent.desc;
+      }
       for (let i = 0; i < 3; i++) {
         const slotEl = document.getElementById(`muscleSlot_${i}`);
         if (localPlayer.musclesOnPerson[i]) {
@@ -2332,7 +2396,7 @@
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
       const v = localPlayer.equipped.vehicle;
       document.getElementById('slotVehicleTitle').innerText = v ? v.name : "À pied";
-      document.getElementById('slotVehicleStats').innerText = v ? `Déplacement +${v.bonusVal} PM (${8 + v.bonusVal} PM)` : "Déplacement 8 PM";
+      document.getElementById('slotVehicleStats').innerText = v ? `Déplacement +${v.bonusVal} PM (${getTotalPm()} PM)` : `Déplacement ${getTotalPm()} PM`;
       document.getElementById('slotVehicleStatusContainer').innerHTML = v
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('vehicle')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
@@ -2390,7 +2454,11 @@
       refreshHud();
     }
     function openGrossisteModal(unitPrice) {
-      grossisteUnitCost = unitPrice || 1000;
+      let basePrice = unitPrice || 1000;
+      if (isRadioEffectActive('GROSSISTE_PRICE_SET')) {
+        basePrice = getRadioEffectValue('GROSSISTE_PRICE_SET', 1500);
+      }
+      grossisteUnitCost = basePrice;
       document.getElementById('grossistePocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
       document.getElementById('grossisteUnitPrice').innerText = `${grossisteUnitCost.toLocaleString()} € / kg`;
       document.getElementById('grossisteMaxKg').innerText = `Max : ${Math.floor(localPlayer.pocketCash / grossisteUnitCost)} kg`;
@@ -2731,7 +2799,7 @@
       btn.onclick = () => { closeModal('modalLootDiscovery'); onClaim(); };
       document.getElementById('modalLootDiscovery').classList.remove('hidden');
     }
-    async function processQrPayload(payload) {
+        async function processQrPayload(payload) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       closeQrScannerModal();
       let data = payload;
@@ -2747,13 +2815,16 @@
       if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
       const type = (data.t || data.type || '').toLowerCase();
 
+      // 1. OUVERTURE DES BOUTIQUES : ARMURERIE / NIGHTCLUB / SPORTCLUB / CONCESSIONNAIRE
       if (type === 'armurerie') return openArmoryShopModal();
       if (type === 'nightclub') return openNightclubShopModal();
       if (type === 'sportclub') return openSportclubShopModal();
       if (type === 'concessionnaire' || type === 'dealer') return openDealerShopModal();
 
+      // 2. CASE GROSSISTE
       if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
 
+      // 3. CARTES OBJETS
       if (type === 'obj') {
         if (data.eff === 'cash') {
           const v = data.val || 1000;
@@ -2768,6 +2839,8 @@
           refreshHud();
         });
       }
+
+      // 4. ACHATS DIRECTS PAR QR (Équipement / Lascar / Prostituée)
       if (type === 'eq' || type === 'gb' || type === 'pr') {
         let cost = data.p || (type === 'gb' ? (data.lvl === 2 ? 3000 : 1500) : (data.lvl === 2 ? 4000 : 2000));
         let itemName = data.n || (type === 'gb' ? `Lascar L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
@@ -2782,29 +2855,42 @@
         if (localPlayer.pocketCash + localPlayer.safeCash < cost) return showAppAlert("Fonds totaux insuffisants !", "Achat Impossible");
         return openPaymentChoiceModal({ type, data, cost, name: itemName });
       }
+
+      // 5. DEAL YENCLI (avec prise en compte du bonus Flash Radio YENCLI_CASH_BONUS)
       if (type === 'yen') {
         if (localPlayer.drugs < data.d) return showAppAlert(`Drogue insuffisante (${data.d} kg requis).`, "Deal Refusé");
-        localPlayer.drugs -= data.d; localPlayer.pocketCash += data.c;
-        await showAppAlert(`+${data.c.toLocaleString()} € en poche !`, "🤝 Deal Yencli");
+        const radioBonus = isRadioEffectActive('YENCLI_CASH_BONUS') ? getRadioEffectValue('YENCLI_CASH_BONUS', 1500) : 0;
+        const totalGain = (data.c || 0) + radioBonus;
+        localPlayer.drugs -= data.d;
+        localPlayer.pocketCash += totalGain;
+        const bonusTxt = radioBonus > 0 ? ` (dont +${radioBonus.toLocaleString()} € Bonus Radio Pénurie !)` : '';
+        await showAppAlert(`+${totalGain.toLocaleString()} € en poche !${bonusTxt}`, "🤝 Deal Yencli");
         refreshHud();
         return;
       }
+
+      // 6. BRAQUAGE (avec prise en compte du bonus Flash Radio HEIST_CASH_BONUS)
       if (type === 'brq') {
         let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
         let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
         if (teamAtk < data.req || members < data.m) return showAppAlert(`Requis : ${data.req} Atk et ${data.m} membres.`, "💥 Échec Braquage");
-        localPlayer.pocketCash += data.c;
+        const radioHeistBonus = isRadioEffectActive('HEIST_CASH_BONUS') ? getRadioEffectValue('HEIST_CASH_BONUS', 2000) : 0;
+        const totalGain = (data.c || 0) + radioHeistBonus;
+        localPlayer.pocketCash += totalGain;
         localPlayer.drugs += (data.d || 0);
-        await showAppAlert(`+${data.c.toLocaleString()} € gagnés !`, "🏆 Braquage Réussi");
+        const bonusTxt = radioHeistBonus > 0 ? ` (dont +${radioHeistBonus.toLocaleString()} € Bonus Radio !)` : '';
+        await showAppAlert(`+${totalGain.toLocaleString()} € gagnés !${bonusTxt}`, "🏆 Braquage Réussi");
         refreshHud();
         return;
       }
     }
+
     async function openAllianceModal() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       syncMultiplayerTargets();
       document.getElementById('modalAlliance').classList.remove('hidden');
     }
+
     async function confirmAlliance() {
       if (!isMyTurnToPlay) return;
       const sel = document.getElementById('allianceTargetSelect');
@@ -2815,18 +2901,36 @@
       closeModal('modalAlliance');
       await showAppAlert(`Demande envoyée à ${target.caidName || 'votre rival'}.`, "Alliance");
     }
+
+    // Fin de tour avec prise en compte des effets Radio sur la Patrouille de Police
     function endCurrentPlayerTurn() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalPatrolDice').classList.remove('hidden');
+      document.getElementById('patrolDiceVisual').innerText = '?';
+      document.getElementById('patrolDiceMoveLabel').innerText = 'Le dé roule...';
       document.getElementById('patrolDiceDirectionLabel').innerText = '';
+
       setTimeout(() => {
-        const val = Math.floor(Math.random() * 6) + 1;
+        if (isRadioEffectActive('PATROL_FREEZE')) {
+          document.getElementById('patrolDiceVisual').innerText = '0';
+          document.getElementById('patrolDiceMoveLabel').innerText = 'Grève au Commissariat : 0 case !';
+          document.getElementById('patrolDiceDirectionLabel').innerText = '🚔 Patrouille immobile ce tour';
+          return;
+        }
+
+        const baseRoll = Math.floor(Math.random() * 6) + 1;
+        const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
+        const finalMove = baseRoll + radioExtra;
         const dir = Math.random() < 0.5 ? '⬅️ GAUCHE' : 'DROITE ➡️';
-        document.getElementById('patrolDiceVisual').innerText = val;
-        document.getElementById('patrolDiceMoveLabel').innerText = `Déplacement : ${val} case(s)`;
+
+        document.getElementById('patrolDiceVisual').innerText = finalMove;
+        document.getElementById('patrolDiceMoveLabel').innerText = radioExtra > 0
+          ? `Déplacement : ${finalMove} cases (Dé ${baseRoll} + ${radioExtra} Radio)`
+          : `Déplacement : ${finalMove} case(s)`;
         document.getElementById('patrolDiceDirectionLabel').innerText = `Direction : ${dir}`;
       }, 600);
     }
+
     function skipPatrolWait() {
       closeModal('modalPatrolDice');
       if (socket) socket.emit('next_player_turn');
