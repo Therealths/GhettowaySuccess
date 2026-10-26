@@ -544,7 +544,7 @@
     <div id="modalCombatPillage" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full">
         <div class="text-center">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 mx-auto flex items-center justify-center text-2xl border border-amber-400/40 mb-2"><i class="ph-bold ph- skull"></i><i class="ph-bold ph-treasure-chest"></i></div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 mx-auto flex items-center justify-center text-2xl border border-amber-400/40 mb-2"><i class="ph-bold ph-treasure-chest"></i></div>
           <h3 class="text-base font-black text-white uppercase">Pillage du Perdant</h3>
           <p class="text-xs text-slate-300 mt-0.5">Choisissez ce que vous prenez (100%) sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
         </div>
@@ -560,8 +560,6 @@
           <h3 id="lootSplitModalTitle" class="text-sm font-black text-white uppercase mt-0.5">Partage du Butin</h3>
           <p id="lootSplitTotalSubtitle" class="text-xs font-mono text-ghetto-gold font-bold mt-0.5">Total : 0 €</p>
         </div>
-
-        <!-- Colonnes Gauche (Joueur 1) / Droite (Joueur 2) -->
         <div class="grid grid-cols-2 gap-2.5 text-xs font-mono">
           <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left">
             <div class="flex items-center justify-between">
@@ -571,7 +569,6 @@
             <div id="lootSplitLeftAmounts" class="text-xs font-black text-white mt-1.5">0 €</div>
             <div id="lootSplitLeftStatus" class="text-[9px] text-slate-400 mt-1">⏳ En attente</div>
           </div>
-
           <div class="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-right">
             <div class="flex items-center justify-between">
               <span id="lootSplitRightPctBadge" class="text-[10px] font-bold text-white">50%</span>
@@ -581,8 +578,6 @@
             <div id="lootSplitRightStatus" class="text-[9px] text-slate-400 mt-1">⏳ En attente</div>
           </div>
         </div>
-
-        <!-- Barre de partage Gauche <-> Droite -->
         <div class="space-y-1.5">
           <div class="flex justify-between text-[9px] font-mono text-slate-400">
             <span>⬅️ Plus à gauche</span>
@@ -591,7 +586,6 @@
           </div>
           <input type="range" id="lootSplitSlider" min="0" max="100" value="50" oninput="onLootSplitSliderInput(this.value)" class="w-full">
         </div>
-
         <button id="btnAcceptLootSplit" onclick="emitAcceptLootSplit()" class="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase rounded-2xl text-xs shadow-lg">
           Accepter ce Partage
         </button>
@@ -716,7 +710,7 @@
           <h3 class="text-sm font-black text-purple-400 uppercase flex items-center gap-1.5"><i class="ph-bold ph-handshake"></i> Sceller une Alliance</h3>
           <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-        <p class="text-xs text-slate-300">S'il accepte, vos forces (joueurs, Lascars, attaque) seront cumulées pour les braquages et combats, et vous ne pourrez pas vous attaquer pendant 2 tours !</p>
+        <p class="text-xs text-slate-300">S'il accepte, vous pourrez choisir de coordonner vos braquages et combats, et vous ne pourrez pas vous attaquer pendant 2 tours !</p>
         <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
         <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase rounded-2xl text-xs">Envoyer la Demande</button>
         <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
@@ -753,7 +747,7 @@
           <button onclick='processQrPayload("{\"t\":\"sportclub\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300 font-bold border border-sky-500/40">💪 Sportclub (Lascars)</button>
           <button onclick='processQrPayload("{\"t\":\"grossiste\",\"p\":1000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold border border-emerald-500/40">🌿 Case Grossiste</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Balle perforante\",\"eff\":\"double_weapon_atk\",\"dur\":\"combat\",\"desc\":\"Dégâts arme à feu doublés\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">💥 Balle perforante</button>
-          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>
+          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque/Défense Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Sifflet\",\"eff\":\"stray_dog\",\"dur\":\"tour\",\"desc\":\"Rallie le Chien Errant (+2 Atk / +2 Def)\"}")' class="p-2 glass-panel rounded-xl text-left text-purple-300">🐕 Sifflet (Chien)</button>
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":2}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M • 8000€ + 2kg)</button>
         </div>
@@ -795,7 +789,7 @@
   </div>
     <script>
     // =========================================================================
-    // CATALOGUES DES 4 BOUTIQUES
+    // CATALOGUES DES 4 BOUTIQUES (Chargés depuis catalog.json + copies de secours)
     // =========================================================================
     let ARMORY_CATALOG = [
       { id: "wp_poing", categorie: "arme", slot: "WEAPON", nom: "Poing Américain", prix: 1000, bonusVal: 2, bonusLabel: "+2 Attaque", isFirearm: false, image: "arme-poing.jpg", desc: "Patate de forain !" },
@@ -1247,7 +1241,7 @@
         return showAppAlert("Fonds totaux insuffisants !", "❌ Achat Impossible");
       }
       const atkVal = item.atk || item.bonusVal || (item.lvl === 2 ? 2 : 1);
-      const dataPayload = { t: 'gb', lvl: item.lvl || 1, p: item.prix, atk: atkVal, n: item.nom };
+      const dataPayload = { t: 'gb', lvl: item.lvl || 1, p: item.prix, atk: atkVal, def: atkVal, n: item.nom };
       closeModal('modalSportclubShop');
       openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
     }
@@ -1478,7 +1472,6 @@
       if (players.length > 1 && connectedRivals.length === 0) {
         connectedRivals = players.filter(p => p.socketId !== socket?.id);
       }
-      // Met à jour les stats en direct de l'allié actif s'il y en a un
       if (localPlayer.allianceActive && localPlayer.activeAlly) {
         const freshAlly = connectedRivals.find(r => r.playerToken === localPlayer.activeAlly.allyToken);
         if (freshAlly) {
@@ -1643,7 +1636,7 @@
         advTag.classList.remove('hidden');
         document.getElementById('combatOpponentNameDisplay').innerText = opponentCaid;
         document.getElementById('combatOpponentForcesBar').innerText = `Lascars : ${targetMusclesCount || 0} | Escort : ${targetHasProstitute ? 'Oui' : 'Non'} | Chien : ${targetHasStrayDog ? 'Oui' : 'Non'}`;
-        const allyNote = (isAlliedAttack && allyCaid) ? ` (En alliance avec ${allyCaid})` : '';
+        const allyNote = (isAlliedAttack && allyCaid) ? ` (Coordonné avec ${allyCaid})` : '';
         document.getElementById('combatLiveLog').innerHTML = `<p class="text-amber-300 font-bold">⚡ Phase 1 : Duel engagé contre ${opponentCaid}${allyNote} ! Jouez vos objets ou cliquez sur Prêt.</p>`;
         document.getElementById('btnToggleCombatReady').classList.remove('hidden');
         updateCombatReadyButtonUI();
@@ -1855,7 +1848,7 @@
           hasProstituteInTransit: !!hasProstituteInTransit
         };
         syncMultiplayerTargets();
-        await showAppAlert(`Alliance scellée avec ${allyCaid} !\n• Vos forces sont cumulées (braquages & combats)\n• Pacte de non-agression actif pour ce tour et le tour suivant.`, "🤝 Pacte Scellé");
+        await showAppAlert(`Alliance scellée avec ${allyCaid} !\n• Vous pouvez choisir de coordonner vos braquages & combats\n• Pacte de non-agression actif pour ce tour et le tour suivant.`, "🤝 Pacte Scellé");
       });
       socket.on('alliance_declined', async () => { await showAppAlert("Le Caïd adverse a refusé votre alliance.", "Alliance Refusée"); });
       socket.on('player_updated', (updatedPlayer) => {
@@ -1883,7 +1876,6 @@
       const container = document.getElementById('pillageOptionsContainer');
       const btns = [];
 
-      // Option 1 : Cash en poche (100%)
       btns.push(`
         <button onclick="choosePillageReward('cash')" class="w-full p-3 glass-panel rounded-2xl border border-amber-500/40 flex items-center justify-between text-left ${pillageInfo.availableCash <= 0 ? 'opacity-40 pointer-events-none' : ''}">
           <div>
@@ -1894,7 +1886,6 @@
         </button>
       `);
 
-      // Option 2 : Drogue en poche (100%)
       btns.push(`
         <button onclick="choosePillageReward('drugs')" class="w-full p-3 glass-panel rounded-2xl border border-emerald-500/40 flex items-center justify-between text-left ${pillageInfo.availableDrugs <= 0 ? 'opacity-40 pointer-events-none' : ''}">
           <div>
@@ -1905,7 +1896,6 @@
         </button>
       `);
 
-      // Option 3 : Prostituée en transit
       if (pillageInfo.hasProstitute) {
         if (pillageInfo.isAlliedVictory && localPlayer.activeAlly) {
           if (!localPlayer.prostituteInTransit) {
@@ -2040,7 +2030,6 @@
       const allySel = document.getElementById('allianceTargetSelect');
       const specialSel = document.getElementById('specialTargetSelect');
 
-      // Pour le combat et les attaques spéciales, on exclut les joueurs protégés par un Pacte d'Alliance (tour actuel + tour suivant)
       const attackableRivals = (connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken));
 
       const combatOpts = !attackableRivals.length
@@ -2327,20 +2316,21 @@
     }
     function acknowledgeRadioCard() { navTo('page-6'); }
 
+    // Lascars donnent Attaque ET Défense
     function getTotalAtk() {
       let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
       if (localPlayer.equipped.weapon) atk += (localPlayer.equipped.weapon.bonusVal * (combatModifiers.doubleWeapon ? 2 : 1));
       const multM = combatModifiers.doubleMuscles ? 2 : 1;
       const radioLascarBonus = isRadioEffectActive('LASCAR_ATK_BONUS') ? getRadioEffectValue('LASCAR_ATK_BONUS', 1) : 0;
       localPlayer.musclesOnPerson.forEach(m => {
-        atk += ((m.bonusVal + radioLascarBonus) * multM);
+        atk += (((m.bonusVal || 1) + radioLascarBonus) * multM);
       });
       if (localPlayer.strayDogActive) atk += 2;
       atk += combatModifiers.flatAtkBonus;
       return Math.max(0, atk);
     }
 
-        function getTotalDef() {
+    function getTotalDef() {
       let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0);
       if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
       const multM = combatModifiers.doubleMuscles ? 2 : 1;
@@ -2505,7 +2495,7 @@
       }
     }
 
-        async function sellItem(idx) {
+    async function sellItem(idx) {
       if (!isMyTurnToPlay) return;
       const item = localPlayer.inventory[idx];
       if (!item) return;
@@ -2871,9 +2861,16 @@
         });
         await showAppAlert(`${data.n} ajouté au Sac !`, "📦 Achat Confirmé");
       } else if (type === 'gb') {
-        const bAtk = data.atk || (data.lvl === 2 ? 2 : 1);
-        localPlayer.musclesOnPerson.push({ id: 'gb_' + Date.now(), type: 'MUSCLE', level: data.lvl || 1, name: `Lascar L${data.lvl||1}`, bonusVal: bAtk, bonusLabel: `+${bAtk} Attaque` });
-        await showAppAlert("Lascar recruté !", "💪 Recrutement");
+        const bVal = data.atk || (data.lvl === 2 ? 2 : 1);
+        localPlayer.musclesOnPerson.push({
+          id: 'gb_' + Date.now(),
+          type: 'MUSCLE',
+          level: data.lvl || 1,
+          name: `Lascar L${data.lvl || 1}`,
+          bonusVal: bVal,
+          bonusLabel: `+${bVal} Atk / +${bVal} Def`
+        });
+        await showAppAlert(`Lascar recruté (+${bVal} Attaque et +${bVal} Défense) !`, "💪 Recrutement");
       } else if (type === 'pr') {
         localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée L${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
         await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
@@ -2908,6 +2905,7 @@
       document.getElementById('modalCombat').classList.remove('hidden');
     }
 
+    // Choix entre Attaque Coordonnée (Alliance) ou Attaque Solo
     async function initiateCombatEngagement() {
       const sel = document.getElementById('combatTargetSelect');
       const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
@@ -2917,12 +2915,12 @@
         return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni durant ce tour, ni au tour suivant) !", "🤝 Pacte Actif");
       }
 
+      let useAlliance = false;
       if (localPlayer.allianceActive && localPlayer.activeAlly) {
-        const confirmPos = await showAppConfirm(
-          `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid} !\nÊtes-vous bien tous les deux positionnés sur la bonne case pour attaquer ${target.caidName || 'ce joueur'} ensemble ?`,
-          "📍 Vérification Position Alliance"
+        useAlliance = await showAppConfirm(
+          `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\n• Cliquez sur CONFIRMER pour lancer une ATTAQUE COORDONNÉE à 2 (si vous êtes tous deux sur la bonne case).\n• Cliquez sur ANNULER pour attaquer EN SOLO.`,
+          "⚔️ Attaque Coordonnée ou Solo ?"
         );
-        if (!confirmPos) return;
       }
 
       const caid = getMyCaid();
@@ -2930,7 +2928,8 @@
         socket.emit('start_combat_engagement', {
           targetSocketId: target.socketId,
           targetPlayerToken: target.playerToken,
-          attackerCaid: caid.name
+          attackerCaid: caid.name,
+          useAlliance: useAlliance
         });
       }
     }
@@ -3155,16 +3154,13 @@
       if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
       const type = (data.t || data.type || '').toLowerCase();
 
-      // 1. OUVERTURE DES BOUTIQUES
       if (type === 'armurerie') return openArmoryShopModal();
       if (type === 'nightclub') return openNightclubShopModal();
       if (type === 'sportclub') return openSportclubShopModal();
       if (type === 'concessionnaire' || type === 'dealer') return openDealerShopModal();
 
-      // 2. CASE GROSSISTE
       if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
 
-      // 3. CARTES OBJETS
       if (type === 'obj') {
         if (data.eff === 'cash') {
           const v = data.val || 1000;
@@ -3180,7 +3176,6 @@
         });
       }
 
-      // 4. ACHATS DIRECTS PAR QR
       if (type === 'eq' || type === 'gb' || type === 'pr') {
         let cost = data.p || (type === 'gb' ? (data.lvl === 2 ? 3000 : 1500) : (data.lvl === 2 ? 4000 : 2000));
         let itemName = data.n || (type === 'gb' ? `Lascar L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
@@ -3196,7 +3191,6 @@
         return openPaymentChoiceModal({ type, data, cost, name: itemName });
       }
 
-      // 5. DEAL YENCLI
       if (type === 'yen') {
         if (localPlayer.drugs < data.d) return showAppAlert(`Drogue insuffisante (${data.d} kg requis).`, "Deal Refusé");
         const radioBonus = isRadioEffectActive('YENCLI_CASH_BONUS') ? getRadioEffectValue('YENCLI_CASH_BONUS', 1500) : 0;
@@ -3209,26 +3203,24 @@
         return;
       }
 
-      // 6. BRAQUAGE (Solo ou en Alliance avec cumul total + Barre de partage Gauche/Droite)
+      // BRAQUAGE (Choix entre Braquage Coordonné en Alliance ou Braquage Solo)
       if (type === 'brq') {
-        const isAllied = !!(localPlayer.allianceActive && localPlayer.activeAlly);
-        if (isAllied) {
-          const confirmBothHere = await showAppConfirm(
-            `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid} !\nÊtes-vous bien tous les deux positionnés sur la case du braquage (${data.n || 'Braquage'}) ?`,
-            "📍 Vérification Position Alliance"
+        let coordinateWithAlly = false;
+        if (localPlayer.allianceActive && localPlayer.activeAlly) {
+          coordinateWithAlly = await showAppConfirm(
+            `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\n• Cliquez sur CONFIRMER si c'est un BRAQUAGE COORDONNÉ à 2 (tous les deux sur la case : forces cumulées & butin partagé).\n• Cliquez sur ANNULER pour tenter ce braquage EN SOLO.`,
+            "💥 Braquage Coordonné ou Solo ?"
           );
-          if (!confirmBothHere) return;
         }
 
-        // Calcul cumulé : chaque joueur compte pour 1 membre + ses Lascars, et les points d'attaque sont additionnés
-        const allyAtk = isAllied ? (localPlayer.activeAlly.allyAtk || 1) : 0;
-        const allyMuscles = isAllied ? (localPlayer.activeAlly.grosBrasCount || 0) : 0;
+        const allyAtk = coordinateWithAlly ? (localPlayer.activeAlly.allyAtk || 1) : 0;
+        const allyMuscles = coordinateWithAlly ? (localPlayer.activeAlly.grosBrasCount || 0) : 0;
         const teamAtk = getTotalAtk() + allyAtk;
-        const members = 1 + localPlayer.musclesOnPerson.length + (isAllied ? (1 + allyMuscles) : 0);
+        const members = 1 + localPlayer.musclesOnPerson.length + (coordinateWithAlly ? (1 + allyMuscles) : 0);
 
         if (teamAtk < data.req || members < data.m) {
           return showAppAlert(
-            `Prérequis insuffisants !\nRequis : ${data.req} Atk et ${data.m} membre(s).\nVotre équipe actuelle : ${teamAtk} Atk et ${members} membre(s).`,
+            `Prérequis insuffisants (${coordinateWithAlly ? 'en Duo' : 'en Solo'}) !\nRequis : ${data.req} Atk et ${data.m} membre(s).\nVotre force : ${teamAtk} Atk et ${members} membre(s).`,
             "💥 Échec Braquage"
           );
         }
@@ -3237,7 +3229,7 @@
         const totalCash = (data.c || 0) + radioHeistBonus;
         const totalDrugs = data.d || 0;
 
-        if (isAllied && socket) {
+        if (coordinateWithAlly && socket) {
           socket.emit('initiate_allied_heist_split', {
             heistName: data.n || 'Braquage',
             totalCash,
@@ -3248,7 +3240,7 @@
           localPlayer.pocketCash += totalCash;
           localPlayer.drugs += totalDrugs;
           const bonusTxt = radioHeistBonus > 0 ? ` (dont +${radioHeistBonus.toLocaleString()} € Bonus Radio !)` : '';
-          await showAppAlert(`+${totalCash.toLocaleString()} € et +${totalDrugs} kg gagnés !${bonusTxt}`, "🏆 Braquage Réussi");
+          await showAppAlert(`+${totalCash.toLocaleString()} € et +${totalDrugs} kg gagnés en solo !${bonusTxt}`, "🏆 Braquage Réussi");
           refreshHud();
         }
         return;
