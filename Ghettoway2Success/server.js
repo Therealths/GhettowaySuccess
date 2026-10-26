@@ -386,8 +386,7 @@ io.on('connection', (socket) => {
     ])];
 
     room.currentTurnAlliedTokens = [];
-    room.strayDogHolderToken = null;
-    room.players.forEach(p => { p.hasStrayDog = false; });
+    // Le Chien Errant reste avec le dernier joueur qui l'a sifflé, jusqu'au prochain coup de sifflet
 
     // Joueur suivant dans l'ordre de la manche ; on saute ceux qui ont déjà joué (en alliance pendant le tour d'un autre)
     if (!room.roundOrder) { room.roundOrder = buildRoundOrder(room); room.turnPos = room.currentTurnIndex; }

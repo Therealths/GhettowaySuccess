@@ -26,6 +26,7 @@ if (socket) {
       }
     }
     localPlayer = Object.assign(localPlayer, player);
+    if (player && player.hasStrayDog !== undefined) localPlayer.strayDogActive = !!player.hasStrayDog;
     if (players) updateRivalsList(players);
     if (gameStarted) {
       currentSession.round = round || 1;
@@ -132,7 +133,6 @@ if (socket) {
     localPlayer.specialUsedThisTurn = false;
     localPlayer.tempAtkMalus = 0;
     localPlayer.tempDefMalus = 0;
-    localPlayer.strayDogActive = false;
     localPlayer.allianceActive = false;
     localPlayer.activeAlly = null;
     startRoundPhase1();
@@ -375,7 +375,7 @@ if (socket) {
   });
   socket.on('stray_dog_granted', async () => {
     localPlayer.strayDogActive = true;
-    await showAppAlert("Le Chien Errant vous rejoint (+2 Atk / +2 Def pour ce tour) !", "🐕 Chien Rallié");
+    await showAppAlert("Le Chien Errant vous rejoint (+2 Atk / +2 Def) !\nIl reste avec vous jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
     refreshHud();
   });
   socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
