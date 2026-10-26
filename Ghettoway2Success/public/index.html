@@ -43,9 +43,7 @@
     .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
     .dealer-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_concessionnaire.jpg'); background-size: cover; background-position: center top; }
 
-    /* =========================================================================
-       SYSTÈME DE PILE DE CARTES 3D (DECK STACK) POUR TOUTES LES BOUTIQUES
-       ========================================================================= */
+    /* Pile de cartes 3D */
     .deck-stage {
       position: relative;
       width: 100%;
@@ -75,9 +73,7 @@
       backface-visibility: hidden;
     }
 
-    /* =========================================================================
-       CORRECTION DU CADRAGE VIDÉO ET PHOTO DU SCANNER QR
-       ========================================================================= */
+    /* Scanner QR carré 1:1 */
     #qr-reader {
       position: relative !important;
       width: 224px !important;
@@ -109,9 +105,7 @@
       align-items: center !important;
       justify-content: center !important;
     }
-    #qr-reader__dashboard {
-      display: none !important;
-    }
+    #qr-reader__dashboard { display: none !important; }
 
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.15); border-radius: 6px; }
@@ -284,7 +278,7 @@
         </div>
       </div>
       <div class="flex flex-col h-full justify-between space-y-2">
-        <!-- BANDEAU VISUEL AVEC BOUTON RETOUR EN HAUT À GAUCHE -->
+        <!-- BANDEAU VISUEL -->
         <div class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center z-10 shadow-md"><i class="ph-bold ph-caret-left text-sm"></i></button>
@@ -393,148 +387,79 @@
       </div>
     </div>
 
-    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE (DECK EMPILÉ 3D BILATÉRAL) ================= -->
+    <!-- ================= 1. MODALE BOUTIQUE ARMURERIE ================= -->
     <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end armory-bg">
-      <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
-        <i class="ph-bold ph-x text-base"></i>
-      </button>
-
+      <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
-          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
-            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
-            <span id="armoryPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
-          </div>
-          <div class="pl-2 flex items-center justify-between">
-            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
-            <span id="armorySafeCashDisplay" class="text-xs font-black text-white">0 €</span>
-          </div>
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="armoryPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
+          <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="armorySafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
         </div>
-
         <div class="grid grid-cols-2 gap-2 p-1 bg-black/75 border border-white/15 rounded-2xl font-mono text-xs">
-          <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-1.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition">
-            <i class="ph-bold ph-sword"></i> Armes
-          </button>
-          <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-1.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
-            <i class="ph-bold ph-shield"></i> Équipements
-          </button>
+          <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-1.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition"><i class="ph-bold ph-sword"></i> Armes</button>
+          <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-1.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition"><i class="ph-bold ph-shield"></i> Équipements</button>
         </div>
-
-        <div onclick="stepArmoryDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-rose-500/40 text-[10px] font-mono text-rose-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
-          <i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir
-        </div>
-
+        <div onclick="stepArmoryDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-rose-500/40 text-[10px] font-mono text-rose-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="stepArmoryDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="armoryCardsContainer" class="deck-stage"></div>
           <button type="button" onclick="stepArmoryDeck(1)" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-
-        <button onclick="closeModal('modalArmoryShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
-          Quitter l'Armurerie
-        </button>
+        <button onclick="closeModal('modalArmoryShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter l'Armurerie</button>
       </div>
     </div>
 
-    <!-- ================= 2. MODALE NIGHTCLUB — PROSTITUÉES ================= -->
+    <!-- ================= 2. MODALE NIGHTCLUB ================= -->
     <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end nightclub-bg">
-      <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
-        <i class="ph-bold ph-x text-base"></i>
-      </button>
-
+      <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
-          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
-            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
-            <span id="nightclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
-          </div>
-          <div class="pl-2 flex items-center justify-between">
-            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
-            <span id="nightclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span>
-          </div>
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="nightclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
+          <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="nightclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
         </div>
-
-        <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
-          <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
-        </div>
-
+        <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="toggleNightclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="nightclubStackContainer" class="deck-stage"></div>
           <button type="button" onclick="toggleNightclubStackCard()" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-
-        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
-          Quitter le Nightclub
-        </button>
+        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Nightclub</button>
       </div>
     </div>
 
-    <!-- ================= 3. MODALE SPORTCLUB — LASCARS ================= -->
+    <!-- ================= 3. MODALE SPORTCLUB ================= -->
     <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end sportclub-bg">
-      <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
-        <i class="ph-bold ph-x text-base"></i>
-      </button>
-
+      <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
-          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
-            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
-            <span id="sportclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
-          </div>
-          <div class="pl-2 flex items-center justify-between">
-            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
-            <span id="sportclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span>
-          </div>
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="sportclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
+          <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="sportclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
         </div>
-
-        <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
-          <i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)
-        </div>
-
+        <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="toggleSportclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="sportclubStackContainer" class="deck-stage"></div>
           <button type="button" onclick="toggleSportclubStackCard()" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-
-        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
-          Quitter le Sportclub
-        </button>
+        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Sportclub</button>
       </div>
     </div>
 
-    <!-- ================= 4. MODALE BOUTIQUE CONCESSIONNAIRE (VÉHICULES) ================= -->
+    <!-- ================= 4. MODALE CONCESSIONNAIRE ================= -->
     <div id="modalDealerShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end dealer-bg">
-      <button onclick="closeModal('modalDealerShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30">
-        <i class="ph-bold ph-x text-base"></i>
-      </button>
-
+      <button onclick="closeModal('modalDealerShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
-          <div class="border-r border-white/10 pr-2 flex items-center justify-between">
-            <span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span>
-            <span id="dealerPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span>
-          </div>
-          <div class="pl-2 flex items-center justify-between">
-            <span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span>
-            <span id="dealerSafeCashDisplay" class="text-xs font-black text-white">0 €</span>
-          </div>
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="dealerPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
+          <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="dealerSafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
         </div>
-
-        <div onclick="stepDealerDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-amber-500/40 text-[10px] font-mono text-amber-200 text-center mx-auto shadow-md cursor-pointer relative z-30">
-          <i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir les véhicules
-        </div>
-
+        <div onclick="stepDealerDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-amber-500/40 text-[10px] font-mono text-amber-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir les véhicules</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="stepDealerDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="dealerCardsContainer" class="deck-stage"></div>
           <button type="button" onclick="stepDealerDeck(1)" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-
-        <button onclick="closeModal('modalDealerShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">
-          Quitter le Concessionnaire
-        </button>
+        <button onclick="closeModal('modalDealerShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Concessionnaire</button>
       </div>
     </div>
 
@@ -554,23 +479,25 @@
         <button onclick="closeModal('modalTargetSpecial')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
+
     <!-- MODALE ALLIANCE REÇUE -->
     <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 max-w-sm mx-auto w-full text-center">
         <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-300 mx-auto flex items-center justify-center text-2xl border border-purple-400/40"><i class="ph-bold ph-handshake"></i></div>
         <h3 class="text-base font-black text-white uppercase">Demande d'Alliance</h3>
-        <p class="text-xs text-slate-300"><strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose un pacte pour ce tour.</p>
+        <p class="text-xs text-slate-300"><strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose un pacte (immunité mutuelle pendant 2 tours).</p>
         <div class="grid grid-cols-2 gap-2 pt-2">
           <button onclick="respondToAllianceRequest(true)" class="py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase rounded-xl text-xs">Accepter</button>
           <button onclick="respondToAllianceRequest(false)" class="py-3 glass-panel text-slate-400 font-bold uppercase rounded-xl text-xs">Refuser</button>
         </div>
       </div>
     </div>
-    <!-- MODALE COMBAT DE RUE -->
+
+    <!-- MODALE COMBAT DE RUE (2 PHASES : ASSAUT -> RIPOSTE) -->
     <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 class="text-sm font-black text-rose-500 uppercase flex items-center gap-1.5"><i class="ph-bold ph-sword"></i> Combat de Rue</h3>
+          <h3 id="combatModalHeaderTitle" class="text-sm font-black text-rose-500 uppercase flex items-center gap-1.5"><i class="ph-bold ph-sword"></i> Combat de Rue</h3>
           <button onclick="abortCombat()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
         <div id="combatTargetSelectionBox">
@@ -587,7 +514,7 @@
           <div id="combatOpponentForcesBar" class="text-[10px] text-slate-300 mt-0.5"></div>
         </div>
         <div class="grid grid-cols-2 gap-2 text-center font-mono">
-          <div class="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30"><span class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut</span><div class="text-xl font-black text-white mt-0.5" id="arenaPlayerLiveAtk">1</div></div>
+          <div class="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30"><span id="arenaAtkLabel" class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut</span><div class="text-xl font-black text-white mt-0.5" id="arenaPlayerLiveAtk">1</div></div>
           <div class="p-2.5 rounded-2xl bg-sky-500/10 border border-sky-500/30"><span class="text-[9px] text-sky-400 uppercase font-bold">Votre Défense</span><div class="text-xl font-black text-white mt-0.5" id="arenaPlayerLiveDef">0</div></div>
         </div>
         <div class="p-2.5 rounded-xl bg-black/50 border border-white/10 min-h-[50px] max-h-20 overflow-y-auto text-[11px] font-mono space-y-1" id="combatLiveLog">
@@ -600,6 +527,77 @@
         <button id="btnInitiateFightAction" onclick="initiateCombatEngagement()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase rounded-2xl text-xs shadow-lg">Engager le Combat</button>
       </div>
     </div>
+
+    <!-- MODALE CHOIX DE LA CIBLE DE RIPOSTE (QUAND LE DÉFENSEUR REPOUSSE 2 ALLIÉS) -->
+    <div id="modalChooseRiposteTarget" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
+      <div class="glass-panel p-5 rounded-3xl space-y-4 border-sky-500/40 max-w-sm mx-auto w-full text-center">
+        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-300 mx-auto flex items-center justify-center text-2xl border border-sky-400/40"><i class="ph-bold ph-shield-check"></i></div>
+        <div>
+          <h3 class="text-base font-black text-white uppercase">Assaut Repoussé !</h3>
+          <p class="text-xs text-slate-300 mt-1">Vous avez bloqué l'attaque des 2 alliés ! Choisissez lequel des deux vous ciblez pour votre contre-attaque :</p>
+        </div>
+        <div id="riposteTargetsList" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- MODALE PILLAGE DU PERDANT (100% CASH, DROGUE OU PROSTITUÉE) -->
+    <div id="modalCombatPillage" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
+      <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full">
+        <div class="text-center">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 mx-auto flex items-center justify-center text-2xl border border-amber-400/40 mb-2"><i class="ph-bold ph- skull"></i><i class="ph-bold ph-treasure-chest"></i></div>
+          <h3 class="text-base font-black text-white uppercase">Pillage du Perdant</h3>
+          <p class="text-xs text-slate-300 mt-0.5">Choisissez ce que vous prenez (100%) sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
+        </div>
+        <div id="pillageOptionsContainer" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- MODALE BARRE DE PARTAGE DU BUTIN EN ALLIANCE (GAUCHE / DROITE) -->
+    <div id="modalAlliedLootSplit" class="hidden absolute inset-0 bg-black/92 backdrop-blur-md z-50 p-5 flex flex-col justify-center">
+      <div class="glass-panel p-5 rounded-3xl space-y-4 border-purple-500/40 max-w-sm mx-auto w-full">
+        <div class="text-center border-b border-white/10 pb-2">
+          <span class="text-[9px] font-mono uppercase text-purple-300 font-bold block">Partage d'Alliance</span>
+          <h3 id="lootSplitModalTitle" class="text-sm font-black text-white uppercase mt-0.5">Partage du Butin</h3>
+          <p id="lootSplitTotalSubtitle" class="text-xs font-mono text-ghetto-gold font-bold mt-0.5">Total : 0 €</p>
+        </div>
+
+        <!-- Colonnes Gauche (Joueur 1) / Droite (Joueur 2) -->
+        <div class="grid grid-cols-2 gap-2.5 text-xs font-mono">
+          <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left">
+            <div class="flex items-center justify-between">
+              <span id="lootSplitLeftName" class="text-[10px] font-black text-amber-300 uppercase truncate">Allié 1</span>
+              <span id="lootSplitLeftPctBadge" class="text-[10px] font-bold text-white">50%</span>
+            </div>
+            <div id="lootSplitLeftAmounts" class="text-xs font-black text-white mt-1.5">0 €</div>
+            <div id="lootSplitLeftStatus" class="text-[9px] text-slate-400 mt-1">⏳ En attente</div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-right">
+            <div class="flex items-center justify-between">
+              <span id="lootSplitRightPctBadge" class="text-[10px] font-bold text-white">50%</span>
+              <span id="lootSplitRightName" class="text-[10px] font-black text-purple-300 uppercase truncate">Allié 2</span>
+            </div>
+            <div id="lootSplitRightAmounts" class="text-xs font-black text-white mt-1.5">0 €</div>
+            <div id="lootSplitRightStatus" class="text-[9px] text-slate-400 mt-1">⏳ En attente</div>
+          </div>
+        </div>
+
+        <!-- Barre de partage Gauche <-> Droite -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between text-[9px] font-mono text-slate-400">
+            <span>⬅️ Plus à gauche</span>
+            <span>50 / 50</span>
+            <span>Plus à droite ➡️</span>
+          </div>
+          <input type="range" id="lootSplitSlider" min="0" max="100" value="50" oninput="onLootSplitSliderInput(this.value)" class="w-full">
+        </div>
+
+        <button id="btnAcceptLootSplit" onclick="emitAcceptLootSplit()" class="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase rounded-2xl text-xs shadow-lg">
+          Accepter ce Partage
+        </button>
+      </div>
+    </div>
+
     <!-- MODALE SÉLECTEUR D'OBJETS DE COMBAT -->
     <div id="modalCombatItemSelector" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-rose-500/40 max-w-sm mx-auto w-full">
@@ -611,6 +609,7 @@
         <button id="btnConfirmCombatItems" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase rounded-2xl text-xs">Activer la Sélection</button>
       </div>
     </div>
+
     <!-- MODALE DÉCOUVERTE D'OBJET -->
     <div id="modalLootDiscovery" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">
@@ -623,6 +622,7 @@
         <button id="btnLootAction" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Récupérer</button>
       </div>
     </div>
+
     <!-- MODALE CHOIX DU COMPTE A DÉBITER -->
     <div id="modalPaymentChoice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full">
@@ -651,6 +651,7 @@
         <button onclick="closeModal('modalPaymentChoice')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
+
     <!-- MODALE GROSSISTE -->
     <div id="modalGrossiste" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-emerald-500/40 shadow-2xl">
@@ -678,6 +679,7 @@
         <button onclick="confirmGrossistePurchase()" class="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase rounded-2xl text-xs">Acheter (Cash uniquement)</button>
       </div>
     </div>
+
     <!-- MODALE TRANSFERT QG -->
     <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
@@ -706,6 +708,7 @@
         <button onclick="confirmTransferAction()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Confirmer le Transfert</button>
       </div>
     </div>
+
     <!-- MODALE ALLIANCE -->
     <div id="modalAlliance" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
@@ -713,29 +716,27 @@
           <h3 class="text-sm font-black text-purple-400 uppercase flex items-center gap-1.5"><i class="ph-bold ph-handshake"></i> Sceller une Alliance</h3>
           <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-        <p class="text-xs text-slate-300">S'il accepte, ses Lascars s'additionneront aux vôtres et son écran se débloquera pour jouer avec vous !</p>
+        <p class="text-xs text-slate-300">S'il accepte, vos forces (joueurs, Lascars, attaque) seront cumulées pour les braquages et combats, et vous ne pourrez pas vous attaquer pendant 2 tours !</p>
         <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
         <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase rounded-2xl text-xs">Envoyer la Demande</button>
         <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
-    <!-- ================= MODALE SCANNER TACTIQUE CORRIGÉE ================= -->
+
+    <!-- MODALE SCANNER TACTIQUE -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-4 flex flex-col justify-between">
       <div class="pt-0.5">
         <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
           <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5"><i class="ph-bold ph-qr-code"></i> Scanner Tactique</h3>
           <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
-
         <div class="relative w-[224px] h-[224px] mx-auto">
           <div id="qr-reader" class="border-2 border-amber-400/50 shadow-2xl"></div>
           <div id="qr-photo-preview-box" class="hidden absolute inset-0 bg-black/95 rounded-[20px] border-2 border-amber-400/70 flex flex-col items-center justify-center p-2 z-20">
             <img id="qr-photo-preview-img" src="" alt="Photo QR" class="w-full h-full object-contain rounded-xl">
           </div>
         </div>
-
         <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1.5">Capteur vidéo...</div>
-
         <div class="mt-1.5 flex items-center justify-center gap-2">
           <label class="px-3 py-1.5 glass-panel rounded-xl text-[10px] font-mono text-slate-200 cursor-pointer inline-flex items-center gap-1.5 border border-white/15 active:scale-95 transition">
             <i class="ph-bold ph-image text-amber-300"></i><span>Choisir Photo QR</span>
@@ -745,7 +746,6 @@
             <i class="ph-bold ph-arrow-counter-clockwise"></i><span>Annuler Photo / Caméra</span>
           </button>
         </div>
-
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
           <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
           <button onclick='processQrPayload("{\"t\":\"concessionnaire\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🚗 Concessionnaire</button>
@@ -755,11 +755,12 @@
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Balle perforante\",\"eff\":\"double_weapon_atk\",\"dur\":\"combat\",\"desc\":\"Dégâts arme à feu doublés\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">💥 Balle perforante</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Sifflet\",\"eff\":\"stray_dog\",\"dur\":\"tour\",\"desc\":\"Rallie le Chien Errant (+2 Atk / +2 Def)\"}")' class="p-2 glass-panel rounded-xl text-left text-purple-300">🐕 Sifflet (Chien)</button>
-          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":0}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M)</button>
+          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":2}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M • 8000€ + 2kg)</button>
         </div>
       </div>
       <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase">Fermer</button>
     </div>
+
     <!-- MODALE PATROUILLE -->
     <div id="modalPatrolDice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
@@ -772,6 +773,7 @@
         <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl">Passer &rarr;</button>
       </div>
     </div>
+
     <!-- MODALES SYSTÈME STYLISÉES -->
     <div id="modalAppAlert" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">
@@ -791,9 +793,9 @@
       </div>
     </div>
   </div>
-  <script>
+    <script>
     // =========================================================================
-    // CATALOGUES DES 4 BOUTIQUES (Chargés depuis catalog.json + copies de secours)
+    // CATALOGUES DES 4 BOUTIQUES
     // =========================================================================
     let ARMORY_CATALOG = [
       { id: "wp_poing", categorie: "arme", slot: "WEAPON", nom: "Poing Américain", prix: 1000, bonusVal: 2, bonusLabel: "+2 Attaque", isFirearm: false, image: "arme-poing.jpg", desc: "Patate de forain !" },
@@ -844,7 +846,7 @@
       .catch(() => {});
 
     // =========================================================================
-    // MOTEUR DE LECTURE & CALCUL DES EFFETS FLASH RADIO (radio_events.json)
+    // LECTURE & CALCUL DES EFFETS FLASH RADIO
     // =========================================================================
     function isRadioEffectActive(type) {
       const ev = currentSession.currentRadioEvent;
@@ -1100,7 +1102,7 @@
       openPaymentChoiceModal(pPayload);
     }
 
-    // --- 2. NIGHTCLUB — PROSTITUÉES ---
+    // --- 2. NIGHTCLUB ---
     let activeNightclubIndex = 0;
 
     function openNightclubShopModal() {
@@ -1180,7 +1182,7 @@
       openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- 3. SPORTCLUB — LASCARS ---
+    // --- 3. SPORTCLUB ---
     let activeSportclubIndex = 0;
 
     function openSportclubShopModal() {
@@ -1250,7 +1252,7 @@
       openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
     }
 
-    // --- 4. CONCESSIONNAIRE — VÉHICULES (SANS GO-FAST) ---
+    // --- 4. CONCESSIONNAIRE ---
     let activeDealerIndex = 0;
 
     function openDealerShopModal() {
@@ -1419,6 +1421,7 @@
     let currentTransferMode = 'deposit';
     let currentTransferResource = 'cash';
     let connectedRivals = [];
+    let nonAggressionPacts = [];
     let takenCaidsInGame = [];
     let pendingAllianceRequest = null;
     let isMyTurnToPlay = true;
@@ -1427,6 +1430,13 @@
     let combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
     let currentDuelInfo = null;
     let isCombatReady = false;
+
+    function isRivalProtectedByPact(rivalToken) {
+      if (!rivalToken || !nonAggressionPacts || !nonAggressionPacts.length) return false;
+      return nonAggressionPacts.some(
+        p => p.remainingTurns > 0 && p.tokens.includes(myPlayerToken) && p.tokens.includes(rivalToken)
+      );
+    }
 
     function applyCaidToLocalPlayer(chosenCaid) {
       if (!chosenCaid) return;
@@ -1467,6 +1477,15 @@
       connectedRivals = players.filter(p => p.socketId !== socket?.id && p.playerToken !== myPlayerToken);
       if (players.length > 1 && connectedRivals.length === 0) {
         connectedRivals = players.filter(p => p.socketId !== socket?.id);
+      }
+      // Met à jour les stats en direct de l'allié actif s'il y en a un
+      if (localPlayer.allianceActive && localPlayer.activeAlly) {
+        const freshAlly = connectedRivals.find(r => r.playerToken === localPlayer.activeAlly.allyToken);
+        if (freshAlly) {
+          localPlayer.activeAlly.grosBrasCount = freshAlly.musclesCount || 0;
+          localPlayer.activeAlly.allyAtk = freshAlly.atk || 1;
+          localPlayer.activeAlly.hasProstituteInTransit = !!freshAlly.hasProstituteInTransit;
+        }
       }
       takenCaidsInGame = players.filter(p => p.caidId && p.playerToken !== myPlayerToken).map(p => p.caidId);
       syncMultiplayerTargets();
@@ -1596,70 +1615,194 @@
         localPlayer.activeAlly = null;
         startRoundPhase1();
       });
-      socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens }) => {
-        isMyTurnToPlay = (activePlayerToken === myPlayerToken) || (alliedTokens && alliedTokens.includes(myPlayerToken));
+      socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts }) => {
+        if (serverPacts) nonAggressionPacts = serverPacts;
+        const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
+        if (!isAlliedNow) {
+          localPlayer.allianceActive = false;
+          localPlayer.activeAlly = null;
+        }
+        isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
         const blocker = document.getElementById('turnBlockerOverlay');
         if (isMyTurnToPlay) blocker.classList.add('hidden');
         else {
           blocker.classList.remove('hidden');
           document.getElementById('blockerCaidName').innerText = activeCaidName || "Caïd Adverse";
         }
+        syncMultiplayerTargets();
       });
-      socket.on('combat_duel_opened', ({ role, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog }) => {
-        currentDuelInfo = { role, opponentCaid, opponentSocketId };
+
+      // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---
+      socket.on('combat_duel_opened', ({ phase, role, isAlliedAttack, allyCaid, allyAtk, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog }) => {
+        currentDuelInfo = { phase: phase || 1, role, isAlliedAttack, allyCaid, allyAtk: allyAtk || 0, opponentCaid, opponentSocketId };
         isCombatReady = false;
+        document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-sword"></i> Phase 1 : Assaut Initial`;
         document.getElementById('combatTargetSelectionBox').classList.add('hidden');
         document.getElementById('btnInitiateFightAction').classList.add('hidden');
         const advTag = document.getElementById('combatAdversaryTag');
         advTag.classList.remove('hidden');
         document.getElementById('combatOpponentNameDisplay').innerText = opponentCaid;
         document.getElementById('combatOpponentForcesBar').innerText = `Lascars : ${targetMusclesCount || 0} | Escort : ${targetHasProstitute ? 'Oui' : 'Non'} | Chien : ${targetHasStrayDog ? 'Oui' : 'Non'}`;
-        document.getElementById('combatLiveLog').innerHTML = `<p class="text-amber-300 font-bold">⚡ Duel engagé contre ${opponentCaid} ! Jouez vos objets ou cliquez sur Prêt.</p>`;
+        const allyNote = (isAlliedAttack && allyCaid) ? ` (En alliance avec ${allyCaid})` : '';
+        document.getElementById('combatLiveLog').innerHTML = `<p class="text-amber-300 font-bold">⚡ Phase 1 : Duel engagé contre ${opponentCaid}${allyNote} ! Jouez vos objets ou cliquez sur Prêt.</p>`;
         document.getElementById('btnToggleCombatReady').classList.remove('hidden');
         updateCombatReadyButtonUI();
         updateArenaLiveStats();
         document.getElementById('modalCombat').classList.remove('hidden');
       });
+
+      socket.on('combat_waiting_defender_riposte_choice', ({ defenderCaid }) => {
+        const log = document.getElementById('combatLiveLog');
+        log.innerHTML += `<p class="text-sky-300 font-bold">🛡️ Votre assaut a été bloqué ! ${defenderCaid} choisit sa cible pour contre-attaquer...</p>`;
+        log.scrollTop = log.scrollHeight;
+      });
+
+      socket.on('combat_choose_riposte_target', ({ targets }) => {
+        const listEl = document.getElementById('riposteTargetsList');
+        listEl.innerHTML = targets.map(t => `
+          <button onclick="selectRiposteTarget('${t.playerToken}')" class="w-full p-3 glass-panel rounded-2xl border border-sky-500/40 flex items-center justify-between text-left hover:bg-sky-500/20">
+            <div>
+              <span class="text-xs font-black text-white uppercase block">${t.caidName}</span>
+              <span class="text-[10px] font-mono text-sky-300">Défense actuelle : ${t.def}</span>
+            </div>
+            <span class="px-3 py-1 bg-rose-500 text-white font-black rounded-xl text-[10px] uppercase">Riposter</span>
+          </button>
+        `).join('');
+        document.getElementById('modalChooseRiposteTarget').classList.remove('hidden');
+      });
+
+      socket.on('combat_not_targeted_by_riposte', async ({ defenderCaid, chosenCaid }) => {
+        closeModal('modalCombat');
+        closeModal('modalCombatItemSelector');
+        resetCombatModifiers();
+        currentDuelInfo = null;
+        await showAppAlert(`${defenderCaid} a repoussé votre assaut et a choisi de cibler ${chosenCaid} pour sa contre-attaque !`, "🛡️ Riposte Adverse");
+      });
+
+      socket.on('combat_phase2_started', async ({ role, opponentCaid }) => {
+        closeModal('modalChooseRiposteTarget');
+        currentDuelInfo = { phase: 2, role, isAlliedAttack: false, allyCaid: null, allyAtk: 0, opponentCaid };
+        isCombatReady = false;
+        document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-arrows-clockwise"></i> Phase 2 : Contre-Attaque`;
+        document.getElementById('combatOpponentNameDisplay').innerText = opponentCaid;
+        updateCombatReadyButtonUI();
+        updateArenaLiveStats();
+        const log = document.getElementById('combatLiveLog');
+        if (role === 'attacker') {
+          log.innerHTML += `<p class="text-emerald-300 font-bold">🔄 Phase 2 : Vous passez à l'Attaque pour riposter contre ${opponentCaid} ! Cliquez sur Prêt.</p>`;
+        } else {
+          log.innerHTML += `<p class="text-rose-300 font-bold">🔄 Phase 2 : Votre assaut a échoué ! ${opponentCaid} passe à la Contre-Attaque contre votre Défense !</p>`;
+        }
+        log.scrollTop = log.scrollHeight;
+      });
+
       socket.on('combat_opponent_played_items', async ({ senderCaid, itemNames }) => {
         const log = document.getElementById('combatLiveLog');
         log.innerHTML += `<p class="text-rose-300">⚠️ <strong>${senderCaid}</strong> a joué : ${itemNames.join(', ')} !</p>`;
         log.scrollTop = log.scrollHeight;
         await showAppAlert(`${senderCaid} vient d'activer : ${itemNames.join(', ')} !\nVous pouvez aussi jouer des objets.`, "⚠️ Action Adverse");
       });
-      socket.on('combat_opponent_is_ready', () => {
+
+      socket.on('combat_opponent_is_ready', ({ caidName }) => {
         const log = document.getElementById('combatLiveLog');
-        log.innerHTML += `<p class="text-emerald-400 font-bold">✅ L'adversaire est prêt au combat !</p>`;
+        log.innerHTML += `<p class="text-emerald-400 font-bold">✅ ${caidName || "Un combattant"} est prêt au combat !</p>`;
         log.scrollTop = log.scrollHeight;
       });
+
       socket.on('combat_ready_state_reset', () => { isCombatReady = false; updateCombatReadyButtonUI(); });
-      socket.on('combat_finished_result', async ({ success, dmgNet, isAttacker, opponentCaid }) => {
+
+      socket.on('combat_finished_draw', async ({ message }) => {
         closeModal('modalCombat');
         closeModal('modalCombatItemSelector');
-        if (isAttacker) {
-          if (success) await showAppAlert(`Votre assaut a transpercé la défense de ${opponentCaid} (Dégâts nets : ${dmgNet}). La cible perd 1 Cœur !`, "🏆 Victoire Écrasante");
-          else {
-            localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-            await checkHospitalStatus();
-            await showAppAlert(`La défense de ${opponentCaid} a tenu bon. Vous perdez 1 Cœur !`, "🛑 Attaque Échouée");
-          }
-        } else {
-          if (!success) {
-            localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-            await checkHospitalStatus();
-            await showAppAlert(`${opponentCaid} transperce votre défense (Dégâts : ${dmgNet}). Vous perdez 1 Cœur !`, "💥 Agression Subie");
-          } else await showAppAlert(`Votre défense a bloqué l'assaut de ${opponentCaid} ! Aucun cœur perdu.`, "🛡️ Défense Réussie");
-        }
         resetCombatModifiers();
         currentDuelInfo = null;
         refreshHud();
+        await showAppAlert(message || "Match Nul !", "🤝 Match Nul");
       });
+
+      socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }) => {
+        closeModal('modalCombat');
+        closeModal('modalCombatItemSelector');
+        resetCombatModifiers();
+        currentDuelInfo = null;
+
+        if (outcome === 'loser') {
+          localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+          await checkHospitalStatus();
+          refreshHud();
+          await showAppAlert(`Vous avez perdu le combat contre ${opponentCaid} (Écart : ${dmgNet}). Vous perdez 1 Cœur et le vainqueur choisit son butin !`, "💥 Défaite");
+        } else {
+          refreshHud();
+          if (isPrimaryPicker && pillageInfo) {
+            openPillageModalUI(pillageInfo);
+          } else {
+            await showAppAlert(`Victoire contre ${opponentCaid} ! Votre allié sélectionne la récompense à piller.`, "🏆 Victoire");
+          }
+        }
+      });
+
+      socket.on('you_were_pillaged', async ({ category, amount, thiefCaid }) => {
+        if (category === 'cash') {
+          localPlayer.pocketCash = 0;
+          refreshHud();
+          await showAppAlert(`${thiefCaid} vous a dépouillé de 100% de votre Cash en poche (${amount.toLocaleString()} €) !`, "💸 Pillage Subi");
+        } else if (category === 'drugs') {
+          localPlayer.drugs = 0;
+          refreshHud();
+          await showAppAlert(`${thiefCaid} vous a dépouillé de 100% de votre Drogue en poche (${amount} kg) !`, "🌿 Pillage Subi");
+        } else if (category === 'prostitute') {
+          localPlayer.prostituteInTransit = null;
+          refreshHud();
+          await showAppAlert(`${thiefCaid} a capturé votre Prostituée en transit !`, "👠 Pillage Subi");
+        }
+      });
+
+      socket.on('pillage_gain_applied', async ({ category, amount, prostituteObj, loserCaid }) => {
+        if (category === 'cash') {
+          localPlayer.pocketCash += (amount || 0);
+          refreshHud();
+          await showAppAlert(`Vous avez pris +${(amount || 0).toLocaleString()} € en cash sur ${loserCaid} !`, "💰 Butin Récupéré");
+        } else if (category === 'drugs') {
+          localPlayer.drugs += (amount || 0);
+          refreshHud();
+          await showAppAlert(`Vous avez pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
+        } else if (category === 'prostitute') {
+          localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée L1', revenue: 1000 };
+          refreshHud();
+          await showAppAlert(`Vous avez récupéré la Prostituée de ${loserCaid} en transit !`, "👠 Escort Capturée");
+        }
+      });
+
       socket.on('combat_aborted', async () => {
         closeModal('modalCombat');
         closeModal('modalCombatItemSelector');
+        closeModal('modalChooseRiposteTarget');
         resetCombatModifiers();
         currentDuelInfo = null;
         await showAppAlert("Le combat a été annulé.", "Combat Interrompu");
       });
+
+      // --- ÉVÉNEMENTS DE PARTAGE DU BUTIN EN ALLIANCE ---
+      socket.on('loot_split_opened', (splitState) => {
+        renderLootSplitModalUI(splitState);
+        document.getElementById('modalAlliedLootSplit').classList.remove('hidden');
+      });
+
+      socket.on('loot_split_updated', (splitState) => {
+        renderLootSplitModalUI(splitState);
+      });
+
+      socket.on('loot_split_completed', async ({ title, cashGained, drugsGained }) => {
+        closeModal('modalAlliedLootSplit');
+        localPlayer.pocketCash += (cashGained || 0);
+        localPlayer.drugs += (drugsGained || 0);
+        refreshHud();
+        await showAppAlert(
+          `Accord validé par les 2 alliés (${title}) !\nVotre part reçue : +${(cashGained || 0).toLocaleString()} € et +${drugsGained || 0} kg.`,
+          "🤝 Butin Partagé"
+        );
+      });
+
       socket.on('lost_stray_dog', async ({ thiefCaid }) => {
         localPlayer.strayDogActive = false;
         await showAppAlert(`${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant !`, "🐕 Chien Errant Volé");
@@ -1702,20 +1845,165 @@
         document.getElementById('allianceReqSenderName').innerText = data.senderCaid || 'Un rival';
         document.getElementById('modalAllianceRequestReceived').classList.remove('hidden');
       });
-      socket.on('alliance_confirmed', async ({ allyCaid, musclesCount }) => {
+      socket.on('alliance_confirmed', async ({ allyToken, allyCaid, musclesCount, allyAtk, hasProstituteInTransit }) => {
         localPlayer.allianceActive = true;
-        localPlayer.activeAlly = { caid: allyCaid, grosBrasCount: musclesCount || 0, bonusAtk: (musclesCount || 0) * 2 };
-        await showAppAlert(`Alliance scellée avec ${allyCaid} ! Vos interfaces sont débloquées.`, "🤝 Pacte Scellé");
+        localPlayer.activeAlly = {
+          allyToken,
+          caid: allyCaid,
+          grosBrasCount: musclesCount || 0,
+          allyAtk: allyAtk || 1,
+          hasProstituteInTransit: !!hasProstituteInTransit
+        };
+        syncMultiplayerTargets();
+        await showAppAlert(`Alliance scellée avec ${allyCaid} !\n• Vos forces sont cumulées (braquages & combats)\n• Pacte de non-agression actif pour ce tour et le tour suivant.`, "🤝 Pacte Scellé");
       });
       socket.on('alliance_declined', async () => { await showAppAlert("Le Caïd adverse a refusé votre alliance.", "Alliance Refusée"); });
       socket.on('player_updated', (updatedPlayer) => {
         const idx = connectedRivals.findIndex(p => p.playerToken === updatedPlayer.playerToken || p.socketId === updatedPlayer.socketId);
         if (idx >= 0) connectedRivals[idx] = updatedPlayer;
         else connectedRivals.push(updatedPlayer);
+        if (localPlayer.allianceActive && localPlayer.activeAlly && updatedPlayer.playerToken === localPlayer.activeAlly.allyToken) {
+          localPlayer.activeAlly.grosBrasCount = updatedPlayer.musclesCount || 0;
+          localPlayer.activeAlly.allyAtk = updatedPlayer.atk || 1;
+          localPlayer.activeAlly.hasProstituteInTransit = !!updatedPlayer.hasProstituteInTransit;
+        }
         syncMultiplayerTargets();
       });
-      socket.on('error_msg', async (msg) => { await showAppAlert(msg, "Erreur"); });
+      socket.on('error_msg', async (msg) => { await showAppAlert(msg, "Attention"); });
     }
+
+    // --- UI PILLAGE & BARRE DE PARTAGE ---
+    function selectRiposteTarget(chosenTargetToken) {
+      closeModal('modalChooseRiposteTarget');
+      if (socket) socket.emit('combat_select_riposte_target', { chosenTargetToken });
+    }
+
+    function openPillageModalUI(pillageInfo) {
+      document.getElementById('pillageLoserName').innerText = pillageInfo.loserCaid || 'le perdant';
+      const container = document.getElementById('pillageOptionsContainer');
+      const btns = [];
+
+      // Option 1 : Cash en poche (100%)
+      btns.push(`
+        <button onclick="choosePillageReward('cash')" class="w-full p-3 glass-panel rounded-2xl border border-amber-500/40 flex items-center justify-between text-left ${pillageInfo.availableCash <= 0 ? 'opacity-40 pointer-events-none' : ''}">
+          <div>
+            <span class="text-xs font-black text-amber-300 uppercase block">💰 100% du Cash en Poche</span>
+            <span class="text-[10px] font-mono text-white">${(pillageInfo.availableCash || 0).toLocaleString()} € disponibles</span>
+          </div>
+          <i class="ph-bold ph-arrow-right text-amber-400"></i>
+        </button>
+      `);
+
+      // Option 2 : Drogue en poche (100%)
+      btns.push(`
+        <button onclick="choosePillageReward('drugs')" class="w-full p-3 glass-panel rounded-2xl border border-emerald-500/40 flex items-center justify-between text-left ${pillageInfo.availableDrugs <= 0 ? 'opacity-40 pointer-events-none' : ''}">
+          <div>
+            <span class="text-xs font-black text-emerald-300 uppercase block">🌿 100% de la Drogue en Poche</span>
+            <span class="text-[10px] font-mono text-white">${pillageInfo.availableDrugs || 0} kg disponibles</span>
+          </div>
+          <i class="ph-bold ph-arrow-right text-emerald-400"></i>
+        </button>
+      `);
+
+      // Option 3 : Prostituée en transit
+      if (pillageInfo.hasProstitute) {
+        if (pillageInfo.isAlliedVictory && localPlayer.activeAlly) {
+          if (!localPlayer.prostituteInTransit) {
+            btns.push(`
+              <button onclick="choosePillageReward('prostitute', '${myPlayerToken}')" class="w-full p-3 glass-panel rounded-2xl border border-pink-500/40 flex items-center justify-between text-left">
+                <div>
+                  <span class="text-xs font-black text-pink-300 uppercase block">👠 Prendre sa Prostituée (Pour Moi)</span>
+                  <span class="text-[10px] font-mono text-white">Place l'escort dans votre slot transit</span>
+                </div>
+                <i class="ph-bold ph-arrow-right text-pink-400"></i>
+              </button>
+            `);
+          }
+          if (!localPlayer.activeAlly.hasProstituteInTransit) {
+            btns.push(`
+              <button onclick="choosePillageReward('prostitute', '${localPlayer.activeAlly.allyToken}')" class="w-full p-3 glass-panel rounded-2xl border border-purple-500/40 flex items-center justify-between text-left">
+                <div>
+                  <span class="text-xs font-black text-purple-300 uppercase block">👠 Donner sa Prostituée à ${localPlayer.activeAlly.caid}</span>
+                  <span class="text-[10px] font-mono text-white">Place l'escort chez votre allié</span>
+                </div>
+                <i class="ph-bold ph-arrow-right text-purple-400"></i>
+              </button>
+            `);
+          }
+        } else {
+          const canTakePros = !localPlayer.prostituteInTransit;
+          btns.push(`
+            <button onclick="choosePillageReward('prostitute', '${myPlayerToken}')" class="w-full p-3 glass-panel rounded-2xl border border-pink-500/40 flex items-center justify-between text-left ${!canTakePros ? 'opacity-40 pointer-events-none' : ''}">
+              <div>
+                <span class="text-xs font-black text-pink-300 uppercase block">👠 Capturer sa Prostituée</span>
+                <span class="text-[10px] font-mono text-white">${canTakePros ? 'Disponible en transit' : 'Votre slot transit est déjà occupé'}</span>
+              </div>
+              <i class="ph-bold ph-arrow-right text-pink-400"></i>
+            </button>
+          `);
+        }
+      }
+
+      btns.push(`
+        <button onclick="choosePillageReward('none')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs uppercase">Ne rien prendre / Fermer</button>
+      `);
+
+      container.innerHTML = btns.join('');
+      document.getElementById('modalCombatPillage').classList.remove('hidden');
+    }
+
+    function choosePillageReward(category, recipientToken = null) {
+      closeModal('modalCombatPillage');
+      if (socket) socket.emit('execute_pillage_choice', { category, recipientToken });
+    }
+
+    function renderLootSplitModalUI(split) {
+      if (!split) return;
+      const rightPct = 100 - split.leftPct;
+      const leftCash = Math.round((split.totalCash * split.leftPct) / 100);
+      const rightCash = split.totalCash - leftCash;
+      const leftDrugs = Math.round((split.totalDrugs * split.leftPct) / 100);
+      const rightDrugs = split.totalDrugs - leftDrugs;
+
+      document.getElementById('lootSplitModalTitle').innerText = split.title || 'Partage du Butin';
+      document.getElementById('lootSplitTotalSubtitle').innerText = `Total à partager : ${split.totalCash.toLocaleString()} €` + (split.totalDrugs > 0 ? ` + ${split.totalDrugs} kg` : '');
+
+      document.getElementById('lootSplitLeftName').innerText = split.leftName;
+      document.getElementById('lootSplitRightName').innerText = split.rightName;
+      document.getElementById('lootSplitLeftPctBadge').innerText = `${split.leftPct}%`;
+      document.getElementById('lootSplitRightPctBadge').innerText = `${rightPct}%`;
+
+      document.getElementById('lootSplitLeftAmounts').innerText = `${leftCash.toLocaleString()} €` + (split.totalDrugs > 0 ? ` • ${leftDrugs} kg` : '');
+      document.getElementById('lootSplitRightAmounts').innerText = `${rightCash.toLocaleString()} €` + (split.totalDrugs > 0 ? ` • ${rightDrugs} kg` : '');
+
+      document.getElementById('lootSplitLeftStatus').innerHTML = split.leftAccepted
+        ? '<span class="text-emerald-400 font-bold">✅ Accord validé</span>'
+        : '⏳ En attente...';
+      document.getElementById('lootSplitRightStatus').innerHTML = split.rightAccepted
+        ? '<span class="text-emerald-400 font-bold">✅ Accord validé</span>'
+        : '⏳ En attente...';
+
+      document.getElementById('lootSplitSlider').value = split.leftPct;
+
+      const myAccepted = (myPlayerToken === split.leftToken && split.leftAccepted) || (myPlayerToken === split.rightToken && split.rightAccepted);
+      const btn = document.getElementById('btnAcceptLootSplit');
+      if (myAccepted) {
+        btn.innerText = "En attente de votre allié...";
+        btn.className = "w-full py-3.5 bg-emerald-700 text-white font-black uppercase rounded-2xl text-xs opacity-75";
+      } else {
+        btn.innerText = "Accepter ce Partage";
+        btn.className = "w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase rounded-2xl text-xs shadow-lg";
+      }
+    }
+
+    function onLootSplitSliderInput(val) {
+      if (socket) socket.emit('update_loot_split_slider', { leftPct: parseInt(val) || 0 });
+    }
+
+    function emitAcceptLootSplit() {
+      if (socket) socket.emit('accept_loot_split');
+    }
+
     async function checkHospitalStatus() {
       if (localPlayer.hearts <= 0) {
         await showAppAlert("Vous n'avez plus aucun Cœur de Vie !\nVotre Caïd est évacué d'urgence à l'Hôpital.", "🚑 Transfert Hôpital");
@@ -1746,18 +2034,29 @@
       if (socket) socket.emit('respond_alliance', { accepted, senderSocketId: pendingAllianceRequest.senderSocketId, senderToken: pendingAllianceRequest.senderToken });
       pendingAllianceRequest = null;
     }
+
     function syncMultiplayerTargets() {
       const combatSel = document.getElementById('combatTargetSelect');
       const allySel = document.getElementById('allianceTargetSelect');
       const specialSel = document.getElementById('specialTargetSelect');
-      const opts = (!connectedRivals || !connectedRivals.length)
+
+      // Pour le combat et les attaques spéciales, on exclut les joueurs protégés par un Pacte d'Alliance (tour actuel + tour suivant)
+      const attackableRivals = (connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken));
+
+      const combatOpts = !attackableRivals.length
+        ? '<option value="">Aucune cible attaquable (ou Pacte actif)</option>'
+        : attackableRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
+
+      const allOpts = (!connectedRivals || !connectedRivals.length)
         ? '<option value="">Aucun rival connecté</option>'
-        : connectedRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
-      if (combatSel) combatSel.innerHTML = opts;
-      if (allySel) allySel.innerHTML = opts;
-      if (specialSel) specialSel.innerHTML = opts;
+        : connectedRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0})</option>`).join('');
+
+      if (combatSel) combatSel.innerHTML = combatOpts;
+      if (specialSel) specialSel.innerHTML = combatOpts;
+      if (allySel) allySel.innerHTML = allOpts;
       updateSelectedRivalDetailsCard();
     }
+
     function updateSelectedRivalDetailsCard() {
       const sel = document.getElementById('combatTargetSelect');
       if (!sel) return;
@@ -1766,12 +2065,20 @@
       document.getElementById('targetPreviewEscort').innerText = (target && target.hasProstituteInTransit) ? 'Oui' : 'Non';
       document.getElementById('targetPreviewDog').innerText = (target && target.hasStrayDog) ? 'Oui' : 'Non';
     }
+
     function updateArenaLiveStats() {
       const a = document.getElementById('arenaPlayerLiveAtk');
       const d = document.getElementById('arenaPlayerLiveDef');
-      if (a) a.innerText = getTotalAtk();
+      const atkLbl = document.getElementById('arenaAtkLabel');
+      const myAtk = getTotalAtk();
+      const allyExtra = (currentDuelInfo && currentDuelInfo.isAlliedAttack) ? (currentDuelInfo.allyAtk || 0) : 0;
+      if (atkLbl) {
+        atkLbl.innerText = allyExtra > 0 ? `Assaut Cumulé (Vous + Allié)` : `Votre Assaut`;
+      }
+      if (a) a.innerText = myAtk + allyExtra;
       if (d) d.innerText = getTotalDef();
     }
+
     function navTo(pageId) {
       document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
       const target = document.getElementById(pageId);
@@ -2090,7 +2397,8 @@
       const targetedSkills = ['caid_2', 'caid_4', 'caid_6', 'caid_7', 'caid_8'];
       if (targetedSkills.includes(caid.id)) {
         syncMultiplayerTargets();
-        if (!connectedRivals || !connectedRivals.length) return showAppAlert("Aucun rival connecté à cibler !", "Cible Introuvable");
+        const sel = document.getElementById('specialTargetSelect');
+        if (!sel || !sel.value) return showAppAlert("Aucune cible attaquable (ou Pacte d'Alliance actif) !", "Cible Introuvable");
         document.getElementById('specialTargetDesc').innerText = `${caid.skillName} : ${caid.skillDesc}`;
         document.getElementById('modalTargetSpecial').classList.remove('hidden');
       } else {
@@ -2111,6 +2419,9 @@
       const sel = document.getElementById('specialTargetSelect');
       const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
       if (!target) return showAppAlert("Sélectionnez une cible.", "Cible Requise");
+      if (isRivalProtectedByPact(target.playerToken)) {
+        return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas cibler votre allié !", "Pacte Actif");
+      }
       const caid = getMyCaid();
       closeModal('modalTargetSpecial');
       let effect = '';
@@ -2137,11 +2448,6 @@
       refreshHud();
     }
 
-    // =========================================================================
-    // CONTRÔLE DE POLICE (SANS GO-FAST) :
-    // - Fouille directe : 30% CLEAR / 35% DROGUE / 35% ARMES
-    // - Si embarqué au poste : Garde à vue + Fin de tour automatique après "Compris"
-    // =========================================================================
     async function triggerPoliceInspection() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
@@ -2158,13 +2464,9 @@
 
       const r = Math.random();
       let pick = 'CLEAN';
-      if (r < 0.30) {
-        pick = 'CLEAN';
-      } else if (r < 0.65) {
-        pick = 'DRUGS_FOUND';
-      } else {
-        pick = 'WEAPONS_FOUND';
-      }
+      if (r < 0.30) pick = 'CLEAN';
+      else if (r < 0.65) pick = 'DRUGS_FOUND';
+      else pick = 'WEAPONS_FOUND';
 
       const hasAnyWeapon = !!localPlayer.equipped.weapon || localPlayer.inventory.some(it => it && it.type === 'WEAPON');
 
@@ -2199,7 +2501,7 @@
       }
     }
 
-    async function sellItem(idx) {
+        async function sellItem(idx) {
       if (!isMyTurnToPlay) return;
       const item = localPlayer.inventory[idx];
       if (!item) return;
@@ -2210,6 +2512,7 @@
         refreshHud();
       }
     }
+
     async function discardItem(idx) {
       if (!isMyTurnToPlay) return;
       const item = localPlayer.inventory[idx];
@@ -2219,6 +2522,7 @@
         refreshHud();
       }
     }
+
     function refreshHud() {
       const caid = getMyCaid();
       const bannerImg = document.getElementById('caidBannerImg');
@@ -2292,10 +2596,12 @@
           def: getTotalDef(),
           musclesCount: localPlayer.musclesOnPerson.length,
           hasProstituteInTransit: !!localPlayer.prostituteInTransit,
+          prostituteObj: localPlayer.prostituteInTransit,
           hasStrayDog: !!localPlayer.strayDogActive
         });
       }
     }
+
     function renderInventoryList() {
       const c = document.getElementById('inventoryItemsList');
       if (!c) return;
@@ -2326,6 +2632,7 @@
           </div>`;
       }).join('');
     }
+
     async function equipItemFromInventory(idx) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const item = localPlayer.inventory[idx];
@@ -2336,6 +2643,7 @@
       localPlayer.inventory.splice(idx, 1);
       refreshHud();
     }
+
     async function unequipSlot(slotKey) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const item = localPlayer.equipped[slotKey];
@@ -2344,6 +2652,7 @@
       localPlayer.equipped[slotKey] = null;
       refreshHud();
     }
+
     async function useItem(idx) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       const it = localPlayer.inventory[idx];
@@ -2381,6 +2690,7 @@
       await showAppAlert(`${it.name} utilisé !`, "Objet");
       refreshHud();
     }
+
     function renderEquipmentSlotsView() {
       const w = localPlayer.equipped.weapon;
       document.getElementById('slotWeaponTitle').innerText = w ? w.name : "Mains nues";
@@ -2401,6 +2711,7 @@
         ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('vehicle')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
         : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
     }
+
     async function openTransferModal(mode) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       currentTransferMode = mode;
@@ -2453,6 +2764,7 @@
       closeModal('modalTransfer');
       refreshHud();
     }
+
     function openGrossisteModal(unitPrice) {
       let basePrice = unitPrice || 1000;
       if (isRadioEffectActive('GROSSISTE_PRICE_SET')) {
@@ -2496,6 +2808,7 @@
       await showAppAlert(`+${kg} kg de drogue achetés (-${cost.toLocaleString()} €).`, "🌿 Grossiste");
       refreshHud();
     }
+
     function openPaymentChoiceModal(purchaseData) {
       pendingPurchaseData = purchaseData;
       const cost = purchaseData.cost;
@@ -2562,6 +2875,7 @@
         await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
       }
     }
+
     function resetCombatModifiers() {
       combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
     }
@@ -2575,9 +2889,11 @@
       if (l.includes('batte') || l.includes('poing') || l.includes('couteau') || l.includes('cran') || l.includes('hache') || l.includes('mains')) return false;
       return l.includes('revolver') || l.includes('pistolet') || l.includes('fusil') || l.includes('pompe') || l.includes('mitraillette') || l.includes('canon') || l.includes('gun');
     }
+
     async function openCombatModal() {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour d'attaquer !", "Tour Inactif");
       syncMultiplayerTargets();
+      document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-sword"></i> Combat de Rue`;
       document.getElementById('combatTargetSelectionBox').classList.remove('hidden');
       document.getElementById('btnInitiateFightAction').classList.remove('hidden');
       document.getElementById('combatAdversaryTag').classList.add('hidden');
@@ -2587,10 +2903,24 @@
       updateArenaLiveStats();
       document.getElementById('modalCombat').classList.remove('hidden');
     }
+
     async function initiateCombatEngagement() {
       const sel = document.getElementById('combatTargetSelect');
       const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
-      if (!target) return showAppAlert("Aucun Caïd adverse sélectionné.", "Cible Requise");
+      if (!target) return showAppAlert("Aucune cible attaquable sélectionnée.", "Cible Requise");
+
+      if (isRivalProtectedByPact(target.playerToken)) {
+        return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni durant ce tour, ni au tour suivant) !", "🤝 Pacte Actif");
+      }
+
+      if (localPlayer.allianceActive && localPlayer.activeAlly) {
+        const confirmPos = await showAppConfirm(
+          `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid} !\nÊtes-vous bien tous les deux positionnés sur la bonne case pour attaquer ${target.caidName || 'ce joueur'} ensemble ?`,
+          "📍 Vérification Position Alliance"
+        );
+        if (!confirmPos) return;
+      }
+
       const caid = getMyCaid();
       if (socket) {
         socket.emit('start_combat_engagement', {
@@ -2600,10 +2930,12 @@
         });
       }
     }
+
     function abortCombat() {
       if (socket && currentDuelInfo) socket.emit('combat_cancel');
       else closeModal('modalCombat');
     }
+
     async function openCombatItemSelectorModal() {
       const items = localPlayer.inventory.filter(i => i && i.dur === 'combat');
       if (!items.length) return showAppAlert("Aucun objet de combat dans votre Sac !", "Sac Vide");
@@ -2646,6 +2978,7 @@
       };
       document.getElementById('modalCombatItemSelector').classList.remove('hidden');
     }
+
     async function toggleCombatReadyState() {
       if (!currentDuelInfo) return;
       isCombatReady = !isCombatReady;
@@ -2655,18 +2988,20 @@
         socket.emit('combat_set_ready', { currentStat: stat });
       }
       const log = document.getElementById('combatLiveLog');
-      log.innerHTML += isCombatReady ? `<p class="text-emerald-400 font-bold">⏳ Vous êtes prêt ! En attente de l'adversaire...</p>` : `<p class="text-amber-300">Non prêt.</p>`;
+      log.innerHTML += isCombatReady ? `<p class="text-emerald-400 font-bold">⏳ Vous êtes prêt ! En attente...</p>` : `<p class="text-amber-300">Non prêt.</p>`;
       log.scrollTop = log.scrollHeight;
     }
+
     function updateCombatReadyButtonUI() {
       const btn = document.getElementById('btnToggleCombatReady');
       const lbl = document.getElementById('btnCombatReadyLabel');
+      const phasePrefix = (currentDuelInfo && currentDuelInfo.phase === 2) ? 'Prêt (Riposte)' : 'Prêt au combat';
       if (isCombatReady) {
         btn.className = "py-3 bg-emerald-600 text-white font-black uppercase rounded-xl text-xs flex items-center justify-center gap-1.5";
         lbl.innerText = "Prêt (Validé)";
       } else {
         btn.className = "py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black uppercase rounded-xl text-xs flex items-center justify-center gap-1.5";
-        lbl.innerText = "Prêt au combat";
+        lbl.innerText = phasePrefix;
       }
     }
 
@@ -2799,7 +3134,8 @@
       btn.onclick = () => { closeModal('modalLootDiscovery'); onClaim(); };
       document.getElementById('modalLootDiscovery').classList.remove('hidden');
     }
-        async function processQrPayload(payload) {
+
+    async function processQrPayload(payload) {
       if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
       closeQrScannerModal();
       let data = payload;
@@ -2815,7 +3151,7 @@
       if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
       const type = (data.t || data.type || '').toLowerCase();
 
-      // 1. OUVERTURE DES BOUTIQUES : ARMURERIE / NIGHTCLUB / SPORTCLUB / CONCESSIONNAIRE
+      // 1. OUVERTURE DES BOUTIQUES
       if (type === 'armurerie') return openArmoryShopModal();
       if (type === 'nightclub') return openNightclubShopModal();
       if (type === 'sportclub') return openSportclubShopModal();
@@ -2840,7 +3176,7 @@
         });
       }
 
-      // 4. ACHATS DIRECTS PAR QR (Équipement / Lascar / Prostituée)
+      // 4. ACHATS DIRECTS PAR QR
       if (type === 'eq' || type === 'gb' || type === 'pr') {
         let cost = data.p || (type === 'gb' ? (data.lvl === 2 ? 3000 : 1500) : (data.lvl === 2 ? 4000 : 2000));
         let itemName = data.n || (type === 'gb' ? `Lascar L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
@@ -2856,31 +3192,61 @@
         return openPaymentChoiceModal({ type, data, cost, name: itemName });
       }
 
-      // 5. DEAL YENCLI (avec prise en compte du bonus Flash Radio YENCLI_CASH_BONUS)
+      // 5. DEAL YENCLI
       if (type === 'yen') {
         if (localPlayer.drugs < data.d) return showAppAlert(`Drogue insuffisante (${data.d} kg requis).`, "Deal Refusé");
         const radioBonus = isRadioEffectActive('YENCLI_CASH_BONUS') ? getRadioEffectValue('YENCLI_CASH_BONUS', 1500) : 0;
         const totalGain = (data.c || 0) + radioBonus;
         localPlayer.drugs -= data.d;
         localPlayer.pocketCash += totalGain;
-        const bonusTxt = radioBonus > 0 ? ` (dont +${radioBonus.toLocaleString()} € Bonus Radio Pénurie !)` : '';
+        const bonusTxt = radioBonus > 0 ? ` (dont +${radioBonus.toLocaleString()} € Bonus Radio !)` : '';
         await showAppAlert(`+${totalGain.toLocaleString()} € en poche !${bonusTxt}`, "🤝 Deal Yencli");
         refreshHud();
         return;
       }
 
-      // 6. BRAQUAGE (avec prise en compte du bonus Flash Radio HEIST_CASH_BONUS)
+      // 6. BRAQUAGE (Solo ou en Alliance avec cumul total + Barre de partage Gauche/Droite)
       if (type === 'brq') {
-        let teamAtk = getTotalAtk() + (localPlayer.activeAlly ? localPlayer.activeAlly.bonusAtk : 0);
-        let members = 1 + localPlayer.musclesOnPerson.length + (localPlayer.allianceActive ? (1 + localPlayer.activeAlly.grosBrasCount) : 0);
-        if (teamAtk < data.req || members < data.m) return showAppAlert(`Requis : ${data.req} Atk et ${data.m} membres.`, "💥 Échec Braquage");
+        const isAllied = !!(localPlayer.allianceActive && localPlayer.activeAlly);
+        if (isAllied) {
+          const confirmBothHere = await showAppConfirm(
+            `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid} !\nÊtes-vous bien tous les deux positionnés sur la case du braquage (${data.n || 'Braquage'}) ?`,
+            "📍 Vérification Position Alliance"
+          );
+          if (!confirmBothHere) return;
+        }
+
+        // Calcul cumulé : chaque joueur compte pour 1 membre + ses Lascars, et les points d'attaque sont additionnés
+        const allyAtk = isAllied ? (localPlayer.activeAlly.allyAtk || 1) : 0;
+        const allyMuscles = isAllied ? (localPlayer.activeAlly.grosBrasCount || 0) : 0;
+        const teamAtk = getTotalAtk() + allyAtk;
+        const members = 1 + localPlayer.musclesOnPerson.length + (isAllied ? (1 + allyMuscles) : 0);
+
+        if (teamAtk < data.req || members < data.m) {
+          return showAppAlert(
+            `Prérequis insuffisants !\nRequis : ${data.req} Atk et ${data.m} membre(s).\nVotre équipe actuelle : ${teamAtk} Atk et ${members} membre(s).`,
+            "💥 Échec Braquage"
+          );
+        }
+
         const radioHeistBonus = isRadioEffectActive('HEIST_CASH_BONUS') ? getRadioEffectValue('HEIST_CASH_BONUS', 2000) : 0;
-        const totalGain = (data.c || 0) + radioHeistBonus;
-        localPlayer.pocketCash += totalGain;
-        localPlayer.drugs += (data.d || 0);
-        const bonusTxt = radioHeistBonus > 0 ? ` (dont +${radioHeistBonus.toLocaleString()} € Bonus Radio !)` : '';
-        await showAppAlert(`+${totalGain.toLocaleString()} € gagnés !${bonusTxt}`, "🏆 Braquage Réussi");
-        refreshHud();
+        const totalCash = (data.c || 0) + radioHeistBonus;
+        const totalDrugs = data.d || 0;
+
+        if (isAllied && socket) {
+          socket.emit('initiate_allied_heist_split', {
+            heistName: data.n || 'Braquage',
+            totalCash,
+            totalDrugs,
+            allyToken: localPlayer.activeAlly.allyToken
+          });
+        } else {
+          localPlayer.pocketCash += totalCash;
+          localPlayer.drugs += totalDrugs;
+          const bonusTxt = radioHeistBonus > 0 ? ` (dont +${radioHeistBonus.toLocaleString()} € Bonus Radio !)` : '';
+          await showAppAlert(`+${totalCash.toLocaleString()} € et +${totalDrugs} kg gagnés !${bonusTxt}`, "🏆 Braquage Réussi");
+          refreshHud();
+        }
         return;
       }
     }
@@ -2902,7 +3268,6 @@
       await showAppAlert(`Demande envoyée à ${target.caidName || 'votre rival'}.`, "Alliance");
     }
 
-    // Fin de tour avec prise en compte des effets Radio sur la Patrouille de Police
     function endCurrentPlayerTurn() {
       if (!isMyTurnToPlay) return;
       document.getElementById('modalPatrolDice').classList.remove('hidden');
