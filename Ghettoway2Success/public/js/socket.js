@@ -112,6 +112,10 @@ if (socket) {
       initCarouselDOM();
     }
   });
+  socket.on('turn_skipped', async ({ allyCaid }) => {
+    const withWho = allyCaid ? ` avec ${allyCaid}` : ' en alliance';
+    await showAppAlert(`Votre tour est passé : vous avez déjà joué cette manche${withWho}.\n\nVous rejouerez à la manche suivante.`, "⏭️ Tour déjà joué");
+  });
   socket.on('game_started', ({ round, radio, players }) => {
     updateRivalsList(players);
     currentSession.round = round;
@@ -130,8 +134,12 @@ if (socket) {
     localPlayer.activeAlly = null;
     startRoundPhase1();
   });
-  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts }) => {
+  let lastActivePlayerToken = null;
+  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder }) => {
     if (serverPacts) nonAggressionPacts = serverPacts;
+    renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
+    if (activePlayerToken === myPlayerToken && lastActivePlayerToken !== myPlayerToken) notifyMyTurn(round);
+    lastActivePlayerToken = activePlayerToken;
     const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
     if (!isAlliedNow) {
       localPlayer.allianceActive = false;

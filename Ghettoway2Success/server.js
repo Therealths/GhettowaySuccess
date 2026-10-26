@@ -83,17 +83,38 @@ function arePlayersInNonAggressionPact(room, tokenA, tokenB) {
   );
 }
 
+// Ordre de passage de la manche : le premier joueur se décale d'un cran à chaque manche (A B C, B C A, C A B...)
+function buildRoundOrder(room) {
+  const n = room.players.length;
+  const start = (room.round - 1) % n;
+  return room.players.map((_, i) => room.players[(start + i) % n].playerToken);
+}
+
+function getActivePlayer(room) {
+  if (!room.roundOrder) return room.players[room.currentTurnIndex] || null;
+  const token = room.roundOrder[room.turnPos];
+  return room.players.find(p => p.playerToken === token) || null;
+}
+
 function broadcastTurnState(roomId) {
   const room = rooms[roomId];
   if (!room || !room.players.length) return;
 
-  const activePlayer = room.players[room.currentTurnIndex];
+  const activePlayer = getActivePlayer(room);
+  const played = room.playedThisRoundTokens || [];
+  const turnOrder = (room.roundOrder || [])
+    .map(token => room.players.find(p => p.playerToken === token))
+    .filter(Boolean)
+    .map(p => ({ token: p.playerToken, caidName: p.caidName, played: played.includes(p.playerToken) }));
+
   io.to(roomId).emit('turn_state_updated', {
     activePlayerToken: activePlayer ? activePlayer.playerToken : null,
     activeCaidName: activePlayer ? activePlayer.caidName : '',
     activeSocketId: activePlayer ? activePlayer.socketId : null,
     alliedTokens: room.currentTurnAlliedTokens || [],
-    nonAggressionPacts: room.nonAggressionPacts || []
+    nonAggressionPacts: room.nonAggressionPacts || [],
+    round: room.round,
+    turnOrder
   });
 }
 
@@ -323,8 +344,11 @@ io.on('connection', (socket) => {
     room.gameStarted = true;
     room.round = 1;
     room.currentTurnIndex = 0;
+    room.roundOrder = buildRoundOrder(room);
+    room.turnPos = 0;
     room.currentTurnAlliedTokens = [];
     room.playedThisRoundTokens = [];
+    room.alliedWithThisRound = {};
     room.nonAggressionPacts = [];
     room.strayDogHolderToken = null;
     room.activeCombat = null;
@@ -345,7 +369,7 @@ io.on('connection', (socket) => {
     const room = rooms[socket.roomId];
     if (!room || !room.gameStarted) return;
 
-    const activePlayer = room.players[room.currentTurnIndex];
+    const activePlayer = getActivePlayer(room);
     if (!activePlayer || activePlayer.socketId !== socket.id) return;
 
     // Le joueur actif et ses alliés du tour ont joué leur tour de la manche
@@ -359,15 +383,19 @@ io.on('connection', (socket) => {
     room.strayDogHolderToken = null;
     room.players.forEach(p => { p.hasStrayDog = false; });
 
-    // On saute les joueurs qui ont déjà joué cette manche (en alliance pendant le tour d'un autre)
-    do {
-      room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
+    // Joueur suivant dans l'ordre de la manche ; on saute ceux qui ont déjà joué (en alliance pendant le tour d'un autre)
+    if (!room.roundOrder) { room.roundOrder = buildRoundOrder(room); room.turnPos = room.currentTurnIndex; }
+    for (let guard = 0; guard < 2 * room.players.length + 2; guard++) {
+      room.turnPos++;
 
-      if (room.currentTurnIndex === 0) {
+      if (room.turnPos >= room.roundOrder.length) {
         room.round++;
         room.playedThisRoundTokens = [];
+        room.alliedWithThisRound = {};
         // Les pactes expirent à la fin de la manche qui suit celle de l'alliance
         room.nonAggressionPacts = (room.nonAggressionPacts || []).filter(p => p.untilRound >= room.round);
+        room.roundOrder = buildRoundOrder(room);
+        room.turnPos = 0;
         room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
         io.to(socket.roomId).emit('new_round_started', {
           round: room.round,
@@ -375,7 +403,18 @@ io.on('connection', (socket) => {
           players: room.players
         });
       }
-    } while (room.playedThisRoundTokens.includes(room.players[room.currentTurnIndex].playerToken));
+
+      const next = getActivePlayer(room);
+      if (!next) continue; // joueur parti
+      if (room.playedThisRoundTokens.includes(next.playerToken)) {
+        io.to(next.socketId).emit('turn_skipped', {
+          allyCaid: (room.alliedWithThisRound || {})[next.playerToken] || null
+        });
+        continue;
+      }
+      room.currentTurnIndex = room.players.indexOf(next);
+      break;
+    }
 
     broadcastTurnState(socket.roomId);
     io.to(socket.roomId).emit('update_room_players', {
@@ -967,6 +1006,11 @@ io.on('connection', (socket) => {
       room.nonAggressionPacts = room.nonAggressionPacts.filter(
         p => !(p.tokens.includes(responder.playerToken) && p.tokens.includes(sender.playerToken))
       );
+      // Pour expliquer à l'allié pourquoi son propre tour sera sauté
+      room.alliedWithThisRound = room.alliedWithThisRound || {};
+      room.alliedWithThisRound[responder.playerToken] = sender.caidName;
+      room.alliedWithThisRound[sender.playerToken] = responder.caidName;
+
       room.nonAggressionPacts.push({
         tokens: [sender.playerToken, responder.playerToken],
         untilRound: room.round + 1 // manche en cours + manche suivante

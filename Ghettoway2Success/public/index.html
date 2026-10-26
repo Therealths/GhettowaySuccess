@@ -26,6 +26,11 @@
 </head>
 <body>
   <div id="app-container">
+    <!-- BANDEAU "C'EST VOTRE TOUR" -->
+    <div id="yourTurnToast" class="hidden absolute top-3 left-3 right-3 z-[60] py-3 px-4 rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-center shadow-2xl pointer-events-none">
+      <span class="text-[9px] font-mono uppercase font-black block">Manche <span id="yourTurnToastRound">1</span></span>
+      <span class="text-sm font-black uppercase">🎲 C'est votre tour !</span>
+    </div>
     <!-- PAGE 1 : ACCUEIL -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg">
       <div class="space-y-3 mb-2 w-full">
@@ -185,6 +190,10 @@
             <h3 class="text-sm font-black text-white uppercase mt-0.5">Tour de <span id="blockerCaidName" class="text-ghetto-gold">...</span></h3>
             <p class="text-[11px] text-slate-300 mt-1">Patientez pendant que ce Caïd effectue ses actions...</p>
           </div>
+          <div class="border-t border-white/10 pt-3">
+            <span class="text-[9px] font-mono uppercase tracking-widest text-slate-400 block font-bold mb-1.5">Ordre de la manche</span>
+            <div class="turn-order-list flex flex-wrap justify-center gap-1.5"></div>
+          </div>
         </div>
       </div>
       <div class="flex flex-col h-full justify-between space-y-2">
@@ -227,6 +236,11 @@
             <div class="flex items-center gap-1 leading-none mb-0.5"><span class="text-[8px] font-mono uppercase font-black text-rose-400">Flash Radio</span><span class="text-[8px] text-slate-500 font-mono">• Manche <span id="hudRadioRoundTag">1</span></span></div>
             <div class="flex items-baseline gap-1 overflow-hidden text-xs truncate"><h4 id="hudRadioReminderTitle" class="font-black text-white truncate text-[11px]">Canicule Urbaine</h4><p id="hudRadioReminderDesc" class="text-[10px] text-slate-300 truncate">les véhicules motorisés perdent -2 PM</p></div>
           </div>
+        </div>
+        <!-- ORDRE DE PASSAGE DE LA MANCHE -->
+        <div class="w-full py-1.5 px-2.5 rounded-2xl glass-panel flex items-center gap-2 flex-shrink-0 overflow-hidden">
+          <span class="text-[8px] font-mono uppercase font-black text-slate-400 flex-shrink-0">Ordre</span>
+          <div class="turn-order-list flex items-center gap-1 overflow-x-auto"></div>
         </div>
         <!-- ONGLETS -->
         <div class="flex-1 flex flex-col min-h-0">

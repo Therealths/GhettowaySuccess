@@ -345,3 +345,43 @@ function skipPatrolWait() {
   closeModal('modalPatrolDice');
   if (socket) socket.emit('next_player_turn');
 }
+
+// --- ORDRE DE PASSAGE & ALERTE DE TOUR ---
+function renderTurnOrder(turnOrder, activeToken, alliedTokens = []) {
+  const html = (turnOrder || []).map(p => {
+    const isMe = p.token === myPlayerToken;
+    const isActive = p.token === activeToken;
+    const isAllied = !isActive && alliedTokens.includes(p.token);
+    let cls = 'bg-white/5 border-white/10 text-slate-300';
+    let icon = '';
+    if (isActive) { cls = 'bg-amber-400/20 border-amber-400 text-amber-300'; icon = '▶ '; }
+    else if (isAllied) { cls = 'bg-purple-500/20 border-purple-400 text-purple-300'; icon = '🤝 '; }
+    else if (p.played) { cls = 'bg-white/5 border-white/5 text-slate-500 line-through'; icon = '✓ '; }
+    const name = p.caidName || 'Caïd';
+    return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (vous)' : ''}</span>`;
+  }).join('');
+  document.querySelectorAll('.turn-order-list').forEach(el => { el.innerHTML = html; });
+}
+
+function notifyMyTurn(round) {
+  document.getElementById('yourTurnToastRound').innerText = round || currentSession.round;
+  const toast = document.getElementById('yourTurnToast');
+  toast.classList.remove('hidden');
+  clearTimeout(notifyMyTurn.timer);
+  notifyMyTurn.timer = setTimeout(() => toast.classList.add('hidden'), 3000);
+  try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+  try {
+    const ctx = notifyMyTurn.ctx || (notifyMyTurn.ctx = new (window.AudioContext || window.webkitAudioContext)());
+    if (ctx.state === 'suspended') ctx.resume();
+    [0, 0.18].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = i === 0 ? 660 : 880;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.15);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.16);
+    });
+  } catch (e) {}
+}
