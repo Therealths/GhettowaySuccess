@@ -79,7 +79,7 @@ function checkRoomReady(room) {
 function arePlayersInNonAggressionPact(room, tokenA, tokenB) {
   if (!room || !room.nonAggressionPacts || !tokenA || !tokenB) return false;
   return room.nonAggressionPacts.some(
-    pact => pact.remainingTurns > 0 && pact.tokens.includes(tokenA) && pact.tokens.includes(tokenB)
+    pact => pact.untilRound >= room.round && pact.tokens.includes(tokenA) && pact.tokens.includes(tokenB)
   );
 }
 
@@ -324,6 +324,7 @@ io.on('connection', (socket) => {
     room.round = 1;
     room.currentTurnIndex = 0;
     room.currentTurnAlliedTokens = [];
+    room.playedThisRoundTokens = [];
     room.nonAggressionPacts = [];
     room.strayDogHolderToken = null;
     room.activeCombat = null;
@@ -347,26 +348,34 @@ io.on('connection', (socket) => {
     const activePlayer = room.players[room.currentTurnIndex];
     if (!activePlayer || activePlayer.socketId !== socket.id) return;
 
-    if (room.nonAggressionPacts && room.nonAggressionPacts.length > 0) {
-      room.nonAggressionPacts.forEach(p => { p.remainingTurns -= 1; });
-      room.nonAggressionPacts = room.nonAggressionPacts.filter(p => p.remainingTurns > 0);
-    }
+    // Le joueur actif et ses alliés du tour ont joué leur tour de la manche
+    room.playedThisRoundTokens = [...new Set([
+      ...(room.playedThisRoundTokens || []),
+      activePlayer.playerToken,
+      ...(room.currentTurnAlliedTokens || [])
+    ])];
 
     room.currentTurnAlliedTokens = [];
     room.strayDogHolderToken = null;
     room.players.forEach(p => { p.hasStrayDog = false; });
 
-    room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
+    // On saute les joueurs qui ont déjà joué cette manche (en alliance pendant le tour d'un autre)
+    do {
+      room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
 
-    if (room.currentTurnIndex === 0) {
-      room.round++;
-      room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
-      io.to(socket.roomId).emit('new_round_started', {
-        round: room.round,
-        radio: room.currentRadio,
-        players: room.players
-      });
-    }
+      if (room.currentTurnIndex === 0) {
+        room.round++;
+        room.playedThisRoundTokens = [];
+        // Les pactes expirent à la fin de la manche qui suit celle de l'alliance
+        room.nonAggressionPacts = (room.nonAggressionPacts || []).filter(p => p.untilRound >= room.round);
+        room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
+        io.to(socket.roomId).emit('new_round_started', {
+          round: room.round,
+          radio: room.currentRadio,
+          players: room.players
+        });
+      }
+    } while (room.playedThisRoundTokens.includes(room.players[room.currentTurnIndex].playerToken));
 
     broadcastTurnState(socket.roomId);
     io.to(socket.roomId).emit('update_room_players', {
@@ -960,7 +969,7 @@ io.on('connection', (socket) => {
       );
       room.nonAggressionPacts.push({
         tokens: [sender.playerToken, responder.playerToken],
-        remainingTurns: 2
+        untilRound: room.round + 1 // manche en cours + manche suivante
       });
 
       io.to(sender.socketId).emit('alliance_confirmed', {

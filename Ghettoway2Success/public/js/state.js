@@ -85,7 +85,7 @@ let isCombatReady = false;
 function isRivalProtectedByPact(rivalToken) {
   if (!rivalToken || !nonAggressionPacts || !nonAggressionPacts.length) return false;
   return nonAggressionPacts.some(
-    p => p.remainingTurns > 0 && p.tokens.includes(myPlayerToken) && p.tokens.includes(rivalToken)
+    p => p.untilRound >= currentSession.round && p.tokens.includes(myPlayerToken) && p.tokens.includes(rivalToken)
   );
 }
 
