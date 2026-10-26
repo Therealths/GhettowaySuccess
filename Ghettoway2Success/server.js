@@ -406,77 +406,7 @@ io.on('connection', (socket) => {
   // COMBAT DE RUE EN 2 PHASES (ASSAUT INITIAL -> CONTRE-ATTAQUE / RIPOSTE)
   // Supporte le combat solo (1v1) et le combat en alliance (2v1)
   // =========================================================================
-  socket.on('start_combat_engagement', ({ targetPlayerToken, targetSocketId, attackerCaid }) => {
-    const room = rooms[socket.roomId];
-    if (!room) return;
-
-    let targetPlayer = room.players.find(p => p.playerToken === targetPlayerToken);
-    if (!targetPlayer) targetPlayer = room.players.find(p => p.socketId === targetSocketId);
-    const attackerPlayer = room.players.find(p => p.socketId === socket.id);
-
-    if (!targetPlayer || !attackerPlayer) return;
-
-    // Vérification du pacte de non-agression (tour en cours + tour suivant)
-    if (arePlayersInNonAggressionPact(room, attackerPlayer.playerToken, targetPlayer.playerToken)) {
-      return socket.emit('error_msg', "Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni durant ce tour, ni au tour suivant) !");
-    }
-
-    // Vérifie si l'attaquant est en alliance active ce tour
-    const isAlliedAttack = room.currentTurnAlliedTokens && room.currentTurnAlliedTokens.includes(attackerPlayer.playerToken);
-    let allyPlayer = null;
-    if (isAlliedAttack) {
-      const allyToken = room.currentTurnAlliedTokens.find(t => t !== attackerPlayer.playerToken);
-      if (allyToken && allyToken !== targetPlayer.playerToken) {
-        allyPlayer = room.players.find(p => p.playerToken === allyToken);
-      }
-    }
-
-    const attackerTokens = allyPlayer
-      ? [attackerPlayer.playerToken, allyPlayer.playerToken]
-      : [attackerPlayer.playerToken];
-
-    const attackerDisplayNames = allyPlayer
-      ? `${attackerPlayer.caidName} & ${allyPlayer.caidName}`
-      : (attackerCaid || attackerPlayer.caidName || "Attaquant");
-
-    const statsByToken = {};
-    statsByToken[attackerPlayer.playerToken] = attackerPlayer.atk || 1;
-    if (allyPlayer) statsByToken[allyPlayer.playerToken] = allyPlayer.atk || 1;
-
-    const combinedMuscles = (attackerPlayer.musclesCount || 0) + (allyPlayer ? (allyPlayer.musclesCount || 0) : 0);
-
-    room.activeCombat = {
-      phase: 1, // 1 = Assaut initial, 2 = Contre-attaque (Riposte)
-      isAlliedAttack: !!allyPlayer,
-      initialAttackerTokens: attackerTokens.slice(),
-      initialDefenderToken: targetPlayer.playerToken,
-      attackerTokens: attackerTokens,
-      defenderToken: targetPlayer.playerToken,
-      attackerCaid: attackerDisplayNames,
-      targetCaid: targetPlayer.caidName || "Défenseur",
-      statsByToken: statsByToken,
-      readyByToken: {},
-      targetDef: targetPlayer.def || 0
-    };
-
-    // Ouvre la modale chez le(s) attaquant(s)
-    attackerTokens.forEach(tok => {
-      const p = room.players.find(x => x.playerToken === tok);
-      if (p) {
-        io.to(p.socketId).emit('combat_duel_opened', {
-          phase: 1,
-          role: 'attacker',
-          isAlliedAttack: !!allyPlayer,
-          allyCaid: allyPlayer ? (tok === attackerPlayer.playerToken ? allyPlayer.caidName : attackerPlayer.caidName) : null,
-          allyAtk: allyPlayer ? (tok === attackerPlayer.playerToken ? (allyPlayer.atk || 1) : (attackerPlayer.atk || 1)) : 0,
-          opponentCaid: room.activeCombat.targetCaid,
-          opponentSocketId: targetPlayer.socketId,
-          targetMusclesCount: targetPlayer.musclesCount || 0,
-          targetHasProstitute: !!targetPlayer.hasProstituteInTransit,
-          targetHasStrayDog: !!targetPlayer.hasStrayDog
-        });
-      }
-    });
+  socket.on('start_combat_engagement', ...)
 
     // Ouvre la modale chez le défenseur
     io.to(targetPlayer.socketId).emit('combat_duel_opened', {
