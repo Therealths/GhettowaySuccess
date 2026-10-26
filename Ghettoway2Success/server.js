@@ -342,7 +342,6 @@ io.on('connection', (socket) => {
     const activePlayer = room.players[room.currentTurnIndex];
     if (!activePlayer || activePlayer.socketId !== socket.id) return;
 
-    // Décrémente les pactes de non-agression (valables pour le tour de l'alliance + le tour suivant)
     if (room.nonAggressionPacts && room.nonAggressionPacts.length > 0) {
       room.nonAggressionPacts.forEach(p => { p.remainingTurns -= 1; });
       room.nonAggressionPacts = room.nonAggressionPacts.filter(p => p.remainingTurns > 0);
@@ -403,12 +402,77 @@ io.on('connection', (socket) => {
   });
 
   // =========================================================================
-  // COMBAT DE RUE EN 2 PHASES (ASSAUT INITIAL -> CONTRE-ATTAQUE / RIPOSTE)
-  // Supporte le combat solo (1v1) et le combat en alliance (2v1)
+  // COMBAT DE RUE EN 2 PHASES (ASSAUT -> RIPOSTE) + CHOIX COORDONNÉ OU SOLO
   // =========================================================================
-  socket.on('start_combat_engagement', ...)
+  socket.on('start_combat_engagement', ({ targetPlayerToken, targetSocketId, attackerCaid, useAlliance }) => {
+    const room = rooms[socket.roomId];
+    if (!room) return;
 
-    // Ouvre la modale chez le défenseur
+    let targetPlayer = room.players.find(p => p.playerToken === targetPlayerToken);
+    if (!targetPlayer) targetPlayer = room.players.find(p => p.socketId === targetSocketId);
+    const attackerPlayer = room.players.find(p => p.socketId === socket.id);
+
+    if (!targetPlayer || !attackerPlayer) return;
+
+    if (arePlayersInNonAggressionPact(room, attackerPlayer.playerToken, targetPlayer.playerToken)) {
+      return socket.emit('error_msg', "Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni durant ce tour, ni au tour suivant) !");
+    }
+
+    const canCoordinate = useAlliance === true && room.currentTurnAlliedTokens && room.currentTurnAlliedTokens.includes(attackerPlayer.playerToken);
+    let allyPlayer = null;
+    if (canCoordinate) {
+      const allyToken = room.currentTurnAlliedTokens.find(t => t !== attackerPlayer.playerToken);
+      if (allyToken && allyToken !== targetPlayer.playerToken) {
+        allyPlayer = room.players.find(p => p.playerToken === allyToken);
+      }
+    }
+
+    const attackerTokens = allyPlayer
+      ? [attackerPlayer.playerToken, allyPlayer.playerToken]
+      : [attackerPlayer.playerToken];
+
+    const attackerDisplayNames = allyPlayer
+      ? `${attackerPlayer.caidName} & ${allyPlayer.caidName}`
+      : (attackerCaid || attackerPlayer.caidName || "Attaquant");
+
+    const statsByToken = {};
+    statsByToken[attackerPlayer.playerToken] = attackerPlayer.atk || 1;
+    if (allyPlayer) statsByToken[allyPlayer.playerToken] = allyPlayer.atk || 1;
+
+    const combinedMuscles = (attackerPlayer.musclesCount || 0) + (allyPlayer ? (allyPlayer.musclesCount || 0) : 0);
+
+    room.activeCombat = {
+      phase: 1,
+      isAlliedAttack: !!allyPlayer,
+      initialAttackerTokens: attackerTokens.slice(),
+      initialDefenderToken: targetPlayer.playerToken,
+      attackerTokens: attackerTokens,
+      defenderToken: targetPlayer.playerToken,
+      attackerCaid: attackerDisplayNames,
+      targetCaid: targetPlayer.caidName || "Défenseur",
+      statsByToken: statsByToken,
+      readyByToken: {},
+      targetDef: targetPlayer.def || 0
+    };
+
+    attackerTokens.forEach(tok => {
+      const p = room.players.find(x => x.playerToken === tok);
+      if (p) {
+        io.to(p.socketId).emit('combat_duel_opened', {
+          phase: 1,
+          role: 'attacker',
+          isAlliedAttack: !!allyPlayer,
+          allyCaid: allyPlayer ? (tok === attackerPlayer.playerToken ? allyPlayer.caidName : attackerPlayer.caidName) : null,
+          allyAtk: allyPlayer ? (tok === attackerPlayer.playerToken ? (allyPlayer.atk || 1) : (attackerPlayer.atk || 1)) : 0,
+          opponentCaid: room.activeCombat.targetCaid,
+          opponentSocketId: targetPlayer.socketId,
+          targetMusclesCount: targetPlayer.musclesCount || 0,
+          targetHasProstitute: !!targetPlayer.hasProstituteInTransit,
+          targetHasStrayDog: !!targetPlayer.hasStrayDog
+        });
+      }
+    });
+
     io.to(targetPlayer.socketId).emit('combat_duel_opened', {
       phase: 1,
       role: 'defender',
@@ -438,7 +502,6 @@ io.on('connection', (socket) => {
       combat.targetDef = newTotalStat;
     }
 
-    // Réinitialise les validations "Prêt"
     combat.readyByToken = {};
 
     const involvedTokens = [...combat.attackerTokens, combat.defenderToken];
@@ -482,19 +545,15 @@ io.on('connection', (socket) => {
     const allReady = involvedTokens.every(tok => !!combat.readyByToken[tok]);
     if (!allReady) return;
 
-    // Calcul du total d'Attaque cumulée des attaquants
     const totalAtk = combat.attackerTokens.reduce((sum, tok) => sum + (combat.statsByToken[tok] || 1), 0);
     const totalDef = combat.targetDef || 0;
     const dmgNet = totalAtk - totalDef;
 
     if (combat.phase === 1) {
       if (dmgNet > 0) {
-        // VICTOIRE DE L'ATTAQUANT (OU DU DUO ALLIÉ) EN PHASE 1
         concludeCombatWithWinner(room, socket.roomId, combat.attackerTokens, combat.defenderToken, dmgNet, combat.isAlliedAttack);
       } else {
-        // L'ASSAUT INITIAL ÉCHOUE -> PASSAGE EN PHASE 2 (CONTRE-ATTAQUE DU DÉFENSEUR)
         if (combat.attackerTokens.length > 1) {
-          // Attaque à 2 en alliance : le défenseur choisit lequel des 2 alliés il cible pour sa riposte
           const defenderP = room.players.find(p => p.playerToken === combat.defenderToken);
           const targetsList = combat.attackerTokens.map(tok => {
             const p = room.players.find(x => x.playerToken === tok);
@@ -514,17 +573,13 @@ io.on('connection', (socket) => {
             });
           }
         } else {
-          // 1v1 : inversion immédiate des rôles pour la Phase 2 (Contre-attaque)
           startCombatPhase2Riposte(room, combat.defenderToken, combat.attackerTokens[0]);
         }
       }
     } else {
-      // PHASE 2 : RÉSULTAT DE LA CONTRE-ATTAQUE (RIPOSTE)
       if (dmgNet > 0) {
-        // Le contre-attaquant réussit sa riposte !
         concludeCombatWithWinner(room, socket.roomId, combat.attackerTokens, combat.defenderToken, dmgNet, false);
       } else {
-        // La contre-attaque échoue aussi -> MATCH NUL !
         involvedTokens.forEach(tok => {
           const p = room.players.find(x => x.playerToken === tok);
           if (p) {
@@ -538,7 +593,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Choix de la cible de riposte par le défenseur lorsqu'il a repoussé 2 alliés
   socket.on('combat_select_riposte_target', ({ chosenTargetToken }) => {
     const room = rooms[socket.roomId];
     if (!room || !room.activeCombat) return;
@@ -598,10 +652,8 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Le perdant perd 1 Cœur de Vie
     loserP.hearts = Math.max(0, (loserP.hearts || 1) - 1);
 
-    // Prépare les données de pillage (100% de ce que le perdant a sur lui)
     room.pendingPillage = {
       winnerTokens: winnerTokens.slice(),
       loserToken: loserP.playerToken,
@@ -617,14 +669,12 @@ io.on('connection', (socket) => {
       .map(t => room.players.find(p => p.playerToken === t)?.caidName || 'Vainqueur')
       .join(' & ');
 
-    // Informe le perdant
     io.to(loserP.socketId).emit('combat_finished_result', {
       outcome: 'loser',
       dmgNet,
       opponentCaid: winnerNames
     });
 
-    // Informe le(s) vainqueur(s) et ouvre la fenêtre de pillage chez le vainqueur principal
     const primaryWinnerToken = winnerTokens[0];
     winnerTokens.forEach(tok => {
       const wP = room.players.find(p => p.playerToken === tok);
@@ -641,7 +691,6 @@ io.on('connection', (socket) => {
     room.activeCombat = null;
   }
 
-  // Exécution du pillage choisi par le vainqueur (100% Cash, 100% Drogue ou Prostituée)
   socket.on('execute_pillage_choice', ({ category, recipientToken }) => {
     const room = rooms[socket.roomId];
     if (!room || !room.pendingPillage) return;
@@ -899,7 +948,6 @@ io.on('connection', (socket) => {
         room.currentTurnAlliedTokens.push(sender.playerToken);
       }
 
-      // Enregistre le Pacte de Non-Agression pour ce tour + le tour suivant (remainingTurns = 2)
       room.nonAggressionPacts = room.nonAggressionPacts.filter(
         p => !(p.tokens.includes(responder.playerToken) && p.tokens.includes(sender.playerToken))
       );
