@@ -816,8 +816,8 @@
     ];
 
     let SPORTCLUB_CATALOG = [
-      { id: "gb_lvl1", categorie: "lascar", slot: "MUSCLE", lvl: 1, nom: "Lascar Niv. 1", prix: 1500, atk: 1, bonusVal: 1, bonusLabel: "+1 Attaque", image: "gblvl1.jpg", desc: "Homme de main solide pour épauler ton Caïd." },
-      { id: "gb_lvl2", categorie: "lascar", slot: "MUSCLE", lvl: 2, nom: "Lascar Niv. 2", prix: 3000, atk: 2, bonusVal: 2, bonusLabel: "+2 Attaque", image: "gblvl2.jpg", desc: "Gros bras surentraîné à la salle de sport." }
+      { id: "gb_lvl1", categorie: "lascar", slot: "MUSCLE", lvl: 1, nom: "Lascar Niv. 1", prix: 1500, atk: 1, def: 1, bonusVal: 1, bonusLabel: "+1 Atk / +1 Def", image: "gblvl1.jpg", desc: "Homme de main solide (+1 Attaque et +1 Défense)." },
+      { id: "gb_lvl2", categorie: "lascar", slot: "MUSCLE", lvl: 2, nom: "Lascar Niv. 2", prix: 3000, atk: 2, def: 2, bonusVal: 2, bonusLabel: "+2 Atk / +2 Def", image: "gblvl2.jpg", desc: "Gros bras surentraîné (+2 Attaque et +2 Défense)." }
     ];
 
     let DEALER_CATALOG = [
@@ -2340,9 +2340,13 @@
       return Math.max(0, atk);
     }
 
-    function getTotalDef() {
+        function getTotalDef() {
       let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0);
       if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
+      const multM = combatModifiers.doubleMuscles ? 2 : 1;
+      localPlayer.musclesOnPerson.forEach(m => {
+        def += ((m.bonusVal || 1) * multM);
+      });
       if (localPlayer.strayDogActive) def += 2;
       return Math.max(0, def);
     }
