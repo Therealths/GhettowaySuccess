@@ -3,7 +3,7 @@
 // Lascars donnent Attaque ET Défense
 function getTotalAtk() {
   let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
-  if (localPlayer.equipped.weapon) atk += (localPlayer.equipped.weapon.bonusVal * (combatModifiers.doubleWeapon ? 2 : 1));
+  if (localPlayer.equipped.weapon && !myWeaponNullified) atk += (localPlayer.equipped.weapon.bonusVal * (combatModifiers.doubleWeapon ? 2 : 1));
   const multM = combatModifiers.doubleMuscles ? 2 : 1;
   const radioLascarBonus = isRadioEffectActive('LASCAR_ATK_BONUS') ? getRadioEffectValue('LASCAR_ATK_BONUS', 1) : 0;
   localPlayer.musclesOnPerson.forEach(m => {
@@ -288,7 +288,8 @@ function refreshHud() {
       musclesCount: localPlayer.musclesOnPerson.length,
       hasProstituteInTransit: !!localPlayer.prostituteInTransit,
       prostituteObj: localPlayer.prostituteInTransit,
-      hasStrayDog: !!localPlayer.strayDogActive
+      hasStrayDog: !!localPlayer.strayDogActive,
+      nullEnemyWeapon: !!combatModifiers.nullEnemyWeapon
     });
   }
 }
@@ -374,7 +375,8 @@ async function useItem(idx) {
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
     localPlayer.inventory.splice(idx, 1);
     refreshHud();
-    await showAppAlert(`${it.name} activé jusqu'à la fin du tour en cours ! Vos statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
+    const lasts = (it.eff === 'double_weapon_atk' || it.eff === 'null_enemy_weapon') ? 'pour votre prochain combat de ce tour' : "jusqu'à la fin du tour en cours";
+    await showAppAlert(`${it.name} activé ${lasts} ! Vos statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
     return;
   }
   localPlayer.inventory.splice(idx, 1);

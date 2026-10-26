@@ -85,6 +85,14 @@ function choosePillageReward(category, recipientToken = null) {
 function resetCombatModifiers() {
   combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
 }
+// Fin d'un combat : Balle perforante et Couvercle de poubelle ne valent que pour un seul combat
+// (le Pot de Protéine reste actif jusqu'à la fin du tour)
+function endSingleCombatEffects() {
+  combatModifiers.doubleWeapon = false;
+  combatModifiers.nullEnemyWeapon = false;
+  myWeaponNullified = false;
+  refreshHud();
+}
 function isFirearm(weaponObj) {
   if (!weaponObj) return false;
   if (typeof weaponObj === 'object' && weaponObj.isFirearm !== undefined) {

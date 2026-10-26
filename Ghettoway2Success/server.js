@@ -118,6 +118,12 @@ function broadcastTurnState(roomId) {
   });
 }
 
+// Couvercle de poubelle : l'arme d'un combattant compte pour 0 si un de ses adversaires a l'effet actif
+function isWeaponNullifiedFor(room, combat, token) {
+  const opponents = combat.attackerTokens.includes(token) ? [combat.defenderToken] : combat.attackerTokens;
+  return opponents.some(t => room.players.find(p => p.playerToken === t)?.nullEnemyWeapon);
+}
+
 function openLootShareSession(room, roomId, sessionData) {
   room.activeLootSplit = {
     sourceType: sessionData.sourceType, // 'heist' | 'combat'
@@ -537,7 +543,8 @@ io.on('connection', (socket) => {
           opponentSocketId: targetPlayer.socketId,
           targetMusclesCount: targetPlayer.musclesCount || 0,
           targetHasProstitute: !!targetPlayer.hasProstituteInTransit,
-          targetHasStrayDog: !!targetPlayer.hasStrayDog
+          targetHasStrayDog: !!targetPlayer.hasStrayDog,
+          weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, tok)
         });
       }
     });
@@ -552,7 +559,8 @@ io.on('connection', (socket) => {
       opponentSocketId: attackerPlayer.socketId,
       targetMusclesCount: combinedMuscles,
       targetHasProstitute: !!attackerPlayer.hasProstituteInTransit,
-      targetHasStrayDog: !!(attackerPlayer.hasStrayDog || (allyPlayer && allyPlayer.hasStrayDog))
+      targetHasStrayDog: !!(attackerPlayer.hasStrayDog || (allyPlayer && allyPlayer.hasStrayDog)),
+      weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, targetPlayer.playerToken)
     });
   });
 
@@ -582,6 +590,9 @@ io.on('connection', (socket) => {
           senderCaid: actor.caidName || 'Un combattant',
           itemNames
         });
+        if (actor.nullEnemyWeapon && isWeaponNullifiedFor(room, combat, p.playerToken)) {
+          io.to(p.socketId).emit('combat_weapon_nullified', { byCaid: actor.caidName || 'Votre adversaire' });
+        }
       }
       io.to(p.socketId).emit('combat_ready_state_reset');
     });
@@ -704,13 +715,15 @@ io.on('connection', (socket) => {
     io.to(newAttacker.socketId).emit('combat_phase2_started', {
       role: 'attacker',
       opponentCaid: newDefender.caidName,
-      myStat: newAttacker.atk || 1
+      myStat: newAttacker.atk || 1,
+      weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, newAttackerToken)
     });
 
     io.to(newDefender.socketId).emit('combat_phase2_started', {
       role: 'defender',
       opponentCaid: newAttacker.caidName,
-      myStat: newDefender.def || 0
+      myStat: newDefender.def || 0,
+      weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, newDefenderToken)
     });
   }
 

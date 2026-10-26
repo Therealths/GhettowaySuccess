@@ -143,7 +143,7 @@ if (socket) {
     renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
     if (activePlayerToken === myPlayerToken && lastActivePlayerToken !== myPlayerToken) notifyMyTurn(round);
     // Pot de Protéine, Balle perforante... : effets valables jusqu'à la fin du tour en cours
-    if (activePlayerToken !== lastActivePlayerToken) { resetCombatModifiers(); refreshHud(); }
+    if (activePlayerToken !== lastActivePlayerToken) { resetCombatModifiers(); myWeaponNullified = false; refreshHud(); }
     lastActivePlayerToken = activePlayerToken;
     activeTurnPlayerToken = activePlayerToken;
     const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
@@ -164,7 +164,8 @@ if (socket) {
   });
 
   // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---
-  socket.on('combat_duel_opened', async ({ phase, role, isAlliedAttack, allyCaid, allyAtk, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog }) => {
+  socket.on('combat_duel_opened', async ({ phase, role, isAlliedAttack, allyCaid, allyAtk, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog, weaponNullified }) => {
+    myWeaponNullified = !!weaponNullified;
     currentDuelInfo = { phase: phase || 1, role, isAlliedAttack, allyCaid, allyAtk: allyAtk || 0, opponentCaid, opponentSocketId };
     isCombatReady = false;
     document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-sword"></i> Phase 1 : Assaut Initial`;
@@ -175,7 +176,8 @@ if (socket) {
     document.getElementById('combatOpponentNameDisplay').innerText = opponentCaid;
     document.getElementById('combatOpponentForcesBar').innerText = `Lascars : ${targetMusclesCount || 0} | Escort : ${targetHasProstitute ? 'Oui' : 'Non'} | Chien : ${targetHasStrayDog ? 'Oui' : 'Non'}`;
     const allyNote = (isAlliedAttack && allyCaid) ? ` (Coordonné avec ${allyCaid})` : '';
-    document.getElementById('combatLiveLog').innerHTML = `<p class="text-amber-300 font-bold">⚡ Phase 1 : Duel engagé contre ${opponentCaid}${allyNote} ! Jouez vos objets ou cliquez sur Prêt.</p>`;
+    document.getElementById('combatLiveLog').innerHTML = `<p class="text-amber-300 font-bold">⚡ Phase 1 : Duel engagé contre ${opponentCaid}${allyNote} ! Jouez vos objets ou cliquez sur Prêt.</p>`
+      + (myWeaponNullified ? `<p class="text-rose-300 font-bold">🗑️ Couvercle de poubelle adverse : votre arme compte pour 0 dans ce combat !</p>` : '');
     document.getElementById('btnToggleCombatReady').classList.remove('hidden');
     updateCombatReadyButtonUI();
     updateArenaLiveStats();
@@ -196,7 +198,16 @@ if (socket) {
       }
     }
   });
+  socket.on('combat_weapon_nullified', async ({ byCaid }) => {
+    myWeaponNullified = true;
+    updateArenaLiveStats();
+    const log = document.getElementById('combatLiveLog');
+    log.innerHTML += `<p class="text-rose-300 font-bold">🗑️ ${byCaid} a sorti un Couvercle de poubelle : votre arme compte pour 0 !</p>`;
+    log.scrollTop = log.scrollHeight;
+    await showAppAlert(`${byCaid} se protège avec un Couvercle de poubelle : votre arme compte pour 0 dans ce combat !`, "🗑️ Arme Neutralisée");
+  });
   socket.on('combat_cancelled_by_prayer', async ({ caidName }) => {
+    endSingleCombatEffects();
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
@@ -224,13 +235,15 @@ if (socket) {
   });
 
   socket.on('combat_not_targeted_by_riposte', async ({ defenderCaid, chosenCaid }) => {
+    endSingleCombatEffects();
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
     await showAppAlert(`${defenderCaid} a repoussé votre assaut et a choisi de cibler ${chosenCaid} pour sa contre-attaque !`, "🛡️ Riposte Adverse");
   });
 
-  socket.on('combat_phase2_started', async ({ role, opponentCaid }) => {
+  socket.on('combat_phase2_started', async ({ role, opponentCaid, weaponNullified }) => {
+    myWeaponNullified = !!weaponNullified;
     closeModal('modalChooseRiposteTarget');
     currentDuelInfo = { phase: 2, role, isAlliedAttack: false, allyCaid: null, allyAtk: 0, opponentCaid };
     isCombatReady = false;
@@ -241,6 +254,7 @@ if (socket) {
     const log = document.getElementById('combatLiveLog');
     if (role === 'attacker') {
       log.innerHTML += `<p class="text-emerald-300 font-bold">🔄 Phase 2 : Vous passez à l'Attaque pour riposter contre ${opponentCaid} ! Cliquez sur Prêt.</p>`;
+      if (myWeaponNullified) log.innerHTML += `<p class="text-rose-300 font-bold">🗑️ Couvercle de poubelle adverse : votre arme compte pour 0 dans ce combat !</p>`;
     } else {
       log.innerHTML += `<p class="text-rose-300 font-bold">🔄 Phase 2 : Votre assaut a échoué ! ${opponentCaid} passe à la Contre-Attaque contre votre Défense !</p>`;
     }
@@ -263,6 +277,7 @@ if (socket) {
   socket.on('combat_ready_state_reset', () => { isCombatReady = false; updateCombatReadyButtonUI(); });
 
   socket.on('combat_finished_draw', async ({ message }) => {
+    endSingleCombatEffects();
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
@@ -271,6 +286,7 @@ if (socket) {
   });
 
   socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }) => {
+    endSingleCombatEffects();
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
@@ -323,6 +339,7 @@ if (socket) {
   });
 
   socket.on('combat_aborted', async () => {
+    endSingleCombatEffects();
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     closeModal('modalChooseRiposteTarget');

@@ -83,6 +83,7 @@ let grossisteUnitCost = 1000;
 let combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
 let currentDuelInfo = null;
 let isCombatReady = false;
+let myWeaponNullified = false; // Couvercle de poubelle adverse : mon arme compte pour 0 dans ce combat
 
 function isRivalProtectedByPact(rivalToken) {
   if (!rivalToken || !nonAggressionPacts || !nonAggressionPacts.length) return false;
