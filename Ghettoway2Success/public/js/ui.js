@@ -1,5 +1,10 @@
 // Fenêtres système (alertes, confirmations), navigation entre écrans
 
+// PWA : active l'installation sur l'écran d'accueil (voir sw.js)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+
 // --- MODALES SYSTÈME ---
 function showAppAlert(msg, title = "Information") {
   return new Promise(res => {
