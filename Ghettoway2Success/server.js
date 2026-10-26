@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -11,33 +12,63 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
-const RADIO_EVENTS = [
+let RADIO_EVENTS = [
   {
+    id: "rad_police_raid",
     title: "Descente de Police massive",
     impact: "Police +2 cases en phase 3",
-    desc: "La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds."
+    desc: "La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds.",
+    effectType: "PATROL_DICE_BONUS",
+    effectVal: 2
   },
   {
+    id: "rad_drug_shortage",
     title: "Pénurie dans la cité",
     impact: "Yencli +1 500 € ce tour",
-    desc: "Le cours du deal explose : tous les contrats Yencli rapportent +1 500 € ce tour."
+    desc: "Le cours du deal explose : tous les contrats Yencli rapportent +1 500 € ce tour.",
+    effectType: "YENCLI_CASH_BONUS",
+    effectVal: 1500
   },
   {
+    id: "rad_heatwave",
     title: "Canicule Urbaine",
     impact: "Véhicules motorisés -2 PM",
-    desc: "Chaleur étouffante : les véhicules motorisés perdent -2 PM pour toute cette manche."
+    desc: "Chaleur étouffante : les véhicules motorisés perdent -2 PM pour toute cette manche.",
+    effectType: "MOTOR_PM_MOD",
+    effectVal: -2
   },
   {
+    id: "rad_gang_war",
     title: "Guerre des Gangs",
     impact: "-30% sur toutes les armes",
-    desc: "L'Armurerie liquide ses stocks : -30% sur tous les équipements offensifs ce tour."
+    desc: "L'Armurerie liquide ses stocks : -30% sur tous les équipements offensifs ce tour.",
+    effectType: "WEAPON_PRICE_MULT",
+    effectVal: 0.7
   },
   {
+    id: "rad_lake_fog",
     title: "Brouillard sur Le Lac",
     impact: "Le Lac infranchissable ce tour",
-    desc: "Le terrain marécageux est totalement infranchissable pour l'ensemble des Caïds ce tour-ci."
+    desc: "Le terrain marécageux est totalement infranchissable pour l'ensemble des Caïds ce tour-ci.",
+    effectType: "BOARD_RULE_ONLY",
+    effectVal: 0
   }
 ];
+
+// Chargement dynamique de public/radio_events.json
+try {
+  const radioFilePath = path.join(__dirname, 'public', 'radio_events.json');
+  if (fs.existsSync(radioFilePath)) {
+    const rawRadio = fs.readFileSync(radioFilePath, 'utf8');
+    const parsedRadio = JSON.parse(rawRadio);
+    if (parsedRadio && Array.isArray(parsedRadio.radio_events) && parsedRadio.radio_events.length > 0) {
+      RADIO_EVENTS = parsedRadio.radio_events;
+      console.log(`${RADIO_EVENTS.length} cartes Flash Radio chargées depuis radio_events.json`);
+    }
+  }
+} catch (err) {
+  console.warn("Impossible de lire public/radio_events.json, utilisation des événements par défaut.", err);
+}
 
 function checkRoomReady(room) {
   if (!room || room.players.length < 2) return false;
@@ -301,7 +332,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Chien Errant : le dernier qui siffle vole le chien
   socket.on('claim_stray_dog', ({ senderCaid, playerToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
@@ -331,7 +361,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Combat : duel engagé
   socket.on('start_combat_engagement', ({ targetPlayerToken, targetSocketId, attackerCaid }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
