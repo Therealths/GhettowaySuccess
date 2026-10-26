@@ -47,11 +47,6 @@ function getTotalPm() {
   return Math.max(1, pm);
 }
 
-function cyclePlayerHearts() {
-  if (!isMyTurnToPlay) return;
-  localPlayer.hearts = localPlayer.hearts <= 1 ? 3 : localPlayer.hearts - 1;
-  refreshHud();
-}
 async function clickMuscleSlot(idx) {
   if (!isMyTurnToPlay || !localPlayer.musclesOnPerson[idx]) return;
   const item = localPlayer.musclesOnPerson[idx];
