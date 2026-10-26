@@ -12,6 +12,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
+// Change à chaque redémarrage (donc à chaque déploiement) : les clients avec une ancienne page se rechargent
+const APP_VERSION = Date.now().toString(36);
+
 let RADIO_EVENTS = [
   {
     id: "rad_police_raid",
@@ -117,6 +120,7 @@ function openLootShareSession(room, roomId, sessionData) {
 }
 
 io.on('connection', (socket) => {
+  socket.emit('app_version', APP_VERSION);
   socket.emit('rooms_list', getAvailableRooms());
 
   socket.on('reconnect_player', ({ roomId, playerToken }) => {

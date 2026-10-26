@@ -1493,6 +1493,12 @@
 
     const socket = typeof io !== 'undefined' ? io() : null;
     if (socket) {
+      // Nouveau déploiement détecté : on recharge pour récupérer la dernière version de l'app
+      let loadedAppVersion = null;
+      socket.on('app_version', (v) => {
+        if (loadedAppVersion && loadedAppVersion !== v) location.reload();
+        else loadedAppVersion = v;
+      });
       socket.on('connect', () => {
         const savedRoomId = localStorage.getItem('g2s_room_id');
         if (savedRoomId) socket.emit('reconnect_player', { roomId: savedRoomId, playerToken: myPlayerToken });
