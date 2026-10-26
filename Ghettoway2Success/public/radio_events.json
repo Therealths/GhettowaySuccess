@@ -1,0 +1,100 @@
+{
+  "radio_events": [
+    {
+      "id": "rad_police_raid",
+      "title": "Descente de Police massive",
+      "impact": "Police +2 cases en phase 3",
+      "desc": "La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds.",
+      "effectType": "PATROL_DICE_BONUS",
+      "effectVal": 2
+    },
+    {
+      "id": "rad_drug_shortage",
+      "title": "Pénurie dans la cité",
+      "impact": "Yencli +1 500 € ce tour",
+      "desc": "Le cours du deal explose : tous les contrats Yencli rapportent +1 500 € ce tour.",
+      "effectType": "YENCLI_CASH_BONUS",
+      "effectVal": 1500
+    },
+    {
+      "id": "rad_heatwave",
+      "title": "Canicule Urbaine",
+      "impact": "Véhicules motorisés -2 PM",
+      "desc": "Chaleur étouffante : les véhicules motorisés perdent -2 PM pour toute cette manche.",
+      "effectType": "MOTOR_PM_MOD",
+      "effectVal": -2
+    },
+    {
+      "id": "rad_gang_war",
+      "title": "Guerre des Gangs",
+      "impact": "-30% sur toutes les armes",
+      "desc": "L'Armurerie liquide ses stocks : -30% sur tous les équipements offensifs ce tour.",
+      "effectType": "WEAPON_PRICE_MULT",
+      "effectVal": 0.7
+    },
+    {
+      "id": "rad_lake_fog",
+      "title": "Brouillard sur Le Lac",
+      "impact": "Le Lac infranchissable ce tour",
+      "desc": "Le terrain marécageux est totalement infranchissable pour l'ensemble des Caïds ce tour-ci.",
+      "effectType": "BOARD_RULE_ONLY",
+      "effectVal": 0
+    },
+    {
+      "id": "rad_police_strike",
+      "title": "Grève au Commissariat",
+      "impact": "Patrouille immobile ce tour",
+      "desc": "Les syndicats de police bloquent le poste : la patrouille ne se déplace pas en fin de tour.",
+      "effectType": "PATROL_FREEZE",
+      "effectVal": 0
+    },
+    {
+      "id": "rad_customs_seizure",
+      "title": "Saisie record aux Douanes",
+      "impact": "Grossiste à 1 500 € / kg",
+      "desc": "Les arrivages sont bloqués à la frontière : le tarif du Grossiste passe à 1 500 € / kg ce tour.",
+      "effectType": "GROSSISTE_PRICE_SET",
+      "effectVal": 1500
+    },
+    {
+      "id": "rad_vip_party",
+      "title": "Soirée VIP au Nightclub",
+      "impact": "Rente Prostituées doublée",
+      "desc": "Affluence record dans le quartier : les prostituées installées au QG rapportent double ce tour.",
+      "effectType": "PROSTITUTE_REV_MULT",
+      "effectVal": 2
+    },
+    {
+      "id": "rad_mma_tournament",
+      "title": "Tournoi clandestin au Sportclub",
+      "impact": "Lascars +1 Attaque ce tour",
+      "desc": "Les gros bras sont chauffés à blanc : chaque Lascar recruté confère +1 Attaque supplémentaire ce tour.",
+      "effectType": "LASCAR_ATK_BONUS",
+      "effectVal": 1
+    },
+    {
+      "id": "rad_armored_truck",
+      "title": "Panne de Fourgon Blindé",
+      "impact": "Braquages +2 000 € ce tour",
+      "desc": "La sécurité est débordée : tous les braquages réussis rapportent un bonus de +2 000 € durant cette manche.",
+      "effectType": "HEIST_CASH_BONUS",
+      "effectVal": 2000
+    },
+    {
+      "id": "rad_curfew",
+      "title": "Couvre-Feu Préfectoral",
+      "impact": "-2 PM à pied ce tour",
+      "desc": "Contrôles renforcés dans les rues : tous les Caïds se déplaçant à pied subissent -2 PM pour cette manche.",
+      "effectType": "FOOT_PM_MOD",
+      "effectVal": -2
+    },
+    {
+      "id": "rad_black_market",
+      "title": "Cargaison tombée du camion",
+      "impact": "-50% sur les Protections",
+      "desc": "Un stock de matériel défensif inonde le marché noir : -50% sur tous les équipements de protection à l'Armurerie.",
+      "effectType": "ARMOR_PRICE_MULT",
+      "effectVal": 0.5
+    }
+  ]
+}
