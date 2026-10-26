@@ -309,12 +309,19 @@ async function startRoundPhase1() {
     const vipNote = revMult > 1 ? ` (Soirée VIP x${revMult} !)` : '';
     await showAppAlert(`+${income.toLocaleString()} € versés au coffre par vos prostituées${vipNote}.`, "💰 Rente QG perçue");
   }
+  refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');
 }
 function acknowledgeRadioCard() { navTo('page-6'); }
 
 function endCurrentPlayerTurn() {
   if (!isMyTurnToPlay) return;
+  // Allié qui joue pendant le tour d'un autre : il termine sa participation, le joueur actif garde la main (et lance le dé de patrouille)
+  if (activeTurnPlayerToken && activeTurnPlayerToken !== myPlayerToken) {
+    if (socket) socket.emit('end_allied_turn');
+    showAppAlert("Votre participation à ce tour est terminée.\nVous rejouerez à la manche suivante.", "🤝 Fin de votre tour");
+    return;
+  }
   document.getElementById('modalPatrolDice').classList.remove('hidden');
   document.getElementById('patrolDiceVisual').innerText = '?';
   document.getElementById('patrolDiceMoveLabel').innerText = 'Le dé roule...';

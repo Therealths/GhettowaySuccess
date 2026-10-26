@@ -25,7 +25,15 @@ function getTotalDef() {
   return Math.max(0, def);
 }
 
+// Une action (attaque, Yencli, braquage, achat, objet ramassé) coûte 2 PM : simple décompte affiché, rien n'est bloqué
+function spendActionPm() {
+  pmSpentThisTurn += 2;
+  refreshHud();
+}
+
 function getTotalPm() {
+  // Malus Burger Queen : démarrage poussif, 0 PM pendant la manche 1
+  if (localPlayer.caidId === 'caid_1' && currentSession.round === 1) return 0;
   const eqVeh = localPlayer.equipped.vehicle;
   let pm = 8 + (eqVeh ? eqVeh.bonusVal : 0);
   if (eqVeh) {
@@ -211,7 +219,11 @@ function refreshHud() {
   document.getElementById('hudHearts').innerText = heartsStr;
   document.getElementById('hudAtk').innerText = getTotalAtk();
   document.getElementById('hudDef').innerText = getTotalDef();
-  document.getElementById('hudCurrentPm').innerText = getTotalPm();
+  // Aide-mémoire : PM restants après les actions du tour (2 PM par action, à décompter aussi sur le plateau)
+  document.getElementById('hudCurrentPm').innerText = Math.max(0, getTotalPm() - pmSpentThisTurn);
+  const pmNote = document.getElementById('hudPmNote');
+  pmNote.innerText = pmSpentThisTurn > 0 ? `(−${pmSpentThisTurn})` : '';
+  pmNote.classList.toggle('hidden', pmSpentThisTurn <= 0);
   if (currentSession.currentRadioEvent) {
     document.getElementById('hudRadioRoundTag').innerText = currentSession.round;
     document.getElementById('hudRadioReminderTitle').innerText = currentSession.currentRadioEvent.title;

@@ -156,15 +156,15 @@ async function processQrPayload(payload) {
   if (type === 'obj') {
     if (data.eff === 'cash') {
       const v = data.val || 1000;
-      return openLootDiscoveryModal(data.n || "Cash", `+${v.toLocaleString()} €`, '<i class="ph-bold ph-coins text-emerald-300"></i>', "Récupérer", async () => { localPlayer.pocketCash += v; refreshHud(); });
+      return openLootDiscoveryModal(data.n || "Cash", `+${v.toLocaleString()} €`, '<i class="ph-bold ph-coins text-emerald-300"></i>', "Récupérer", async () => { localPlayer.pocketCash += v; spendActionPm(); });
     }
     if (data.eff === 'drug') {
       const v = data.val || 1;
-      return openLootDiscoveryModal(data.n || "Drogue", `+${v} kg`, '<i class="ph-bold ph-plant text-emerald-400"></i>', "Récupérer", async () => { localPlayer.drugs += v; refreshHud(); });
+      return openLootDiscoveryModal(data.n || "Drogue", `+${v} kg`, '<i class="ph-bold ph-plant text-emerald-400"></i>', "Récupérer", async () => { localPlayer.drugs += v; spendActionPm(); });
     }
     return openLootDiscoveryModal(data.n || "Objet", data.desc || "Objet spécial", '<i class="ph-bold ph-backpack text-ghetto-gold"></i>', "Ajouter au sac", async () => {
       localPlayer.inventory.push({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', name: data.n, eff: data.eff, val: data.val || 0, dur: data.dur || 'instant', desc: data.desc || "Objet" });
-      refreshHud();
+      spendActionPm();
     });
   }
 
@@ -189,6 +189,7 @@ async function processQrPayload(payload) {
     const totalGain = (data.c || 0) + radioBonus;
     localPlayer.drugs -= data.d;
     localPlayer.pocketCash += totalGain;
+    spendActionPm();
     const bonusTxt = radioBonus > 0 ? ` (dont +${radioBonus.toLocaleString()} € Bonus Radio !)` : '';
     await showAppAlert(`+${totalGain.toLocaleString()} € en poche !${bonusTxt}`, "🤝 Deal Yencli");
     refreshHud();
@@ -222,6 +223,7 @@ async function processQrPayload(payload) {
     const radioHeistBonus = isRadioEffectActive('HEIST_CASH_BONUS') ? getRadioEffectValue('HEIST_CASH_BONUS', 2000) : 0;
     const totalCash = (data.c || 0) + radioHeistBonus;
     const totalDrugs = data.d || 0;
+    spendActionPm();
 
     if (coordinateWithAlly && socket) {
       socket.emit('initiate_allied_heist_split', {

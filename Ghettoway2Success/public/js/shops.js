@@ -573,6 +573,7 @@ async function confirmGrossistePurchase() {
   if (localPlayer.pocketCash < cost) return showAppAlert("Cash en poche insuffisant !", "Fonds Insuffisants");
   localPlayer.pocketCash -= cost;
   localPlayer.drugs += kg;
+  spendActionPm();
   closeModal('modalGrossiste');
   await showAppAlert(`+${kg} kg de drogue achetés (-${cost.toLocaleString()} €).`, "🌿 Grossiste");
   refreshHud();
@@ -617,6 +618,7 @@ async function finalizePurchaseExecution(pData) {
   if (pData.markKitanoWeapon) {
     localPlayer.firstWeaponDoubled = true;
   }
+  spendActionPm();
   if (type === 'eq') {
     const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
     const bonus = data.atk || data.def || data.pm || 1;

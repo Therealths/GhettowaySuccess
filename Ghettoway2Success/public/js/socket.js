@@ -112,6 +112,9 @@ if (socket) {
       initCarouselDOM();
     }
   });
+  socket.on('ally_ended_turn', async ({ allyCaid }) => {
+    await showAppAlert(`${allyCaid || 'Votre allié'} a terminé sa participation à votre tour.\nVous continuez seul jusqu'à la fin de votre tour.`, "🤝 Fin de l'Alliance");
+  });
   socket.on('turn_skipped', async ({ allyCaid }) => {
     const withWho = allyCaid ? ` avec ${allyCaid}` : ' en alliance';
     await showAppAlert(`Votre tour est passé : vous avez déjà joué cette manche${withWho}.\n\nVous rejouerez à la manche suivante.`, "⏭️ Tour déjà joué");
@@ -140,12 +143,15 @@ if (socket) {
     renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
     if (activePlayerToken === myPlayerToken && lastActivePlayerToken !== myPlayerToken) notifyMyTurn(round);
     lastActivePlayerToken = activePlayerToken;
+    activeTurnPlayerToken = activePlayerToken;
     const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
     if (!isAlliedNow) {
       localPlayer.allianceActive = false;
       localPlayer.activeAlly = null;
     }
+    const wasMyTurn = isMyTurnToPlay;
     isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
+    if (isMyTurnToPlay && !wasMyTurn) { pmSpentThisTurn = 0; refreshHud(); }
     const blocker = document.getElementById('turnBlockerOverlay');
     if (isMyTurnToPlay) blocker.classList.add('hidden');
     else {

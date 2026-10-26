@@ -425,6 +425,22 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Un allié (qui joue pendant le tour d'un autre) termine sa participation : il ne peut plus agir ce tour
+  socket.on('end_allied_turn', () => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.gameStarted) return;
+    const ally = room.players.find(p => p.socketId === socket.id);
+    const activePlayer = getActivePlayer(room);
+    if (!ally || !activePlayer || ally.playerToken === activePlayer.playerToken) return;
+    if (!(room.currentTurnAlliedTokens || []).includes(ally.playerToken)) return;
+
+    room.playedThisRoundTokens = [...new Set([...(room.playedThisRoundTokens || []), ally.playerToken])];
+    room.currentTurnAlliedTokens = room.currentTurnAlliedTokens.filter(t => t !== ally.playerToken && t !== activePlayer.playerToken);
+
+    io.to(activePlayer.socketId).emit('ally_ended_turn', { allyCaid: ally.caidName });
+    broadcastTurnState(socket.roomId);
+  });
+
   socket.on('claim_stray_dog', ({ senderCaid, playerToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;

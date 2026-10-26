@@ -138,6 +138,7 @@ async function initiateCombatEngagement() {
       attackerCaid: caid.name,
       useAlliance: useAlliance
     });
+    spendActionPm();
   }
 }
 
