@@ -149,7 +149,7 @@
       "desc": "Escort VIP haut de gamme, rente élevée."
     }
   ],
-  "sportclub": [
+    "sportclub": [
     {
       "id": "gb_lvl1",
       "categorie": "lascar",
@@ -158,10 +158,11 @@
       "nom": "Lascar Niv. 1",
       "prix": 1500,
       "atk": 1,
+      "def": 1,
       "bonusVal": 1,
-      "bonusLabel": "+1 Attaque",
+      "bonusLabel": "+1 Atk / +1 Def",
       "image": "gblvl1.jpg",
-      "desc": "Homme de main solide pour épauler ton Caïd."
+      "desc": "Homme de main solide (+1 Attaque et +1 Défense)."
     },
     {
       "id": "gb_lvl2",
@@ -171,10 +172,11 @@
       "nom": "Lascar Niv. 2",
       "prix": 3000,
       "atk": 2,
+      "def": 2,
       "bonusVal": 2,
-      "bonusLabel": "+2 Attaque",
+      "bonusLabel": "+2 Atk / +2 Def",
       "image": "gblvl2.jpg",
-      "desc": "Gros bras surentraîné à la salle de sport."
+      "desc": "Gros bras surentraîné (+2 Attaque et +2 Défense)."
     }
   ],
   "concessionnaire": [
