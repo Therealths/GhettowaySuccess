@@ -562,29 +562,32 @@
         </div>
         <div class="grid grid-cols-2 gap-2.5 text-xs font-mono">
           <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left">
-            <div class="flex items-center justify-between">
-              <span id="lootSplitLeftName" class="text-[10px] font-black text-amber-300 uppercase truncate">Allié 1</span>
-              <span id="lootSplitLeftPctBadge" class="text-[10px] font-bold text-white">50%</span>
-            </div>
+            <span id="lootSplitLeftName" class="text-[10px] font-black text-amber-300 uppercase truncate block">Allié 1</span>
             <div id="lootSplitLeftAmounts" class="text-xs font-black text-white mt-1.5">0 €</div>
             <div id="lootSplitLeftStatus" class="text-[9px] text-slate-400 mt-1">⏳ En attente</div>
           </div>
           <div class="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-right">
-            <div class="flex items-center justify-between">
-              <span id="lootSplitRightPctBadge" class="text-[10px] font-bold text-white">50%</span>
-              <span id="lootSplitRightName" class="text-[10px] font-black text-purple-300 uppercase truncate">Allié 2</span>
-            </div>
+            <span id="lootSplitRightName" class="text-[10px] font-black text-purple-300 uppercase truncate block">Allié 2</span>
             <div id="lootSplitRightAmounts" class="text-xs font-black text-white mt-1.5">0 €</div>
             <div id="lootSplitRightStatus" class="text-[9px] text-slate-400 mt-1">⏳ En attente</div>
           </div>
         </div>
-        <div class="space-y-1.5">
+        <!-- Le curseur est tiré vers le joueur qui reçoit la plus grosse part -->
+        <div id="lootSplitCashBlock" class="space-y-1.5">
           <div class="flex justify-between text-[9px] font-mono text-slate-400">
-            <span>⬅️ Plus à gauche</span>
-            <span>50 / 50</span>
-            <span>Plus à droite ➡️</span>
+            <span id="lootSplitCashLeftLabel" class="text-amber-300 font-bold">50%</span>
+            <span class="text-ghetto-gold font-bold">💵 Argent</span>
+            <span id="lootSplitCashRightLabel" class="text-purple-300 font-bold">50%</span>
           </div>
-          <input type="range" id="lootSplitSlider" min="0" max="100" value="50" oninput="onLootSplitSliderInput(this.value)" class="w-full">
+          <input type="range" id="lootSplitSlider" min="0" max="100" value="50" oninput="onLootSplitSliderInput(this.value, 'cash')" class="w-full">
+        </div>
+        <div id="lootSplitDrugBlock" class="space-y-1.5 hidden">
+          <div class="flex justify-between text-[9px] font-mono text-slate-400">
+            <span id="lootSplitDrugLeftLabel" class="text-amber-300 font-bold">50%</span>
+            <span class="text-emerald-300 font-bold">🌿 Drogue</span>
+            <span id="lootSplitDrugRightLabel" class="text-purple-300 font-bold">50%</span>
+          </div>
+          <input type="range" id="lootSplitDrugSlider" min="0" max="100" value="50" oninput="onLootSplitSliderInput(this.value, 'drugs')" class="w-full">
         </div>
         <button id="btnAcceptLootSplit" onclick="emitAcceptLootSplit()" class="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase rounded-2xl text-xs shadow-lg">
           Accepter ce Partage
@@ -1953,10 +1956,10 @@
 
     function renderLootSplitModalUI(split) {
       if (!split) return;
-      const rightPct = 100 - split.leftPct;
+      const drugLeftPct = split.drugLeftPct ?? split.leftPct;
       const leftCash = Math.round((split.totalCash * split.leftPct) / 100);
       const rightCash = split.totalCash - leftCash;
-      const leftDrugs = Math.round((split.totalDrugs * split.leftPct) / 100);
+      const leftDrugs = Math.round((split.totalDrugs * drugLeftPct) / 100);
       const rightDrugs = split.totalDrugs - leftDrugs;
 
       document.getElementById('lootSplitModalTitle').innerText = split.title || 'Partage du Butin';
@@ -1964,8 +1967,6 @@
 
       document.getElementById('lootSplitLeftName').innerText = split.leftName;
       document.getElementById('lootSplitRightName').innerText = split.rightName;
-      document.getElementById('lootSplitLeftPctBadge').innerText = `${split.leftPct}%`;
-      document.getElementById('lootSplitRightPctBadge').innerText = `${rightPct}%`;
 
       document.getElementById('lootSplitLeftAmounts').innerText = `${leftCash.toLocaleString()} €` + (split.totalDrugs > 0 ? ` • ${leftDrugs} kg` : '');
       document.getElementById('lootSplitRightAmounts').innerText = `${rightCash.toLocaleString()} €` + (split.totalDrugs > 0 ? ` • ${rightDrugs} kg` : '');
@@ -1977,7 +1978,16 @@
         ? '<span class="text-emerald-400 font-bold">✅ Accord validé</span>'
         : '⏳ En attente...';
 
-      document.getElementById('lootSplitSlider').value = split.leftPct;
+      // Valeur du curseur = part du joueur de droite : glisser vers un joueur augmente sa part
+      document.getElementById('lootSplitCashBlock').classList.toggle('hidden', split.totalCash <= 0 && split.totalDrugs > 0);
+      document.getElementById('lootSplitSlider').value = 100 - split.leftPct;
+      document.getElementById('lootSplitCashLeftLabel').innerText = `${split.leftPct}%`;
+      document.getElementById('lootSplitCashRightLabel').innerText = `${100 - split.leftPct}%`;
+
+      document.getElementById('lootSplitDrugBlock').classList.toggle('hidden', split.totalDrugs <= 0);
+      document.getElementById('lootSplitDrugSlider').value = 100 - drugLeftPct;
+      document.getElementById('lootSplitDrugLeftLabel').innerText = `${drugLeftPct}%`;
+      document.getElementById('lootSplitDrugRightLabel').innerText = `${100 - drugLeftPct}%`;
 
       const myAccepted = (myPlayerToken === split.leftToken && split.leftAccepted) || (myPlayerToken === split.rightToken && split.rightAccepted);
       const btn = document.getElementById('btnAcceptLootSplit');
@@ -1990,8 +2000,9 @@
       }
     }
 
-    function onLootSplitSliderInput(val) {
-      if (socket) socket.emit('update_loot_split_slider', { leftPct: parseInt(val) || 0 });
+    function onLootSplitSliderInput(val, kind = 'cash') {
+      const leftPct = 100 - (parseInt(val) || 0);
+      if (socket) socket.emit('update_loot_split_slider', { leftPct, kind });
     }
 
     function emitAcceptLootSplit() {

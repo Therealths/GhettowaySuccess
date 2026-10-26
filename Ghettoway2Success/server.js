@@ -104,7 +104,8 @@ function openLootShareSession(room, roomId, sessionData) {
     rightToken: sessionData.rightToken,
     leftName: sessionData.leftName,
     rightName: sessionData.rightName,
-    leftPct: 50,
+    leftPct: 50, // part d'argent du joueur de gauche
+    drugLeftPct: 50, // part de drogue du joueur de gauche
     leftAccepted: false,
     rightAccepted: false
   };
@@ -826,12 +827,14 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('update_loot_split_slider', ({ leftPct }) => {
+  socket.on('update_loot_split_slider', ({ leftPct, kind }) => {
     const room = rooms[socket.roomId];
     if (!room || !room.activeLootSplit) return;
     const split = room.activeLootSplit;
 
-    split.leftPct = Math.max(0, Math.min(100, parseInt(leftPct) || 0));
+    const pct = Math.max(0, Math.min(100, parseInt(leftPct) || 0));
+    if (kind === 'drugs') split.drugLeftPct = pct;
+    else split.leftPct = pct;
     split.leftAccepted = false;
     split.rightAccepted = false;
 
@@ -857,7 +860,7 @@ io.on('connection', (socket) => {
     if (split.leftAccepted && split.rightAccepted) {
       const leftCash = Math.round((split.totalCash * split.leftPct) / 100);
       const rightCash = split.totalCash - leftCash;
-      const leftDrugs = Math.round((split.totalDrugs * split.leftPct) / 100);
+      const leftDrugs = Math.round((split.totalDrugs * split.drugLeftPct) / 100);
       const rightDrugs = split.totalDrugs - leftDrugs;
 
       if (leftP) {
