@@ -1348,14 +1348,18 @@
         document.getElementById('btnAppAlertOk').onclick = () => { m.classList.add('hidden'); res(); };
       });
     }
-    function showAppConfirm(msg, title = "Confirmation") {
+    function showAppConfirm(msg, title = "Confirmation", yesLabel = "Confirmer", noLabel = "Annuler") {
       return new Promise(res => {
         document.getElementById('appConfirmTitle').innerText = title;
         document.getElementById('appConfirmMessage').innerText = msg;
         const m = document.getElementById('modalAppConfirm');
         m.classList.remove('hidden');
-        document.getElementById('btnAppConfirmYes').onclick = () => { m.classList.add('hidden'); res(true); };
-        document.getElementById('btnAppConfirmNo').onclick = () => { m.classList.add('hidden'); res(false); };
+        const btnYes = document.getElementById('btnAppConfirmYes');
+        const btnNo = document.getElementById('btnAppConfirmNo');
+        btnYes.innerText = yesLabel;
+        btnNo.innerText = noLabel;
+        btnYes.onclick = () => { m.classList.add('hidden'); res(true); };
+        btnNo.onclick = () => { m.classList.add('hidden'); res(false); };
       });
     }
     const myPlayerToken = (() => {
@@ -2918,8 +2922,10 @@
       let useAlliance = false;
       if (localPlayer.allianceActive && localPlayer.activeAlly) {
         useAlliance = await showAppConfirm(
-          `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\n• Cliquez sur CONFIRMER pour lancer une ATTAQUE COORDONNÉE à 2 (si vous êtes tous deux sur la bonne case).\n• Cliquez sur ANNULER pour attaquer EN SOLO.`,
-          "⚔️ Attaque Coordonnée ou Solo ?"
+          `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\nComment voulez-vous attaquer ?\n\n• SOLO : vous attaquez seul.\n• EN ALLIANCE : attaque coordonnée à 2 (si vous êtes tous deux sur la bonne case).`,
+          "⚔️ Solo ou en Alliance ?",
+          "🤝 En Alliance",
+          "Solo"
         );
       }
 
@@ -3208,8 +3214,10 @@
         let coordinateWithAlly = false;
         if (localPlayer.allianceActive && localPlayer.activeAlly) {
           coordinateWithAlly = await showAppConfirm(
-            `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\n• Cliquez sur CONFIRMER si c'est un BRAQUAGE COORDONNÉ à 2 (tous les deux sur la case : forces cumulées & butin partagé).\n• Cliquez sur ANNULER pour tenter ce braquage EN SOLO.`,
-            "💥 Braquage Coordonné ou Solo ?"
+            `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\nComment voulez-vous faire ce braquage ?\n\n• SOLO : vous tentez le braquage seul.\n• EN ALLIANCE : braquage coordonné à 2 (tous les deux sur la case : forces cumulées & butin partagé).`,
+            "💥 Solo ou en Alliance ?",
+            "🤝 En Alliance",
+            "Solo"
           );
         }
 
