@@ -87,13 +87,14 @@ async function openSpecialAbilityPrompt() {
     if (!sel || !sel.value) return showAppAlert("Aucune cible attaquable (ou Pacte d'Alliance actif) !", "Cible Introuvable");
     document.getElementById('specialTargetDesc').innerText = `${caid.skillName} : ${caid.skillDesc}`;
     document.getElementById('modalTargetSpecial').classList.remove('hidden');
+  } else if (caid.id === 'caid_5') {
+    // La Prière ne s'active pas à l'avance : elle est proposée automatiquement au moment du contrôle ou de l'agression
+    return showAppAlert("Prière Miraculeuse : elle vous sera proposée automatiquement lors d'un contrôle de police ou si un rival vous attaque (50% de chance d'annuler).\n\nUtilisable 1x par manche.", "🙏 J-Lo Gramme");
   } else {
     if (!await showAppConfirm(`${caid.skillName} : ${caid.skillDesc}\n\nUtilisable 1x par tour. Activer ?`, "⚡ Capacité Spéciale")) return;
     if (caid.id === 'caid_3') {
       localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
       await showAppAlert("+1 Cœur de Vie restauré !", "⚡ La Grosse Sieste");
-    } else if (caid.id === 'caid_5') {
-      await showAppAlert("Prière Miraculeuse prête !", "⚡ J-Lo Gramme");
     } else {
       await showAppAlert(`${caid.skillName} activée !`, "⚡ Capacité Active");
     }
@@ -373,7 +374,7 @@ async function useItem(idx) {
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
     localPlayer.inventory.splice(idx, 1);
     refreshHud();
-    await showAppAlert(`${it.name} activé ! Vos statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
+    await showAppAlert(`${it.name} activé jusqu'à la fin du tour en cours ! Vos statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
     return;
   }
   localPlayer.inventory.splice(idx, 1);

@@ -142,6 +142,8 @@ if (socket) {
     if (serverPacts) nonAggressionPacts = serverPacts;
     renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
     if (activePlayerToken === myPlayerToken && lastActivePlayerToken !== myPlayerToken) notifyMyTurn(round);
+    // Pot de Protéine, Balle perforante... : effets valables jusqu'à la fin du tour en cours
+    if (activePlayerToken !== lastActivePlayerToken) { resetCombatModifiers(); refreshHud(); }
     lastActivePlayerToken = activePlayerToken;
     activeTurnPlayerToken = activePlayerToken;
     const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
@@ -162,7 +164,7 @@ if (socket) {
   });
 
   // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---
-  socket.on('combat_duel_opened', ({ phase, role, isAlliedAttack, allyCaid, allyAtk, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog }) => {
+  socket.on('combat_duel_opened', async ({ phase, role, isAlliedAttack, allyCaid, allyAtk, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog }) => {
     currentDuelInfo = { phase: phase || 1, role, isAlliedAttack, allyCaid, allyAtk: allyAtk || 0, opponentCaid, opponentSocketId };
     isCombatReady = false;
     document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-sword"></i> Phase 1 : Assaut Initial`;
@@ -178,6 +180,27 @@ if (socket) {
     updateCombatReadyButtonUI();
     updateArenaLiveStats();
     document.getElementById('modalCombat').classList.remove('hidden');
+
+    // J-Lo Gramme agressée : Prière Miraculeuse (50% d'annuler l'agression), 1x par manche
+    if (role === 'defender' && (phase || 1) === 1 && localPlayer.caidId === 'caid_5' && !localPlayer.specialUsedThisTurn) {
+      if (await showAppConfirm(`${opponentCaid} vous agresse !\n\nTenter votre 'Prière Miraculeuse' (50% d'annuler cette agression) ?`, "🙏 J-Lo Gramme")) {
+        localPlayer.specialUsedThisTurn = true;
+        refreshHud();
+        if (Math.random() >= 0.5) {
+          socket.emit('combat_prayer_cancel');
+        } else {
+          const log = document.getElementById('combatLiveLog');
+          log.innerHTML += `<p class="text-rose-300 font-bold">🙏 PILE ! La prière échoue, le combat continue.</p>`;
+          await showAppAlert("PILE ! La prière échoue : le combat continue.", "🙏 Échec");
+        }
+      }
+    }
+  });
+  socket.on('combat_cancelled_by_prayer', async ({ caidName }) => {
+    closeModal('modalCombat');
+    closeModal('modalCombatItemSelector');
+    currentDuelInfo = null;
+    await showAppAlert(`FACE ! ${caidName} a annulé l'agression grâce à sa Prière Miraculeuse.`, "🙏 Miracle");
   });
 
   socket.on('combat_waiting_defender_riposte_choice', ({ defenderCaid }) => {
@@ -203,7 +226,6 @@ if (socket) {
   socket.on('combat_not_targeted_by_riposte', async ({ defenderCaid, chosenCaid }) => {
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
-    resetCombatModifiers();
     currentDuelInfo = null;
     await showAppAlert(`${defenderCaid} a repoussé votre assaut et a choisi de cibler ${chosenCaid} pour sa contre-attaque !`, "🛡️ Riposte Adverse");
   });
@@ -243,7 +265,6 @@ if (socket) {
   socket.on('combat_finished_draw', async ({ message }) => {
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
-    resetCombatModifiers();
     currentDuelInfo = null;
     refreshHud();
     await showAppAlert(message || "Match Nul !", "🤝 Match Nul");
@@ -252,7 +273,6 @@ if (socket) {
   socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }) => {
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
-    resetCombatModifiers();
     currentDuelInfo = null;
 
     if (outcome === 'loser') {
@@ -306,7 +326,6 @@ if (socket) {
     closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     closeModal('modalChooseRiposteTarget');
-    resetCombatModifiers();
     currentDuelInfo = null;
     await showAppAlert("Le combat a été annulé.", "Combat Interrompu");
   });

@@ -861,6 +861,21 @@ io.on('connection', (socket) => {
     room.pendingPillage = null;
   });
 
+  // J-Lo Gramme (défenseur) a réussi sa Prière Miraculeuse : l'agression est annulée
+  socket.on('combat_prayer_cancel', () => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.activeCombat) return;
+    const defender = room.players.find(p => p.socketId === socket.id);
+    if (!defender || defender.playerToken !== room.activeCombat.defenderToken || defender.caidId !== 'caid_5') return;
+
+    const involved = [...room.activeCombat.attackerTokens, room.activeCombat.defenderToken];
+    involved.forEach(tok => {
+      const p = room.players.find(x => x.playerToken === tok);
+      if (p) io.to(p.socketId).emit('combat_cancelled_by_prayer', { caidName: defender.caidName });
+    });
+    room.activeCombat = null;
+  });
+
   socket.on('combat_cancel', () => {
     const room = rooms[socket.roomId];
     if (room && room.activeCombat) {

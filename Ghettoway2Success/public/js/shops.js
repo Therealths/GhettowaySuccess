@@ -534,6 +534,23 @@ async function buyDealerCatalogItem(itemId) {
   openPaymentChoiceModal(pPayload);
 }
 
+// Malus J-Lo Gramme : ses 5 premiers kg achetés au grossiste (sur la partie) coûtent le double
+function getJloDoubledKgLeft() {
+  return localPlayer.caidId === 'caid_5' ? Math.max(0, 5 - (localPlayer.jloDoubledKgBought || 0)) : 0;
+}
+function getGrossisteCost(kg) {
+  return (kg + Math.min(kg, getJloDoubledKgLeft())) * grossisteUnitCost;
+}
+function getGrossisteMaxKg() {
+  let kg = 0;
+  while (getGrossisteCost(kg + 1) <= localPlayer.pocketCash) kg++;
+  return kg;
+}
+function showGrossisteTotal(kg) {
+  const doubled = Math.min(kg, getJloDoubledKgLeft());
+  document.getElementById('grossisteTotalPriceDisplay').innerText = `${getGrossisteCost(kg).toLocaleString()} €` + (doubled > 0 ? ` (dont ${doubled} kg au double)` : '');
+}
+
 function openGrossisteModal(unitPrice) {
   let basePrice = unitPrice || 1000;
   if (isRadioEffectActive('GROSSISTE_PRICE_SET')) {
@@ -541,36 +558,38 @@ function openGrossisteModal(unitPrice) {
   }
   grossisteUnitCost = basePrice;
   document.getElementById('grossistePocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
-  document.getElementById('grossisteUnitPrice').innerText = `${grossisteUnitCost.toLocaleString()} € / kg`;
-  document.getElementById('grossisteMaxKg').innerText = `Max : ${Math.floor(localPlayer.pocketCash / grossisteUnitCost)} kg`;
+  const jloLeft = getJloDoubledKgLeft();
+  document.getElementById('grossisteUnitPrice').innerText = `${grossisteUnitCost.toLocaleString()} € / kg` + (jloLeft > 0 ? ` (malus J-Lo : ${jloLeft} kg au double)` : '');
+  document.getElementById('grossisteMaxKg').innerText = `Max : ${getGrossisteMaxKg()} kg`;
   setGrossistePercentage(0);
   document.getElementById('modalGrossiste').classList.remove('hidden');
 }
 function setGrossistePercentage(pct) {
-  const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
+  const maxKg = getGrossisteMaxKg();
   const kg = Math.floor((maxKg * pct) / 100);
   document.getElementById('grossisteKgInput').value = kg;
   document.getElementById('grossisteRangeSlider').value = pct;
-  document.getElementById('grossisteTotalPriceDisplay').innerText = `${(kg * grossisteUnitCost).toLocaleString()} €`;
+  showGrossisteTotal(kg);
 }
 function syncGrossisteSliderToInput() {
   const pct = parseInt(document.getElementById('grossisteRangeSlider').value) || 0;
-  const kg = Math.floor((Math.floor(localPlayer.pocketCash / grossisteUnitCost) * pct) / 100);
+  const kg = Math.floor((getGrossisteMaxKg() * pct) / 100);
   document.getElementById('grossisteKgInput').value = kg;
-  document.getElementById('grossisteTotalPriceDisplay').innerText = `${(kg * grossisteUnitCost).toLocaleString()} €`;
+  showGrossisteTotal(kg);
 }
 function syncGrossisteInputToSlider() {
-  const maxKg = Math.floor(localPlayer.pocketCash / grossisteUnitCost);
+  const maxKg = getGrossisteMaxKg();
   let kg = Math.min(maxKg, parseInt(document.getElementById('grossisteKgInput').value) || 0);
   document.getElementById('grossisteKgInput').value = kg;
   document.getElementById('grossisteRangeSlider').value = maxKg > 0 ? Math.round((kg / maxKg) * 100) : 0;
-  document.getElementById('grossisteTotalPriceDisplay').innerText = `${(kg * grossisteUnitCost).toLocaleString()} €`;
+  showGrossisteTotal(kg);
 }
 async function confirmGrossistePurchase() {
   const kg = parseInt(document.getElementById('grossisteKgInput').value) || 0;
   if (kg <= 0) return showAppAlert("Sélectionnez au moins 1 kg.", "Achat");
-  const cost = kg * grossisteUnitCost;
+  const cost = getGrossisteCost(kg);
   if (localPlayer.pocketCash < cost) return showAppAlert("Cash en poche insuffisant !", "Fonds Insuffisants");
+  if (localPlayer.caidId === 'caid_5') localPlayer.jloDoubledKgBought = (localPlayer.jloDoubledKgBought || 0) + Math.min(kg, getJloDoubledKgLeft());
   localPlayer.pocketCash -= cost;
   localPlayer.drugs += kg;
   spendActionPm();
