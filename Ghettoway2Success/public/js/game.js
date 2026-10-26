@@ -44,7 +44,7 @@ function syncMultiplayerTargets() {
 
   const allOpts = (!connectedRivals || !connectedRivals.length)
     ? '<option value="">Aucun rival connecté</option>'
-    : connectedRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0})</option>`).join('');
+    : connectedRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
 
   if (combatSel) combatSel.innerHTML = combatOpts;
   if (specialSel) specialSel.innerHTML = combatOpts;
@@ -314,10 +314,16 @@ async function startRoundPhase1() {
 }
 function acknowledgeRadioCard() { navTo('page-6'); }
 
-function endCurrentPlayerTurn() {
+async function endCurrentPlayerTurn(forced = false) {
   if (!isMyTurnToPlay) return;
+  const isAllyHelping = activeTurnPlayerToken && activeTurnPlayerToken !== myPlayerToken;
+  // Bouton "Tour terminé" : on demande confirmation (la garde à vue, elle, met fin au tour d'office)
+  if (!forced && !await showAppConfirm(
+    isAllyHelping ? "Terminer votre participation à ce tour ?\nVous ne pourrez plus agir avant la manche suivante." : "Terminer votre tour ?\nLa main passera au joueur suivant.",
+    "⏭️ Fin de tour"
+  )) return;
   // Allié qui joue pendant le tour d'un autre : il termine sa participation, le joueur actif garde la main (et lance le dé de patrouille)
-  if (activeTurnPlayerToken && activeTurnPlayerToken !== myPlayerToken) {
+  if (isAllyHelping) {
     if (socket) socket.emit('end_allied_turn');
     showAppAlert("Votre participation à ce tour est terminée.\nVous rejouerez à la manche suivante.", "🤝 Fin de votre tour");
     return;
@@ -365,7 +371,8 @@ function renderTurnOrder(turnOrder, activeToken, alliedTokens = []) {
     else if (isAllied) { cls = 'bg-purple-500/20 border-purple-400 text-purple-300'; icon = '🤝 '; }
     else if (p.played) { cls = 'bg-white/5 border-white/5 text-slate-500 line-through'; icon = '✓ '; }
     const name = p.caidName || 'Caïd';
-    return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (vous)' : ''}</span>`;
+    const dog = p.hasStrayDog ? ' 🐕' : '';
+    return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (vous)' : ''}${dog}</span>`;
   }).join('');
   document.querySelectorAll('.turn-order-list').forEach(el => { el.innerHTML = html; });
 }

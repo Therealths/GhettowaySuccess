@@ -163,7 +163,7 @@ async function triggerPoliceInspection() {
         `${s} kg de drogue saisis !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !`,
         "🚔 Garde à Vue"
       );
-      endCurrentPlayerTurn();
+      endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
     } else {
       await showAppAlert("La police cherchait de la drogue mais vous n'en avez pas sur vous : R.A.S., vous repartez libre !", "👮 Contrôle");
     }
@@ -176,7 +176,7 @@ async function triggerPoliceInspection() {
         "Armes saisies !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !",
         "🚔 Garde à Vue"
       );
-      endCurrentPlayerTurn();
+      endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
     } else {
       await showAppAlert("La police cherchait des armes mais vous n'en possédez aucune : R.A.S., vous repartez libre !", "👮 Contrôle");
     }
@@ -213,6 +213,7 @@ function refreshHud() {
   for (let i = 0; i < localPlayer.hearts; i++) heartsStr += '❤️';
   for (let i = localPlayer.hearts; i < 3; i++) heartsStr += '🖤';
   document.getElementById('hudHearts').innerText = heartsStr;
+  document.getElementById('hudDogBadge').classList.toggle('hidden', !localPlayer.strayDogActive);
   document.getElementById('hudAtk').innerText = getTotalAtk();
   document.getElementById('hudDef').innerText = getTotalDef();
   // Aide-mémoire : PM restants après les actions du tour (2 PM par action, à décompter aussi sur le plateau)

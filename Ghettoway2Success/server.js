@@ -105,7 +105,7 @@ function broadcastTurnState(roomId) {
   const turnOrder = (room.roundOrder || [])
     .map(token => room.players.find(p => p.playerToken === token))
     .filter(Boolean)
-    .map(p => ({ token: p.playerToken, caidName: p.caidName, played: played.includes(p.playerToken) }));
+    .map(p => ({ token: p.playerToken, caidName: p.caidName, played: played.includes(p.playerToken), hasStrayDog: p.playerToken === room.strayDogHolderToken }));
 
   io.to(roomId).emit('turn_state_updated', {
     activePlayerToken: activePlayer ? activePlayer.playerToken : null,
@@ -466,6 +466,7 @@ io.on('connection', (socket) => {
     if (curPlayer) curPlayer.hasStrayDog = true;
 
     socket.emit('stray_dog_granted');
+    broadcastTurnState(socket.roomId); // tout le monde voit le nouveau maître du chien dans la barre d'ordre
 
     io.to(socket.roomId).emit('update_room_players', {
       players: room.players,
