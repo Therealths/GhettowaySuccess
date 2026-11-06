@@ -5,12 +5,13 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 }
 
-// Bandeau « Installe l'appli » sur l'accueil, seulement quand le jeu est ouvert dans le navigateur.
-// Android (Chrome) : vrai bouton d'installation ; iPhone : les étapes Safari, car Apple n'en propose pas.
-// « Plus tard » le cache 3 jours.
+// Bandeau « Installe l'appli » sur l'accueil, seulement quand le jeu est ouvert dans le navigateur d'un téléphone.
+// Quand Chrome propose l'installation, le bouton l'ouvre directement ; sinon il affiche les étapes à suivre
+// (Chrome ne la propose qu'après un toucher et 30 s sur la page, et Safari jamais). « Plus tard » le cache 3 jours.
 let deferredInstallPrompt = null;
 const isStandaloneApp = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroidDevice = /android/i.test(navigator.userAgent);
 function hideInstallBanner() { document.getElementById('installBanner').classList.add('hidden'); }
 function showInstallBanner() {
   let later = 0;
@@ -19,7 +20,9 @@ function showInstallBanner() {
   document.getElementById('installBanner').classList.remove('hidden');
 }
 async function installApp() {
-  if (!deferredInstallPrompt) return document.getElementById('installIosSteps').classList.toggle('hidden');
+  if (!deferredInstallPrompt) {
+    return document.getElementById(isIosDevice ? 'installIosSteps' : 'installAndroidSteps').classList.toggle('hidden');
+  }
   const prompt = deferredInstallPrompt;
   deferredInstallPrompt = null;
   prompt.prompt();
@@ -29,9 +32,21 @@ function dismissInstallBanner() {
   try { localStorage.setItem('g2s_install_later', Date.now() + 3 * 24 * 3600 * 1000); } catch (e) {}
   hideInstallBanner();
 }
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; showInstallBanner(); });
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('installAndroidSteps').classList.add('hidden');
+  showInstallBanner();
+});
 window.addEventListener('appinstalled', hideInstallBanner);
-if (isIosDevice) showInstallBanner();
+(async () => {
+  if (!isIosDevice && !isAndroidDevice) return;
+  // Chrome Android sait dire si l'appli de cette adresse est déjà installée (voir related_applications du manifeste)
+  try {
+    if (navigator.getInstalledRelatedApps && (await navigator.getInstalledRelatedApps()).length) return;
+  } catch (e) {}
+  showInstallBanner();
+})();
 
 // --- MODALES SYSTÈME ---
 function showAppAlert(msg, title = "Information") {

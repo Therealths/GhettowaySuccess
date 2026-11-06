@@ -146,6 +146,11 @@
           <button onclick="installApp()" class="px-3 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-xl text-[10px] active:scale-95 transition">Installer</button>
           <button onclick="dismissInstallBanner()" aria-label="Plus tard" class="w-7 h-7 rounded-full flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
         </div>
+        <ol id="installAndroidSteps" class="hidden mt-3 pt-3 border-t border-white/10 space-y-1.5 text-[11px] text-slate-200">
+          <li>1. Touche le menu <strong class="text-white">⋮</strong> en haut à droite de Chrome</li>
+          <li>2. Choisis <strong class="text-white">Installer l'application</strong> (ou <strong class="text-white">Ajouter à l'écran d'accueil</strong>)</li>
+          <li>3. Confirme avec <strong class="text-white">Installer</strong>, puis ouvre le jeu depuis l'icône</li>
+        </ol>
         <ol id="installIosSteps" class="hidden mt-3 pt-3 border-t border-white/10 space-y-1.5 text-[11px] text-slate-200">
           <li>1. Dans Safari, touche <strong class="text-white">Partager</strong> <i class="ph-bold ph-export text-sky-300"></i> en bas de l'écran</li>
           <li>2. Choisis <strong class="text-white">Sur l'écran d'accueil</strong> <i class="ph-bold ph-plus-square text-sky-300"></i></li>
