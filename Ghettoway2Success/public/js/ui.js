@@ -37,6 +37,7 @@ function navTo(pageId) {
   const current = document.querySelector('.screen-view.active');
   const target = document.getElementById(pageId);
   clearTimeout(slideTimer);
+  if (!backTrapArmed) { clearTimeout(exitHintTimer); armBackTrap(); }
   document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active', 'slide-in-up', 'slide-out-down'));
   if (target) target.classList.add('active');
   const fromId = current && current.id;
@@ -52,3 +53,54 @@ function navTo(pageId) {
   if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// Bouton retour du téléphone : on garde toujours une entrée d'historique en réserve pour que
+// le retour agisse dans l'appli au lieu de la fermer. Sur l'accueil, il faut appuyer deux fois.
+let backTrapArmed = false, exitHintTimer = null;
+function armBackTrap() {
+  if (backTrapArmed) return;
+  history.pushState({ ghettoway: true }, '');
+  backTrapArmed = true;
+}
+// Ferme la fenêtre du dessus si elle a un bouton de fermeture ; les fenêtres obligatoires restent ouvertes
+function closeTopModalOnBack() {
+  const open = [...document.querySelectorAll('[id^="modal"]:not(.hidden)')];
+  const top = open[open.length - 1];
+  if (!top) return false;
+  if (top.id === 'modalCombat') { if (!currentDuelInfo) closeModal('modalCombat'); return true; }
+  const btn = [...top.querySelectorAll('button')].find(b => {
+    const a = b.getAttribute('onclick') || '';
+    return a.includes(`closeModal('${top.id}')`) || a.includes('closeQrScannerModal()');
+  });
+  if (btn) btn.click();
+  return true;
+}
+function showExitHint() {
+  let el = document.getElementById('exitHint');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'exitHint';
+    el.className = 'absolute bottom-24 left-1/2 -translate-x-1/2 z-[70] px-4 py-2 rounded-full bg-black/85 border border-white/15 text-white text-xs font-bold whitespace-nowrap pointer-events-none transition-opacity duration-300';
+    el.innerText = 'Appuie encore pour quitter';
+    document.getElementById('app-container').appendChild(el);
+  }
+  el.style.opacity = '1';
+}
+window.addEventListener('popstate', () => {
+  backTrapArmed = false;
+  const page = document.querySelector('.screen-view.active:not(.slide-out-down)');
+  const pageId = page && page.id;
+  if (!closeTopModalOnBack()) {
+    if (pageId === 'page-1') {
+      // Pas de nouvelle entrée pendant 2 s : un second retour ferme l'appli
+      showExitHint();
+      clearTimeout(exitHintTimer);
+      exitHintTimer = setTimeout(() => { document.getElementById('exitHint').style.opacity = '0'; armBackTrap(); }, 2000);
+      return;
+    }
+    if (SLIDE_PAGES.includes(pageId)) navTo('page-1');
+    else if (pageId === 'page-6' && document.getElementById('panelInteractions').classList.contains('hidden')) switchMainCaidTab('interactions');
+  }
+  armBackTrap();
+});
+armBackTrap();
