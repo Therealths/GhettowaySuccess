@@ -30,10 +30,24 @@ function showAppConfirm(msg, title = "Confirmation", yesLabel = "Confirmer", noL
   });
 }
 
+// Créer / Rejoindre glissent depuis le bas par-dessus l'accueil, et redescendent au retour
+const SLIDE_PAGES = ['page-2', 'page-3'];
+let slideTimer = null;
 function navTo(pageId) {
-  document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+  const current = document.querySelector('.screen-view.active');
   const target = document.getElementById(pageId);
+  clearTimeout(slideTimer);
+  document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active', 'slide-in-up', 'slide-out-down'));
   if (target) target.classList.add('active');
+  const fromId = current && current.id;
+  if (target && fromId === 'page-1' && SLIDE_PAGES.includes(pageId)) {
+    current.classList.add('active');
+    target.classList.add('slide-in-up');
+    slideTimer = setTimeout(() => { current.classList.remove('active'); target.classList.remove('slide-in-up'); }, 420);
+  } else if (target && pageId === 'page-1' && SLIDE_PAGES.includes(fromId)) {
+    current.classList.add('active', 'slide-out-down');
+    slideTimer = setTimeout(() => current.classList.remove('active', 'slide-out-down'), 340);
+  }
   if (pageId === 'page-4' && !caidLocked) initCarouselDOM();
   if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
 }
