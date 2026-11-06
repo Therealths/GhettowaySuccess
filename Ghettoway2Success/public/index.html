@@ -14,6 +14,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Ghettoway">
   <!-- Écran de chargement : styles chargés avant tout le reste pour s'afficher immédiatement -->
+  <link rel="preload" as="image" href="wallpaper-bridge.jpg">
+  <link rel="preload" as="image" href="sign-gateway.webp">
   <link rel="preload" as="image" href="wallpaper-clean.jpg">
   <link rel="preload" as="image" href="sticker-hello-ghetto.webp">
   <style>
@@ -21,13 +23,17 @@
     #splash.done { opacity: 0; pointer-events: none; }
     #splashFrame { position: relative; width: 100%; max-width: 420px; height: 100dvh; overflow: hidden; }
     #splashScene { position: absolute; transform-origin: 50% 45%; }
-    #splashBg, #splashShade { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+    #splashBg, #splashNight, #splashShade, .splash-letter { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
     #splashShade { background: linear-gradient(to bottom, rgba(5,6,9,0) 0%, rgba(5,6,9,0.3) 45%, rgba(5,6,9,0.95) 85%); }
     #splashSticker { position: absolute; left: 0; top: 36.12%; width: 47.4%; opacity: 0; transform-origin: 50% 50%; }
-    #splash.go #splashBg { animation: splashBgIn 1s ease-out forwards; }
-    #splash.go #splashShade { animation: splashFade 1s ease-out .2s forwards; }
-    #splash.go #splashSticker { animation: splashSlap .45s cubic-bezier(.5,0,.75,0) 1.1s forwards; }
-    #splash.go #splashScene { animation: splashShake .32s ease-out 1.5s; }
+    /* 1) le pont seul  2) l'enseigne s'allume lettre par lettre  3) la nuit tombe  4) l'autocollant se colle */
+    #splash.go #splashBg { animation: splashBgIn .9s ease-out forwards; }
+    #splash.go .splash-letter { animation: splashNeon .4s linear forwards; }
+    #splash.go #splashNight { animation: splashFade .6s ease-in-out 2.2s forwards; }
+    #splash.go #splashShade { animation: splashFade .6s ease-in-out 2.2s forwards; }
+    #splash.go #splashSticker { animation: splashSlap .45s cubic-bezier(.5,0,.75,0) 2.75s forwards; }
+    #splash.go #splashScene { animation: splashShake .32s ease-out 3.15s; }
+    @keyframes splashNeon { 0% { opacity: 0; } 25% { opacity: 1; } 40% { opacity: .25; } 55% { opacity: 1; } 70% { opacity: .6; } 100% { opacity: 1; } }
     @keyframes splashBgIn { from { opacity: 0; transform: scale(1.08); } to { opacity: 1; transform: scale(1); } }
     @keyframes splashFade { to { opacity: 1; } }
     @keyframes splashSlap {
@@ -45,6 +51,7 @@
     @media (prefers-reduced-motion: reduce) {
       #splash.go #splashSticker { animation: splashFade .4s ease-out .6s forwards; }
       #splash.go #splashScene { animation: none; }
+      #splash.go .splash-letter { animation: splashFade .4s ease-out .9s forwards; }
     }
   </style>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -72,7 +79,9 @@
   <div id="splash" onclick="this.classList.add('done')">
     <div id="splashFrame">
       <div id="splashScene">
-        <img id="splashBg" src="wallpaper-clean.jpg" alt="">
+        <img id="splashBg" src="wallpaper-bridge.jpg" alt="">
+        <div id="splashLetters"></div>
+        <img id="splashNight" src="wallpaper-clean.jpg" alt="">
         <img id="splashSticker" src="sticker-hello-ghetto.webp" alt="">
         <div id="splashShade"></div>
       </div>
@@ -91,6 +100,16 @@
       }
       layout();
       window.addEventListener('resize', layout);
+      // Enseigne « GATEWAY TO SUCCESS » : une copie de l'image par lettre, découpée par colonnes (en px sur 768)
+      const cuts = [190, 262, 305, 340, 377, 437, 465, 514, 546, 586, 617, 634, 652, 674, 700, 717, 760];
+      const letters = document.getElementById('splashLetters');
+      for (let i = 0; i < cuts.length - 1; i++) {
+        const l = document.createElement('img');
+        l.src = 'sign-gateway.webp'; l.alt = ''; l.className = 'splash-letter';
+        l.style.clipPath = `inset(0 ${(100 - cuts[i + 1] / 7.68).toFixed(2)}% 0 ${(cuts[i] / 7.68).toFixed(2)}%)`;
+        l.style.animationDelay = (0.9 + i * 0.075).toFixed(3) + 's';
+        letters.appendChild(l);
+      }
       let go = false, goAt = 0, loaded = false;
       function start() { if (!go) { go = true; goAt = Date.now(); splash.classList.add('go'); } }
       function finish() {
@@ -99,7 +118,7 @@
         setTimeout(() => {
           splash.classList.add('done');
           setTimeout(() => splash.remove(), 600);
-        }, Math.max(0, 2600 - (Date.now() - goAt)));
+        }, Math.max(0, 4000 - (Date.now() - goAt)));
       }
       const bg = document.getElementById('splashBg');
       if (bg.complete) start(); else { bg.onload = start; bg.onerror = start; }
