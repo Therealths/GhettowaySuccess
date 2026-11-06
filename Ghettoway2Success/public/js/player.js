@@ -289,7 +289,20 @@ function refreshHud() {
       hasProstituteInTransit: !!localPlayer.prostituteInTransit,
       prostituteObj: localPlayer.prostituteInTransit,
       hasStrayDog: !!localPlayer.strayDogActive,
-      nullEnemyWeapon: !!combatModifiers.nullEnemyWeapon
+      nullEnemyWeapon: !!combatModifiers.nullEnemyWeapon,
+      // État complet du Caïd, rendu par le serveur à la reconnexion (page rechargée, serveur redémarré)
+      inventory: localPlayer.inventory,
+      equipped: localPlayer.equipped,
+      musclesOnPerson: localPlayer.musclesOnPerson,
+      prostituteInTransit: localPlayer.prostituteInTransit,
+      prostitutesAtSafeList: localPlayer.prostitutesAtSafeList,
+      freeProstituteClaimed: localPlayer.freeProstituteClaimed,
+      baseAtk: localPlayer.baseAtk,
+      baseDef: localPlayer.baseDef,
+      tempAtkMalus: localPlayer.tempAtkMalus,
+      tempDefMalus: localPlayer.tempDefMalus,
+      firstWeaponDoubled: localPlayer.firstWeaponDoubled,
+      specialUsedThisTurn: localPlayer.specialUsedThisTurn
     });
   }
 }

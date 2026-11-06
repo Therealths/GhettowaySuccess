@@ -8,9 +8,77 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
+// L'ancien hébergement Render renvoie vers le jeu hébergé sur le PC (Render définit RENDER automatiquement)
+const REDIRECT_TO = process.env.RENDER ? 'https://thomscode.tail3e6d13.ts.net:10000' : null;
+if (REDIRECT_TO) app.use((req, res) => res.redirect(302, REDIRECT_TO + req.originalUrl));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
+
+// Sauvegarde des parties sur disque toutes les 3 s (si elles ont changé), rechargées au démarrage :
+// une partie survit ainsi à un redémarrage du serveur. Les parties inactives depuis 3 jours sont retirées,
+// et celles qui étaient terminées sont gardées dans l'historique.
+const DATA_DIR = process.env.GAME_DATA_DIR || path.join(__dirname, 'data');
+const SAVE_FILE = path.join(DATA_DIR, 'parties.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'historique.json');
+const ROOM_MAX_IDLE_MS = 3 * 24 * 3600 * 1000;
+const roomSnapshots = {};
+let lastSavedJson = '';
+
+function writeJsonAtomic(file, data) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(file + '.tmp', data);
+  fs.renameSync(file + '.tmp', file);
+}
+
+function loadSavedRooms() {
+  try {
+    const saved = JSON.parse(fs.readFileSync(SAVE_FILE, 'utf8'));
+    Object.assign(rooms, saved);
+    console.log(`${Object.keys(saved).length} partie(s) rechargée(s) depuis la sauvegarde`);
+  } catch (e) {
+    if (e.code !== 'ENOENT') console.error('Sauvegarde illisible :', e.message);
+  }
+}
+
+function archiveFinishedRoom(roomId, room) {
+  if (!room.gameOver) return;
+  let history = [];
+  try { history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')); } catch (e) {}
+  history.push({ roomId, gameName: room.gameName, endedAt: room.lastActivity, ...room.gameOver });
+  writeJsonAtomic(HISTORY_FILE, JSON.stringify(history, null, 1));
+}
+
+function saveRooms() {
+  const now = Date.now();
+  for (const [roomId, room] of Object.entries(rooms)) {
+    const snap = JSON.stringify(room);
+    if (snap !== roomSnapshots[roomId]) {
+      room.lastActivity = now;
+      roomSnapshots[roomId] = JSON.stringify(room);
+    }
+    if (now - room.lastActivity > ROOM_MAX_IDLE_MS) {
+      archiveFinishedRoom(roomId, room);
+      delete rooms[roomId];
+      delete roomSnapshots[roomId];
+    }
+  }
+  const json = JSON.stringify(rooms);
+  if (json === lastSavedJson) return;
+  try {
+    writeJsonAtomic(SAVE_FILE, json);
+    lastSavedJson = json;
+  } catch (e) {
+    console.error('Échec de la sauvegarde :', e.message);
+  }
+}
+
+if (!REDIRECT_TO) {
+  loadSavedRooms();
+  setInterval(saveRooms, 3000);
+  for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => { saveRooms(); process.exit(0); });
+}
 // Fin de partie : le premier Caïd qui réunit cette somme (poche + coffre) gagne
 const WIN_CASH = 100000;
 
@@ -1178,6 +1246,6 @@ function getAvailableRooms() {
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, process.env.HOST, () => {
   console.log(`Serveur Ghettoway 2 Success actif sur le port ${PORT}`);
 });
