@@ -5,6 +5,34 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 }
 
+// Bandeau « Installe l'appli » sur l'accueil, seulement quand le jeu est ouvert dans le navigateur.
+// Android (Chrome) : vrai bouton d'installation ; iPhone : les étapes Safari, car Apple n'en propose pas.
+// « Plus tard » le cache 3 jours.
+let deferredInstallPrompt = null;
+const isStandaloneApp = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function hideInstallBanner() { document.getElementById('installBanner').classList.add('hidden'); }
+function showInstallBanner() {
+  let later = 0;
+  try { later = +localStorage.getItem('g2s_install_later') || 0; } catch (e) {}
+  if (isStandaloneApp() || Date.now() < later) return;
+  document.getElementById('installBanner').classList.remove('hidden');
+}
+async function installApp() {
+  if (!deferredInstallPrompt) return document.getElementById('installIosSteps').classList.toggle('hidden');
+  const prompt = deferredInstallPrompt;
+  deferredInstallPrompt = null;
+  prompt.prompt();
+  if ((await prompt.userChoice).outcome === 'accepted') hideInstallBanner();
+}
+function dismissInstallBanner() {
+  try { localStorage.setItem('g2s_install_later', Date.now() + 3 * 24 * 3600 * 1000); } catch (e) {}
+  hideInstallBanner();
+}
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; showInstallBanner(); });
+window.addEventListener('appinstalled', hideInstallBanner);
+if (isIosDevice) showInstallBanner();
+
 // --- MODALES SYSTÈME ---
 function showAppAlert(msg, title = "Information") {
   return new Promise(res => {
