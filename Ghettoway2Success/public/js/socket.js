@@ -423,6 +423,7 @@ if (socket) {
     await showAppAlert(`Alliance scellée avec ${allyCaid} !\n• Vous pouvez choisir de coordonner vos braquages & combats\n• Pacte de non-agression actif pour ce tour et le tour suivant.`, "🤝 Pacte Scellé");
   });
   socket.on('alliance_declined', async () => { await showAppAlert("Le Caïd adverse a refusé votre alliance.", "Alliance Refusée"); });
+  socket.on('game_over', showGameOver);
   socket.on('player_updated', (updatedPlayer) => {
     const idx = connectedRivals.findIndex(p => p.playerToken === updatedPlayer.playerToken || p.socketId === updatedPlayer.socketId);
     if (idx >= 0) connectedRivals[idx] = updatedPlayer;

@@ -399,3 +399,47 @@ function notifyMyTurn(round) {
     });
   } catch (e) {}
 }
+
+function escapeHtml(t) { return String(t).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`); }
+// Fin de partie (annoncée par le serveur quand un Caïd atteint 100 000 €) : podium et titres
+function showGameOver({ winnerToken, round, standings }) {
+  document.querySelectorAll('[id^="modal"]').forEach(m => m.classList.add('hidden'));
+  const imgOf = id => (CAID_ROSTER.find(c => c.id === id) || {}).imageFile || '';
+  const euros = n => `${n.toLocaleString('fr-FR')} €`;
+  const winner = standings.find(p => p.playerToken === winnerToken) || standings[0];
+  document.getElementById('endRound').innerText = `Manche ${round || 1}`;
+  document.getElementById('endWinnerName').innerText = winner.caidName;
+  document.getElementById('endWinnerCash').innerText = euros(winner.fortune);
+  document.getElementById('endWinnerImg').src = imgOf(winner.caidId);
+  const medals = ['🥇', '🥈', '🥉'];
+  document.getElementById('endStandings').innerHTML = standings.map((p, i) => `
+    <div class="glass-panel rounded-2xl px-3 py-2 flex items-center gap-3 ${p.playerToken === myPlayerToken ? 'border-amber-400/60' : ''}">
+      <span class="text-lg w-6 text-center">${medals[i] || i + 1}</span>
+      <img src="${imgOf(p.caidId)}" alt="" class="w-9 h-9 rounded-xl object-cover">
+      <span class="flex-1 text-sm font-bold text-white truncate">${escapeHtml(p.caidName)}</span>
+      <span class="text-xs font-mono font-black text-ghetto-gold">${euros(p.fortune)}</span>
+    </div>`).join('');
+  const titles = [
+    ['👊', 'Le plus bagarreur', 'combatWins', n => `${n} combat${n > 1 ? 's' : ''} gagné${n > 1 ? 's' : ''}`],
+    ['🤕', 'Le plus amoché', 'combatLosses', n => `${n} défaite${n > 1 ? 's' : ''}`],
+    ['🚔', 'Le plus arrêté', 'arrests', n => `${n} garde${n > 1 ? 's' : ''} à vue`],
+    ['🌿', 'Le baron de la drogue', 'drugs', n => `${n} kg en stock`]
+  ].map(([icon, label, key, fmt]) => {
+    const best = standings.reduce((a, b) => (b[key] > a[key] ? b : a));
+    if (!best[key]) return '';
+    return `<div class="glass-panel rounded-2xl p-2.5">
+      <span class="text-[10px] font-black uppercase text-amber-300 block">${icon} ${label}</span>
+      <span class="text-xs font-bold text-white block truncate">${escapeHtml(best.caidName)}</span>
+      <span class="text-[10px] font-mono text-slate-400">${fmt(best[key])}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('endTitles').innerHTML = titles;
+  navTo('page-end');
+  if (winnerToken === myPlayerToken && navigator.vibrate) navigator.vibrate([100, 60, 100, 60, 300]);
+}
+function leaveFinishedGame() {
+  localStorage.removeItem('g2s_room_id');
+  localStorage.removeItem('g2s_saved_caid_id');
+  if (socket) socket.emit('leave_room');
+  window.location.reload();
+}

@@ -158,6 +158,7 @@ async function triggerPoliceInspection() {
     if (localPlayer.drugs > 0) {
       const s = localPlayer.drugs;
       localPlayer.drugs = 0;
+      localPlayer.arrests = (localPlayer.arrests || 0) + 1;
       refreshHud();
       await showAppAlert(
         `${s} kg de drogue saisis !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !`,
@@ -171,6 +172,7 @@ async function triggerPoliceInspection() {
     if (hasAnyWeapon) {
       localPlayer.equipped.weapon = null;
       localPlayer.inventory = localPlayer.inventory.filter(it => !it || it.type !== 'WEAPON');
+      localPlayer.arrests = (localPlayer.arrests || 0) + 1;
       refreshHud();
       await showAppAlert(
         "Armes saisies !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !",
@@ -278,6 +280,8 @@ function refreshHud() {
       pocketCash: localPlayer.pocketCash,
       safeCash: localPlayer.safeCash,
       drugs: localPlayer.drugs,
+      safeDrugs: localPlayer.safeDrugs,
+      arrests: localPlayer.arrests || 0,
       hearts: localPlayer.hearts,
       atk: getTotalAtk(),
       def: getTotalDef(),

@@ -38,6 +38,7 @@ let localPlayer = {
   safeCash: 0,
   drugs: 5,
   safeDrugs: 0,
+  arrests: 0,
   hearts: 3,
   baseAtk: 1,
   baseDef: 0,

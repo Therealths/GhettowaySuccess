@@ -55,7 +55,24 @@ async function startLiveQrCamera() {
 async function openQrScannerModal() {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
   document.getElementById('modalQrScanner').classList.remove('hidden');
+  applyQrTestMode();
   await startLiveQrCamera();
+}
+
+// Boutons de test cachés : 5 appuis rapides sur le titre « Scanner Tactique » les affichent (ou les recachent)
+let scannerTitleTaps = [];
+function applyQrTestMode() {
+  document.getElementById('qrTestButtons').classList.toggle('hidden', localStorage.getItem('g2s_test_mode') !== '1');
+}
+function tapScannerTitle() {
+  const now = Date.now();
+  scannerTitleTaps = scannerTitleTaps.filter(t => now - t < 2500).concat(now);
+  if (scannerTitleTaps.length < 5) return;
+  scannerTitleTaps = [];
+  const on = localStorage.getItem('g2s_test_mode') !== '1';
+  localStorage.setItem('g2s_test_mode', on ? '1' : '0');
+  applyQrTestMode();
+  if (navigator.vibrate) navigator.vibrate(on ? [40, 60, 40] : 80);
 }
 
 async function closeQrScannerModal() {

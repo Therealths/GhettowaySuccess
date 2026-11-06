@@ -11,6 +11,31 @@ const io = new Server(server, { cors: { origin: '*' } });
 app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
+// Fin de partie : le premier Caïd qui réunit cette somme (poche + coffre) gagne
+const WIN_CASH = 100000;
+
+function buildStandings(room) {
+  return room.players
+    .map(p => ({
+      playerToken: p.playerToken,
+      caidId: p.caidId,
+      caidName: p.caidName || 'Caïd',
+      fortune: (p.pocketCash || 0) + (p.safeCash || 0),
+      drugs: (p.drugs || 0) + (p.safeDrugs || 0),
+      combatWins: p.combatWins || 0,
+      combatLosses: p.combatLosses || 0,
+      arrests: p.arrests || 0
+    }))
+    .sort((a, b) => b.fortune - a.fortune);
+}
+
+function checkVictory(room, roomId) {
+  if (!room.gameStarted || room.gameOver) return;
+  const winner = room.players.find(p => (p.pocketCash || 0) + (p.safeCash || 0) >= WIN_CASH);
+  if (!winner) return;
+  room.gameOver = { winnerToken: winner.playerToken, round: room.round, standings: buildStandings(room) };
+  io.to(roomId).emit('game_over', room.gameOver);
+}
 
 // Change à chaque redémarrage (donc à chaque déploiement) : les clients avec une ancienne page se rechargent
 const APP_VERSION = Date.now().toString(36);
@@ -172,6 +197,7 @@ io.on('connection', (socket) => {
       isReady: checkRoomReady(room),
       selectionMode: room.selectionMode || 'random'
     });
+    if (room.gameOver) socket.emit('game_over', room.gameOver);
 
     io.to(roomId).emit('update_room_players', {
       players: room.players,
@@ -735,6 +761,11 @@ io.on('connection', (socket) => {
     }
 
     loserP.hearts = Math.max(0, (loserP.hearts || 1) - 1);
+    loserP.combatLosses = (loserP.combatLosses || 0) + 1;
+    winnerTokens.forEach(tok => {
+      const wP = room.players.find(p => p.playerToken === tok);
+      if (wP) wP.combatWins = (wP.combatWins || 0) + 1;
+    });
 
     room.pendingPillage = {
       winnerTokens: winnerTokens.slice(),
@@ -813,6 +844,7 @@ io.on('connection', (socket) => {
         });
       } else {
         primaryWinner.pocketCash = (primaryWinner.pocketCash || 0) + stolenCash;
+        checkVictory(room, socket.roomId);
         io.to(primaryWinner.socketId).emit('pillage_gain_applied', {
           category: 'cash',
           amount: stolenCash,
@@ -1089,6 +1121,7 @@ io.on('connection', (socket) => {
     if (p) {
       Object.assign(p, updatedData);
       socket.to(socket.roomId).emit('player_updated', p);
+      checkVictory(room, socket.roomId);
     }
   });
 
