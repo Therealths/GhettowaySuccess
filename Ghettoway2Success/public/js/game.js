@@ -1,10 +1,61 @@
 // Création de partie, sélection des caïds, manches et fin de tour
 
-async function checkHospitalStatus() {
+async function checkHospitalStatus(cause) {
   if (localPlayer.hearts <= 0) {
-    await showAppAlert("Vous n'avez plus aucun Cœur de Vie !\nVotre Caïd est évacué d'urgence à l'Hôpital.", "🚑 Transfert Hôpital");
+    await showHospitalScreen(cause);
     localPlayer.hearts = 1;
   }
+}
+// Écran plein page du transfert à l'hôpital : K.O., puis soins (retour à 1 Cœur)
+function showHospitalScreen(cause) {
+  const scr = document.getElementById('hospitalScreen');
+  const caid = getMyCaid();
+  const cta = document.getElementById('hospCta');
+  const hearts = [...document.querySelectorAll('#hospHearts i')];
+  const row = (icon, label, before, after, note) => `<div class="police-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}${note ? `<small>${escapeHtml(note)}</small>` : ''}</span>${before !== '' ? `<span class="bef">${before}</span><i class="ph-bold ph-arrow-right text-slate-500 text-xs"></i>` : ''}<span class="aft">${after}</span></div>`;
+  const setRows = html => {
+    const box = document.getElementById('hospRows');
+    box.innerHTML = html;
+    [...box.children].forEach((el, i) => el.style.animationDelay = `${0.15 + i * 0.1}s`);
+  };
+
+  document.getElementById('hospRound').innerText = currentSession.round || 1;
+  document.getElementById('hospCaidImg').src = caid.imageFile;
+  document.getElementById('hospCaidName').innerText = caid.name;
+  document.getElementById('hospCaidSub').innerText = 'évacué d’urgence';
+  document.getElementById('hospBadge').innerText = 'K.O.';
+  document.getElementById('hospHeadline').innerHTML = 'T’ES<br>K.O.';
+  hearts.forEach(h => h.classList.remove('on'));
+  setRows(
+    (cause ? row('ph-warning', 'Cause', '', '', cause) : '') +
+    row('ph-heart-break', 'Cœurs de vie', '', '0 / 3')
+  );
+  cta.innerText = 'Recevoir les soins';
+  scr.dataset.state = 'ko';
+  scr.classList.remove('hidden', 'result', 'show');
+  void scr.offsetWidth; // relance les animations d'arrivée
+  scr.classList.add('show');
+
+  return new Promise(resolve => {
+    cta.onclick = () => {
+      if (scr.classList.contains('result')) {
+        scr.classList.add('hidden');
+        scr.classList.remove('show', 'result');
+        return resolve();
+      }
+      scr.dataset.state = 'soin';
+      scr.classList.add('result');
+      document.getElementById('hospHeadline').innerHTML = 'REMIS<br>SUR PIED.';
+      document.getElementById('hospBadge').innerText = 'SOIGNÉ';
+      document.getElementById('hospCaidSub').innerText = 'sort de l’hôpital';
+      hearts[0].classList.add('on');
+      setRows(
+        row('ph-heart', 'Cœurs de vie', '0', '1 / 3') +
+        row('ph-person-simple-walk', 'Ton Caïd', '', 'retourne dans la rue')
+      );
+      cta.innerText = 'Retour dans la rue';
+    };
+  });
 }
 function emitCreateGame() {
   const gName = document.getElementById('createGameName').value || 'Ghetto War';

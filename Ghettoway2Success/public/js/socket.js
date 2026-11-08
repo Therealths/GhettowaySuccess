@@ -298,7 +298,7 @@ if (socket) {
 
     if (outcome === 'loser') {
       localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-      await checkHospitalStatus();
+      await checkHospitalStatus(`Combat perdu contre ${opponentCaid}`);
       refreshHud();
       await showAppAlert(`Vous avez perdu le combat contre ${opponentCaid} (Écart : ${dmgNet}). Vous perdez 1 Cœur et le vainqueur choisit son butin !`, "💥 Défaite");
     } else {
@@ -386,7 +386,7 @@ if (socket) {
   socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
     if (effectType === 'siphon') {
       localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-      await checkHospitalStatus();
+      await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
       await showAppAlert(`${senderCaid} vous vole 1 Cœur de Vie !`, "🩸 Siphon Vital");
     } else if (effectType === 'shuriken') {
       localPlayer.tempDefMalus = 3;

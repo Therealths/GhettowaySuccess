@@ -197,3 +197,26 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @keyframes policeShake { 0%, 100% { transform: none; } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
 @media (max-height: 700px) { .police-headline { font-size: 34px; } .police-panel { padding: 12px; } .police-card { padding: 5px 2px; } .police-row { padding: 6px 10px; } }
 @media (prefers-reduced-motion: reduce) { .police-screen *, .police-screen.show *, .police-screen.result * { animation: none !important; } }
+/* Transfert à l'hôpital : même scène que le contrôle de police, avec ambulance, moniteur cardiaque et cœurs */
+.hosp-screen { --accent: #fb7185; }
+.hosp-screen[data-state="soin"] { --accent: #34d399; }
+.hosp-screen .police-light-blue { background: radial-gradient(closest-side, rgba(255,255,255,0.45), transparent); }
+.hosp-screen .police-cta { background: linear-gradient(90deg, #fb7185, #e11d48); }
+.hosp-screen[data-state="soin"] .police-cta { background: linear-gradient(90deg, #34d399, #10b981); }
+.hosp-team { max-width: 380px; }
+.hosp-monitor { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 12px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); }
+.hosp-monitor svg { flex: 1; height: 34px; min-width: 0; fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.hosp-flat { stroke: var(--accent); }
+.hosp-beat { stroke: var(--accent); stroke-dasharray: 100; stroke-dashoffset: 100; opacity: 0; }
+.hosp-screen[data-state="soin"] .hosp-flat { opacity: 0; }
+.hosp-screen[data-state="soin"] .hosp-beat { opacity: 1; }
+.hosp-hearts { display: flex; gap: 3px; font-size: 18px; color: #334155; }
+.hosp-hearts i.on { color: #f43f5e; }
+.hosp-screen.show .hosp-flat { animation: hospBlink 1s steps(2) infinite; }
+.hosp-screen.result .hosp-flat { animation: none; }
+.hosp-screen.result .hosp-beat { animation: hospTrace 1.6s linear infinite; }
+.hosp-screen.result .hosp-hearts i.on { animation: hospPop 0.5s cubic-bezier(.2,1.6,.4,1) 0.3s both; }
+@keyframes hospBlink { 50% { opacity: 0.25; } }
+@keyframes hospTrace { from { stroke-dashoffset: 100; } 70%, to { stroke-dashoffset: 0; } }
+@keyframes hospPop { from { transform: scale(0); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hosp-beat { stroke-dashoffset: 0; } }
