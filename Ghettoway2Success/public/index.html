@@ -855,6 +855,36 @@
       </div>
     </div>
 
+    <!-- CONTRÔLE DE POLICE : patrouille plein écran, tirage de la fouille puis résultat -->
+    <div id="policeScreen" class="hidden absolute inset-0 z-40 police-screen" data-state="fouille">
+      <img src="wallpaper-clean.jpg" alt="" class="police-bg">
+      <div class="police-lights"><i class="police-light-red"></i><i class="police-light-blue"></i></div>
+      <div class="police-shade"></div>
+      <div class="police-content">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="policeRound">1</span></span>
+          <span class="px-2.5 py-1 rounded-full bg-rose-500 text-white text-[10px] font-black"><i class="ph-fill ph-siren"></i> Contrôle</span>
+        </div>
+        <h2 id="policeHeadline" class="font-anton police-headline px-4 mt-2"></h2>
+        <div class="police-team-wrap"><img src="police-team.webp" alt="Patrouille de police" class="police-team"></div>
+        <div class="police-panel">
+          <div class="flex items-center gap-3 mb-3">
+            <img id="policeCaidImg" src="" alt="" class="w-12 h-12 rounded-full object-cover border-2 police-accent-border">
+            <div class="flex-1 min-w-0"><div id="policeCaidName" class="text-sm font-black text-white truncate"></div><div id="policeCaidSub" class="text-[11px] text-slate-400"></div></div>
+            <span id="policeBadge" class="font-anton text-xl police-accent"></span>
+          </div>
+          <div id="policeDrawLabel" class="text-[10px] font-black uppercase tracking-widest text-sky-300 mb-2"></div>
+          <div id="policeDraw" class="grid grid-cols-3 gap-2">
+            <div class="police-card" data-pick="CLEAN" style="--card:#34d399"><i class="ph-bold ph-check-circle"></i><b>R.A.S.</b><small>30%</small></div>
+            <div class="police-card" data-pick="DRUGS_FOUND" style="--card:#fb7185"><i class="ph-bold ph-leaf"></i><b>Drogue</b><small>35%</small></div>
+            <div class="police-card" data-pick="WEAPONS_FOUND" style="--card:#fb7185"><i class="ph-bold ph-knife"></i><b>Armes</b><small>35%</small></div>
+          </div>
+          <div id="policeRows" class="flex flex-col gap-1.5 mt-3"></div>
+          <button id="policeCta" class="police-cta">Voir le résultat</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODALES SYSTÈME STYLISÉES -->
     <div id="modalAppAlert" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">

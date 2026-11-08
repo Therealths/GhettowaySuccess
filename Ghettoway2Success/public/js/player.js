@@ -150,39 +150,109 @@ async function triggerPoliceInspection() {
   else if (r < 0.65) pick = 'DRUGS_FOUND';
   else pick = 'WEAPONS_FOUND';
 
-  const hasAnyWeapon = !!localPlayer.equipped.weapon || localPlayer.inventory.some(it => it && it.type === 'WEAPON');
+  const weapons = [localPlayer.equipped.weapon, ...localPlayer.inventory.filter(it => it && it.type === 'WEAPON')].filter(Boolean);
+  const drugs = localPlayer.drugs;
+  const arrests = localPlayer.arrests || 0;
+  const caught = (pick === 'DRUGS_FOUND' && drugs > 0) || (pick === 'WEAPONS_FOUND' && weapons.length > 0);
 
-  if (pick === 'CLEAN') {
-    await showAppAlert("R.A.S. ! La patrouille ne trouve rien et vous laisse repartir.", "👮 Contrôle");
-  } else if (pick === 'DRUGS_FOUND') {
-    if (localPlayer.drugs > 0) {
-      const s = localPlayer.drugs;
-      localPlayer.drugs = 0;
-      localPlayer.arrests = (localPlayer.arrests || 0) + 1;
-      refreshHud();
-      await showAppAlert(
-        `${s} kg de drogue saisis !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !`,
-        "🚔 Garde à Vue"
-      );
-      endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
-    } else {
-      await showAppAlert("La police cherchait de la drogue mais vous n'en avez pas sur vous : R.A.S., vous repartez libre !", "👮 Contrôle");
-    }
-  } else if (pick === 'WEAPONS_FOUND') {
-    if (hasAnyWeapon) {
+  // La saisie est appliquée tout de suite (un rechargement de page ne l'annule pas), l'écran raconte ensuite la scène
+  if (caught) {
+    if (pick === 'DRUGS_FOUND') localPlayer.drugs = 0;
+    else {
       localPlayer.equipped.weapon = null;
       localPlayer.inventory = localPlayer.inventory.filter(it => !it || it.type !== 'WEAPON');
-      localPlayer.arrests = (localPlayer.arrests || 0) + 1;
-      refreshHud();
-      await showAppAlert(
-        "Armes saisies !\nVous êtes conduit au poste de police et placé en garde à vue : votre tour prend fin immédiatement !",
-        "🚔 Garde à Vue"
-      );
-      endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
-    } else {
-      await showAppAlert("La police cherchait des armes mais vous n'en possédez aucune : R.A.S., vous repartez libre !", "👮 Contrôle");
     }
+    localPlayer.arrests = arrests + 1;
+    refreshHud();
   }
+
+  await showPoliceScreen({ pick, caught, drugs, weapons, arrests });
+  if (caught) endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
+}
+
+// Écran plein écran du contrôle : la patrouille arrive, tire au sort ce qu'elle cherche, puis le verdict
+function showPoliceScreen({ pick, caught, drugs, weapons, arrests }) {
+  const scr = document.getElementById('policeScreen');
+  const caid = getMyCaid();
+  const cta = document.getElementById('policeCta');
+  const cards = [...document.querySelectorAll('#policeDraw .police-card')];
+  const weaponNames = weapons.map(w => w.name).join(', ');
+  const row = (icon, label, before, after, note) => `<div class="police-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}${note ? `<small>${escapeHtml(note)}</small>` : ''}</span>${before !== '' ? `<span class="bef">${before}</span><i class="ph-bold ph-arrow-right text-slate-500 text-xs"></i>` : ''}<span class="aft">${after}</span></div>`;
+  const setRows = html => {
+    const box = document.getElementById('policeRows');
+    box.innerHTML = html;
+    [...box.children].forEach((el, i) => el.style.animationDelay = `${0.15 + i * 0.1}s`);
+  };
+  const searched = pick === 'DRUGS_FOUND' ? 'de la drogue' : 'des armes';
+
+  document.getElementById('policeRound').innerText = currentSession.round || 1;
+  document.getElementById('policeCaidImg').src = caid.imageFile;
+  document.getElementById('policeCaidName').innerText = caid.name;
+  document.getElementById('policeCaidSub').innerText = 'se fait fouiller…';
+  document.getElementById('policeBadge').innerText = '…';
+  document.getElementById('policeHeadline').innerHTML = 'PAPIERS,<br>S’IL VOUS PLAÎT.';
+  document.getElementById('policeDrawLabel').innerText = 'La patrouille choisit ce qu’elle cherche…';
+  document.getElementById('policeRows').innerHTML = '';
+  cards.forEach(c => c.classList.remove('on'));
+  cta.innerText = 'Voir le résultat';
+  cta.disabled = true;
+  scr.dataset.state = 'fouille';
+  scr.classList.remove('hidden', 'result', 'show');
+  void scr.offsetWidth; // relance les animations d'arrivée
+  scr.classList.add('show');
+
+  return new Promise(resolve => {
+    // Tirage : la sélection saute de carte en carte puis s'arrête sur ce que cherche la police
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const target = cards.findIndex(c => c.dataset.pick === pick);
+    const steps = reduce ? 0 : 12;
+    let i = 0;
+    const land = () => {
+      cards.forEach((c, k) => c.classList.toggle('on', k === target));
+      document.getElementById('policeDrawLabel').innerText = 'Ils cherchent :';
+      setRows(
+        row('ph-leaf', 'Drogue sur toi', '', `${drugs} kg`) +
+        row('ph-knife', 'Armes sur toi', '', weapons.length ? `${weapons.length}` : 'aucune', weaponNames)
+      );
+      cta.disabled = false;
+    };
+    const tick = () => {
+      if (i >= steps) return land();
+      cards.forEach((c, k) => c.classList.toggle('on', k === i % 3));
+      i++;
+      setTimeout(tick, 70 + i * 9);
+    };
+    setTimeout(tick, reduce ? 0 : 900);
+
+    cta.onclick = () => {
+      if (scr.classList.contains('result')) {
+        scr.classList.add('hidden');
+        scr.classList.remove('show', 'result');
+        return resolve();
+      }
+      scr.dataset.state = caught ? 'gav' : 'ras';
+      scr.classList.add('result');
+      document.getElementById('policeDrawLabel').innerText = 'Ils cherchaient :';
+      document.getElementById('policeHeadline').innerHTML = caught ? 'AU POSTE.' : 'CIRCULEZ.';
+      document.getElementById('policeBadge').innerText = caught ? 'GAV' : 'LIBRE';
+      document.getElementById('policeCaidSub').innerText = caught ? 'placé en garde à vue' : 'repart libre';
+      if (!caught) {
+        setRows(
+          (pick === 'CLEAN' ? row('ph-magnifying-glass', 'Contrôle de routine', '', 'R.A.S.') : row('ph-magnifying-glass', `Ils cherchaient ${searched}`, '', 'rien trouvé')) +
+          row('ph-person-simple-walk', 'Ton tour', '', 'continue')
+        );
+      } else {
+        setRows(
+          (pick === 'DRUGS_FOUND'
+            ? row('ph-leaf', 'Drogue sur toi', `${drugs} kg`, '0 kg', 'saisie')
+            : row('ph-knife', 'Armes sur toi', `${weapons.length}`, '0', `saisies : ${weaponNames}`)) +
+          row('ph-lock-key', 'Arrestations', `${arrests}`, `${arrests + 1}`) +
+          row('ph-hourglass-simple', 'Ton tour', 'en cours', 'terminé')
+        );
+      }
+      cta.innerText = caught ? 'Direction le poste' : 'Repartir';
+    };
+  });
 }
 
 async function sellItem(idx) {
