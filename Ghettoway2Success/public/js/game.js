@@ -95,16 +95,17 @@ function syncMultiplayerTargets() {
   const allySel = document.getElementById('allianceTargetSelect');
   const specialSel = document.getElementById('specialTargetSelect');
 
-  const attackableRivals = (connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken) && !r.inHospital);
+  // Caïd à l'hôpital : toujours listé, mais grisé et non sélectionnable
+  const rivalName = r => r.caidName || r.name || 'Caïd Adverse';
+  const rivalOpt = r => `<option value="${r.playerToken}">${rivalName(r)} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`;
+  const hospitalOpt = r => `<option value="" disabled style="color:#64748b">🏥 ${rivalName(r)} : à l’hôpital</option>`;
+  const buildOpts = (rivals, inHospital, emptyLabel) => {
+    const ok = rivals.filter(r => !inHospital(r)), out = rivals.filter(inHospital);
+    return (ok.length ? ok.map(rivalOpt).join('') : `<option value="" selected>${emptyLabel}</option>`) + out.map(hospitalOpt).join('');
+  };
 
-  const combatOpts = !attackableRivals.length
-    ? '<option value="">Aucune cible attaquable (Pacte actif ou à l’hôpital)</option>'
-    : attackableRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
-
-  const allyRivals = (connectedRivals || []).filter(r => !(r.inHospital && r.inHospital.round === (currentSession.round || 1)));
-  const allOpts = !allyRivals.length
-    ? '<option value="">Aucun allié possible (ou Caïd à l’hôpital)</option>'
-    : allyRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
+  const combatOpts = buildOpts((connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken)), r => !!r.inHospital, 'Aucune cible attaquable (ou Pacte actif)');
+  const allOpts = buildOpts(connectedRivals || [], r => !!(r.inHospital && r.inHospital.round === (currentSession.round || 1)), 'Aucun allié possible');
 
   if (combatSel) combatSel.innerHTML = combatOpts;
   if (specialSel) specialSel.innerHTML = combatOpts;
