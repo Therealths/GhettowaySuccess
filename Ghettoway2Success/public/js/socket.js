@@ -181,20 +181,14 @@ if (socket) {
     // allyCaid : noms des autres attaquants joints par « & », allies : [{ token, caidName, atk }]
     currentDuelInfo = { phase: phase || 1, role, isAlliedAttack, allyCaid, allyAtk: allyAtk || 0, allies: allies || [], opponentCaid, opponentSocketId };
     isCombatReady = false;
-    document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-sword"></i> Phase 1 : Assaut Initial`;
-    document.getElementById('combatTargetSelectionBox').classList.add('hidden');
-    document.getElementById('btnInitiateFightAction').classList.add('hidden');
-    const advTag = document.getElementById('combatAdversaryTag');
-    advTag.classList.remove('hidden');
-    document.getElementById('combatOpponentNameDisplay').innerText = opponentCaid;
-    document.getElementById('combatOpponentForcesBar').innerText = `Lascars : ${targetMusclesCount || 0} | Escort : ${targetHasProstitute ? 'Oui' : 'Non'} | Chien : ${targetHasStrayDog ? 'Oui' : 'Non'}`;
-    const allyNote = (isAlliedAttack && allyCaid) ? ` (Coordonné avec ${allyCaid})` : '';
-    document.getElementById('combatLiveLog').innerHTML = `<p class="text-amber-300 font-bold">⚡ Phase 1 : Duel engagé contre ${opponentCaid}${allyNote} ! Jouez vos objets ou cliquez sur Prêt.</p>`
-      + (myWeaponNullified ? `<p class="text-rose-300 font-bold">🗑️ Couvercle de poubelle adverse : votre arme compte pour 0 dans ce combat !</p>` : '');
-    document.getElementById('btnToggleCombatReady').classList.remove('hidden');
-    updateCombatReadyButtonUI();
-    updateArenaLiveStats();
-    document.getElementById('modalCombat').classList.remove('hidden');
+    fightReadyNames = new Set();
+    fightWaiting = null;
+    fightForces = { muscles: targetMusclesCount || 0, prostitute: !!targetHasProstitute, dog: !!targetHasStrayDog };
+    const allyNote = (isAlliedAttack && allyCaid) ? ` (coordonné avec ${escapeHtml(allyCaid)})` : '';
+    fightLog(`⚡ Duel engagé contre <b>${escapeHtml(opponentCaid)}</b>${allyNote} ! Joue tes objets ou clique sur Prêt.`, true);
+    if (myWeaponNullified) fightLog(`🗑️ Couvercle de poubelle adverse : ton arme compte pour 0 dans ce combat !`);
+    closeModal('modalCombatItemSelector');
+    renderFightDuel(true);
 
     // J-Lo Gramme agressée : Prière Miraculeuse (50% d'annuler l'agression), 1x par manche
     if (role === 'defender' && (phase || 1) === 1 && localPlayer.caidId === 'caid_5' && !localPlayer.specialUsedThisTurn) {
@@ -204,8 +198,7 @@ if (socket) {
         if (Math.random() >= 0.5) {
           socket.emit('combat_prayer_cancel');
         } else {
-          const log = document.getElementById('combatLiveLog');
-          log.innerHTML += `<p class="text-rose-300 font-bold">🙏 PILE ! La prière échoue, le combat continue.</p>`;
+          fightLog(`🙏 PILE ! La prière échoue, le combat continue.`);
           await showAppAlert("PILE ! La prière échoue : le combat continue.", "🙏 Échec");
         }
       }
@@ -214,109 +207,98 @@ if (socket) {
   socket.on('combat_weapon_nullified', async ({ byCaid }) => {
     myWeaponNullified = true;
     updateArenaLiveStats();
-    const log = document.getElementById('combatLiveLog');
-    log.innerHTML += `<p class="text-rose-300 font-bold">🗑️ ${byCaid} a sorti un Couvercle de poubelle : votre arme compte pour 0 !</p>`;
-    log.scrollTop = log.scrollHeight;
+    fightLog(`🗑️ <b>${escapeHtml(byCaid)}</b> a sorti un Couvercle de poubelle : ton arme compte pour 0 !`);
     await showAppAlert(`${byCaid} se protège avec un Couvercle de poubelle : votre arme compte pour 0 dans ce combat !`, "🗑️ Arme Neutralisée");
   });
   socket.on('combat_cancelled_by_prayer', async ({ caidName }) => {
     endSingleCombatEffects();
-    closeModal('modalCombat');
+    closeFightScreen();
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
     await showAppAlert(`FACE ! ${caidName} a annulé l'agression grâce à sa Prière Miraculeuse.`, "🙏 Miracle");
   });
 
+  // Attaque coordonnée bloquée : les attaquants attendent que le défenseur choisisse sa cible
   socket.on('combat_waiting_defender_riposte_choice', ({ defenderCaid }) => {
-    const log = document.getElementById('combatLiveLog');
-    log.innerHTML += `<p class="text-sky-300 font-bold">🛡️ Votre assaut a été bloqué ! ${defenderCaid} choisit sa cible pour contre-attaquer...</p>`;
-    log.scrollTop = log.scrollHeight;
+    closeModal('modalCombatItemSelector');
+    fightWaiting = `${defenderCaid || 'Le défenseur'} choisit qui reçoit sa contre-attaque…`;
+    fightLog(`🛡️ Votre assaut a été bloqué ! <b>${escapeHtml(defenderCaid)}</b> choisit sa cible pour contre-attaquer…`);
+    renderFightDuel(true);
   });
 
   socket.on('combat_choose_riposte_target', ({ targets }) => {
-    const listEl = document.getElementById('riposteTargetsList');
-    listEl.innerHTML = targets.map(t => `
-      <button onclick="selectRiposteTarget('${t.playerToken}')" class="w-full p-3 glass-panel rounded-2xl border border-sky-500/40 flex items-center justify-between text-left hover:bg-sky-500/20">
-        <div>
-          <span class="text-xs font-black text-white uppercase block">${t.caidName}</span>
-          <span class="text-[10px] font-mono text-sky-300">Défense actuelle : ${t.def}</span>
-        </div>
-        <span class="px-3 py-1 bg-rose-500 text-white font-black rounded-xl text-[10px] uppercase">Riposter</span>
-      </button>
-    `).join('');
-    document.getElementById('modalChooseRiposteTarget').classList.remove('hidden');
+    closeModal('modalCombatItemSelector');
+    fightRiposteTargets = targets || [];
+    fightRipostePick = null;
+    renderFightRiposte();
   });
 
   socket.on('combat_not_targeted_by_riposte', async ({ defenderCaid, chosenCaid }) => {
     endSingleCombatEffects();
-    closeModal('modalCombat');
+    closeFightScreen();
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
+    fightWaiting = null;
     await showAppAlert(`${defenderCaid} a repoussé votre assaut et a choisi de cibler ${chosenCaid} pour sa contre-attaque !`, "🛡️ Riposte Adverse");
   });
 
   socket.on('combat_phase2_started', async ({ role, opponentCaid, weaponNullified }) => {
     myWeaponNullified = !!weaponNullified;
-    closeModal('modalChooseRiposteTarget');
-    currentDuelInfo = { phase: 2, role, isAlliedAttack: false, allyCaid: null, allyAtk: 0, opponentCaid };
+    currentDuelInfo = { phase: 2, role, isAlliedAttack: false, allyCaid: null, allyAtk: 0, allies: [], opponentCaid };
     isCombatReady = false;
-    document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-arrows-clockwise"></i> Phase 2 : Contre-Attaque`;
-    document.getElementById('combatOpponentNameDisplay').innerText = opponentCaid;
-    updateCombatReadyButtonUI();
-    updateArenaLiveStats();
-    const log = document.getElementById('combatLiveLog');
+    fightReadyNames = new Set();
+    fightWaiting = null;
+    const opp = (connectedRivals || []).find(r => allyRivalName(r) === opponentCaid);
+    fightForces = opp ? { muscles: opp.musclesCount || 0, prostitute: !!opp.hasProstituteInTransit, dog: !!opp.hasStrayDog } : null;
+    closeModal('modalCombatItemSelector');
     if (role === 'attacker') {
-      log.innerHTML += `<p class="text-emerald-300 font-bold">🔄 Phase 2 : Vous passez à l'Attaque pour riposter contre ${opponentCaid} ! Cliquez sur Prêt.</p>`;
-      if (myWeaponNullified) log.innerHTML += `<p class="text-rose-300 font-bold">🗑️ Couvercle de poubelle adverse : votre arme compte pour 0 dans ce combat !</p>`;
+      fightLog(`🔄 Phase 2 : tu passes à l'attaque pour riposter contre <b>${escapeHtml(opponentCaid)}</b> ! Clique sur Prêt.`);
+      if (myWeaponNullified) fightLog(`🗑️ Couvercle de poubelle adverse : ton arme compte pour 0 dans ce combat !`);
     } else {
-      log.innerHTML += `<p class="text-rose-300 font-bold">🔄 Phase 2 : Votre assaut a échoué ! ${opponentCaid} passe à la Contre-Attaque contre votre Défense !</p>`;
+      fightLog(`🔄 Phase 2 : ton assaut a échoué ! <b>${escapeHtml(opponentCaid)}</b> contre-attaque contre ta défense !`);
     }
-    log.scrollTop = log.scrollHeight;
+    renderFightDuel(true);
   });
 
   socket.on('combat_opponent_played_items', async ({ senderCaid, itemNames }) => {
-    const log = document.getElementById('combatLiveLog');
-    log.innerHTML += `<p class="text-rose-300">⚠️ <strong>${senderCaid}</strong> a joué : ${itemNames.join(', ')} !</p>`;
-    log.scrollTop = log.scrollHeight;
+    fightLog(`⚠️ <b>${escapeHtml(senderCaid)}</b> a joué : ${escapeHtml(itemNames.join(', '))} !`);
     await showAppAlert(`${senderCaid} vient d'activer : ${itemNames.join(', ')} !\nVous pouvez aussi jouer des objets.`, "⚠️ Action Adverse");
   });
 
   socket.on('combat_opponent_is_ready', ({ caidName }) => {
-    const log = document.getElementById('combatLiveLog');
-    log.innerHTML += `<p class="text-emerald-400 font-bold">✅ ${caidName || "Un combattant"} est prêt au combat !</p>`;
-    log.scrollTop = log.scrollHeight;
+    if (caidName) fightReadyNames.add(caidName);
+    fightLog(`✅ <b>${escapeHtml(caidName || 'Un combattant')}</b> est prêt au combat !`);
+    updateCombatReadyButtonUI();
   });
 
-  socket.on('combat_ready_state_reset', () => { isCombatReady = false; updateCombatReadyButtonUI(); });
+  socket.on('combat_ready_state_reset', () => { isCombatReady = false; fightReadyNames = new Set(); updateCombatReadyButtonUI(); });
 
   socket.on('combat_finished_draw', async ({ message }) => {
+    const last = fightLast;
     endSingleCombatEffects();
-    closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
     refreshHud();
-    await showAppAlert(message || "Match Nul !", "🤝 Match Nul");
+    await showFightDraw(message || "Match Nul !", last);
   });
 
   socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }) => {
+    const last = fightLast;
     endSingleCombatEffects();
-    closeModal('modalCombat');
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
 
     if (outcome === 'loser') {
+      const heartsBefore = localPlayer.hearts;
       localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
       refreshHud();
-      await showAppAlert(`Vous avez perdu le combat contre ${opponentCaid} (Écart : ${dmgNet}). Vous perdez 1 Cœur et le vainqueur choisit son butin !`, "💥 Défaite");
+      // Écran de défaite d'abord, puis l'écran Hôpital si plus aucun cœur
+      await showFightDefeat({ dmgNet, opponentCaid, heartsBefore }, last);
       await checkHospitalStatus(`Combat perdu contre ${opponentCaid}`);
       refreshHud();
     } else {
       refreshHud();
-      if (isPrimaryPicker && pillageInfo) {
-        openPillageModalUI(pillageInfo);
-      } else {
-        await showAppAlert(`Victoire contre ${opponentCaid} ! Votre allié sélectionne la récompense à piller.`, "🏆 Victoire");
-      }
+      await showFightVictory({ dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }, last);
     }
   });
 
@@ -354,10 +336,10 @@ if (socket) {
 
   socket.on('combat_aborted', async () => {
     endSingleCombatEffects();
-    closeModal('modalCombat');
+    closeFightScreen();
     closeModal('modalCombatItemSelector');
-    closeModal('modalChooseRiposteTarget');
     currentDuelInfo = null;
+    fightWaiting = null;
     await showAppAlert("Le combat a été annulé.", "Combat Interrompu");
   });
 

@@ -109,8 +109,13 @@ function armBackTrap() {
 function closeTopModalOnBack() {
   const open = [...document.querySelectorAll('[id^="modal"]:not(.hidden)')];
   const top = open[open.length - 1];
-  if (!top) return false;
-  if (top.id === 'modalCombat') { if (!currentDuelInfo) closeModal('modalCombat'); return true; }
+  if (!top) {
+    // Écran de combat : le retour ne ferme que le choix de la cible, jamais un duel en cours
+    const fight = document.getElementById('fightScreen');
+    if (!fight || fight.classList.contains('hidden')) return false;
+    if (fight.dataset.state === 'choix' && !currentDuelInfo) closeFightScreen();
+    return true;
+  }
   const btn = [...top.querySelectorAll('button')].find(b => {
     const a = b.getAttribute('onclick') || '';
     return a.includes(`closeModal('${top.id}')`) || a.includes('closeQrScannerModal()');

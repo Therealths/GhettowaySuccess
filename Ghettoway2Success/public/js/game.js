@@ -91,7 +91,6 @@ function respondToAllianceRequest(accepted) {
 }
 
 function syncMultiplayerTargets() {
-  const combatSel = document.getElementById('combatTargetSelect');
   const specialSel = document.getElementById('specialTargetSelect');
 
   // Caïd à l'hôpital : toujours listé, mais grisé et non sélectionnable
@@ -105,34 +104,27 @@ function syncMultiplayerTargets() {
 
   const combatOpts = buildOpts((connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken)), r => !!r.inHospital, 'Aucune cible attaquable (ou Pacte actif)');
 
-  if (combatSel) combatSel.innerHTML = combatOpts;
   if (specialSel) specialSel.innerHTML = combatOpts;
-  // Écran d'alliance ouvert sur le choix : la liste des Caïds suit
+  // Écrans d'alliance ou de combat ouverts sur le choix : la liste des Caïds suit
   if (typeof refreshAllianceChoice === 'function') refreshAllianceChoice();
-  updateSelectedRivalDetailsCard();
+  if (typeof refreshFightChoice === 'function') refreshFightChoice();
 }
 
-function updateSelectedRivalDetailsCard() {
-  const sel = document.getElementById('combatTargetSelect');
-  if (!sel) return;
-  const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
-  document.getElementById('targetPreviewLascars').innerText = target ? (target.musclesCount || 0) : '0';
-  document.getElementById('targetPreviewEscort').innerText = (target && target.hasProstituteInTransit) ? 'Oui' : 'Non';
-  document.getElementById('targetPreviewDog').innerText = (target && target.hasStrayDog) ? 'Oui' : 'Non';
-}
-
+// Écran de combat : ma stat en direct (attaque, cumulée avec mes alliés, ou défense) ; celle de l'adversaire reste secrète
 function updateArenaLiveStats() {
-  const a = document.getElementById('arenaPlayerLiveAtk');
-  const d = document.getElementById('arenaPlayerLiveDef');
-  const atkLbl = document.getElementById('arenaAtkLabel');
+  const stat = document.getElementById('fightMyStat');
+  const lbl = document.getElementById('arenaAtkLabel');
+  if (!stat || !currentDuelInfo) return;
   const myAtk = getTotalAtk();
-  const allyExtra = (currentDuelInfo && currentDuelInfo.isAlliedAttack) ? (currentDuelInfo.allyAtk || 0) : 0;
-  if (atkLbl) {
-    const nbAllies = ((currentDuelInfo && currentDuelInfo.allies) || []).length;
-    atkLbl.innerText = allyExtra > 0 ? `Assaut Cumulé (Vous + ${nbAllies > 1 ? nbAllies + ' Alliés' : 'Allié'})` : `Votre Assaut`;
+  const allyExtra = currentDuelInfo.isAlliedAttack ? (currentDuelInfo.allyAtk || 0) : 0;
+  if (currentDuelInfo.role === 'attacker') {
+    const nbAllies = (currentDuelInfo.allies || []).length;
+    if (lbl) lbl.innerText = allyExtra > 0 ? `Votre assaut (à ${nbAllies + 1})` : 'Ton attaque';
+    stat.innerText = myAtk + allyExtra;
+  } else {
+    if (lbl) lbl.innerText = 'Ta défense';
+    stat.innerText = getTotalDef();
   }
-  if (a) a.innerText = myAtk + allyExtra;
-  if (d) d.innerText = getTotalDef();
 }
 async function confirmLeaveGame() {
   if (await showAppConfirm("Voulez-vous quitter définitivement cette partie ?", "Quitter")) {

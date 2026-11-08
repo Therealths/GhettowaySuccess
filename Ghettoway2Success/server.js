@@ -873,7 +873,7 @@ io.on('connection', (socket) => {
           const defenderP = room.players.find(p => p.playerToken === combat.defenderToken);
           const targetsList = combat.attackerTokens.map(tok => {
             const p = room.players.find(x => x.playerToken === tok);
-            return { playerToken: tok, caidName: p ? p.caidName : 'Allié', def: p ? (p.def || 0) : 0 };
+            return { playerToken: tok, caidName: p ? p.caidName : 'Allié' };
           });
           combat.attackerTokens.forEach(tok => {
             const p = room.players.find(x => x.playerToken === tok);

@@ -563,50 +563,17 @@
       </div>
     </div>
 
-    <!-- MODALE COMBAT DE RUE (2 PHASES : ASSAUT -> RIPOSTE) -->
-    <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
-      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 id="combatModalHeaderTitle" class="text-sm font-black text-rose-500 uppercase flex items-center gap-1.5"><i class="ph-bold ph-sword"></i> Combat de Rue</h3>
-          <button onclick="abortCombat()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
+    <!-- COMBAT DE RUE : écran plein page (choix de la cible, duel, choix de la riposte, victoire, défaite, match nul) -->
+    <div id="fightScreen" class="hidden absolute inset-0 z-40 ally-screen fight-screen" data-state="choix">
+      <div class="ally-scene"><img id="fightImg" src="combat-duel.webp" alt=""><div id="fightStage" class="ally-stage"></div></div>
+      <div class="ally-glow fight-glow"></div>
+      <div class="ally-content">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="fightRound">1</span></span>
+          <span class="flex items-center gap-2"><span id="fightChip" class="ally-chip"></span><button type="button" id="fightAbort" onclick="abortCombat()" class="fight-x" aria-label="Fermer"><i class="ph-bold ph-x"></i></button></span>
         </div>
-        <div id="combatTargetSelectionBox">
-          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
-          <select id="combatTargetSelect" onchange="updateSelectedRivalDetailsCard()" class="w-full glass-input text-white p-2.5 rounded-xl text-xs font-bold outline-none"></select>
-          <div class="mt-2 p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs font-mono grid grid-cols-3 text-center gap-1">
-            <div><span class="text-[9px] text-sky-400 uppercase block font-bold">Lascars</span><span id="targetPreviewLascars" class="text-white font-black">0</span></div>
-            <div><span class="text-[9px] text-rose-400 uppercase block font-bold">Escort</span><span id="targetPreviewEscort" class="text-white font-black">Non</span></div>
-            <div><span class="text-[9px] text-purple-400 uppercase block font-bold">Chien</span><span id="targetPreviewDog" class="text-white font-black">Non</span></div>
-          </div>
-        </div>
-        <div id="combatAdversaryTag" class="hidden text-center p-2 rounded-xl bg-white/5 border border-white/10 font-mono text-xs">
-          <span>Adversaire : </span><strong id="combatOpponentNameDisplay" class="text-ghetto-gold uppercase">...</strong>
-          <div id="combatOpponentForcesBar" class="text-[10px] text-slate-300 mt-0.5"></div>
-        </div>
-        <div class="grid grid-cols-2 gap-2 text-center font-mono">
-          <div class="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30"><span id="arenaAtkLabel" class="text-[9px] text-rose-400 uppercase font-bold">Votre Assaut</span><div class="text-xl font-black text-white mt-0.5" id="arenaPlayerLiveAtk">1</div></div>
-          <div class="p-2.5 rounded-2xl bg-sky-500/10 border border-sky-500/30"><span class="text-[9px] text-sky-400 uppercase font-bold">Votre Défense</span><div class="text-xl font-black text-white mt-0.5" id="arenaPlayerLiveDef">0</div></div>
-        </div>
-        <div class="p-2.5 rounded-xl bg-black/50 border border-white/10 min-h-[50px] max-h-20 overflow-y-auto text-[11px] font-mono space-y-1" id="combatLiveLog">
-          <p class="text-slate-400 italic">Prêt pour le combat...</p>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="openCombatItemSelectorModal()" class="py-3 glass-panel border border-amber-500/40 text-amber-300 font-black uppercase rounded-xl text-xs flex items-center justify-center gap-1.5"><i class="ph-bold ph-backpack text-sm"></i><span>Objets</span></button>
-          <button id="btnToggleCombatReady" onclick="toggleCombatReadyState()" class="hidden py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black uppercase rounded-xl text-xs flex items-center justify-center gap-1.5"><i class="ph-bold ph-check text-sm"></i><span id="btnCombatReadyLabel">Prêt au combat</span></button>
-        </div>
-        <button id="btnInitiateFightAction" onclick="initiateCombatEngagement()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase rounded-2xl text-xs shadow-lg">Engager le Combat</button>
-      </div>
-    </div>
-
-    <!-- MODALE CHOIX DE LA CIBLE DE RIPOSTE (QUAND LE DÉFENSEUR REPOUSSE 2 ALLIÉS) -->
-    <div id="modalChooseRiposteTarget" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-5 rounded-3xl space-y-4 border-sky-500/40 max-w-sm mx-auto w-full text-center">
-        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-300 mx-auto flex items-center justify-center text-2xl border border-sky-400/40"><i class="ph-bold ph-shield-check"></i></div>
-        <div>
-          <h3 class="text-base font-black text-white uppercase">Assaut Repoussé !</h3>
-          <p class="text-xs text-slate-300 mt-1">Vous avez bloqué l'attaque des 2 alliés ! Choisissez lequel des deux vous ciblez pour votre contre-attaque :</p>
-        </div>
-        <div id="riposteTargetsList" class="space-y-2"></div>
+        <div class="flex-1"></div>
+        <div id="fightBottom" class="ally-bottom"></div>
       </div>
     </div>
 
@@ -615,7 +582,7 @@
       <div class="loot-bag-wrap"><img src="sac-butin.webp" alt="Sac de butin" class="loot-bag"></div>
       <div class="loot-panel space-y-4">
         <div class="text-center">
-          <h3 class="font-anton loot-head">PILLAGE</h3>
+          <h3 class="font-anton loot-head">RACKET</h3>
           <p class="text-xs text-slate-300 mt-0.5">Choisissez ce que vous prenez (100%) sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
         </div>
         <div id="pillageOptionsContainer" class="space-y-2"></div>
