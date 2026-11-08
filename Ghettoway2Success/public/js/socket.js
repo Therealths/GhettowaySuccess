@@ -298,9 +298,10 @@ if (socket) {
 
     if (outcome === 'loser') {
       localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-      await checkHospitalStatus(`Combat perdu contre ${opponentCaid}`);
       refreshHud();
       await showAppAlert(`Vous avez perdu le combat contre ${opponentCaid} (Écart : ${dmgNet}). Vous perdez 1 Cœur et le vainqueur choisit son butin !`, "💥 Défaite");
+      await checkHospitalStatus(`Combat perdu contre ${opponentCaid}`);
+      refreshHud();
     } else {
       refreshHud();
       if (isPrimaryPicker && pillageInfo) {
@@ -386,8 +387,10 @@ if (socket) {
   socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
     if (effectType === 'siphon') {
       localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-      await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
+      refreshHud();
       await showAppAlert(`${senderCaid} vous vole 1 Cœur de Vie !`, "🩸 Siphon Vital");
+      await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
+      refreshHud();
     } else if (effectType === 'shuriken') {
       localPlayer.tempDefMalus = 3;
       await showAppAlert(`${senderCaid} réduit votre Défense de 3 points ce tour !`, "⭐ Shuriken");
