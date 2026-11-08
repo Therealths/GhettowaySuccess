@@ -3,10 +3,25 @@
     {
       "id": "rad_police_raid",
       "title": "Descente de Police massive",
-      "impact": "Police +2 cases en phase 3",
-      "desc": "La police avance de +2 cases lors de la phase 3 pour l'ensemble des Caïds.",
+      "impact": "Patrouille +2 points de déplacement",
+      "desc": "La patrouille de police gagne +2 points de déplacement au dé de fin de tour.",
       "effectType": "PATROL_DICE_BONUS",
-      "effectVal": 2
+      "effectVal": 2,
+      "message": "Descente de police massive ce soir ! Les patrouilles accélèrent, planquez la marchandise…",
+      "rule": {
+        "big": "+2",
+        "tone": "malus",
+        "label": "points de déplacement pour la patrouille",
+        "sub": "au dé de fin de chaque tour",
+        "rows": [
+          [
+            "ph-dice-five",
+            "Dé de patrouille",
+            "1 à 6",
+            "3 à 8"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_drug_shortage",
@@ -14,15 +29,57 @@
       "impact": "Yencli +1 500 € ce tour",
       "desc": "Le cours du deal explose : tous les contrats Yencli rapportent +1 500 € ce tour.",
       "effectType": "YENCLI_CASH_BONUS",
-      "effectVal": 1500
+      "effectVal": 1500,
+      "message": "Plus rien à fumer dans la cité, les clients sont en manque… c'est le moment de dealer !",
+      "rule": {
+        "big": "+1 500 €",
+        "tone": "bonus",
+        "label": "par deal Yencli",
+        "sub": "en plus du prix du contrat",
+        "rows": [
+          [
+            "ph-handshake",
+            "Deal à 5 000 €",
+            "5 000 €",
+            "6 500 €"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_heatwave",
       "title": "Canicule Urbaine",
-      "impact": "Véhicules motorisés -2 PM",
-      "desc": "Chaleur étouffante : les véhicules motorisés perdent -2 PM pour toute cette manche.",
+      "impact": "Véhicules à moteur -2 points de déplacement",
+      "desc": "Chaleur étouffante : les véhicules à moteur perdent 2 points de déplacement pour toute cette manche.",
       "effectType": "MOTOR_PM_MOD",
-      "effectVal": -2
+      "effectVal": -2,
+      "message": "Canicule sur la ville ! Les moteurs chauffent, laissez la caisse au garage…",
+      "rule": {
+        "big": "-2",
+        "tone": "malus",
+        "label": "points de déplacement pour les véhicules à moteur",
+        "sub": "scooter et grosse cylindrée",
+        "rows": [
+          [
+            "ph-moped",
+            "Scooter",
+            "14",
+            "12"
+          ],
+          [
+            "ph-motorcycle",
+            "Grosse cylindrée",
+            "16",
+            "14"
+          ],
+          [
+            "ph-person-simple-walk",
+            "Rollers, trottinette, à pied",
+            "",
+            "pas touchés"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_gang_war",
@@ -30,7 +87,28 @@
       "impact": "-30% sur toutes les armes",
       "desc": "L'Armurerie liquide ses stocks : -30% sur tous les équipements offensifs ce tour.",
       "effectType": "WEAPON_PRICE_MULT",
-      "effectVal": 0.7
+      "effectVal": 0.7,
+      "message": "Guerre des gangs ! L'Armurerie liquide ses stocks, tout le monde veut s'armer…",
+      "rule": {
+        "big": "-30 %",
+        "tone": "bonus",
+        "label": "sur toutes les armes",
+        "sub": "à l'Armurerie",
+        "rows": [
+          [
+            "ph-knife",
+            "Cran d'arrêt",
+            "2 000 €",
+            "1 400 €"
+          ],
+          [
+            "ph-crosshair",
+            "Revolver",
+            "8 000 €",
+            "5 600 €"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_lake_fog",
@@ -38,7 +116,22 @@
       "impact": "Le Lac infranchissable ce tour",
       "desc": "Le terrain marécageux est totalement infranchissable pour l'ensemble des Caïds ce tour-ci.",
       "effectType": "BOARD_RULE_ONLY",
-      "effectVal": 0
+      "effectVal": 0,
+      "message": "Un brouillard épais tombe sur le Lac, on n'y voit plus rien… personne ne passe !",
+      "rule": {
+        "big": "Lac fermé",
+        "tone": "plateau",
+        "label": "infranchissable",
+        "sub": "contourne-le sur le plateau",
+        "rows": [
+          [
+            "ph-waves",
+            "Le Lac ne peut pas être traversé ce tour",
+            "",
+            ""
+          ]
+        ]
+      }
     },
     {
       "id": "rad_police_strike",
@@ -46,7 +139,22 @@
       "impact": "Patrouille immobile ce tour",
       "desc": "Les syndicats de police bloquent le poste : la patrouille ne se déplace pas en fin de tour.",
       "effectType": "PATROL_FREEZE",
-      "effectVal": 0
+      "effectVal": 0,
+      "message": "Les keufs sont en grève ! Le commissariat est bloqué, la patrouille reste au poste…",
+      "rule": {
+        "big": "0",
+        "tone": "bonus",
+        "label": "point de déplacement pour la patrouille",
+        "sub": "elle reste au poste ce tour",
+        "rows": [
+          [
+            "ph-dice-five",
+            "Dé de patrouille",
+            "1 à 6",
+            "0"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_customs_seizure",
@@ -54,7 +162,22 @@
       "impact": "Grossiste à 1 500 € / kg",
       "desc": "Les arrivages sont bloqués à la frontière : le tarif du Grossiste passe à 1 500 € / kg ce tour.",
       "effectType": "GROSSISTE_PRICE_SET",
-      "effectVal": 1500
+      "effectVal": 1500,
+      "message": "Saisie record aux douanes ! Plus rien ne passe la frontière, le kilo va coûter une blinde…",
+      "rule": {
+        "big": "1 500 €",
+        "tone": "malus",
+        "label": "le kilo chez le Grossiste",
+        "sub": "au lieu de 1 000 €",
+        "rows": [
+          [
+            "ph-package",
+            "Grossiste",
+            "1 000 €/kg",
+            "1 500 €/kg"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_vip_party",
@@ -62,7 +185,28 @@
       "impact": "Rente Prostituées doublée",
       "desc": "Affluence record dans le quartier : les prostituées installées au QG rapportent double ce tour.",
       "effectType": "PROSTITUTE_REV_MULT",
-      "effectVal": 2
+      "effectVal": 2,
+      "message": "Soirée VIP au Nightclub ! Le quartier est plein à craquer, ça va rapporter gros…",
+      "rule": {
+        "big": "x2",
+        "tone": "bonus",
+        "label": "rente des prostituées",
+        "sub": "installées au QG",
+        "rows": [
+          [
+            "ph-sparkle",
+            "Niveau 1",
+            "1 000 €",
+            "2 000 €"
+          ],
+          [
+            "ph-crown",
+            "Niveau 2",
+            "2 500 €",
+            "5 000 €"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_mma_tournament",
@@ -70,7 +214,28 @@
       "impact": "Lascars +1 Attaque ce tour",
       "desc": "Les gros bras sont chauffés à blanc : chaque Lascar recruté confère +1 Attaque supplémentaire ce tour.",
       "effectType": "LASCAR_ATK_BONUS",
-      "effectVal": 1
+      "effectVal": 1,
+      "message": "Tournoi clandestin au Sportclub ! Les gros bras sont chauffés à blanc…",
+      "rule": {
+        "big": "+1 ATK",
+        "tone": "bonus",
+        "label": "pour chaque Lascar",
+        "sub": "en combat et en braquage",
+        "rows": [
+          [
+            "ph-barbell",
+            "Lascar niveau 1",
+            "+1",
+            "+2"
+          ],
+          [
+            "ph-barbell",
+            "Lascar niveau 2",
+            "+2",
+            "+3"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_armored_truck",
@@ -78,15 +243,45 @@
       "impact": "Braquages +2 000 € ce tour",
       "desc": "La sécurité est débordée : tous les braquages réussis rapportent un bonus de +2 000 € durant cette manche.",
       "effectType": "HEIST_CASH_BONUS",
-      "effectVal": 2000
+      "effectVal": 2000,
+      "message": "Un fourgon blindé en rade sur le périph'… la sécu est débordée, c'est le moment !",
+      "rule": {
+        "big": "+2 000 €",
+        "tone": "bonus",
+        "label": "par braquage réussi",
+        "sub": "s'ajoute au butin partagé",
+        "rows": [
+          [
+            "ph-bank",
+            "Braquage à 8 000 €",
+            "8 000 €",
+            "10 000 €"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_curfew",
       "title": "Couvre-Feu Préfectoral",
-      "impact": "-2 PM à pied ce tour",
-      "desc": "Contrôles renforcés dans les rues : tous les Caïds se déplaçant à pied subissent -2 PM pour cette manche.",
+      "impact": "-2 points de déplacement à pied",
+      "desc": "Contrôles renforcés dans les rues : tous les Caïds qui se déplacent à pied perdent 2 points de déplacement pour cette manche.",
       "effectType": "FOOT_PM_MOD",
-      "effectVal": -2
+      "effectVal": -2,
+      "message": "Couvre-feu préfectoral ! Contrôles dans toutes les rues, ceux qui marchent vont galérer…",
+      "rule": {
+        "big": "-2",
+        "tone": "malus",
+        "label": "points de déplacement à pied",
+        "sub": "les véhicules ne sont pas touchés",
+        "rows": [
+          [
+            "ph-sneaker-move",
+            "À pied",
+            "8",
+            "6"
+          ]
+        ]
+      }
     },
     {
       "id": "rad_black_market",
@@ -94,7 +289,28 @@
       "impact": "-50% sur les Protections",
       "desc": "Un stock de matériel défensif inonde le marché noir : -50% sur tous les équipements de protection à l'Armurerie.",
       "effectType": "ARMOR_PRICE_MULT",
-      "effectVal": 0.5
+      "effectVal": 0.5,
+      "message": "Une cargaison est tombée du camion… gilets et casques bradés au marché noir !",
+      "rule": {
+        "big": "-50 %",
+        "tone": "bonus",
+        "label": "sur les protections",
+        "sub": "à l'Armurerie",
+        "rows": [
+          [
+            "ph-shield",
+            "Casque de soldat",
+            "5 000 €",
+            "2 500 €"
+          ],
+          [
+            "ph-shield-check",
+            "Gilet par balle",
+            "8 000 €",
+            "4 000 €"
+          ]
+        ]
+      }
     }
   ]
 }

@@ -58,7 +58,7 @@
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700;900&family=Anton&family=Permanent+Marker&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -285,22 +285,43 @@
       </div>
     </div>
     <!-- PAGE 5 : FLASH RADIO -->
-    <div id="page-5" class="screen-view p-5 justify-between bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(9,10,16,0.92), rgba(9,10,16,0.98)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80');">
-      <div class="pt-1 text-center">
-        <div class="flex items-center justify-between mb-2">
-          <button onclick="navTo('page-lobby')" class="w-9 h-9 rounded-xl glass-panel text-white flex items-center justify-center"><i class="ph-bold ph-caret-left text-base"></i></button>
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 border border-rose-500/40 text-rose-400 font-mono text-[10px] uppercase font-black rounded-full"><i class="ph-bold ph-broadcast animate-pulse"></i> Phase 1 : Flash Radio</div>
-          <div class="w-9"></div>
+    <div id="page-5" class="screen-view radio-page px-4 pt-4 gap-3">
+      <div class="flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">Manche <span id="radioRoundNumber">1</span></span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/15 text-rose-400 text-[11px] uppercase font-black tracking-wide rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>Ghetto FM 93.4</span>
+      </div>
+      <div class="radio-blaster relative flex-shrink-0 text-blue-400">
+        <span class="radio-arc radio-arc-l1"></span><span class="radio-arc radio-arc-l2"></span>
+        <span class="radio-arc radio-arc-r1"></span><span class="radio-arc radio-arc-r2"></span>
+        <img src="radio-blaster.webp" alt="Ghetto blaster" class="relative mx-auto">
+      </div>
+      <!-- Message entendu à la radio -->
+      <div class="radio-bubble relative flex-shrink-0 rounded-2xl border-2 border-blue-500 bg-[#0d1426] p-3">
+        <div class="flex items-center gap-1.5 text-blue-300 text-[10px] font-black uppercase tracking-[0.14em]">
+          <i class="ph-bold ph-headphones text-sm"></i>Entendu à la radio
+          <span class="radio-wave ml-auto text-blue-500"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
         </div>
-        <h2 class="text-2xl font-black text-white uppercase font-mono">Manche <span id="radioRoundNumber">1</span></h2>
+        <p id="radioCardMessage" class="font-marker text-[15px] leading-snug text-slate-200 mt-2"></p>
       </div>
-      <div class="glass-panel p-5 rounded-2xl text-left space-y-3 my-auto border-rose-500/20">
-        <div class="flex items-center gap-2 text-rose-400 font-mono text-xs uppercase font-bold"><i class="ph-bold ph-siren text-lg"></i> Fréquence 93.4 Ghetto FM</div>
-        <h3 id="radioCardTitle" class="text-base font-black text-white">Descente de Police massive</h3>
-        <p id="radioCardEffect" class="text-xs text-slate-300 leading-relaxed">La police avance de +2 cases lors de la phase 3.</p>
+      <!-- Règle qui change -->
+      <div class="radio-rule-box flex-shrink-0 rounded-2xl bg-[#12131b] border border-[#262838] p-3">
+        <div class="radio-rule-content">
+        <div class="flex items-center gap-1.5 text-amber-400 text-[10px] font-black uppercase tracking-[0.14em]"><i class="ph-bold ph-gavel text-sm"></i>La règle qui change</div>
+        <h3 id="radioCardTitle" class="hidden"></h3>
+        <div class="flex items-center gap-3 mt-1.5">
+          <span id="radioRuleBig" class="font-anton uppercase leading-none whitespace-nowrap"></span>
+          <div class="min-w-0"><div id="radioRuleLabel" class="font-extrabold text-[15px] leading-tight text-white"></div><div id="radioRuleSub" class="text-[11px] text-slate-400 mt-0.5"></div></div>
+        </div>
+        <div id="radioRuleRows" class="space-y-1.5 mt-2.5"></div>
+        <div class="flex justify-center gap-1.5 mt-2.5 flex-wrap">
+          <span class="radio-chip bg-white/5 text-slate-300"><i class="ph-bold ph-users-three"></i>Tous</span>
+          <span class="radio-chip bg-white/5 text-slate-300"><i class="ph-bold ph-hourglass"></i>Cette manche</span>
+          <span id="radioRuleTone" class="radio-chip"></span>
+        </div>
+        </div>
       </div>
-      <button type="button" onclick="acknowledgeRadioCard()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2">
-        <span>Passer à l'action des Caïds</span><i class="ph-bold ph-arrow-right"></i>
+      <button type="button" onclick="acknowledgeRadioCard()" class="radio-cta mt-auto flex-shrink-0 w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2">
+        <i class="ph-fill ph-play"></i><span>Passer à l'action</span>
       </button>
     </div>
     <!-- PAGE 6 : FICHE CAÏD (DASHBOARD) -->

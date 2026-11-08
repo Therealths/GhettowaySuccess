@@ -292,11 +292,42 @@ function finalizeCaidSelection(chosenCaid) {
   }
 }
 
-async function startRoundPhase1() {
-  const ev = currentSession.currentRadioEvent || { title: "Descente massive", impact: "Police +2 cases", desc: "La police avance de +2 cases." };
+// Page Flash Radio : message de l'animateur puis règle qui change (champs message/rule de radio_events.json)
+const RADIO_TONES = {
+  bonus: { color: '#34d399', chip: 'bg-emerald-400/15 text-emerald-400', label: 'Bonus' },
+  malus: { color: '#fb7185', chip: 'bg-rose-500/15 text-rose-400', label: 'Malus' },
+  plateau: { color: '#fbbf24', chip: 'bg-amber-400/15 text-amber-400', label: 'Plateau' }
+};
+function renderRadioCard(ev) {
+  const rule = ev.rule || { big: '', tone: 'plateau', label: ev.impact || ev.title, sub: ev.desc, rows: [] };
+  const tone = RADIO_TONES[rule.tone] || RADIO_TONES.plateau;
   document.getElementById('radioRoundNumber').innerText = currentSession.round;
   document.getElementById('radioCardTitle').innerText = ev.title;
-  document.getElementById('radioCardEffect').innerText = ev.desc;
+  // Le message sort du poste mot par mot, puis la règle arrive juste après le dernier mot
+  const words = `« ${ev.message || ev.desc} »`.split(' ');
+  document.getElementById('radioCardMessage').innerHTML = words
+    .map((w, i) => `<span class="radio-word" style="animation-delay:${(0.95 + i * 0.055).toFixed(3)}s">${escapeHtml(w)} </span>`).join('');
+  document.getElementById('page-5').style.setProperty('--radio-rule-delay', `${(0.95 + words.length * 0.055 + 0.15).toFixed(2)}s`);
+  const big = document.getElementById('radioRuleBig');
+  big.innerText = rule.big;
+  big.style.color = tone.color;
+  big.style.fontSize = rule.big.length <= 4 ? '50px' : (rule.big.length <= 8 ? '42px' : '34px');
+  big.classList.toggle('hidden', !rule.big);
+  document.getElementById('radioRuleLabel').innerText = rule.label;
+  document.getElementById('radioRuleSub').innerText = rule.sub || '';
+  document.getElementById('radioRuleRows').innerHTML = (rule.rows || []).map(([icon, label, before, after]) => `
+    <div class="radio-row">
+      <span class="flex items-center gap-1.5 min-w-0"><i class="ph-bold ${icon} text-base flex-shrink-0"></i><span>${escapeHtml(label)}</span></span>
+      <span class="flex items-center gap-1.5 flex-shrink-0">${before ? `<span class="text-slate-500 line-through">${escapeHtml(before)}</span><i class="ph-bold ph-arrow-right text-slate-500"></i>` : ''}<b style="color:${tone.color}">${escapeHtml(after)}</b></span>
+    </div>`).join('');
+  const chip = document.getElementById('radioRuleTone');
+  chip.className = `radio-chip ${tone.chip}`;
+  chip.innerText = tone.label;
+}
+
+async function startRoundPhase1() {
+  const ev = currentSession.currentRadioEvent || { title: "Descente massive", impact: "Police +2 cases", desc: "La police avance de +2 cases." };
+  renderRadioCard(ev);
   document.getElementById('hudRadioRoundTag').innerText = currentSession.round;
   document.getElementById('hudRadioReminderTitle').innerText = ev.title;
   document.getElementById('hudRadioReminderDesc').innerText = ev.impact || ev.desc;
