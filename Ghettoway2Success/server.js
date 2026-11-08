@@ -644,6 +644,10 @@ io.on('connection', (socket) => {
     if (arePlayersInNonAggressionPact(room, attackerPlayer.playerToken, targetPlayer.playerToken)) {
       return socket.emit('error_msg', "Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni durant ce tour, ni au tour suivant) !");
     }
+    // Caïd à l'hôpital : intouchable jusqu'au début de son prochain tour
+    if (targetPlayer.inHospital) {
+      return socket.emit('error_msg', `${targetPlayer.caidName || 'Ce Caïd'} est à l'hôpital : intouchable jusqu'à son prochain tour !`);
+    }
 
     const canCoordinate = useAlliance === true && room.currentTurnAlliedTokens && room.currentTurnAlliedTokens.includes(attackerPlayer.playerToken);
     let allyPlayer = null;
@@ -1158,6 +1162,10 @@ io.on('connection', (socket) => {
     if (arePlayersInNonAggressionPact(room, sender.playerToken, targetP.playerToken)) {
       return socket.emit('error_msg', "Pacte d'Alliance actif : impossible de cibler votre allié (ni durant ce tour, ni au tour suivant) !");
     }
+    // Caïd à l'hôpital : intouchable jusqu'au début de son prochain tour
+    if (targetP.inHospital) {
+      return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} est à l'hôpital : intouchable jusqu'à son prochain tour !`);
+    }
 
     io.to(targetP.socketId).emit('received_special_effect', {
       effectType,
@@ -1180,6 +1188,10 @@ io.on('connection', (socket) => {
     if (targetPlayerToken) {
       const targetP = room.players.find(p => p.playerToken === targetPlayerToken);
       if (targetP) destSocketId = targetP.socketId;
+      // Caïd envoyé à l'hôpital pendant cette manche : pas d'alliance avant la manche suivante
+      if (targetP && targetP.inHospital && targetP.inHospital.round === room.round) {
+        return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} est à l'hôpital : pas d'alliance possible avant la manche suivante !`);
+      }
     }
 
     io.to(destSocketId).emit('alliance_request_received', {

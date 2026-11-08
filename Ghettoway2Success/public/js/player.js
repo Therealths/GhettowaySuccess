@@ -353,6 +353,7 @@ function refreshHud() {
       safeDrugs: localPlayer.safeDrugs,
       arrests: localPlayer.arrests || 0,
       hearts: localPlayer.hearts,
+      inHospital: localPlayer.inHospital || null,
       atk: getTotalAtk(),
       def: getTotalDef(),
       musclesCount: localPlayer.musclesOnPerson.length,

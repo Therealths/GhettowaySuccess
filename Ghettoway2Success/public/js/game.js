@@ -1,59 +1,67 @@
 // Création de partie, sélection des caïds, manches et fin de tour
 
+// Hôpital : à 0 Cœur le Caïd est évacué (écran K.O.) et reste intouchable jusqu'au début de son prochain tour,
+// où il est soigné (écran Remis sur pied) avant de jouer. inHospital garde la manche et le tour en cours au moment du K.O.
 async function checkHospitalStatus(cause) {
-  if (localPlayer.hearts <= 0) {
-    await showHospitalScreen(cause);
-    localPlayer.hearts = 1;
-  }
+  if (localPlayer.hearts > 0 || localPlayer.inHospital) return;
+  localPlayer.inHospital = { round: currentSession.round || 1, turnToken: activeTurnPlayerToken || null };
+  refreshHud();
+  // K.O. pendant son tour (ou pendant sa participation au tour d'un allié) : le tour s'arrête là
+  const endsTurn = isMyTurnToPlay;
+  await showHospitalScreen('ko', cause, 0, endsTurn);
+  if (endsTurn) endCurrentPlayerTurn(true);
 }
-// Écran plein page du transfert à l'hôpital : K.O., puis soins (retour à 1 Cœur)
-function showHospitalScreen(cause) {
+async function checkHospitalRelease(round) {
+  const h = localPlayer.inHospital;
+  if (!h || checkHospitalRelease.busy) return;
+  // Toujours le tour où il a été mis K.O. (page rechargée, mise à jour du tour) : ce n'est pas encore son « prochain » tour
+  if (h.turnToken === myPlayerToken && h.round === (round || currentSession.round)) return;
+  checkHospitalRelease.busy = true;
+  // Début de manche : on laisse d'abord passer le Flash Radio
+  while (document.getElementById('page-5').classList.contains('active')) await new Promise(r => setTimeout(r, 400));
+  const before = localPlayer.hearts;
+  localPlayer.hearts = Math.max(1, before);
+  localPlayer.inHospital = null;
+  refreshHud();
+  await showHospitalScreen('soin', null, before);
+  checkHospitalRelease.busy = false;
+}
+// Écran plein page de l'hôpital : 'ko' (évacuation) ou 'soin' (sortie, au début du tour suivant)
+function showHospitalScreen(mode, cause, heartsBefore = 0, endsTurn = false) {
   const scr = document.getElementById('hospitalScreen');
   const caid = getMyCaid();
   const cta = document.getElementById('hospCta');
-  const hearts = [...document.querySelectorAll('#hospHearts i')];
+  const ko = mode === 'ko';
   const row = (icon, label, before, after, note) => `<div class="police-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}${note ? `<small>${escapeHtml(note)}</small>` : ''}</span>${before !== '' ? `<span class="bef">${before}</span><i class="ph-bold ph-arrow-right text-slate-500 text-xs"></i>` : ''}<span class="aft">${after}</span></div>`;
-  const setRows = html => {
-    const box = document.getElementById('hospRows');
-    box.innerHTML = html;
-    [...box.children].forEach((el, i) => el.style.animationDelay = `${0.15 + i * 0.1}s`);
-  };
+  const box = document.getElementById('hospRows');
 
   document.getElementById('hospRound').innerText = currentSession.round || 1;
   document.getElementById('hospCaidImg').src = caid.imageFile;
   document.getElementById('hospCaidName').innerText = caid.name;
-  document.getElementById('hospCaidSub').innerText = 'évacué d’urgence';
-  document.getElementById('hospBadge').innerText = 'K.O.';
-  document.getElementById('hospHeadline').innerHTML = 'T’ES<br>K.O.';
-  hearts.forEach(h => h.classList.remove('on'));
-  setRows(
-    (cause ? row('ph-warning', 'Cause', '', '', cause) : '') +
-    row('ph-heart-break', 'Cœurs de vie', '', '0 / 3')
-  );
-  cta.innerText = 'Recevoir les soins';
-  scr.dataset.state = 'ko';
+  document.getElementById('hospCaidSub').innerText = ko ? 'évacué d’urgence' : 'sort de l’hôpital';
+  document.getElementById('hospBadge').innerText = ko ? 'K.O.' : 'SOIGNÉ';
+  document.getElementById('hospHeadline').innerHTML = ko ? 'T’ES<br>K.O.' : 'REMIS<br>SUR PIED.';
+  document.querySelectorAll('#hospHearts i').forEach((h, i) => h.classList.toggle('on', i < localPlayer.hearts));
+  box.innerHTML = ko
+    ? (cause ? row('ph-warning', 'Cause', '', '', cause) : '') +
+      row('ph-heart-break', 'Cœurs de vie', '', '0 / 3') +
+      row('ph-shield-check', 'Intouchable', '', 'jusqu’à ton tour', 'Ni attaque, ni pouvoir, ni alliance cette manche') +
+      (endsTurn ? row('ph-hourglass-simple', 'Ton tour', 'en cours', 'terminé') : '')
+    : row('ph-heart', 'Cœurs de vie', `${heartsBefore}`, `${localPlayer.hearts} / 3`) +
+      row('ph-person-simple-walk', 'Ton tour', '', 'à toi de jouer');
+  [...box.children].forEach((el, i) => el.style.animationDelay = `${0.15 + i * 0.1}s`);
+  cta.innerText = ko ? 'Direction l’hôpital' : 'Retour dans la rue';
+  scr.dataset.state = ko ? 'ko' : 'soin';
   scr.classList.remove('hidden', 'result', 'show');
   void scr.offsetWidth; // relance les animations d'arrivée
   scr.classList.add('show');
+  if (!ko) scr.classList.add('result');
 
   return new Promise(resolve => {
     cta.onclick = () => {
-      if (scr.classList.contains('result')) {
-        scr.classList.add('hidden');
-        scr.classList.remove('show', 'result');
-        return resolve();
-      }
-      scr.dataset.state = 'soin';
-      scr.classList.add('result');
-      document.getElementById('hospHeadline').innerHTML = 'REMIS<br>SUR PIED.';
-      document.getElementById('hospBadge').innerText = 'SOIGNÉ';
-      document.getElementById('hospCaidSub').innerText = 'sort de l’hôpital';
-      hearts[0].classList.add('on');
-      setRows(
-        row('ph-heart', 'Cœurs de vie', '0', '1 / 3') +
-        row('ph-person-simple-walk', 'Ton Caïd', '', 'retourne dans la rue')
-      );
-      cta.innerText = 'Retour dans la rue';
+      scr.classList.add('hidden');
+      scr.classList.remove('show', 'result');
+      resolve();
     };
   });
 }
@@ -87,15 +95,16 @@ function syncMultiplayerTargets() {
   const allySel = document.getElementById('allianceTargetSelect');
   const specialSel = document.getElementById('specialTargetSelect');
 
-  const attackableRivals = (connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken));
+  const attackableRivals = (connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken) && !r.inHospital);
 
   const combatOpts = !attackableRivals.length
-    ? '<option value="">Aucune cible attaquable (ou Pacte actif)</option>'
+    ? '<option value="">Aucune cible attaquable (Pacte actif ou à l’hôpital)</option>'
     : attackableRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
 
-  const allOpts = (!connectedRivals || !connectedRivals.length)
-    ? '<option value="">Aucun rival connecté</option>'
-    : connectedRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
+  const allyRivals = (connectedRivals || []).filter(r => !(r.inHospital && r.inHospital.round === (currentSession.round || 1)));
+  const allOpts = !allyRivals.length
+    ? '<option value="">Aucun allié possible (ou Caïd à l’hôpital)</option>'
+    : allyRivals.map(r => `<option value="${r.playerToken}">${r.caidName || r.name || 'Caïd Adverse'} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`).join('');
 
   if (combatSel) combatSel.innerHTML = combatOpts;
   if (specialSel) specialSel.innerHTML = combatOpts;

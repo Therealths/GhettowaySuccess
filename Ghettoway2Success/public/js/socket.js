@@ -159,6 +159,8 @@ if (socket) {
     const wasMyTurn = isMyTurnToPlay;
     isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
     if (isMyTurnToPlay && !wasMyTurn) { pmSpentThisTurn = 0; refreshHud(); }
+    // Sortie d'hôpital au début de son tour, ou quand il rejoint le tour d'un allié
+    if (activePlayerToken === myPlayerToken || (isMyTurnToPlay && !wasMyTurn)) checkHospitalRelease(round);
     const blocker = document.getElementById('turnBlockerOverlay');
     if (isMyTurnToPlay) blocker.classList.add('hidden');
     else {
