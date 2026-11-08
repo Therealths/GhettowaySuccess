@@ -84,15 +84,14 @@ function emitCreateGame() {
 }
 function emitStartGame() { if (socket) socket.emit('start_game'); }
 function respondToAllianceRequest(accepted) {
-  document.getElementById('modalAllianceRequestReceived').classList.add('hidden');
+  closeAllianceScreen();
   if (!pendingAllianceRequest) return;
-  if (socket) socket.emit('respond_alliance', { accepted, senderSocketId: pendingAllianceRequest.senderSocketId, senderToken: pendingAllianceRequest.senderToken });
+  if (socket) socket.emit('respond_alliance', { requestId: pendingAllianceRequest.requestId, accepted, senderToken: pendingAllianceRequest.senderToken });
   pendingAllianceRequest = null;
 }
 
 function syncMultiplayerTargets() {
   const combatSel = document.getElementById('combatTargetSelect');
-  const allySel = document.getElementById('allianceTargetSelect');
   const specialSel = document.getElementById('specialTargetSelect');
 
   // Caïd à l'hôpital : toujours listé, mais grisé et non sélectionnable
@@ -105,11 +104,11 @@ function syncMultiplayerTargets() {
   };
 
   const combatOpts = buildOpts((connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken)), r => !!r.inHospital, 'Aucune cible attaquable (ou Pacte actif)');
-  const allOpts = buildOpts(connectedRivals || [], r => !!(r.inHospital && r.inHospital.round === (currentSession.round || 1)), 'Aucun allié possible');
 
   if (combatSel) combatSel.innerHTML = combatOpts;
   if (specialSel) specialSel.innerHTML = combatOpts;
-  if (allySel) allySel.innerHTML = allOpts;
+  // Écran d'alliance ouvert sur le choix : la liste des Caïds suit
+  if (typeof refreshAllianceChoice === 'function') refreshAllianceChoice();
   updateSelectedRivalDetailsCard();
 }
 
@@ -129,7 +128,8 @@ function updateArenaLiveStats() {
   const myAtk = getTotalAtk();
   const allyExtra = (currentDuelInfo && currentDuelInfo.isAlliedAttack) ? (currentDuelInfo.allyAtk || 0) : 0;
   if (atkLbl) {
-    atkLbl.innerText = allyExtra > 0 ? `Assaut Cumulé (Vous + Allié)` : `Votre Assaut`;
+    const nbAllies = ((currentDuelInfo && currentDuelInfo.allies) || []).length;
+    atkLbl.innerText = allyExtra > 0 ? `Assaut Cumulé (Vous + ${nbAllies > 1 ? nbAllies + ' Alliés' : 'Allié'})` : `Votre Assaut`;
   }
   if (a) a.innerText = myAtk + allyExtra;
   if (d) d.innerText = getTotalDef();

@@ -60,7 +60,7 @@ let localPlayer = {
   inventory: [],
   specialUsedThisTurn: false,
   allianceActive: false,
-  activeAlly: null
+  activeAllies: [] // { allyToken, caid, caidId, grosBrasCount, allyAtk, hasProstituteInTransit } par allié du tour
 };
 function getMyCaid() {
   const id = localPlayer.caidId || localStorage.getItem('g2s_saved_caid_id');
@@ -139,13 +139,14 @@ function updateRivalsList(players) {
   if (players.length > 1 && connectedRivals.length === 0) {
     connectedRivals = players.filter(p => p.socketId !== socket?.id);
   }
-  if (localPlayer.allianceActive && localPlayer.activeAlly) {
-    const freshAlly = connectedRivals.find(r => r.playerToken === localPlayer.activeAlly.allyToken);
-    if (freshAlly) {
-      localPlayer.activeAlly.grosBrasCount = freshAlly.musclesCount || 0;
-      localPlayer.activeAlly.allyAtk = freshAlly.atk || 1;
-      localPlayer.activeAlly.hasProstituteInTransit = !!freshAlly.hasProstituteInTransit;
-    }
+  if (localPlayer.allianceActive && localPlayer.activeAllies.length) {
+    localPlayer.activeAllies.forEach(ally => {
+      const freshAlly = connectedRivals.find(r => r.playerToken === ally.allyToken);
+      if (!freshAlly) return;
+      ally.grosBrasCount = freshAlly.musclesCount || 0;
+      ally.allyAtk = freshAlly.atk || 1;
+      ally.hasProstituteInTransit = !!freshAlly.hasProstituteInTransit;
+    });
   }
   takenCaidsInGame = players.filter(p => p.caidId && p.playerToken !== myPlayerToken).map(p => p.caidId);
   syncMultiplayerTargets();

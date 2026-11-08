@@ -220,3 +220,91 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @keyframes hospTrace { from { stroke-dashoffset: 100; } 70%, to { stroke-dashoffset: 0; } }
 @keyframes hospPop { from { transform: scale(0); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .hosp-beat { stroke-dashoffset: 0; } }
+/* Alliance : écran plein page (choix, attente, demande reçue, pacte scellé, refus) */
+.ally-screen { --ac: #a78bfa; --ac2: #8b5cf6; --ac3: #c4b5fd; --chip: #8b5cf6; background: #07080e; overflow: hidden; color: #fff; }
+.ally-screen[data-state="scelle"] { --ac: #34d399; --ac2: #10b981; --ac3: #6ee7b7; --chip: #059669; }
+.ally-screen[data-state="refus"] { --ac: #fb7185; --ac2: #e11d48; --ac3: #fb7185; --chip: #e11d48; }
+.ally-scene { position: absolute; left: 0; right: 0; top: 44px; height: min(470px, 56%); }
+.ally-scene > img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.ally-scene::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#07080e, transparent 12%, transparent 72%, #07080e); }
+.ally-screen[data-state="refus"] .ally-scene > img { filter: grayscale(0.6) brightness(0.75); }
+.ally-stage { position: absolute; inset: 0; z-index: 1; }
+.ally-glow { position: absolute; inset: 0; pointer-events: none; display: none; background: radial-gradient(circle at 50% 33%, rgba(16,185,129,0.35), transparent 40%); }
+.ally-screen[data-state="scelle"] .ally-glow { display: block; }
+.ally-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
+.ally-chip { font-size: 10px; font-weight: 900; padding: 4px 9px; border-radius: 999px; color: #fff; background: var(--chip); }
+.ally-bottom { padding: 18px 16px 16px; background: linear-gradient(transparent, #07080e 18px); max-height: calc(100% - 44px); overflow-y: auto; }
+.ally-head { font-size: 44px; line-height: 0.95; text-align: center; text-shadow: 0 4px 18px rgba(0,0,0,0.8); }
+.ally-head.sm { font-size: 34px; }
+.ally-ac { color: var(--ac); }
+/* Avatars posés sur les silhouettes de la scène */
+.ally-at { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ally-tag, .ally-mini { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.ally-tag img { width: 64px; height: 64px; border-radius: 999px; object-fit: cover; border: 3px solid var(--ac); box-shadow: 0 6px 20px rgba(0,0,0,0.6); }
+.ally-mini img { width: 46px; height: 46px; border-radius: 999px; object-fit: cover; border: 2px solid var(--ac); box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
+.ally-tag b, .ally-mini b { font-weight: 900; background: rgba(0,0,0,0.75); border-radius: 99px; white-space: nowrap; }
+.ally-tag b { font-size: 11px; padding: 2px 8px; }
+.ally-mini b { font-size: 9px; padding: 1px 6px; }
+.ally-tag.dim img, .ally-mini.dim img { opacity: 0.45; filter: grayscale(1); border-color: #fb7185; }
+.ally-st { position: absolute; top: -4px; right: -6px; width: 20px; height: 20px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #fff; background: #475569; border: 2px solid #07080e; }
+.ally-tag .ally-st { top: -2px; right: -4px; width: 24px; height: 24px; font-size: 13px; }
+.ally-st.ok { background: #10b981; }
+.ally-st.no { background: #e11d48; }
+.ally-unknown { width: 64px; height: 64px; border-radius: 99px; border: 3px dashed var(--ac); background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; font-family: 'Anton', sans-serif; font-size: 30px; color: var(--ac); }
+.ally-note { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #cbd5e1; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 99px; }
+.ally-bubble { position: absolute; z-index: 2; background: #fff; color: #111; border-radius: 18px; padding: 8px 14px; font-family: 'Permanent Marker', cursive; font-size: 17px; line-height: 1.1; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.ally-bubble::after { content: ''; position: absolute; bottom: -10px; border: 10px solid transparent; border-top-color: #fff; border-bottom: 0; }
+.ally-bubble.l::after { left: 24px; }
+.ally-bubble.r::after { right: 24px; }
+.ally-tape { position: absolute; z-index: 2; left: -20px; right: -20px; padding: 6px 0; text-align: center; font-family: 'Anton', sans-serif; font-size: 30px; letter-spacing: 0.06em; color: #0b0613; background: linear-gradient(90deg, #6ee7b7, #10b981); transform: rotate(-7deg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.ally-stamp { position: absolute; z-index: 2; left: 30%; padding: 0 14px; border: 5px solid #fb7185; border-radius: 10px; color: #fb7185; font-family: 'Anton', sans-serif; font-size: 40px; letter-spacing: 0.05em; background: rgba(0,0,0,0.35); transform: rotate(-12deg); }
+/* Liste des Caïds à inviter */
+.ally-pick { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 10px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); transition: border-color .15s, background .15s, transform .1s; }
+.ally-pick:active { transform: scale(0.98); }
+.ally-pick img { width: 40px; height: 40px; border-radius: 999px; object-fit: cover; flex-shrink: 0; }
+.ally-pick .n { flex: 1; min-width: 0; }
+.ally-pick .n b { display: block; font-size: 13px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ally-pick .n span { display: block; font-size: 10px; font-weight: 700; color: #94a3b8; }
+.ally-pick.on { border-color: var(--ac); background: rgba(167,139,250,0.12); }
+.ally-pick.off { opacity: 0.4; filter: grayscale(1); }
+.ally-chk { width: 22px; height: 22px; flex-shrink: 0; border-radius: 7px; border: 2px solid #475569; display: flex; align-items: center; justify-content: center; font-size: 13px; color: transparent; }
+.ally-pick.on .ally-chk { background: var(--ac); border-color: var(--ac); color: #0b0613; }
+.ally-cta { display: block; width: 100%; padding: 14px; border-radius: 16px; text-align: center; font-weight: 900; font-size: 14px; text-transform: uppercase; color: #000; background: linear-gradient(90deg, var(--ac3), var(--ac2)); transition: opacity .2s; }
+.ally-cta:disabled { opacity: 0.35; }
+.ally-ghost { display: block; width: 100%; padding: 12px; border-radius: 16px; text-align: center; font-weight: 800; font-size: 12px; text-transform: uppercase; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+.ally-close { display: block; margin: 12px auto 0; padding: 6px 16px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+.ally-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+.ally-row img { width: 26px; height: 26px; border-radius: 99px; object-fit: cover; }
+.ally-row img.dim { filter: grayscale(1); }
+.ally-row .lbl { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ally-row .aft { font-size: 13px; font-weight: 900; }
+.ally-ic { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 11px; font-weight: 800; color: #cbd5e1; line-height: 1.15; }
+.ally-ic i { font-size: 18px; color: var(--ac); flex-shrink: 0; }
+.ally-dots i { display: inline-block; width: 7px; height: 7px; margin: 0 2px; border-radius: 9px; background: var(--ac); opacity: 0.35; animation: allyDot 1.2s ease-in-out infinite; }
+.ally-dots i:nth-child(2) { animation-delay: .2s; }
+.ally-dots i:nth-child(3) { animation-delay: .4s; }
+/* Animations d'arrivée (pas rejouées quand l'écran se met à jour : classe static) */
+.ally-screen.show:not(.static) .ally-scene > img { animation: allyFade 0.6s ease-out both; }
+.ally-screen.show:not(.static) .ally-at.l { animation: allyFromLeft 0.5s cubic-bezier(.2,1.2,.4,1) 0.2s both; }
+.ally-screen.show:not(.static) .ally-at.r { animation: allyFromRight 0.5s cubic-bezier(.2,1.2,.4,1) 0.3s both; }
+.ally-screen.show:not(.static) .ally-bubble { animation: allyPop 0.4s cubic-bezier(.2,1.6,.4,1) 0.55s both; }
+.ally-screen.show:not(.static) .ally-tape { animation: allyTape 0.45s cubic-bezier(.2,1.5,.4,1) 0.6s both; }
+.ally-screen.show:not(.static) .ally-stamp { animation: allyStamp 0.45s cubic-bezier(.2,1.6,.4,1) 0.5s both; }
+.ally-screen.show:not(.static) .ally-bottom { animation: allyUp 0.45s ease-out 0.15s both; }
+@keyframes allyFade { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
+@keyframes allyFromLeft { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
+@keyframes allyFromRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: none; } }
+@keyframes allyPop { from { opacity: 0; transform: scale(0.6) translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes allyTape { from { opacity: 0; transform: rotate(-7deg) scale(1.5); } to { opacity: 1; transform: rotate(-7deg); } }
+@keyframes allyStamp { from { opacity: 0; transform: rotate(-12deg) scale(1.8); } to { opacity: 1; transform: rotate(-12deg); } }
+@keyframes allyUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes allyDot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+@media (max-height: 700px) {
+  .ally-scene { height: 50%; }
+  .ally-head { font-size: 34px; } .ally-head.sm { font-size: 28px; }
+  .ally-tag img, .ally-unknown { width: 52px; height: 52px; } .ally-mini img { width: 38px; height: 38px; }
+  .ally-bubble { font-size: 15px; padding: 6px 12px; } .ally-tape { font-size: 24px; } .ally-stamp { font-size: 32px; }
+  .ally-bottom { padding-bottom: 12px; } .ally-pick { padding: 6px 10px; } .ally-pick img { width: 34px; height: 34px; }
+  .ally-cta { padding: 11px; } .ally-ghost { padding: 10px; } .ally-ic { padding: 6px 8px; font-size: 10px; } .ally-row { padding: 5px 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .ally-screen *, .ally-screen.show * { animation: none !important; } }

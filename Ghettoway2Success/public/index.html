@@ -563,19 +563,6 @@
       </div>
     </div>
 
-    <!-- MODALE ALLIANCE REÇUE -->
-    <div id="modalAllianceRequestReceived" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-purple-500/40 max-w-sm mx-auto w-full text-center">
-        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-300 mx-auto flex items-center justify-center text-2xl border border-purple-400/40"><i class="ph-bold ph-handshake"></i></div>
-        <h3 class="text-base font-black text-white uppercase">Demande d'Alliance</h3>
-        <p class="text-xs text-slate-300"><strong id="allianceReqSenderName" class="text-purple-300">Rival</strong> vous propose un pacte (immunité mutuelle pendant 2 tours).</p>
-        <div class="grid grid-cols-2 gap-2 pt-2">
-          <button onclick="respondToAllianceRequest(true)" class="py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase rounded-xl text-xs">Accepter</button>
-          <button onclick="respondToAllianceRequest(false)" class="py-3 glass-panel text-slate-400 font-bold uppercase rounded-xl text-xs">Refuser</button>
-        </div>
-      </div>
-    </div>
-
     <!-- MODALE COMBAT DE RUE (2 PHASES : ASSAUT -> RIPOSTE) -->
     <div id="modalCombat" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
       <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
@@ -789,20 +776,6 @@
       </div>
     </div>
 
-    <!-- MODALE ALLIANCE -->
-    <div id="modalAlliance" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
-      <div class="glass-panel p-5 rounded-3xl space-y-4 border-white/15 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 class="text-sm font-black text-purple-400 uppercase flex items-center gap-1.5"><i class="ph-bold ph-handshake"></i> Sceller une Alliance</h3>
-          <button onclick="closeModal('modalAlliance')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
-        </div>
-        <p class="text-xs text-slate-300">S'il accepte, vous pourrez choisir de coordonner vos braquages et combats, et vous ne pourrez pas vous attaquer pendant 2 tours !</p>
-        <select id="allianceTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
-        <button onclick="confirmAlliance()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase rounded-2xl text-xs">Envoyer la Demande</button>
-        <button onclick="closeModal('modalAlliance')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
-      </div>
-    </div>
-
     <!-- MODALE SCANNER TACTIQUE -->
     <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-4 flex flex-col justify-between">
       <div class="pt-0.5">
@@ -912,6 +885,20 @@
       </div>
     </div>
 
+    <!-- ALLIANCE : écran plein page (choix des alliés, attente des réponses, demande reçue, pacte scellé, refus) -->
+    <div id="allianceScreen" class="hidden absolute inset-0 z-40 ally-screen" data-state="choix">
+      <div class="ally-scene"><img id="allyImg" src="alliance-deal.webp" alt=""><div id="allyStage" class="ally-stage"></div></div>
+      <div class="ally-glow"></div>
+      <div class="ally-content">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="allyRound">1</span></span>
+          <span class="ally-chip"><i class="ph-fill ph-handshake"></i> Alliance</span>
+        </div>
+        <div class="flex-1"></div>
+        <div id="allyBottom" class="ally-bottom"></div>
+      </div>
+    </div>
+
     <!-- MODALES SYSTÈME STYLISÉES -->
     <div id="modalAppAlert" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
       <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">
@@ -940,6 +927,7 @@
   <script src="js/qr.js"></script>
   <script src="js/game.js"></script>
   <script src="js/socket.js"></script>
+  <script src="js/lootgroup.js"></script>
   <script src="js/testmode.js"></script>
 </body>
 </html>

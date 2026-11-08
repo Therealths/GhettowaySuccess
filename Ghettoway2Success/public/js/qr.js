@@ -216,23 +216,26 @@ async function processQrPayload(payload) {
   // BRAQUAGE (Choix entre Braquage Coordonné en Alliance ou Braquage Solo)
   if (type === 'brq') {
     let coordinateWithAlly = false;
-    if (localPlayer.allianceActive && localPlayer.activeAlly) {
+    const heistAllies = localPlayer.activeAllies || [];
+    const n = heistAllies.length + 1;
+    if (localPlayer.allianceActive && heistAllies.length) {
       coordinateWithAlly = await showAppConfirm(
-        `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\nComment voulez-vous faire ce braquage ?\n\n• SOLO : vous tentez le braquage seul.\n• EN ALLIANCE : braquage coordonné à 2 (tous les deux sur la case : forces cumulées & butin partagé).`,
+        `Vous êtes en Alliance avec ${formatAllyNames(heistAllies)}.\n\nComment voulez-vous faire ce braquage ?\n\n• SOLO : vous tentez le braquage seul.\n• EN ALLIANCE : braquage coordonné à ${n} (${n === 2 ? 'tous les deux' : 'tous'} sur la case : forces cumulées & butin partagé).`,
         "💥 Solo ou en Alliance ?",
         "🤝 En Alliance",
         "Solo"
       );
     }
 
-    const allyAtk = coordinateWithAlly ? (localPlayer.activeAlly.allyAtk || 1) : 0;
-    const allyMuscles = coordinateWithAlly ? (localPlayer.activeAlly.grosBrasCount || 0) : 0;
+    // Forces cumulées de tous les alliés : attaque + gros bras + l'allié lui-même
+    const allyAtk = coordinateWithAlly ? heistAllies.reduce((t, a) => t + (a.allyAtk || 1), 0) : 0;
+    const allyMembers = coordinateWithAlly ? heistAllies.reduce((t, a) => t + 1 + (a.grosBrasCount || 0), 0) : 0;
     const teamAtk = getTotalAtk() + allyAtk;
-    const members = 1 + localPlayer.musclesOnPerson.length + (coordinateWithAlly ? (1 + allyMuscles) : 0);
+    const members = 1 + localPlayer.musclesOnPerson.length + allyMembers;
 
     if (teamAtk < data.req || members < data.m) {
       return showAppAlert(
-        `Prérequis insuffisants (${coordinateWithAlly ? 'en Duo' : 'en Solo'}) !\nRequis : ${data.req} Atk et ${data.m} membre(s).\nVotre force : ${teamAtk} Atk et ${members} membre(s).`,
+        `Prérequis insuffisants (${coordinateWithAlly ? (n === 2 ? 'en Duo' : `à ${n}`) : 'en Solo'}) !\nRequis : ${data.req} Atk et ${data.m} membre(s).\nVotre force : ${teamAtk} Atk et ${members} membre(s).`,
         "💥 Échec Braquage"
       );
     }
@@ -247,7 +250,7 @@ async function processQrPayload(payload) {
         heistName: data.n || 'Braquage',
         totalCash,
         totalDrugs,
-        allyToken: localPlayer.activeAlly.allyToken
+        allyTokens: heistAllies.map(a => a.allyToken)
       });
     } else {
       localPlayer.pocketCash += totalCash;

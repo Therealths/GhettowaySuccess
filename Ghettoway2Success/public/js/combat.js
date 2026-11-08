@@ -32,7 +32,9 @@ function openPillageModalUI(pillageInfo) {
   `);
 
   if (pillageInfo.hasProstitute) {
-    if (pillageInfo.isAlliedVictory && localPlayer.activeAlly) {
+    // Alliés gagnants (si le serveur précise winnerTokens, on s'y limite)
+    const winningAllies = (localPlayer.activeAllies || []).filter(a => !Array.isArray(pillageInfo.winnerTokens) || pillageInfo.winnerTokens.includes(a.allyToken));
+    if (pillageInfo.isAlliedVictory && winningAllies.length) {
       if (!localPlayer.prostituteInTransit) {
         btns.push(`
           <button onclick="choosePillageReward('prostitute', '${myPlayerToken}')" class="w-full p-3 glass-panel rounded-2xl border border-pink-500/40 flex items-center justify-between text-left">
@@ -44,17 +46,18 @@ function openPillageModalUI(pillageInfo) {
           </button>
         `);
       }
-      if (!localPlayer.activeAlly.hasProstituteInTransit) {
+      // Un bouton par allié dont le slot transit est libre
+      winningAllies.filter(a => !a.hasProstituteInTransit).forEach(a => {
         btns.push(`
-          <button onclick="choosePillageReward('prostitute', '${localPlayer.activeAlly.allyToken}')" class="w-full p-3 glass-panel rounded-2xl border border-purple-500/40 flex items-center justify-between text-left">
+          <button onclick="choosePillageReward('prostitute', '${escapeHtml(a.allyToken)}')" class="w-full p-3 glass-panel rounded-2xl border border-purple-500/40 flex items-center justify-between text-left">
             <div>
-              <span class="text-xs font-black text-purple-300 uppercase block">👠 Donner sa Prostituée à ${localPlayer.activeAlly.caid}</span>
+              <span class="text-xs font-black text-purple-300 uppercase block">👠 Donner sa Prostituée à ${escapeHtml(a.caid || 'votre allié')}</span>
               <span class="text-[10px] font-mono text-white">Place l'escort chez votre allié</span>
             </div>
             <i class="ph-bold ph-arrow-right text-purple-400"></i>
           </button>
         `);
-      }
+      });
     } else {
       const canTakePros = !localPlayer.prostituteInTransit;
       btns.push(`
@@ -75,6 +78,12 @@ function openPillageModalUI(pillageInfo) {
 
   container.innerHTML = btns.join('');
   document.getElementById('modalCombatPillage').classList.remove('hidden');
+}
+
+// « A », « A et B », « A, B et C »
+function formatAllyNames(allies) {
+  const names = allies.map(a => a.caid || 'un allié');
+  return names.length > 1 ? names.slice(0, -1).join(', ') + ' et ' + names[names.length - 1] : (names[0] || '');
 }
 
 function choosePillageReward(category, recipientToken = null) {
@@ -129,9 +138,12 @@ async function initiateCombatEngagement() {
   }
 
   let useAlliance = false;
-  if (localPlayer.allianceActive && localPlayer.activeAlly) {
+  // Alliés du tour, sauf la cible éventuelle
+  const combatAllies = (localPlayer.activeAllies || []).filter(a => a.allyToken !== target.playerToken);
+  if (localPlayer.allianceActive && combatAllies.length) {
+    const n = combatAllies.length + 1;
     useAlliance = await showAppConfirm(
-      `Vous êtes en Alliance avec ${localPlayer.activeAlly.caid}.\n\nComment voulez-vous attaquer ?\n\n• SOLO : vous attaquez seul.\n• EN ALLIANCE : attaque coordonnée à 2 (si vous êtes tous deux sur la bonne case).`,
+      `Vous êtes en Alliance avec ${formatAllyNames(combatAllies)}.\n\nComment voulez-vous attaquer ?\n\n• SOLO : vous attaquez seul.\n• EN ALLIANCE : attaque coordonnée à ${n} (si vous êtes ${n === 2 ? 'tous deux' : 'tous'} sur la bonne case).`,
       "⚔️ Solo ou en Alliance ?",
       "🤝 En Alliance",
       "Solo"

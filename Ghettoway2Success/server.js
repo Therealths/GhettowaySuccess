@@ -205,6 +205,8 @@ function createTestRoom() {
     strayDogHolderToken: null,
     activeCombat: null,
     activeLootSplit: null,
+    activeGroupSplit: null,
+    pendingAlliance: null,
     pendingPillage: null,
     gameStarted: true,
     currentRadio: RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)],
@@ -296,6 +298,48 @@ function openLootShareSession(room, roomId, sessionData) {
   if (rightP) io.to(rightP.socketId).emit('loot_split_opened', room.activeLootSplit);
 }
 
+// Partage de groupe (3 membres ou plus) : parts en %, le premier membre (celui qui a mené l'action) reçoit les restes
+function openGroupSplit(room, sessionData) {
+  const members = [];
+  (sessionData.tokens || []).forEach(tok => {
+    const p = room.players.find(x => x.playerToken === tok);
+    if (p && !members.some(m => m.token === tok)) members.push({ token: tok, caidName: p.caidName || 'Caïd', caidId: p.caidId || null });
+  });
+  if (!members.length) return;
+
+  const base = Math.floor(100 / members.length);
+  const cashPcts = {}, drugPcts = {}, accepted = {};
+  members.forEach((m, i) => {
+    const pct = i === 0 ? 100 - base * (members.length - 1) : base;
+    cashPcts[m.token] = pct;
+    drugPcts[m.token] = pct;
+    accepted[m.token] = false;
+  });
+
+  room.activeGroupSplit = {
+    id: 'gs_' + Math.random().toString(36).substring(2, 9),
+    title: sessionData.title || 'Partage du Butin',
+    sourceType: sessionData.sourceType, // 'heist' | 'combat'
+    totalCash: sessionData.totalCash || 0,
+    totalDrugs: sessionData.totalDrugs || 0,
+    members,
+    cashPcts,
+    drugPcts,
+    accepted
+  };
+  emitGroupSplit(room, 'group_split_opened');
+}
+
+// Envoi à chaque membre, retrouvé par son playerToken (le socketId change à la reconnexion)
+function emitGroupSplit(room, eventName) {
+  const split = room.activeGroupSplit;
+  if (!split) return;
+  split.members.forEach(m => {
+    const p = room.players.find(x => x.playerToken === m.token);
+    if (p && p.socketId) io.to(p.socketId).emit(eventName, split);
+  });
+}
+
 io.on('connection', (socket) => {
   socket.emit('app_version', APP_VERSION);
   socket.emit('rooms_list', getAvailableRooms());
@@ -352,6 +396,8 @@ io.on('connection', (socket) => {
       strayDogHolderToken: null,
       activeCombat: null,
       activeLootSplit: null,
+      activeGroupSplit: null,
+      pendingAlliance: null,
       pendingPillage: null,
       gameStarted: false,
       currentRadio: RADIO_EVENTS[0],
@@ -511,6 +557,8 @@ io.on('connection', (socket) => {
     room.strayDogHolderToken = null;
     room.activeCombat = null;
     room.activeLootSplit = null;
+    room.activeGroupSplit = null;
+    room.pendingAlliance = null;
     room.pendingPillage = null;
     room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
 
@@ -538,6 +586,7 @@ io.on('connection', (socket) => {
     ])];
 
     room.currentTurnAlliedTokens = [];
+    room.pendingAlliance = null; // une demande d'alliance non répondue expire avec le tour
     // Le Chien Errant reste avec le dernier joueur qui l'a sifflé, jusqu'au prochain coup de sifflet
 
     // Joueur suivant dans l'ordre de la manche ; on saute ceux qui ont déjà joué (en alliance pendant le tour d'un autre)
@@ -592,7 +641,9 @@ io.on('connection', (socket) => {
     if (!(room.currentTurnAlliedTokens || []).includes(ally.playerToken)) return;
 
     room.playedThisRoundTokens = [...new Set([...(room.playedThisRoundTokens || []), ally.playerToken])];
-    room.currentTurnAlliedTokens = room.currentTurnAlliedTokens.filter(t => t !== ally.playerToken && t !== activePlayer.playerToken);
+    room.currentTurnAlliedTokens = room.currentTurnAlliedTokens.filter(t => t !== ally.playerToken);
+    // S'il ne reste que le joueur actif, l'alliance du tour est terminée
+    if (room.currentTurnAlliedTokens.every(t => t === activePlayer.playerToken)) room.currentTurnAlliedTokens = [];
 
     io.to(activePlayer.socketId).emit('ally_ended_turn', { allyCaid: ally.caidName });
     broadcastTurnState(socket.roomId);
@@ -650,31 +701,30 @@ io.on('connection', (socket) => {
     }
 
     const canCoordinate = useAlliance === true && room.currentTurnAlliedTokens && room.currentTurnAlliedTokens.includes(attackerPlayer.playerToken);
-    let allyPlayer = null;
-    if (canCoordinate) {
-      const allyToken = room.currentTurnAlliedTokens.find(t => t !== attackerPlayer.playerToken);
-      if (allyToken && allyToken !== targetPlayer.playerToken) {
-        allyPlayer = room.players.find(p => p.playerToken === allyToken);
-      }
-    }
+    // Tous les autres membres de l'alliance du tour (sauf la cible) attaquent avec lui
+    const allyPlayers = canCoordinate
+      ? room.currentTurnAlliedTokens
+          .filter(t => t !== attackerPlayer.playerToken && t !== targetPlayer.playerToken)
+          .map(t => room.players.find(p => p.playerToken === t))
+          .filter(Boolean)
+      : [];
+    const isAllied = allyPlayers.length > 0;
+    const attackers = [attackerPlayer, ...allyPlayers];
 
-    const attackerTokens = allyPlayer
-      ? [attackerPlayer.playerToken, allyPlayer.playerToken]
-      : [attackerPlayer.playerToken];
+    const attackerTokens = attackers.map(p => p.playerToken);
 
-    const attackerDisplayNames = allyPlayer
-      ? `${attackerPlayer.caidName} & ${allyPlayer.caidName}`
+    const attackerDisplayNames = isAllied
+      ? attackers.map(p => p.caidName).join(' & ')
       : (attackerCaid || attackerPlayer.caidName || "Attaquant");
 
     const statsByToken = {};
-    statsByToken[attackerPlayer.playerToken] = attackerPlayer.atk || 1;
-    if (allyPlayer) statsByToken[allyPlayer.playerToken] = allyPlayer.atk || 1;
+    attackers.forEach(p => { statsByToken[p.playerToken] = p.atk || 1; });
 
-    const combinedMuscles = (attackerPlayer.musclesCount || 0) + (allyPlayer ? (allyPlayer.musclesCount || 0) : 0);
+    const combinedMuscles = attackers.reduce((sum, p) => sum + (p.musclesCount || 0), 0);
 
     room.activeCombat = {
       phase: 1,
-      isAlliedAttack: !!allyPlayer,
+      isAlliedAttack: isAllied,
       initialAttackerTokens: attackerTokens.slice(),
       initialDefenderToken: targetPlayer.playerToken,
       attackerTokens: attackerTokens,
@@ -686,15 +736,18 @@ io.on('connection', (socket) => {
       targetDef: targetPlayer.def || 0
     };
 
-    attackerTokens.forEach(tok => {
-      const p = room.players.find(x => x.playerToken === tok);
+    attackers.forEach(p => {
+      const tok = p.playerToken;
+      // Pour chaque attaquant : les autres attaquants sont ses alliés
+      const others = attackers.filter(x => x.playerToken !== tok);
       if (p) {
         io.to(p.socketId).emit('combat_duel_opened', {
           phase: 1,
           role: 'attacker',
-          isAlliedAttack: !!allyPlayer,
-          allyCaid: allyPlayer ? (tok === attackerPlayer.playerToken ? allyPlayer.caidName : attackerPlayer.caidName) : null,
-          allyAtk: allyPlayer ? (tok === attackerPlayer.playerToken ? (allyPlayer.atk || 1) : (attackerPlayer.atk || 1)) : 0,
+          isAlliedAttack: isAllied,
+          allyCaid: isAllied ? others.map(x => x.caidName).join(' & ') : null,
+          allyAtk: isAllied ? others.reduce((sum, x) => sum + (x.atk || 1), 0) : 0,
+          allies: others.map(x => ({ token: x.playerToken, caidName: x.caidName, atk: x.atk || 1 })),
           opponentCaid: room.activeCombat.targetCaid,
           opponentSocketId: targetPlayer.socketId,
           targetMusclesCount: targetPlayer.musclesCount || 0,
@@ -708,14 +761,14 @@ io.on('connection', (socket) => {
     io.to(targetPlayer.socketId).emit('combat_duel_opened', {
       phase: 1,
       role: 'defender',
-      isAlliedAttack: !!allyPlayer,
+      isAlliedAttack: isAllied,
       allyCaid: null,
       allyAtk: 0,
       opponentCaid: room.activeCombat.attackerCaid,
       opponentSocketId: attackerPlayer.socketId,
       targetMusclesCount: combinedMuscles,
-      targetHasProstitute: !!attackerPlayer.hasProstituteInTransit,
-      targetHasStrayDog: !!(attackerPlayer.hasStrayDog || (allyPlayer && allyPlayer.hasStrayDog)),
+      targetHasProstitute: attackers.some(p => !!p.hasProstituteInTransit),
+      targetHasStrayDog: attackers.some(p => !!p.hasStrayDog),
       weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, targetPlayer.playerToken)
     });
   });
@@ -836,17 +889,18 @@ io.on('connection', (socket) => {
     const defenderP = room.players.find(p => p.socketId === socket.id);
     if (!defenderP || defenderP.playerToken !== combat.defenderToken) return;
 
-    const unchosenToken = combat.attackerTokens.find(t => t !== chosenTargetToken);
-    if (unchosenToken) {
+    if (!combat.attackerTokens.includes(chosenTargetToken)) return;
+
+    const chosenP = room.players.find(p => p.playerToken === chosenTargetToken);
+    combat.attackerTokens.filter(t => t !== chosenTargetToken).forEach(unchosenToken => {
       const unchosenP = room.players.find(p => p.playerToken === unchosenToken);
-      const chosenP = room.players.find(p => p.playerToken === chosenTargetToken);
       if (unchosenP) {
         io.to(unchosenP.socketId).emit('combat_not_targeted_by_riposte', {
           defenderCaid: defenderP.caidName,
           chosenCaid: chosenP ? chosenP.caidName : 'votre allié'
         });
       }
-    }
+    });
 
     startCombatPhase2Riposte(room, combat.defenderToken, chosenTargetToken);
   });
@@ -972,6 +1026,14 @@ io.on('connection', (socket) => {
           leftName: primaryWinner.caidName,
           rightName: allyP ? allyP.caidName : 'Allié'
         });
+      } else if (pillage.isAlliedVictory && pillage.winnerTokens.length > 2 && stolenCash > 0) {
+        openGroupSplit(room, {
+          sourceType: 'combat',
+          title: `Pillage sur ${loserP.caidName} (Cash)`,
+          totalCash: stolenCash,
+          totalDrugs: 0,
+          tokens: pillage.winnerTokens
+        });
       } else {
         primaryWinner.pocketCash = (primaryWinner.pocketCash || 0) + stolenCash;
         checkVictory(room, socket.roomId);
@@ -1001,6 +1063,14 @@ io.on('connection', (socket) => {
           rightToken: allyP ? allyP.playerToken : primaryWinner.playerToken,
           leftName: primaryWinner.caidName,
           rightName: allyP ? allyP.caidName : 'Allié'
+        });
+      } else if (pillage.isAlliedVictory && pillage.winnerTokens.length > 2 && stolenDrugs > 0) {
+        openGroupSplit(room, {
+          sourceType: 'combat',
+          title: `Pillage sur ${loserP.caidName} (Drogue)`,
+          totalCash: 0,
+          totalDrugs: stolenDrugs,
+          tokens: pillage.winnerTokens
         });
       } else {
         primaryWinner.drugs = (primaryWinner.drugs || 0) + stolenDrugs;
@@ -1066,13 +1136,30 @@ io.on('connection', (socket) => {
   // =========================================================================
   // BARRE DE PARTAGE DU BUTIN EN ALLIANCE (BRAQUAGES & PILLAGES)
   // =========================================================================
-  socket.on('initiate_allied_heist_split', ({ heistName, totalCash, totalDrugs, allyToken }) => {
+  socket.on('initiate_allied_heist_split', ({ heistName, totalCash, totalDrugs, allyToken, allyTokens }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
     const initiator = room.players.find(p => p.socketId === socket.id);
-    const ally = room.players.find(p => p.playerToken === allyToken);
-    if (!initiator || !ally) return;
+    if (!initiator) return;
+    // Compat : ancien client avec un seul allyToken
+    const tokens = Array.isArray(allyTokens) ? allyTokens : (allyToken ? [allyToken] : []);
+    const allies = [...new Set(tokens)]
+      .filter(t => t !== initiator.playerToken)
+      .map(t => room.players.find(p => p.playerToken === t))
+      .filter(Boolean);
+    if (!allies.length) return;
 
+    if (allies.length > 1) {
+      return openGroupSplit(room, {
+        sourceType: 'heist',
+        title: `Braquage : ${heistName || 'Butin'}`,
+        totalCash: totalCash || 0,
+        totalDrugs: totalDrugs || 0,
+        tokens: [initiator.playerToken, ...allies.map(p => p.playerToken)]
+      });
+    }
+
+    const ally = allies[0];
     openLootShareSession(room, socket.roomId, {
       sourceType: 'heist',
       title: `Braquage : ${heistName || 'Butin'}`,
@@ -1147,6 +1234,79 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Partage de groupe : n'importe quel membre ajuste n'importe quelle part par pas de 5 %
+  socket.on('group_split_adjust', ({ kind, token, delta }) => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.activeGroupSplit) return;
+    const split = room.activeGroupSplit;
+    const actor = room.players.find(p => p.socketId === socket.id);
+    if (!actor || !split.members.some(m => m.token === actor.playerToken)) return;
+    if (!split.members.some(m => m.token === token)) return;
+
+    const pcts = kind === 'drugs' ? split.drugPcts : split.cashPcts;
+    const step = Math.min(100, Math.abs(parseInt(delta) || 0));
+    if (!step) return;
+    const others = split.members.map(m => m.token).filter(t => t !== token);
+    if (!others.length) return;
+
+    let moved = 0;
+    if (delta > 0) {
+      // On prend sur le membre qui a la plus grosse part
+      const donor = others.reduce((best, t) => (pcts[t] > pcts[best] ? t : best), others[0]);
+      moved = Math.min(step, pcts[donor] || 0, 100 - (pcts[token] || 0));
+      if (moved > 0) { pcts[donor] -= moved; pcts[token] += moved; }
+    } else {
+      // On donne au membre qui a la plus petite part
+      const receiver = others.reduce((best, t) => (pcts[t] < pcts[best] ? t : best), others[0]);
+      moved = Math.min(step, pcts[token] || 0, 100 - (pcts[receiver] || 0));
+      if (moved > 0) { pcts[token] -= moved; pcts[receiver] += moved; }
+    }
+    if (!moved) return;
+
+    split.members.forEach(m => { split.accepted[m.token] = false; });
+    emitGroupSplit(room, 'group_split_updated');
+  });
+
+  socket.on('group_split_accept', () => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.activeGroupSplit) return;
+    const split = room.activeGroupSplit;
+    const actor = room.players.find(p => p.socketId === socket.id);
+    if (!actor || !split.members.some(m => m.token === actor.playerToken)) return;
+
+    split.accepted[actor.playerToken] = true;
+    if (!split.members.every(m => split.accepted[m.token])) {
+      return emitGroupSplit(room, 'group_split_updated');
+    }
+
+    // Tout le monde a validé : montants arrondis à l'inférieur, le reste au premier membre
+    const cashBy = {}, drugsBy = {};
+    split.members.forEach(m => {
+      cashBy[m.token] = Math.floor((split.totalCash * (split.cashPcts[m.token] || 0)) / 100);
+      drugsBy[m.token] = Math.floor((split.totalDrugs * (split.drugPcts[m.token] || 0)) / 100);
+    });
+    const first = split.members[0].token;
+    cashBy[first] += split.totalCash - Object.values(cashBy).reduce((a, b) => a + b, 0);
+    drugsBy[first] += split.totalDrugs - Object.values(drugsBy).reduce((a, b) => a + b, 0);
+
+    split.members.forEach(m => {
+      const p = room.players.find(x => x.playerToken === m.token);
+      if (!p) return;
+      p.pocketCash = (p.pocketCash || 0) + cashBy[m.token];
+      p.drugs = (p.drugs || 0) + drugsBy[m.token];
+      if (p.socketId) {
+        io.to(p.socketId).emit('group_split_completed', {
+          title: split.title,
+          cashGained: cashBy[m.token],
+          drugsGained: drugsBy[m.token]
+        });
+      }
+    });
+
+    room.activeGroupSplit = null;
+    checkVictory(room, socket.roomId);
+  });
+
   // =========================================================================
   // CAPACITÉS SPÉCIALES & ALLIANCES (AVEC IMMUNITÉ 2 TOURS)
   // =========================================================================
@@ -1178,77 +1338,158 @@ io.on('connection', (socket) => {
     io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
-  socket.on('propose_alliance', ({ targetPlayerToken, targetSocketId, senderName, musclesCount }) => {
+  // Le joueur actif invite 1 à 3 Caïds ; chacun répond de son côté
+  socket.on('propose_alliance', ({ targetPlayerTokens, targetPlayerToken, senderName }) => {
     const room = rooms[socket.roomId];
-    if (!room) return;
+    if (!room || !room.gameStarted) return;
     const sender = room.players.find(p => p.socketId === socket.id);
     if (!sender) return;
-
-    let destSocketId = targetSocketId;
-    if (targetPlayerToken) {
-      const targetP = room.players.find(p => p.playerToken === targetPlayerToken);
-      if (targetP) destSocketId = targetP.socketId;
-      // Caïd envoyé à l'hôpital pendant cette manche : pas d'alliance avant la manche suivante
-      if (targetP && targetP.inHospital && targetP.inHospital.round === room.round) {
-        return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} est à l'hôpital : pas d'alliance possible avant la manche suivante !`);
-      }
+    const activePlayer = getActivePlayer(room);
+    if (!activePlayer || activePlayer.playerToken !== sender.playerToken) {
+      return socket.emit('error_msg', "Seul le Caïd dont c'est le tour peut proposer une alliance.");
     }
 
-    io.to(destSocketId).emit('alliance_request_received', {
-      senderSocketId: socket.id,
-      senderToken: sender.playerToken,
-      senderCaid: sender.caidName || senderName,
-      musclesCount: musclesCount || 0
+    // Compat : ancien client avec une seule cible
+    const requested = Array.isArray(targetPlayerTokens) ? targetPlayerTokens : (targetPlayerToken ? [targetPlayerToken] : []);
+    const targets = [];
+    let refusedSome = false;
+    [...new Set(requested)].forEach(tok => {
+      if (tok === sender.playerToken) return;
+      const targetP = room.players.find(p => p.playerToken === tok);
+      if (!targetP) return; // joueur absent
+      if ((room.currentTurnAlliedTokens || []).includes(tok)) return; // déjà allié ce tour
+      // Caïd envoyé à l'hôpital pendant cette manche : pas d'alliance avant la manche suivante
+      if (targetP.inHospital && targetP.inHospital.round === room.round) {
+        refusedSome = true;
+        return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} est à l'hôpital : pas d'alliance possible avant la manche suivante !`);
+      }
+      targets.push(targetP);
     });
+    if (!targets.length) {
+      if (!refusedSome) socket.emit('error_msg', "Aucun Caïd valide à inviter dans l'alliance.");
+      return;
+    }
+
+    // Une seule demande à la fois : la nouvelle remplace l'ancienne
+    room.pendingAlliance = {
+      id: 'al_' + Math.random().toString(36).substring(2, 9),
+      senderToken: sender.playerToken,
+      round: room.round,
+      invitees: {}
+    };
+    targets.forEach(t => { room.pendingAlliance.invitees[t.playerToken] = 'wait'; });
+
+    const inviteesList = targets.map(t => ({ token: t.playerToken, caidName: t.caidName, caidId: t.caidId }));
+    targets.forEach(t => {
+      io.to(t.socketId).emit('alliance_request_received', {
+        requestId: room.pendingAlliance.id,
+        senderToken: sender.playerToken,
+        senderCaid: sender.caidName || senderName,
+        senderCaidId: sender.caidId,
+        invitees: inviteesList
+      });
+    });
+    emitAllianceStatus(room);
   });
 
-  socket.on('respond_alliance', ({ accepted, senderSocketId, senderToken }) => {
+  // Statut des réponses, envoyé au proposant
+  function emitAllianceStatus(room) {
+    const pending = room.pendingAlliance;
+    if (!pending) return;
+    const sender = room.players.find(p => p.playerToken === pending.senderToken);
+    if (!sender) return;
+    const invitees = Object.keys(pending.invitees).map(tok => {
+      const p = room.players.find(x => x.playerToken === tok);
+      return { token: tok, caidName: p ? p.caidName : 'Caïd', caidId: p ? p.caidId : null, status: pending.invitees[tok] };
+    });
+    io.to(sender.socketId).emit('alliance_request_status', {
+      requestId: pending.id,
+      invitees,
+      done: !invitees.some(i => i.status === 'wait')
+    });
+  }
+
+  function allianceNamesByStatus(room, status) {
+    const pending = room.pendingAlliance;
+    return Object.keys(pending.invitees)
+      .filter(tok => pending.invitees[tok] === status)
+      .map(tok => room.players.find(p => p.playerToken === tok)?.caidName || 'Caïd');
+  }
+
+  socket.on('respond_alliance', ({ requestId, accepted, senderToken }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
     const responder = room.players.find(p => p.socketId === socket.id);
-    const sender = room.players.find(p => p.socketId === senderSocketId || p.playerToken === senderToken);
-    if (!responder || !sender) return;
+    if (!responder) return;
+
+    const pending = room.pendingAlliance;
+    const matches = pending && (requestId ? pending.id === requestId : (!senderToken || pending.senderToken === senderToken));
+    if (!matches || pending.invitees[responder.playerToken] === undefined) {
+      return socket.emit('error_msg', "Cette demande d'alliance a expiré.");
+    }
+    if (pending.invitees[responder.playerToken] !== 'wait') return; // déjà répondu
+    const sender = room.players.find(p => p.playerToken === pending.senderToken);
+    if (!sender) return;
+
+    pending.invitees[responder.playerToken] = accepted ? 'ok' : 'no';
+    emitAllianceStatus(room);
 
     if (accepted) {
-      if (!room.currentTurnAlliedTokens.includes(responder.playerToken)) {
-        room.currentTurnAlliedTokens.push(responder.playerToken);
-      }
+      room.currentTurnAlliedTokens = room.currentTurnAlliedTokens || [];
       if (!room.currentTurnAlliedTokens.includes(sender.playerToken)) {
         room.currentTurnAlliedTokens.push(sender.playerToken);
       }
+      if (!room.currentTurnAlliedTokens.includes(responder.playerToken)) {
+        room.currentTurnAlliedTokens.push(responder.playerToken);
+      }
+      const memberTokens = room.currentTurnAlliedTokens.slice();
 
-      room.nonAggressionPacts = room.nonAggressionPacts.filter(
-        p => !(p.tokens.includes(responder.playerToken) && p.tokens.includes(sender.playerToken))
-      );
-      // Pour expliquer à l'allié pourquoi son propre tour sera sauté
-      room.alliedWithThisRound = room.alliedWithThisRound || {};
-      room.alliedWithThisRound[responder.playerToken] = sender.caidName;
-      room.alliedWithThisRound[sender.playerToken] = responder.caidName;
-
+      // Un seul pacte de groupe par demande, complété à chaque nouvel accepté
+      room.nonAggressionPacts = (room.nonAggressionPacts || []).filter(p => p.allianceId !== pending.id);
       room.nonAggressionPacts.push({
-        tokens: [sender.playerToken, responder.playerToken],
+        allianceId: pending.id,
+        tokens: memberTokens,
         untilRound: room.round + 1 // manche en cours + manche suivante
       });
 
-      io.to(sender.socketId).emit('alliance_confirmed', {
-        allyToken: responder.playerToken,
-        allyCaid: responder.caidName,
-        musclesCount: responder.musclesCount || 0,
-        allyAtk: responder.atk || 1,
-        hasProstituteInTransit: !!responder.hasProstituteInTransit
-      });
+      // Pour expliquer à l'allié pourquoi son propre tour sera sauté
+      room.alliedWithThisRound = room.alliedWithThisRound || {};
+      room.alliedWithThisRound[responder.playerToken] = sender.caidName;
+      room.alliedWithThisRound[sender.playerToken] = memberTokens
+        .filter(t => t !== sender.playerToken)
+        .map(t => room.players.find(p => p.playerToken === t)?.caidName || 'Caïd')
+        .join(' & ');
 
-      socket.emit('alliance_confirmed', {
-        allyToken: sender.playerToken,
-        allyCaid: sender.caidName || 'Caïd',
-        musclesCount: sender.musclesCount || 0,
-        allyAtk: sender.atk || 1,
-        hasProstituteInTransit: !!sender.hasProstituteInTransit
+      const members = memberTokens
+        .map(t => room.players.find(p => p.playerToken === t))
+        .filter(Boolean)
+        .map(p => ({
+          token: p.playerToken,
+          caidName: p.caidName || 'Caïd',
+          caidId: p.caidId,
+          musclesCount: p.musclesCount || 0,
+          atk: p.atk || 1,
+          hasProstituteInTransit: !!p.hasProstituteInTransit
+        }));
+      const payload = {
+        allianceId: pending.id,
+        senderToken: sender.playerToken,
+        members,
+        refused: allianceNamesByStatus(room, 'no'),
+        pending: allianceNamesByStatus(room, 'wait')
+      };
+      memberTokens.forEach(t => {
+        const p = room.players.find(x => x.playerToken === t);
+        if (p) io.to(p.socketId).emit('alliance_confirmed', payload);
       });
 
       broadcastTurnState(socket.roomId);
     } else {
-      io.to(sender.socketId).emit('alliance_declined');
+      // Tout le monde a répondu et personne n'a accepté
+      const statuses = Object.values(pending.invitees);
+      if (!statuses.includes('wait') && !statuses.includes('ok')) {
+        io.to(sender.socketId).emit('alliance_declined', { refused: allianceNamesByStatus(room, 'no') });
+      }
     }
   });
 

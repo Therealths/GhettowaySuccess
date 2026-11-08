@@ -122,7 +122,9 @@ if (socket) {
     await showAppAlert(`${allyCaid || 'Votre allié'} a terminé sa participation à votre tour.\nVous continuez seul jusqu'à la fin de votre tour.`, "🤝 Fin de l'Alliance");
   });
   socket.on('turn_skipped', async ({ allyCaid }) => {
-    const withWho = allyCaid ? ` avec ${allyCaid}` : ' en alliance';
+    // allyCaid : un nom, une liste de noms (texte) ou un tableau
+    const names = Array.isArray(allyCaid) ? allyCaid : [];
+    const withWho = names.length ? ` avec ${allyListNames(names)}` : (allyCaid && !Array.isArray(allyCaid) ? ` avec ${allyCaid}` : ' en alliance');
     await showAppAlert(`Votre tour est passé : vous avez déjà joué cette manche${withWho}.\n\nVous rejouerez à la manche suivante.`, "⏭️ Tour déjà joué");
   });
   socket.on('game_started', ({ round, radio, players }) => {
@@ -139,7 +141,7 @@ if (socket) {
     localPlayer.tempAtkMalus = 0;
     localPlayer.tempDefMalus = 0;
     localPlayer.allianceActive = false;
-    localPlayer.activeAlly = null;
+    localPlayer.activeAllies = [];
     startRoundPhase1();
   });
   let lastActivePlayerToken = null;
@@ -154,7 +156,10 @@ if (socket) {
     const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
     if (!isAlliedNow) {
       localPlayer.allianceActive = false;
-      localPlayer.activeAlly = null;
+      localPlayer.activeAllies = [];
+    } else {
+      // Un allié qui a terminé sa participation ne compte plus dans les actions coordonnées
+      localPlayer.activeAllies = (localPlayer.activeAllies || []).filter(a => alliedTokens.includes(a.allyToken));
     }
     const wasMyTurn = isMyTurnToPlay;
     isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
@@ -171,9 +176,10 @@ if (socket) {
   });
 
   // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---
-  socket.on('combat_duel_opened', async ({ phase, role, isAlliedAttack, allyCaid, allyAtk, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog, weaponNullified }) => {
+  socket.on('combat_duel_opened', async ({ phase, role, isAlliedAttack, allyCaid, allyAtk, allies, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog, weaponNullified }) => {
     myWeaponNullified = !!weaponNullified;
-    currentDuelInfo = { phase: phase || 1, role, isAlliedAttack, allyCaid, allyAtk: allyAtk || 0, opponentCaid, opponentSocketId };
+    // allyCaid : noms des autres attaquants joints par « & », allies : [{ token, caidName, atk }]
+    currentDuelInfo = { phase: phase || 1, role, isAlliedAttack, allyCaid, allyAtk: allyAtk || 0, allies: allies || [], opponentCaid, opponentSocketId };
     isCombatReady = false;
     document.getElementById('combatModalHeaderTitle').innerHTML = `<i class="ph-bold ph-sword"></i> Phase 1 : Assaut Initial`;
     document.getElementById('combatTargetSelectionBox').classList.add('hidden');
@@ -415,33 +421,36 @@ if (socket) {
     await showAppAlert(`${item.name} a été ajouté à votre Sac !`, "🎁 Butin Dérobé");
     refreshHud();
   });
-  socket.on('alliance_request_received', (data) => {
-    pendingAllianceRequest = data;
-    document.getElementById('allianceReqSenderName').innerText = data.senderCaid || 'Un rival';
-    document.getElementById('modalAllianceRequestReceived').classList.remove('hidden');
-  });
-  socket.on('alliance_confirmed', async ({ allyToken, allyCaid, musclesCount, allyAtk, hasProstituteInTransit }) => {
+  // Alliance : écrans plein page (js/alliance.js)
+  socket.on('alliance_request_received', (data) => { if (data) showAllianceRequest(data); });
+  socket.on('alliance_request_status', (data) => { onAllianceRequestStatus(data); });
+  socket.on('alliance_confirmed', (data) => {
+    if (!data) return;
+    // Mes alliés du tour (moi exclu)
     localPlayer.allianceActive = true;
-    localPlayer.activeAlly = {
-      allyToken,
-      caid: allyCaid,
-      grosBrasCount: musclesCount || 0,
-      allyAtk: allyAtk || 1,
-      hasProstituteInTransit: !!hasProstituteInTransit
-    };
-    syncMultiplayerTargets();
-    await showAppAlert(`Alliance scellée avec ${allyCaid} !\n• Vous pouvez choisir de coordonner vos braquages & combats\n• Pacte de non-agression actif pour ce tour et le tour suivant.`, "🤝 Pacte Scellé");
+    localPlayer.activeAllies = (data.members || []).filter(m => m.token !== myPlayerToken).map(m => ({
+      allyToken: m.token,
+      caid: m.caidName,
+      caidId: m.caidId,
+      grosBrasCount: m.musclesCount || 0,
+      allyAtk: m.atk || 1,
+      hasProstituteInTransit: !!m.hasProstituteInTransit
+    }));
+    showAllianceSealed(data);
+    if (typeof syncMultiplayerTargets === 'function') syncMultiplayerTargets();
+    if (typeof refreshHud === 'function') refreshHud();
   });
-  socket.on('alliance_declined', async () => { await showAppAlert("Le Caïd adverse a refusé votre alliance.", "Alliance Refusée"); });
+  socket.on('alliance_declined', (data) => { showAllianceRefused(data || {}); });
   socket.on('game_over', showGameOver);
   socket.on('player_updated', (updatedPlayer) => {
     const idx = connectedRivals.findIndex(p => p.playerToken === updatedPlayer.playerToken || p.socketId === updatedPlayer.socketId);
     if (idx >= 0) connectedRivals[idx] = updatedPlayer;
     else connectedRivals.push(updatedPlayer);
-    if (localPlayer.allianceActive && localPlayer.activeAlly && updatedPlayer.playerToken === localPlayer.activeAlly.allyToken) {
-      localPlayer.activeAlly.grosBrasCount = updatedPlayer.musclesCount || 0;
-      localPlayer.activeAlly.allyAtk = updatedPlayer.atk || 1;
-      localPlayer.activeAlly.hasProstituteInTransit = !!updatedPlayer.hasProstituteInTransit;
+    const ally = localPlayer.allianceActive && (localPlayer.activeAllies || []).find(a => a.allyToken === updatedPlayer.playerToken);
+    if (ally) {
+      ally.grosBrasCount = updatedPlayer.musclesCount || 0;
+      ally.allyAtk = updatedPlayer.atk || 1;
+      ally.hasProstituteInTransit = !!updatedPlayer.hasProstituteInTransit;
     }
     syncMultiplayerTargets();
   });
