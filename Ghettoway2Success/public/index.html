@@ -611,11 +611,11 @@
     </div>
 
     <!-- MODALE PILLAGE DU PERDANT (100% CASH, DROGUE OU PROSTITUÉE) -->
-    <div id="modalCombatPillage" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full">
+    <div id="modalCombatPillage" class="hidden absolute inset-0 z-50 loot-screen flex flex-col">
+      <div class="loot-bag-wrap"><img src="sac-butin.webp" alt="Sac de butin" class="loot-bag"></div>
+      <div class="loot-panel space-y-4">
         <div class="text-center">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 mx-auto flex items-center justify-center text-2xl border border-amber-400/40 mb-2"><i class="ph-bold ph-treasure-chest"></i></div>
-          <h3 class="text-base font-black text-white uppercase">Pillage du Perdant</h3>
+          <h3 class="font-anton loot-head">PILLAGE</h3>
           <p class="text-xs text-slate-300 mt-0.5">Choisissez ce que vous prenez (100%) sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
         </div>
         <div id="pillageOptionsContainer" class="space-y-2"></div>
@@ -623,11 +623,12 @@
     </div>
 
     <!-- MODALE BARRE DE PARTAGE DU BUTIN EN ALLIANCE (GAUCHE / DROITE) -->
-    <div id="modalAlliedLootSplit" class="hidden absolute inset-0 bg-black/92 backdrop-blur-md z-50 p-5 flex flex-col justify-center">
-      <div class="glass-panel p-5 rounded-3xl space-y-4 border-purple-500/40 max-w-sm mx-auto w-full">
-        <div class="text-center border-b border-white/10 pb-2">
-          <span class="text-[9px] font-mono uppercase text-purple-300 font-bold block">Partage d'Alliance</span>
-          <h3 id="lootSplitModalTitle" class="text-sm font-black text-white uppercase mt-0.5">Partage du Butin</h3>
+    <div id="modalAlliedLootSplit" class="hidden absolute inset-0 z-50 loot-screen flex flex-col">
+      <div class="loot-bag-wrap"><img src="sac-butin.webp" alt="Sac de butin" class="loot-bag"></div>
+      <div class="loot-panel space-y-4">
+        <div class="text-center">
+          <span id="lootSplitModalTitle" class="text-[10px] font-mono uppercase text-emerald-300 font-bold block">Partage du Butin</span>
+          <h3 class="font-anton loot-head">PARTAGE DU BUTIN</h3>
           <p id="lootSplitTotalSubtitle" class="text-xs font-mono text-ghetto-gold font-bold mt-0.5">Total : 0 €</p>
         </div>
         <div class="grid grid-cols-2 gap-2.5 text-xs font-mono">

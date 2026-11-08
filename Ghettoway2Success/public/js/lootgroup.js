@@ -8,9 +8,10 @@ const groupSplitEl = (() => {
   const style = document.createElement('style');
   style.textContent = `
 #modalGroupLootSplit { background: #07080e; }
-#modalGroupLootSplit .gs-scene { position: absolute; left: 0; right: 0; top: 0; height: 300px; opacity: .55; pointer-events: none; }
-#modalGroupLootSplit .gs-scene img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
-#modalGroupLootSplit .gs-scene:after { content: ''; position: absolute; inset: 0; background: linear-gradient(#07080e, transparent 14%, transparent 70%, #07080e); }
+#modalGroupLootSplit .gs-scene { position: absolute; left: 0; right: 0; top: 36px; height: 240px; display: flex; align-items: center; justify-content: center; pointer-events: none; background: radial-gradient(closest-side, rgba(250,204,21,.16), transparent); }
+#modalGroupLootSplit .gs-scene img { width: 86%; max-width: 330px; height: 100%; object-fit: contain; filter: drop-shadow(0 14px 22px rgba(0,0,0,.7)); }
+@media (max-height: 700px) { #modalGroupLootSplit .gs-scene { top: 30px; height: 140px; } }
+
 #modalGroupLootSplit .gs-bar { display: flex; height: 16px; border-radius: 99px; overflow: hidden; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05); }
 #modalGroupLootSplit .gs-bar > div { transition: width .25s ease; }
 #modalGroupLootSplit .gs-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
@@ -96,14 +97,14 @@ function renderGroupSplitUI() {
   }).join('');
 
   groupSplitEl.innerHTML = `
-    <div class="gs-scene"><img src="alliance-pacte.webp" alt=""></div>
+    <div class="gs-scene"><img src="sac-butin.webp" alt="Sac de butin"></div>
     <div class="relative z-[1] flex flex-col h-full">
       <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
         <span>Manche ${currentSession.round || 1}</span>
         <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full text-white" style="background:#059669"><i class="ph-fill ph-handshake"></i> Alliance</span>
       </div>
       <div class="flex-1 min-h-[24px]"></div>
-      <div class="px-4 pb-4 overflow-y-auto">
+      <div class="loot-panel overflow-y-auto">
         <span class="block text-center text-[10px] font-mono uppercase font-bold text-emerald-300">${escapeHtml(s.title || 'Butin')}</span>
         <h2 class="font-anton text-center text-white leading-none mt-1" style="font-size:36px;text-shadow:0 4px 18px rgba(0,0,0,.8)">PARTAGE DU BUTIN</h2>
         <p class="text-center text-sm font-bold text-slate-200 mt-1 mb-3">Chacun ajuste, tout le monde valide</p>

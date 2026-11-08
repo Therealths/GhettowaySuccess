@@ -308,3 +308,13 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
   .ally-cta { padding: 11px; } .ally-ghost { padding: 10px; } .ally-ic { padding: 6px 8px; font-size: 10px; } .ally-row { padding: 5px 10px; }
 }
 @media (prefers-reduced-motion: reduce) { .ally-screen *, .ally-screen.show * { animation: none !important; } }
+/* Écrans de butin (pillage, partage à 2) : sac de butin sur fond de nuit */
+.loot-screen { background: #07080e; overflow-y: auto; }
+.loot-bag-wrap { flex: none; height: 240px; margin-top: 36px; display: flex; align-items: center; justify-content: center; padding: 0 24px; background: radial-gradient(closest-side, rgba(250,204,21,0.16), transparent); }
+.loot-bag { width: 86%; max-width: 330px; height: 100%; object-fit: contain; filter: drop-shadow(0 14px 22px rgba(0,0,0,0.7)); }
+.loot-panel { margin: auto 12px 12px; padding: 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); background: rgba(10,12,20,0.95); }
+.loot-head { font-size: 36px; line-height: 1; color: #fff; text-shadow: 0 4px 18px rgba(0,0,0,0.8); }
+@media (max-height: 700px) { .loot-bag-wrap { height: 140px; margin-top: 30px; } }
+.loot-screen:not(.hidden) .loot-bag { animation: lootDrop 0.5s cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes lootDrop { from { opacity: 0; transform: translateY(-30px) scale(0.92); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .loot-screen .loot-bag { animation: none !important; } }
