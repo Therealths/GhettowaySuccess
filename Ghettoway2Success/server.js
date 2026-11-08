@@ -378,8 +378,35 @@ io.on('connection', (socket) => {
 
     if (room.gameStarted) {
       broadcastTurnState(roomId);
+      resendPendingState(room, existingPlayer, socket);
     }
   });
+
+  // Joueur reconnecté (page rechargée, changement de Caïd dans la partie test) :
+  // on lui renvoie ce qu'il a pu manquer pendant qu'il n'était pas connecté
+  function resendPendingState(room, player, sock) {
+    const tok = player.playerToken;
+    const pa = room.pendingAlliance;
+    if (pa && pa.round === room.round) {
+      if (pa.invitees[tok] === 'wait' && pa.request) sock.emit('alliance_request_received', pa.request);
+      if (pa.senderToken === tok) {
+        emitAllianceStatus(room, true);
+        const statuses = Object.values(pa.invitees);
+        if (!pa.declinedSent && !statuses.includes('wait') && !statuses.includes('ok')) {
+          pa.declinedSent = true;
+          sock.emit('alliance_declined', { refused: allianceNamesByStatus(room, 'no') });
+        }
+      }
+    }
+    const pact = room.lastAlliancePayload;
+    if (pact && (room.currentTurnAlliedTokens || []).includes(tok) && pact.members.some(m => m.token === tok)) {
+      sock.emit('alliance_confirmed', pact);
+    }
+    const gs = room.activeGroupSplit;
+    if (gs && gs.members.some(m => m.token === tok)) sock.emit('group_split_opened', gs);
+    const ls = room.activeLootSplit;
+    if (ls && (ls.leftToken === tok || ls.rightToken === tok)) sock.emit('loot_split_opened', ls);
+  }
 
   socket.on('create_room', ({ gameName, maxPlayers, selectionMode, playerToken }) => {
     const roomId = 'GW_' + Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -1380,20 +1407,20 @@ io.on('connection', (socket) => {
     targets.forEach(t => { room.pendingAlliance.invitees[t.playerToken] = 'wait'; });
 
     const inviteesList = targets.map(t => ({ token: t.playerToken, caidName: t.caidName, caidId: t.caidId }));
-    targets.forEach(t => {
-      io.to(t.socketId).emit('alliance_request_received', {
-        requestId: room.pendingAlliance.id,
-        senderToken: sender.playerToken,
-        senderCaid: sender.caidName || senderName,
-        senderCaidId: sender.caidId,
-        invitees: inviteesList
-      });
-    });
+    // Gardée pour la renvoyer à un invité qui se reconnecte (page rechargée, partie test)
+    room.pendingAlliance.request = {
+      requestId: room.pendingAlliance.id,
+      senderToken: sender.playerToken,
+      senderCaid: sender.caidName || senderName,
+      senderCaidId: sender.caidId,
+      invitees: inviteesList
+    };
+    targets.forEach(t => io.to(t.socketId).emit('alliance_request_received', room.pendingAlliance.request));
     emitAllianceStatus(room);
   });
 
   // Statut des réponses, envoyé au proposant
-  function emitAllianceStatus(room) {
+  function emitAllianceStatus(room, resent) {
     const pending = room.pendingAlliance;
     if (!pending) return;
     const sender = room.players.find(p => p.playerToken === pending.senderToken);
@@ -1405,7 +1432,8 @@ io.on('connection', (socket) => {
     io.to(sender.socketId).emit('alliance_request_status', {
       requestId: pending.id,
       invitees,
-      done: !invitees.some(i => i.status === 'wait')
+      done: !invitees.some(i => i.status === 'wait'),
+      resent: !!resent
     });
   }
 
@@ -1478,6 +1506,7 @@ io.on('connection', (socket) => {
         refused: allianceNamesByStatus(room, 'no'),
         pending: allianceNamesByStatus(room, 'wait')
       };
+      room.lastAlliancePayload = payload;
       memberTokens.forEach(t => {
         const p = room.players.find(x => x.playerToken === t);
         if (p) io.to(p.socketId).emit('alliance_confirmed', payload);
@@ -1488,6 +1517,7 @@ io.on('connection', (socket) => {
       // Tout le monde a répondu et personne n'a accepté
       const statuses = Object.values(pending.invitees);
       if (!statuses.includes('wait') && !statuses.includes('ok')) {
+        pending.declinedSent = !!sender.socketId;
         io.to(sender.socketId).emit('alliance_declined', { refused: allianceNamesByStatus(room, 'no') });
       }
     }

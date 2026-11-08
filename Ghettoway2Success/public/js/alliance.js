@@ -60,7 +60,9 @@ let allySelected = [];           // tokens cochés sur l'écran de choix
 let allyOutgoing = null;         // ma demande en cours { requestId, invitees: [{ token, caidName, caidId, status }], done }
 let allyHeldPact = null;         // pacte reçu par le proposant avant que tous les invités aient répondu
 let allyLastPact = null;         // dernier alliance_confirmed reçu
-const allySeenPacts = new Set(); // allianceId dont l'écran « scellé » a déjà été montré
+// allianceId dont l'écran « scellé » a déjà été montré, gardés par Caïd (page rechargée, partie test)
+const allySeenKey = 'g2s_seen_pacts_' + myPlayerToken;
+const allySeenPacts = new Set((() => { try { return JSON.parse(localStorage.getItem(allySeenKey)) || []; } catch (e) { return []; } })());
 let allyResolve = null;
 
 function allyCaidImg(caidId, name) {
@@ -218,7 +220,8 @@ function onAllianceRequestStatus(data) {
     allyHeldPact = null;
     return showAllianceSealed(pact);
   }
-  if (showing) renderAllianceWaiting();
+  // Reconnexion pendant l'attente des réponses : on rouvre l'écran d'attente
+  if (showing || (data.resent && !allyOutgoing.done)) renderAllianceWaiting();
 }
 
 // REÇU : un Caïd me propose une alliance (éventuellement avec d'autres invités)
@@ -255,6 +258,7 @@ function showAllianceSealed(pact) {
     return;
   }
   allySeenPacts.add(pact.allianceId);
+  try { localStorage.setItem(allySeenKey, JSON.stringify([...allySeenPacts].slice(-20))); } catch (e) {}
   return renderAllianceSealed(pact);
 }
 
