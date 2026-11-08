@@ -31,7 +31,7 @@ async function resetTestGame() {
 if (isTestPlayer && socket) {
   const bar = document.createElement('div');
   bar.id = 'testPlayerBar';
-  bar.className = 'absolute top-1 left-1/2 -translate-x-1/2 z-[45] flex items-center gap-1 p-1 rounded-full bg-black/85 border border-amber-400/50 shadow-lg';
+  bar.className = 'absolute top-1 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-1 p-1 rounded-full bg-black/85 border border-amber-400/50 shadow-lg';
   bar.innerHTML = `<span class="text-[9px] font-black uppercase text-amber-300 px-1.5">Test</span>` +
     TEST_PLAYERS.map((p, i) => {
       const caid = CAID_ROSTER.find(c => c.id === p.caidId);
