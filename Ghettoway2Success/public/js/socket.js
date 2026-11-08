@@ -45,6 +45,11 @@ if (socket) {
       const modeBadge = r.selectionMode === 'manual' ? '👆 Au Choix' : '🎲 Aléatoire';
       const div = document.createElement('div');
       div.className = "p-3.5 glass-panel rounded-2xl flex items-center justify-between cursor-pointer hover:border-cyan-400/40";
+      if (r.isTest) {
+        div.onclick = () => enterTestGame(1);
+        div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${r.name}</h4><span class="text-[10px] text-slate-400 font-mono">Partie de test • 3 Caïds sur ce téléphone</span></div><span class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-3 py-1 rounded-lg border border-amber-500/30">Tester</span>`;
+        return container.appendChild(div);
+      }
       div.onclick = () => {
         caidLocked = false;
         localPlayer.caidId = null;

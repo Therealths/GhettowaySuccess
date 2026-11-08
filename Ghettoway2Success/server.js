@@ -58,7 +58,7 @@ function saveRooms() {
       room.lastActivity = now;
       roomSnapshots[roomId] = JSON.stringify(room);
     }
-    if (now - room.lastActivity > ROOM_MAX_IDLE_MS) {
+    if (roomId !== TEST_ROOM_ID && now - room.lastActivity > ROOM_MAX_IDLE_MS) {
       archiveFinishedRoom(roomId, room);
       delete rooms[roomId];
       delete roomSnapshots[roomId];
@@ -183,6 +183,63 @@ function buildRoundOrder(room) {
   return room.players.map((_, i) => room.players[(start + i) % n].playerToken);
 }
 
+// Partie de test permanente : 3 joueurs déjà lancés, pilotables depuis un seul téléphone
+const TEST_ROOM_ID = 'TEST';
+const TEST_PLAYERS = [
+  { playerToken: 'tok_test_1', caidId: 'caid_1', caidName: 'Burger Queen', inventory: [{ id: 'kebab_1', type: 'CONSUMABLE', name: 'Kebab', desc: 'Restaure 1 Cœur de Vie' }] },
+  { playerToken: 'tok_test_2', caidId: 'caid_7', caidName: 'Jamel Pépouze', inventory: [{ id: 'armor_jamel', type: 'ARMOR', name: 'Gilet pare-balles usagé', price: 2000, bonusVal: 1, bonusLabel: '+1 Défense', desc: 'Confère +1 en Défense' }] },
+  { playerToken: 'tok_test_3', caidId: 'caid_5', caidName: 'J-Lo Gramme', inventory: [] }
+];
+
+function createTestRoom() {
+  const room = {
+    id: TEST_ROOM_ID,
+    name: 'test',
+    maxPlayers: 3,
+    selectionMode: 'manual',
+    hostSocketId: null,
+    round: 1,
+    currentTurnIndex: 0,
+    currentTurnAlliedTokens: [],
+    nonAggressionPacts: [],
+    strayDogHolderToken: null,
+    activeCombat: null,
+    activeLootSplit: null,
+    pendingPillage: null,
+    gameStarted: true,
+    currentRadio: RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)],
+    isTestRoom: true,
+    players: TEST_PLAYERS.map((t, i) => ({
+      socketId: null,
+      playerToken: t.playerToken,
+      caidId: t.caidId,
+      caidName: t.caidName,
+      isHost: i === 0,
+      hearts: 3,
+      pocketCash: 5000,
+      safeCash: 0,
+      safeDrugs: 0,
+      drugs: 5,
+      arrests: 0,
+      atk: 1,
+      def: 0,
+      musclesCount: 0,
+      hasProstituteInTransit: false,
+      prostituteObj: null,
+      hasStrayDog: false,
+      inventory: JSON.parse(JSON.stringify(t.inventory)),
+      equipped: { weapon: null, armor: null, vehicle: null }
+    }))
+  };
+  room.roundOrder = buildRoundOrder(room);
+  room.turnPos = 0;
+  room.playedThisRoundTokens = [];
+  room.alliedWithThisRound = {};
+  rooms[TEST_ROOM_ID] = room;
+}
+// Après loadSavedRooms() (et RADIO_EVENTS chargé) : on crée TEST s'il n'existe pas déjà
+if (!REDIRECT_TO && !rooms[TEST_ROOM_ID]) createTestRoom();
+
 function getActivePlayer(room) {
   if (!room.roundOrder) return room.players[room.currentTurnIndex] || null;
   const token = room.roundOrder[room.turnPos];
@@ -250,6 +307,7 @@ io.on('connection', (socket) => {
     const existingPlayer = room.players.find(p => p.playerToken === playerToken);
     if (!existingPlayer) return socket.emit('reconnect_failed');
 
+    if (room.isTestRoom) room.players.forEach(p => { if (p.socketId === socket.id) p.socketId = null; });
     existingPlayer.socketId = socket.id;
     socket.join(roomId);
     socket.roomId = roomId;
@@ -1193,6 +1251,12 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('reset_test_room', ({ roomId } = {}) => {
+    if (socket.roomId !== TEST_ROOM_ID && roomId !== TEST_ROOM_ID) return;
+    createTestRoom();
+    io.to(TEST_ROOM_ID).emit('test_room_reset');
+  });
+
   socket.on('leave_room', () => {
     handlePlayerDisconnect(socket);
   });
@@ -1207,6 +1271,12 @@ io.on('connection', (socket) => {
 
 function handlePlayerDisconnect(socket) {
   const room = rooms[socket.roomId];
+  if (room && room.isTestRoom) {
+    room.players.forEach(p => { if (p.socketId === socket.id) p.socketId = null; });
+    socket.leave(socket.roomId);
+    socket.roomId = null;
+    return;
+  }
   if (room) {
     if (room.strayDogHolderToken) {
       const p = room.players.find(x => x.socketId === socket.id);
@@ -1234,7 +1304,7 @@ function handlePlayerDisconnect(socket) {
 }
 
 function getAvailableRooms() {
-  return Object.values(rooms)
+  const list = Object.values(rooms)
     .filter(r => !r.gameStarted && r.players.length < r.maxPlayers)
     .map(r => ({
       id: r.id,
@@ -1243,6 +1313,8 @@ function getAvailableRooms() {
       connectedCount: r.players.length,
       selectionMode: r.selectionMode || 'random'
     }));
+  if (rooms[TEST_ROOM_ID]) list.push({ id: TEST_ROOM_ID, name: 'test', maxPlayers: 3, connectedCount: 3, selectionMode: 'manual', isTest: true });
+  return list;
 }
 
 const PORT = process.env.PORT || 3000;

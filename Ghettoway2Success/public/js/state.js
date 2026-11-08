@@ -17,6 +17,12 @@ function getRadioEffectValue(type, fallbackVal = 0) {
 }
 const myPlayerToken = (() => {
   let t = localStorage.getItem('g2s_player_token');
+  // Joueur de la partie « test » mais plus dans cette partie : on reprend sa vraie identité
+  if (t && t.startsWith('tok_test_') && localStorage.getItem('g2s_room_id') !== 'TEST') {
+    t = localStorage.getItem('g2s_real_token');
+    localStorage.removeItem('g2s_real_token');
+    if (t) localStorage.setItem('g2s_player_token', t);
+  }
   if (!t) { t = 'tok_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36); localStorage.setItem('g2s_player_token', t); }
   return t;
 })();
