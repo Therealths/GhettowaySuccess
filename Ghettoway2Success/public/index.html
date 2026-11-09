@@ -783,16 +783,26 @@
       <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase">Fermer</button>
     </div>
 
-    <!-- MODALE PATROUILLE -->
-    <div id="modalPatrolDice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center text-center">
-      <div class="glass-panel p-6 rounded-3xl space-y-4 border-white/15 max-w-sm mx-auto w-full">
-        <h3 class="text-base font-black text-white uppercase">Patrouille de Police</h3>
-        <div id="patrolDiceVisual" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-600 to-red-950 border-2 border-rose-400 flex items-center justify-center text-3xl font-black text-white font-mono">?</div>
-        <div>
-          <span id="patrolDiceMoveLabel" class="text-xs font-mono text-rose-400 font-bold uppercase">Le dé roule...</span>
-          <div id="patrolDiceDirectionLabel" class="text-sm font-black font-mono text-ghetto-gold uppercase mt-1"></div>
+    <!-- PATROUILLE DE FIN DE TOUR : dé qui roule, puis déplacement et direction du pion de la patrouille -->
+    <div id="patrolScreen" class="hidden absolute inset-0 z-40 police-screen patrol-screen" data-state="roule">
+      <img src="wallpaper-clean.jpg" alt="" class="police-bg">
+      <div class="police-lights"><i class="police-light-red"></i><i class="police-light-blue"></i></div>
+      <div class="police-shade"></div>
+      <div class="police-content">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="patrolRound">1</span> · fin de tour</span>
+          <span class="px-2.5 py-1 rounded-full bg-blue-600 text-white text-[10px] font-black"><i class="ph-fill ph-siren"></i> Patrouille</span>
         </div>
-        <button onclick="skipPatrolWait()" class="py-2.5 px-4 glass-panel text-slate-400 font-mono text-[10px] rounded-xl">Passer &rarr;</button>
+        <h2 id="patrolHeadline" class="font-anton police-headline px-4 mt-2"></h2>
+        <div class="police-team-wrap"><img id="patrolImg" src="patrol-car.webp" alt="Voiture de patrouille" class="police-team patrol-car"></div>
+        <div class="police-panel">
+          <div class="flex items-center gap-4">
+            <div id="patrolDie" class="patrol-die"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div id="patrolInfo" class="flex-1 min-w-0"></div>
+          </div>
+          <div id="patrolDirection"></div>
+          <button id="patrolCta" class="police-cta" onclick="skipPatrolWait()">Passer la main</button>
+        </div>
       </div>
     </div>
 

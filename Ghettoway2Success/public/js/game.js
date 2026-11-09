@@ -412,39 +412,90 @@ async function endCurrentPlayerTurn(forced = false) {
     showAppAlert("Votre participation à ce tour est terminée.\nVous rejouerez à la manche suivante.", "🤝 Fin de votre tour");
     return;
   }
-  document.getElementById('modalPatrolDice').classList.remove('hidden');
-  document.getElementById('patrolDiceVisual').innerText = '?';
-  document.getElementById('patrolDiceMoveLabel').innerText = 'Le dé roule...';
-  document.getElementById('patrolDiceDirectionLabel').innerText = '';
+  showPatrolScreen();
+}
 
-  setTimeout(() => {
-    if (isRadioEffectActive('PATROL_FREEZE')) {
-      document.getElementById('patrolDiceVisual').innerText = '0';
-      document.getElementById('patrolDiceMoveLabel').innerText = 'Grève au Commissariat : 0 case !';
-      document.getElementById('patrolDiceDirectionLabel').innerText = '🚔 Patrouille immobile ce tour';
+// Patrouille de fin de tour : le dé roule, puis on indique de combien de cases et dans quel sens avancer le pion
+const PATROL_PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+function setPatrolDie(n) {
+  document.querySelectorAll('#patrolDie i').forEach((pip, i) => pip.classList.toggle('on', (PATROL_PIPS[n] || []).includes(i)));
+}
+// Prochain joueur de la manche (celui qui n'a pas encore joué et n'est pas allié ce tour)
+function nextPlayerLabel() {
+  const order = lastTurnOrder || [];
+  const i = order.findIndex(p => p.token === activeTurnPlayerToken);
+  const next = order.slice(i + 1).find(p => !p.played && !(lastAlliedTokens || []).includes(p.token));
+  return next ? `Passer la main à ${next.token === myPlayerToken ? 'toi' : next.caidName}` : 'Passer à la manche suivante';
+}
+function showPatrolScreen() {
+  const scr = document.getElementById('patrolScreen');
+  const cta = document.getElementById('patrolCta');
+  const info = document.getElementById('patrolInfo');
+  const dirBox = document.getElementById('patrolDirection');
+  const greve = isRadioEffectActive('PATROL_FREEZE');
+  const baseRoll = Math.floor(Math.random() * 6) + 1;
+  const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
+  const finalMove = baseRoll + radioExtra;
+  const left = Math.random() < 0.5;
+
+  document.getElementById('patrolRound').innerText = currentSession.round || 1;
+  document.getElementById('patrolHeadline').innerHTML = 'LA PATROUILLE<br>TOURNE…';
+  info.innerHTML = '<div class="text-xs font-black uppercase tracking-widest text-sky-300">Le dé roule…</div><div class="patrol-big text-slate-500">?</div>';
+  cta.innerText = nextPlayerLabel();
+  cta.disabled = true;
+  scr.dataset.state = 'roule';
+  scr.classList.remove('hidden', 'show', 'result');
+  void scr.offsetWidth; // relance les animations d'arrivée
+  scr.classList.add('show');
+
+  // Bloc direction toujours présent, panneau de hauteur fixe : la voiture ne bouge pas quand le résultat arrive
+  const dirHtml = (label, labelCls, note) => `<div class="mt-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</span><span class="patrol-dir ${labelCls}">${label}</span></div>
+      <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
+  dirBox.innerHTML = dirHtml('…', 'text-slate-500', 'Le dé décide de combien de cases et dans quel sens avance la patrouille.');
+
+  const land = () => {
+    cta.disabled = false;
+    scr.classList.add('result');
+    if (greve) {
+      scr.dataset.state = 'greve';
+      setPatrolDie(0);
+      document.getElementById('patrolHeadline').innerHTML = 'GRÈVE AU<br>COMMISSARIAT.';
+      info.innerHTML = '<div class="text-[10px] font-black uppercase tracking-widest text-amber-300">Flash Radio</div><div class="patrol-big">0 <span>case</span></div>';
+      dirBox.innerHTML = dirHtml('SUR PLACE', 'text-amber-300', 'Grève au commissariat : la patrouille ne bouge pas ce tour.');
       return;
     }
+    scr.dataset.state = 'resultat';
+    setPatrolDie(baseRoll);
+    document.getElementById('patrolHeadline').innerHTML = 'LA PATROUILLE<br>BOUGE.';
+    info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
+      + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
+    dirBox.innerHTML = dirHtml(left ? '⬅ GAUCHE' : 'DROITE ➡', '', `Avance le pion de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau.`);
+  };
 
-    const baseRoll = Math.floor(Math.random() * 6) + 1;
-    const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
-    const finalMove = baseRoll + radioExtra;
-    const dir = Math.random() < 0.5 ? '⬅️ GAUCHE' : 'DROITE ➡️';
-
-    document.getElementById('patrolDiceVisual').innerText = finalMove;
-    document.getElementById('patrolDiceMoveLabel').innerText = radioExtra > 0
-      ? `Déplacement : ${finalMove} cases (Dé ${baseRoll} + ${radioExtra} Radio)`
-      : `Déplacement : ${finalMove} case(s)`;
-    document.getElementById('patrolDiceDirectionLabel').innerText = `Direction : ${dir}`;
-  }, 600);
+  // Le dé change de face quelques fois avant de tomber
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return land();
+  let k = 0;
+  const tick = () => {
+    if (k >= 10) return land();
+    setPatrolDie(1 + Math.floor(Math.random() * 6));
+    k++;
+    setTimeout(tick, 70 + k * 12);
+  };
+  setTimeout(tick, 300);
 }
 
 function skipPatrolWait() {
-  closeModal('modalPatrolDice');
+  const scr = document.getElementById('patrolScreen');
+  scr.classList.add('hidden');
+  scr.classList.remove('show', 'result');
   if (socket) socket.emit('next_player_turn');
 }
 
 // --- ORDRE DE PASSAGE & ALERTE DE TOUR ---
+let lastTurnOrder = [], lastAlliedTokens = [];
 function renderTurnOrder(turnOrder, activeToken, alliedTokens = []) {
+  lastTurnOrder = turnOrder || [];
+  lastAlliedTokens = alliedTokens || [];
   const html = (turnOrder || []).map(p => {
     const isMe = p.token === myPlayerToken;
     const isActive = p.token === activeToken;
