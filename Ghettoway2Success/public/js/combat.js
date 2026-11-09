@@ -195,7 +195,8 @@ function fightLog(html, reset) {
   if (reset) fightLogLines = [];
   if (html) fightLogLines.push(html);
   const el = document.getElementById('combatLiveLog');
-  if (el) el.innerHTML = fightLogLines[fightLogLines.length - 1] || '';
+  // Zone toujours affichée, hauteur fixe (2 lignes) : le score et les boutons ne bougent pas quand un message arrive
+  if (el) el.innerHTML = fightLogLines[fightLogLines.length - 1] || '<span class="text-slate-500">Choisis tes objets, puis déclare-toi prêt.</span>';
 }
 
 // CHOIX : cartes des Caïds rivaux (pacte actif et hôpital grisés)
@@ -321,7 +322,7 @@ function renderFightDuel(replay) {
   const bottom = `<div class="fight-phase">${phase}</div>
     <h2 class="font-anton ally-head fight-title">${title}</h2>
     <div class="fight-score mt-3">${atk ? myBox : oppBox}<div class="fight-mid">VS</div>${atk ? oppBox : myBox}</div>
-    <div class="flex flex-col gap-1.5 mt-3">${forces}<div id="combatLiveLog" class="fight-log ${fightLogLines.length ? '' : 'hidden'}"></div></div>
+    <div class="flex flex-col gap-1.5 mt-3">${forces}<div id="combatLiveLog" class="fight-log"></div></div>
     ${actions}`;
   const theme = atk && !p2 ? 'atk' : 'def';
   const res = fightRender('duel', theme, atk ? (p2 ? 'riposte' : 'combat') : 'defense', stage, bottom, replay);

@@ -20,7 +20,7 @@ const groupSplitEl = (() => {
 #modalGroupLootSplit .gs-step:active { background: rgba(255,255,255,.18); }
 #modalGroupLootSplit .gs-step:disabled { opacity: .3; }
 #modalGroupLootSplit .gs-pct { width: 48px; text-align: center; font-size: 20px; color: var(--c); flex-shrink: 0; }
-#modalGroupLootSplit .gs-cta { background: linear-gradient(90deg, #6ee7b7, #10b981); color: #04120c; }
+#modalGroupLootSplit .gs-cta { background: linear-gradient(90deg, #6ee7b7, #10b981); color: #04120c; border: 1px solid transparent; }
 #modalGroupLootSplit .gs-cta.gs-wait { background: rgba(255,255,255,.08); color: #94a3b8; border: 1px solid rgba(255,255,255,.12); }
 `;
   document.head.appendChild(style);

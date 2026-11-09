@@ -748,6 +748,7 @@
         <div class="scan-line"></div>
         <div id="qr-photo-preview-box" class="hidden absolute inset-0 bg-black/95 rounded-[18px] flex items-center justify-center p-2">
           <img id="qr-photo-preview-img" src="" alt="Photo QR" class="w-full h-full object-contain rounded-xl">
+          <button type="button" id="btnCancelQrPhoto" onclick="cancelSelectedQrPhoto()" class="hidden absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1.5 rounded-xl bg-rose-600/90 border border-rose-400 text-[11px] text-white font-bold pointer-events-auto"><i class="ph-bold ph-arrow-counter-clockwise"></i> Revenir à la caméra</button>
         </div>
       </div>
       <div id="scanTape" class="scan-tape"></div>
@@ -762,14 +763,13 @@
         <div class="flex-1"></div>
         <div class="police-panel scan-panel pointer-events-auto">
           <h2 class="font-anton scan-head">FLASH UN QR CODE</h2>
-          <div id="qrScannerStatus" class="text-[11px] text-center font-bold text-amber-300 mt-1">Démarrage de la caméra…</div>
+          <div id="qrScannerStatus" class="scan-status text-[11px] text-center font-bold text-amber-300 mt-1">Démarrage de la caméra…</div>
           <div class="grid grid-cols-3 gap-2 mt-3">
             <label class="scan-btn cursor-pointer"><i class="ph-bold ph-image"></i><span>Photo</span>
               <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
             <button type="button" id="btnQrTorch" onclick="toggleQrTorch()" class="scan-btn" disabled><i class="ph-bold ph-flashlight"></i><span>Lampe</span></button>
             <button type="button" onclick="closeQrScannerModal()" class="scan-btn"><i class="ph-bold ph-x"></i><span>Fermer</span></button>
           </div>
-          <button type="button" id="btnCancelQrPhoto" onclick="cancelSelectedQrPhoto()" class="hidden mt-2 w-full py-2 rounded-xl bg-rose-500/20 border border-rose-500/50 text-[11px] text-rose-300 font-bold"><i class="ph-bold ph-arrow-counter-clockwise"></i> Revenir à la caméra</button>
           <div id="qrTestButtons" class="hidden mt-3 grid grid-cols-2 gap-1.5 text-[10px] font-mono max-h-40 overflow-y-auto">
           <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
           <button onclick='processQrPayload("{\"t\":\"concessionnaire\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🚗 Concessionnaire</button>

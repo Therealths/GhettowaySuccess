@@ -534,3 +534,8 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .scan-btn:disabled { opacity: 0.3; }
 .scan-btn.on { background: rgba(251,191,36,0.2); border-color: #fbbf24; }
 @media (prefers-reduced-motion: reduce) { .scan-screen * { animation: none !important; } }
+/* Places réservées : rien ne bouge quand un message ou une ligne de bilan arrive */
+#policeRows { min-height: 9.2rem; }
+#combatLiveLog { height: calc(2.7em + 16px); overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.scan-status { min-height: 2.8em; line-height: 1.4; }
+@media (max-height: 700px) { #policeRows { min-height: 8.4rem; } }

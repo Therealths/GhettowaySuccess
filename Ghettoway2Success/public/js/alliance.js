@@ -217,7 +217,7 @@ function renderAllianceWaiting() {
   const note = inv.length === 1 ? 'En attente de sa réponse… L’écran se met à jour tout seul.' : 'L’alliance se fait avec ceux qui acceptent. L’écran se met à jour tout seul.';
   const bottom = `<h2 class="font-anton ally-head">UN DEAL ?</h2>
     <div class="text-center text-sm font-bold text-slate-200 mt-1">${summary}</div>
-    ${waiting ? '<div class="text-center mt-3 ally-dots"><i></i><i></i><i></i></div>' : ''}
+    <div class="text-center mt-3 ally-dots" style="${waiting ? '' : 'visibility:hidden'}"><i></i><i></i><i></i></div>
     <div class="text-center text-[11px] text-slate-500 mt-2 mb-4">${note}</div>
     <div class="flex flex-col gap-1.5">${rows}</div>
     <button type="button" class="ally-close" onclick="closeAllianceScreen()">Fermer</button>`;
