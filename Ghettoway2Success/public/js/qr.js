@@ -212,6 +212,8 @@ async function processQrPayload(payload) {
   if (type === 'concessionnaire' || type === 'dealer') return openDealerShopModal();
 
   if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
+  // Case Fouilles : objet tiré au hasard
+  if (type === 'fouilles' || type === 'fouille') return openFouille();
 
   if (type === 'obj') {
     if (data.eff === 'cash') {

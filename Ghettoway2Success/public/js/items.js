@@ -62,6 +62,25 @@ function openLootDiscoveryModal(it, cta, onClaim) {
   if (img && !img.complete) { img.onload = reveal; img.onerror = reveal; } else reveal();
 }
 
+// Case Fouilles du plateau : un seul QR, l'objet est tiré au hasard (même poids = même chance pour chaque objet)
+const FOUILLE_TABLE = [
+  [1, { name: 'Trognon de pomme', eff: 'none', desc: 'Bon... Ben... Faut pas gâcher !' }],
+  [1, { name: 'Vieille canette', eff: 'def_malus_round', val: 1, desc: '−1 Défense à un rival jusqu’à la fin de la manche' }],
+  [1, { name: 'Kebab', eff: 'heal', val: 1, desc: 'Restaure 1 Cœur de Vie' }],
+  [1, { name: 'Couvercle de poubelle', eff: 'null_enemy_weapon', dur: 'combat', desc: 'Réduit l’arme adverse à 0' }],
+  [1, { name: 'Pot de Protéine', eff: 'double_muscles_atk', dur: 'combat', desc: 'Attaque/Défense Lascars doublée' }],
+  [1, { name: 'Balle perforante', eff: 'double_weapon_atk', dur: 'combat', desc: 'Dégâts arme à feu doublés' }],
+  [1, { name: 'Passeport diplomatique', eff: 'cancel_police', desc: 'Annule un contrôle de police' }],
+  [1, { name: 'Sifflet', eff: 'stray_dog', dur: 'tour', desc: 'Rallie le Chien Errant (+2 Atk / +2 Def)' }]
+];
+function openFouille() {
+  const total = FOUILLE_TABLE.reduce((s, [w]) => s + w, 0);
+  let r = Math.random() * total;
+  const pick = (FOUILLE_TABLE.find(([w]) => (r -= w) < 0) || FOUILLE_TABLE[0])[1];
+  const it = Object.assign({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', val: 0, dur: 'instant' }, pick);
+  return openLootDiscoveryModal(it, "Ajouter au sac", () => { localPlayer.inventory.push(it); spendActionPm(); });
+}
+
 // =========================================================================
 // COMBAT : pile de cartes des objets, on joue celles qu'on veut
 // =========================================================================
