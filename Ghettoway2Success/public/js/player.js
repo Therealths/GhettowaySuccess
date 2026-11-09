@@ -489,55 +489,138 @@ function renderEquipmentSlotsView() {
     : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
 }
 
-async function openTransferModal(mode) {
+// Coffre du QG : sur toi ⇄ au QG pour l'argent et la drogue, installation d'une escort (aller simple)
+let transferAmount = 0;
+const escortRent = pr => pr.revenue || (pr.level === 2 ? 2500 : 1000);
+async function openTransferModal(mode, res) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
-  currentTransferMode = mode;
+  currentTransferMode = mode === 'withdraw' ? 'withdraw' : 'deposit';
+  currentTransferResource = res || (currentTransferResource === 'escort' ? 'cash' : currentTransferResource || 'cash');
+  if (currentTransferResource === 'escort') currentTransferMode = 'deposit';
+  document.getElementById('qgRound').innerText = currentSession.round || 1;
   document.getElementById('modalTransfer').classList.remove('hidden');
+  transferAmount = 0;
   updateTransferUI();
 }
-function switchTransferResource(res) { currentTransferResource = res; updateTransferUI(); }
+function switchTransferResource(res) {
+  currentTransferResource = res;
+  if (res === 'escort') currentTransferMode = 'deposit';
+  transferAmount = 0;
+  updateTransferUI();
+}
+function toggleTransferDirection() {
+  if (currentTransferResource === 'escort') return; // aller simple
+  currentTransferMode = currentTransferMode === 'deposit' ? 'withdraw' : 'deposit';
+  transferAmount = 0;
+  updateTransferUI();
+}
 function getTransferMaxLimit() {
   return currentTransferResource === 'cash'
     ? (currentTransferMode === 'deposit' ? localPlayer.pocketCash : localPlayer.safeCash)
     : (currentTransferMode === 'deposit' ? localPlayer.drugs : (localPlayer.safeDrugs || 0));
 }
-function updateTransferUI() {
-  const maxLimit = getTransferMaxLimit();
-  const unit = currentTransferResource === 'cash' ? '€' : 'kg';
-  document.getElementById('transferTabCash').className = currentTransferResource === 'cash' ? "py-2 rounded-xl font-bold bg-yellow-400 text-black" : "py-2 rounded-xl font-bold text-slate-400";
-  document.getElementById('transferTabDrugs').className = currentTransferResource === 'drugs' ? "py-2 rounded-xl font-bold bg-emerald-400 text-black" : "py-2 rounded-xl font-bold text-slate-400";
-  document.getElementById('transferPocketDisplay').innerText = currentTransferResource === 'cash' ? `${localPlayer.pocketCash.toLocaleString()} €` : `${localPlayer.drugs} kg`;
-  document.getElementById('transferSafeDisplay').innerText = currentTransferResource === 'cash' ? `${localPlayer.safeCash.toLocaleString()} €` : `${localPlayer.safeDrugs || 0} kg`;
-  document.getElementById('transferUnitSuffix').innerText = unit;
-  document.getElementById('transferMaxAvailableLabel').innerText = `Max : ${maxLimit.toLocaleString()} ${unit}`;
-  setTransferPercentage(0);
+function transferStep() { return currentTransferResource === 'cash' ? 500 : 1; }
+function fmtTransfer(v) { return currentTransferResource === 'cash' ? `${v.toLocaleString()} €` : `${v} kg`; }
+function setTransferAmount(v) {
+  transferAmount = Math.max(0, Math.min(getTransferMaxLimit(), Math.round(v)));
+  updateTransferUI(true);
 }
-function setTransferPercentage(pct) {
-  const maxLimit = getTransferMaxLimit();
-  document.getElementById('transferAmountInput').value = Math.floor((maxLimit * pct) / 100);
-  document.getElementById('transferRangeSlider').value = pct;
+function stepTransfer(dir) {
+  const step = transferStep();
+  const max = getTransferMaxLimit();
+  // Pas de 500 € ou 1 kg ; le dernier pas va jusqu'au maximum
+  setTransferAmount(dir > 0 ? Math.min(max, (Math.floor(transferAmount / step) + 1) * step) : Math.max(0, (Math.ceil(transferAmount / step) - 1) * step));
 }
-function syncTransferSliderToInput() {
-  const pct = parseInt(document.getElementById('transferRangeSlider').value) || 0;
-  document.getElementById('transferAmountInput').value = Math.floor((getTransferMaxLimit() * pct) / 100);
+function setTransferFraction(f) {
+  const max = getTransferMaxLimit();
+  setTransferAmount(f >= 1 ? max : Math.floor((max * f) / transferStep()) * transferStep());
 }
-function syncTransferInputToSlider() {
-  const maxLimit = getTransferMaxLimit();
-  let val = Math.min(maxLimit, parseInt(document.getElementById('transferAmountInput').value) || 0);
-  document.getElementById('transferAmountInput').value = val;
-  document.getElementById('transferRangeSlider').value = maxLimit > 0 ? Math.round((val / maxLimit) * 100) : 0;
+function updateTransferUI(amountOnly) {
+  const scr = document.getElementById('modalTransfer');
+  const res = currentTransferResource, dep = currentTransferMode === 'deposit';
+  scr.dataset.res = res;
+  scr.dataset.dir = currentTransferMode;
+  document.querySelectorAll('#modalTransfer .qg-tabs button').forEach(b => b.classList.toggle('on', b.dataset.res === res));
+  const meIll = document.getElementById('qgMeIll');
+  const hint = document.getElementById('qgHint');
+  const cta = document.getElementById('qgCta');
+  document.getElementById('qgAmountBox').classList.toggle('hidden', res === 'escort');
+  document.getElementById('qgEscortBox').classList.toggle('hidden', res !== 'escort');
+  document.getElementById('qgArrowHint').innerText = res === 'escort' ? 'aller simple' : 'toucher pour inverser';
+  document.getElementById('qgArrowLabel').innerText = res === 'escort' ? 'Installer' : (dep ? 'Déposer' : 'Retirer');
+
+  if (res === 'escort') {
+    const pr = localPlayer.prostituteInTransit;
+    const list = localPlayer.prostitutesAtSafeList || [];
+    const rent = list.reduce((acc, p) => acc + escortRent(p), 0);
+    meIll.innerHTML = pr ? `<img src="${pr.level === 2 ? 'plvl2.jpg' : 'plvl1.jpg'}" alt="" class="qg-portrait">` : '<div class="qg-empty"><i class="ph-bold ph-user"></i></div>';
+    document.getElementById('qgMeVal').innerText = pr ? `L${pr.level || 1}` : 'personne';
+    document.getElementById('qgMeAfter').innerText = pr ? '→ personne' : '';
+    document.getElementById('qgSafeVal').innerText = `${list.length} escort${list.length > 1 ? 's' : ''}`;
+    document.getElementById('qgSafeAfter').innerText = pr ? `→ ${(rent + escortRent(pr)).toLocaleString()} €/manche` : `${rent.toLocaleString()} €/manche`;
+    document.getElementById('qgEscortBox').innerHTML = pr
+      ? `<div class="font-anton text-2xl text-white">${escapeHtml(pr.name || `Prostituée L${pr.level || 1}`)}</div><div class="text-sm font-bold text-pink-300">Rente : ${escortRent(pr).toLocaleString()} € à chaque manche</div>`
+      : `<div class="text-sm font-bold text-slate-300">Aucune escort sur toi</div><div class="text-[11px] text-slate-500">Recrute-en une au Nightclub.</div>`;
+    document.getElementById('qgHeadline').innerHTML = 'AU CHAUD.';
+    hint.innerHTML = '<i class="ph-fill ph-shield-check"></i> Au QG, elle rapporte sa rente à chaque manche et ne peut plus être rackettée';
+    cta.innerText = 'Installer au QG';
+    cta.disabled = !pr;
+    return;
+  }
+  const cash = res === 'cash';
+  const mine = cash ? localPlayer.pocketCash : localPlayer.drugs;
+  const safe = cash ? localPlayer.safeCash : (localPlayer.safeDrugs || 0);
+  const max = getTransferMaxLimit();
+  transferAmount = Math.min(transferAmount, max);
+  meIll.innerHTML = cash ? '<img src="pay-cash.webp" alt="Portefeuille">' : '<img src="qg-sachet.webp" alt="Sachet de drogue">';
+  document.getElementById('qgMeVal').innerText = fmtTransfer(mine);
+  document.getElementById('qgSafeVal').innerText = fmtTransfer(safe);
+  document.getElementById('qgMeAfter').innerText = `→ ${fmtTransfer(dep ? mine - transferAmount : mine + transferAmount)}`;
+  document.getElementById('qgSafeAfter').innerText = `→ ${fmtTransfer(dep ? safe + transferAmount : safe - transferAmount)}`;
+  document.getElementById('qgAmount').innerText = fmtTransfer(transferAmount);
+  document.getElementById('qgMax').innerText = `max ${fmtTransfer(max)}`;
+  const range = document.getElementById('transferRangeSlider');
+  range.max = max; range.step = transferStep(); range.value = transferAmount;
+  document.getElementById('qgHeadline').innerHTML = dep ? 'À L’ABRI.' : 'ON RESSORT<br>LE MAGOT.';
+  hint.innerHTML = `<i class="ph-fill ph-shield-check"></i> ${cash ? 'Au QG, ton argent est à l’abri du racket' : 'Au QG, ta drogue échappe aux contrôles de police'}`;
+  cta.innerText = `${dep ? 'Déposer' : 'Retirer'} ${fmtTransfer(transferAmount)}`;
+  cta.disabled = transferAmount <= 0;
+}
+// Petite animation : billets, sachets ou portrait qui passent d'un côté à l'autre
+function playTransferFly(icon, toRight) {
+  const box = document.querySelector('#modalTransfer .qg-duo');
+  [0, 1, 2].forEach(i => {
+    const el = document.createElement('span');
+    el.className = `qg-fly ${toRight ? 'right' : 'left'}`;
+    el.innerHTML = icon;
+    el.style.animationDelay = `${i * 0.09}s`;
+    box.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  });
 }
 async function confirmTransferAction() {
   if (!isMyTurnToPlay) return;
-  const amt = parseInt(document.getElementById('transferAmountInput').value) || 0;
-  if (amt <= 0) return showAppAlert("Sélectionnez un montant supérieur à 0.", "Montant Invalide");
-  if (currentTransferResource === 'cash') {
-    if (currentTransferMode === 'deposit' && amt <= localPlayer.pocketCash) { localPlayer.pocketCash -= amt; localPlayer.safeCash += amt; }
-    else if (currentTransferMode === 'withdraw' && amt <= localPlayer.safeCash) { localPlayer.safeCash -= amt; localPlayer.pocketCash += amt; }
+  const res = currentTransferResource, dep = currentTransferMode === 'deposit';
+  if (res === 'escort') {
+    if (!localPlayer.prostituteInTransit) return;
+    playTransferFly('💃', true);
+    localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
+    localPlayer.prostituteInTransit = null;
   } else {
-    if (currentTransferMode === 'deposit' && amt <= localPlayer.drugs) { localPlayer.drugs -= amt; localPlayer.safeDrugs += amt; }
-    else if (currentTransferMode === 'withdraw' && amt <= localPlayer.safeDrugs) { localPlayer.safeDrugs -= amt; localPlayer.drugs += amt; }
+    const amt = transferAmount;
+    if (amt <= 0) return;
+    if (res === 'cash') {
+      if (dep && amt <= localPlayer.pocketCash) { localPlayer.pocketCash -= amt; localPlayer.safeCash += amt; }
+      else if (!dep && amt <= localPlayer.safeCash) { localPlayer.safeCash -= amt; localPlayer.pocketCash += amt; }
+      else return;
+    } else {
+      if (dep && amt <= localPlayer.drugs) { localPlayer.drugs -= amt; localPlayer.safeDrugs += amt; }
+      else if (!dep && amt <= localPlayer.safeDrugs) { localPlayer.safeDrugs -= amt; localPlayer.drugs += amt; }
+      else return;
+    }
+    playTransferFly(res === 'cash' ? '💵' : '🌿', dep);
   }
-  closeModal('modalTransfer');
+  transferAmount = 0;
   refreshHud();
+  setTimeout(() => updateTransferUI(), 450);
 }

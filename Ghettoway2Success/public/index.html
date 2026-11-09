@@ -384,7 +384,7 @@
             </div>
             <div class="flex items-center gap-1.5">
               <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <button onclick="depositProstituteToSafe()" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center"><span class="text-[9px] font-mono font-black uppercase">QG</span></button>
+              <button onclick="openTransferModal('deposit', 'escort')" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center"><span class="text-[9px] font-mono font-black uppercase">QG</span></button>
             </div>
           </div>
         </div>
@@ -728,32 +728,47 @@
       </div>
     </div>
 
-    <!-- MODALE TRANSFERT QG -->
-    <div id="modalTransfer" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
-      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-white/15 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 id="transferModalTitle" class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5"><i class="ph-bold ph-vault"></i> Coffre du QG</h3>
-          <button onclick="closeModal('modalTransfer')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
-        </div>
-        <div class="grid grid-cols-2 gap-1.5 p-1 bg-black/60 rounded-2xl font-mono text-xs">
-          <button id="transferTabCash" onclick="switchTransferResource('cash')" class="py-2 rounded-xl font-bold bg-yellow-400 text-black">Argent (€)</button>
-          <button id="transferTabDrugs" onclick="switchTransferResource('drugs')" class="py-2 rounded-xl font-bold text-slate-400">Drogue (kg)</button>
-        </div>
-        <div class="p-3 bg-black/40 rounded-2xl border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
-          <div class="border-r border-white/10 pr-2"><span class="text-[9px] text-amber-400 uppercase font-bold block">Sur Vous</span><div id="transferPocketDisplay" class="text-sm font-black text-white mt-0.5">5 000 €</div></div>
-          <div class="pl-2"><span class="text-[9px] text-sky-400 uppercase font-bold block">Au Coffre</span><div id="transferSafeDisplay" class="text-sm font-black text-white mt-0.5">0 €</div></div>
-        </div>
-        <div class="space-y-2">
-          <div class="flex items-center justify-between text-xs font-mono"><span id="transferInputLabel" class="text-[10px] uppercase text-slate-400 font-bold">Quantité :</span><span id="transferMaxAvailableLabel" class="text-[10px] text-ghetto-gold font-bold">Max : 5 000 €</span></div>
-          <div class="relative flex items-center"><input type="number" id="transferAmountInput" value="0" min="0" oninput="syncTransferInputToSlider()" class="w-full glass-input text-white px-3 py-2.5 rounded-xl text-sm font-mono font-bold"><span id="transferUnitSuffix" class="text-xs font-mono text-slate-400 absolute right-3">€</span></div>
-          <input type="range" id="transferRangeSlider" min="0" max="100" value="0" oninput="syncTransferSliderToInput()" class="w-full">
-          <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
-            <button onclick="setTransferPercentage(0)" class="py-2 glass-panel rounded-xl text-slate-300 font-bold">0 %</button>
-            <button onclick="setTransferPercentage(50)" class="py-2 glass-panel rounded-xl text-slate-300 font-bold">50 %</button>
-            <button onclick="setTransferPercentage(100)" class="py-2 glass-panel rounded-xl text-ghetto-gold font-bold">100 % (Tout)</button>
+    <!-- COFFRE DU QG : sur toi ⇄ au QG (argent, drogue), et installation d'une escort (aller simple) -->
+    <div id="modalTransfer" class="hidden absolute inset-0 z-50 qg-screen" data-res="cash" data-dir="deposit">
+      <div class="qg-scene"><img src="grossiste-hall.webp" alt=""></div>
+      <div class="relative z-[1] flex flex-col h-full">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="qgRound">1</span></span>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-full bg-sky-600 text-white text-[10px] font-black"><i class="ph-fill ph-vault"></i> Coffre du QG</span>
+            <button onclick="closeModal('modalTransfer')" class="w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-slate-200" aria-label="Fermer"><i class="ph-bold ph-x text-xs"></i></button>
           </div>
         </div>
-        <button onclick="confirmTransferAction()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Confirmer le Transfert</button>
+        <h2 id="qgHeadline" class="font-anton qg-head px-4 mt-2">À L’ABRI.</h2>
+        <div class="flex-1"></div>
+        <div class="police-panel qg-panel">
+          <div class="qg-tabs">
+            <button type="button" data-res="cash" onclick="switchTransferResource('cash')"><i class="ph-bold ph-money"></i> Argent</button>
+            <button type="button" data-res="drugs" onclick="switchTransferResource('drugs')"><i class="ph-bold ph-leaf"></i> Drogue</button>
+            <button type="button" data-res="escort" onclick="switchTransferResource('escort')"><i class="ph-bold ph-sparkle"></i> Escort</button>
+          </div>
+          <div class="qg-duo mt-3">
+            <div class="qg-side"><div id="qgMeIll" class="qg-ill"></div><b>Sur toi</b><div id="qgMeVal" class="qg-val">0</div><div id="qgMeAfter" class="qg-after"></div></div>
+            <button type="button" id="qgArrow" class="qg-arrow" onclick="toggleTransferDirection()"><span><i class="ph-bold ph-arrow-right"></i></span><em id="qgArrowLabel">Déposer</em><small id="qgArrowHint">toucher pour inverser</small></button>
+            <div class="qg-side"><div class="qg-ill"><img src="qg-coffre.webp" alt="Coffre-fort du QG"></div><b>Au QG</b><div id="qgSafeVal" class="qg-val">0</div><div id="qgSafeAfter" class="qg-after"></div></div>
+          </div>
+          <div id="qgAmountBox">
+            <div class="flex items-center justify-between mt-3">
+              <button type="button" class="gros-step" onclick="stepTransfer(-1)" aria-label="Moins"><i class="ph-bold ph-minus"></i></button>
+              <div class="text-center"><div id="qgAmount" class="qg-amount">0</div><div id="qgMax" class="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">max 0</div></div>
+              <button type="button" class="gros-step" onclick="stepTransfer(1)" aria-label="Plus"><i class="ph-bold ph-plus"></i></button>
+            </div>
+            <input type="range" id="transferRangeSlider" class="w-full mt-3" min="0" max="0" value="0" oninput="setTransferAmount(+this.value)">
+            <div class="flex gap-2 mt-3">
+              <button type="button" class="gros-quick" onclick="setTransferFraction(0.25)">¼</button>
+              <button type="button" class="gros-quick" onclick="setTransferFraction(0.5)">½</button>
+              <button type="button" class="gros-quick" onclick="setTransferFraction(1)">Tout</button>
+            </div>
+          </div>
+          <div id="qgEscortBox" class="qg-escort hidden"></div>
+          <div id="qgHint" class="qg-hint mt-3"></div>
+          <button type="button" id="qgCta" class="qg-cta mt-3" onclick="confirmTransferAction()">Déposer</button>
+        </div>
       </div>
     </div>
 
