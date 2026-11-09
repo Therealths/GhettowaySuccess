@@ -295,6 +295,7 @@ if (socket) {
     const opp = (connectedRivals || []).find(r => allyRivalName(r) === opponentCaid);
     fightForces = opp ? { muscles: opp.musclesCount || 0, prostitute: !!opp.hasProstituteInTransit, dog: !!opp.hasStrayDog } : null;
     closeModal('modalCombatItemSelector');
+    await msgIdle();
     if (role === 'attacker') {
       fightLog(`🔄 Phase 2 : tu passes à l'attaque pour riposter contre <b>${escapeHtml(opponentCaid)}</b> ! Clique sur Prêt.`);
       if (myWeaponNullified) fightLog(`🗑️ Couvercle de poubelle adverse : ton arme compte pour 0 dans ce combat !`);
@@ -323,6 +324,7 @@ if (socket) {
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
     refreshHud();
+    await msgIdle(); // l'écran de résultat attend que les messages en cours soient lus
     await showFightDraw(message || "Match Nul !", last);
   });
 
@@ -331,6 +333,7 @@ if (socket) {
     endSingleCombatEffects();
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
+    await msgIdle(); // l'écran de résultat attend que les messages en cours soient lus
 
     if (outcome === 'loser') {
       const heartsBefore = localPlayer.hearts;
@@ -433,6 +436,7 @@ if (socket) {
       socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });
     }
     refreshHud();
+    await msgIdle(); // « Touché ! » après les messages déjà ouverts
     await showPowerHit(effectType, senderCaid, stolen);
     if (effectType === 'siphon') await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
     refreshHud();

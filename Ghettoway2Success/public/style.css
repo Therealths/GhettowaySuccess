@@ -854,3 +854,6 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @keyframes findRays { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 @media (max-height: 700px) { .find-card { width: min(230px, 62%); top: 56px; } .find-head { font-size: 32px; } }
 @media (prefers-reduced-motion: reduce) { .find-screen *, .deck-screen * { animation: none !important; } .find-screen[data-state="carte"] .find-card, .find-screen[data-state="carte"] .find-bottom { opacity: 1; } }
+
+/* Message ouvert : les animations des écrans derrière attendent qu'il soit fermé */
+body.msg-open *:not(.msg-screen, .msg-screen *) { animation-play-state: paused !important; }

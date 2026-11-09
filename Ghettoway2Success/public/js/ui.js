@@ -87,18 +87,31 @@ function msgShow(modal, iconEl, parts, title) {
   modal.classList.add('show');
   if (parts.tone === 'lose') { try { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); } catch (e) {} }
 }
+// Messages en file : un seul à la fois, le suivant attend le clic sur le précédent.
+// Tant qu'un message est ouvert, les animations des écrans derrière sont en pause (body.msg-open)
+let msgChain = Promise.resolve();
+function msgQueue(open) {
+  const p = msgChain.then(() => new Promise(res => {
+    document.body.classList.add('msg-open');
+    open(v => { document.body.classList.remove('msg-open'); res(v); });
+  }));
+  msgChain = p.catch(() => {});
+  return p;
+}
+// Attend que tous les messages en cours aient été fermés (avant d'afficher un grand écran)
+function msgIdle() { return msgChain; }
 function showAppAlert(msg, title = "Information") {
-  return new Promise(res => {
+  return msgQueue(done => {
     const m = document.getElementById('modalAppAlert');
     const parts = msgParts(title, msg, false);
     document.getElementById('appAlertTag').innerText = MSG_TAGS[parts.tone];
     document.getElementById('appAlertMessage').innerHTML = msgHtml(msg);
     msgShow(m, document.getElementById('appAlertIcon'), parts, document.getElementById('appAlertTitle'));
-    document.getElementById('btnAppAlertOk').onclick = () => { m.classList.add('hidden'); m.classList.remove('show'); res(); };
+    document.getElementById('btnAppAlertOk').onclick = () => { m.classList.add('hidden'); m.classList.remove('show'); done(); };
   });
 }
 function showAppConfirm(msg, title = "Confirmation", yesLabel = "Confirmer", noLabel = "Annuler") {
-  return new Promise(res => {
+  return msgQueue(done => {
     const m = document.getElementById('modalAppConfirm');
     const parts = msgParts(title, msg, true);
     document.getElementById('appConfirmMessage').innerHTML = msgHtml(msg);
@@ -109,7 +122,7 @@ function showAppConfirm(msg, title = "Confirmation", yesLabel = "Confirmer", noL
     btnNo.innerText = noLabel;
     // Action risquée : bouton rouge
     btnYes.classList.toggle('danger', /quitter|supprimer|congédier|abandonner/i.test(yesLabel));
-    const close = v => { m.classList.add('hidden'); m.classList.remove('show'); res(v); };
+    const close = v => { m.classList.add('hidden'); m.classList.remove('show'); done(v); };
     btnYes.onclick = () => close(true);
     btnNo.onclick = () => close(false);
   });
