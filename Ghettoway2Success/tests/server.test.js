@@ -1,0 +1,222 @@
+// Tests du serveur : vraies connexions socket.io sur un serveur lancé à part (port et dossier de données temporaires).
+// Lancer avec : npm test
+const { test, before, after } = require('node:test');
+const assert = require('node:assert');
+const { spawn } = require('node:child_process');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { io } = require('socket.io-client');
+
+const PORT = 3200 + Math.floor(Math.random() * 500);
+const URL = `http://localhost:${PORT}`;
+const DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'g2s-test-'));
+let server;
+const clients = [];
+
+before(async () => {
+  server = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
+    env: { ...process.env, PORT, GAME_DATA_DIR: DATA_DIR },
+    stdio: ['ignore', 'pipe', 'inherit']
+  });
+  await new Promise((resolve, reject) => {
+    server.stdout.on('data', d => { if (String(d).includes('actif sur le port')) resolve(); });
+    server.on('exit', code => reject(new Error(`serveur arrêté (code ${code})`)));
+  });
+});
+
+after(() => {
+  clients.forEach(c => c.disconnect());
+  server.kill();
+  fs.rmSync(DATA_DIR, { recursive: true, force: true });
+});
+
+// Client de test : garde tous les événements reçus, waitFor attend le prochain qui correspond
+async function connect() {
+  const s = io(URL, { transports: ['websocket'], forceNew: true });
+  s.events = [];
+  s.waiters = [];
+  s.onAny((event, data) => {
+    s.events.push({ event, data });
+    s.waiters = s.waiters.filter(w => !(w.event === event && w.pred(data) && (w.resolve(data), true)));
+  });
+  await new Promise(r => s.on('connect', r));
+  clients.push(s);
+  return s;
+}
+function waitFor(s, event, pred = () => true, ms = 2000) {
+  const seen = s.events.find(e => e.event === event && pred(e.data) && !e.used);
+  if (seen) { seen.used = true; return Promise.resolve(seen.data); }
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`« ${event} » jamais reçu`)), ms);
+    s.waiters.push({ event, pred, resolve: d => { clearTimeout(timer); const e = s.events.findLast(x => x.data === d); if (e) e.used = true; resolve(d); } });
+  });
+}
+const never = async (s, event, ms = 300) => {
+  await new Promise(r => setTimeout(r, ms));
+  assert.ok(!s.events.some(e => e.event === event && !e.used), `« ${event} » reçu alors qu'il ne devait pas l'être`);
+};
+
+// Partie normale à 2 joueurs, lancée, avec leurs Caïds
+async function startGame(caids = [['caid_1', 'Burger Queen'], ['caid_7', 'Jamel Pépouze']]) {
+  const players = [];
+  let roomId;
+  for (const [i, [caidId, caidName]] of caids.entries()) {
+    const s = await connect();
+    s.token = `tok_${caidId}_${Math.random().toString(36).slice(2, 7)}`;
+    if (i === 0) {
+      s.emit('create_room', { gameName: 'Test', maxPlayers: caids.length, selectionMode: 'manual', playerToken: s.token });
+      roomId = (await waitFor(s, 'room_created')).roomId;
+    } else {
+      s.emit('join_room', { roomId, playerToken: s.token });
+      await waitFor(s, 'room_joined');
+    }
+    s.emit('assign_caid', { caidId, caidName, startCash: 5000, startDrug: 5, startHearts: 3, unarmedAtk: 1, playerToken: s.token });
+    await waitFor(s, 'caid_assigned_ok');
+    players.push(s);
+  }
+  players[0].emit('start_game');
+  await Promise.all(players.map(s => waitFor(s, 'game_started')));
+  return { roomId, players };
+}
+
+// Partie test : 3 Caïds pilotés depuis un seul téléphone (on bascule en se reconnectant à leur place)
+async function testRoomAs(token) {
+  const s = await connect();
+  s.emit('reconnect_player', { roomId: 'TEST', playerToken: token });
+  s.me = (await waitFor(s, 'reconnect_success')).player;
+  return s;
+}
+
+test('création de partie, Caïds choisis, partie lancée et tour annoncé', async () => {
+  const { players: [a, b] } = await startGame();
+  const turn = await waitFor(b, 'turn_state_updated');
+  assert.ok([a.token, b.token].includes(turn.activePlayerToken));
+  assert.strictEqual(turn.turnOrder.length, 2);
+});
+
+test('combat gagné : les deux joueurs voient le duel, le perdant perd un cœur, le vainqueur choisit son butin', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  assert.strictEqual((await waitFor(a, 'combat_duel_opened')).role, 'attacker');
+  assert.strictEqual((await waitFor(b, 'combat_duel_opened')).role, 'defender');
+
+  a.emit('combat_set_ready', { currentStat: 3 });
+  assert.strictEqual((await waitFor(b, 'combat_opponent_is_ready')).caidName, 'Burger Queen');
+  b.emit('combat_set_ready', { currentStat: 1 });
+  const win = await waitFor(a, 'combat_finished_result');
+  const lose = await waitFor(b, 'combat_finished_result');
+  assert.deepStrictEqual([win.outcome, win.dmgNet, win.isPrimaryPicker], ['winner', 2, true]);
+  assert.strictEqual(lose.outcome, 'loser');
+
+  a.emit('execute_pillage_choice', { category: 'cash' });
+  assert.strictEqual((await waitFor(b, 'you_were_pillaged')).amount, 5000);
+  assert.strictEqual((await waitFor(a, 'pillage_gain_applied')).amount, 5000);
+});
+
+test('assaut bloqué : riposte du défenseur en phase 2, puis match nul', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  a.emit('combat_set_ready', { currentStat: 1 });
+  b.emit('combat_set_ready', { currentStat: 2 });
+  assert.strictEqual((await waitFor(b, 'combat_phase2_started')).role, 'attacker');
+  assert.strictEqual((await waitFor(a, 'combat_phase2_started')).role, 'defender');
+  b.emit('combat_set_ready', { currentStat: 1 });
+  a.emit('combat_set_ready', { currentStat: 4 });
+  await waitFor(a, 'combat_finished_draw');
+  await waitFor(b, 'combat_finished_draw');
+});
+
+test('objets joués en combat : l’adversaire est prévenu et doit revalider « Prêt »', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  b.emit('combat_set_ready', { currentStat: 0 });
+  a.emit('combat_play_items', { itemNames: ['Vieille canette'], newTotalStat: 2 });
+  assert.deepStrictEqual((await waitFor(b, 'combat_opponent_played_items')).itemNames, ['Vieille canette']);
+  await waitFor(b, 'combat_ready_state_reset');
+  a.emit('combat_set_ready', { currentStat: 2 });
+  await never(a, 'combat_finished_result'); // b n'a pas revalidé
+  a.emit('combat_cancel');
+  await waitFor(b, 'combat_aborted');
+});
+
+test('pouvoir ciblé : la cible reçoit l’effet avec le nom de l’expéditeur', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('apply_special_to_target', { targetPlayerToken: b.token, effectType: 'canette', senderCaid: 'Burger Queen' });
+  const fx = await waitFor(b, 'received_special_effect');
+  assert.deepStrictEqual([fx.effectType, fx.senderCaid, fx.senderToken], ['canette', 'Burger Queen', a.token]);
+});
+
+test('victoire à 100 000 € : fin de partie annoncée à tous avec le classement', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('sync_player', { pocketCash: 60000, safeCash: 40000 });
+  const over = await waitFor(b, 'game_over');
+  assert.strictEqual(over.winnerToken, a.token);
+  assert.deepStrictEqual(over.standings.map(p => p.fortune), [100000, 5000]);
+});
+
+test('partie test : le défenseur reçoit le combat quand on bascule sur lui, puis le résultat manqué à son retour', async () => {
+  let j1 = await testRoomAs('tok_test_1');
+  j1.emit('reset_test_room');
+  await waitFor(j1, 'test_room_reset');
+  j1.disconnect();
+  j1 = await testRoomAs('tok_test_1');
+  const heartsJ2 = (await testRoomAs('tok_test_2').then(s => (s.disconnect(), s.me))).hearts;
+
+  j1.emit('start_combat_engagement', { targetPlayerToken: 'tok_test_2', attackerCaid: 'Burger Queen' });
+  await waitFor(j1, 'combat_duel_opened');
+  j1.disconnect();
+
+  let j2 = await testRoomAs('tok_test_2');
+  assert.strictEqual((await waitFor(j2, 'combat_duel_opened')).role, 'defender');
+  j2.emit('combat_set_ready', { currentStat: 0 });
+  await new Promise(r => setTimeout(r, 100));
+  j2.disconnect();
+
+  j1 = await testRoomAs('tok_test_1');
+  assert.strictEqual((await waitFor(j1, 'combat_duel_opened')).role, 'attacker');
+  assert.strictEqual((await waitFor(j1, 'combat_opponent_is_ready')).caidName, 'Jamel Pépouze');
+  j1.emit('combat_set_ready', { currentStat: 1 });
+  assert.strictEqual((await waitFor(j1, 'combat_finished_result')).outcome, 'winner');
+  j1.disconnect();
+
+  j2 = await testRoomAs('tok_test_2');
+  assert.strictEqual(j2.me.hearts, heartsJ2 - 1); // le cœur est déjà retiré côté serveur
+  const late = await waitFor(j2, 'combat_finished_result');
+  assert.deepStrictEqual([late.outcome, late.late], ['loser', true]);
+  j2.disconnect();
+  // Le message n'est remis qu'une fois
+  j2 = await testRoomAs('tok_test_2');
+  await never(j2, 'combat_finished_result');
+  j2.disconnect();
+});
+
+test('partie test : J-Lo Gramme attaquée reçoit le duel en défense (Prière proposée côté téléphone)', async () => {
+  const j1 = await testRoomAs('tok_test_1');
+  j1.emit('start_combat_engagement', { targetPlayerToken: 'tok_test_3', attackerCaid: 'Burger Queen' });
+  await waitFor(j1, 'combat_duel_opened');
+  j1.disconnect();
+  const j3 = await testRoomAs('tok_test_3');
+  assert.strictEqual(j3.me.caidId, 'caid_5');
+  const duel = await waitFor(j3, 'combat_duel_opened');
+  assert.deepStrictEqual([duel.role, duel.phase], ['defender', 1]);
+  j3.emit('combat_prayer_cancel');
+  await waitFor(j3, 'combat_cancelled_by_prayer');
+  j3.disconnect();
+  const back = await testRoomAs('tok_test_1');
+  assert.strictEqual((await waitFor(back, 'combat_cancelled_by_prayer')).late, true);
+  back.disconnect();
+});
+
+test('partie test : un pouvoir lancé sur un Caïd hors ligne lui est remis à son retour', async () => {
+  const j1 = await testRoomAs('tok_test_1');
+  j1.emit('apply_special_to_target', { targetPlayerToken: 'tok_test_3', effectType: 'shuriken', senderCaid: 'Burger Queen' });
+  await new Promise(r => setTimeout(r, 100));
+  j1.disconnect();
+  const j3 = await testRoomAs('tok_test_3');
+  const fx = await waitFor(j3, 'received_special_effect');
+  assert.deepStrictEqual([fx.effectType, fx.late], ['shuriken', true]);
+  j3.disconnect();
+});
