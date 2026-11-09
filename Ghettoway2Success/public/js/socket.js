@@ -328,7 +328,8 @@ if (socket) {
     await showFightDraw(message || "Match Nul !", last);
   });
 
-  socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }) => {
+  // late : message gardé par le serveur pendant qu'on était hors ligne (le Cœur perdu, le butin… sont déjà dans nos stats)
+  socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo, late }) => {
     const last = fightLast;
     endSingleCombatEffects();
     closeModal('modalCombatItemSelector');
@@ -336,8 +337,8 @@ if (socket) {
     await msgIdle(); // l'écran de résultat attend que les messages en cours soient lus
 
     if (outcome === 'loser') {
-      const heartsBefore = localPlayer.hearts;
-      localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+      const heartsBefore = late ? localPlayer.hearts + 1 : localPlayer.hearts;
+      if (!late) localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
       refreshHud();
       // Écran de défaite d'abord, puis l'écran Hôpital si plus aucun cœur
       await showFightDefeat({ dmgNet, opponentCaid, heartsBefore }, last);
@@ -365,13 +366,13 @@ if (socket) {
     }
   });
 
-  socket.on('pillage_gain_applied', async ({ category, amount, prostituteObj, loserCaid }) => {
+  socket.on('pillage_gain_applied', async ({ category, amount, prostituteObj, loserCaid, late }) => {
     if (category === 'cash') {
-      localPlayer.pocketCash += (amount || 0);
+      if (!late) localPlayer.pocketCash += (amount || 0);
       refreshHud();
       await showAppAlert(`Vous avez pris +${(amount || 0).toLocaleString()} € en cash sur ${loserCaid} !`, "💰 Butin Récupéré");
     } else if (category === 'drugs') {
-      localPlayer.drugs += (amount || 0);
+      if (!late) localPlayer.drugs += (amount || 0);
       refreshHud();
       await showAppAlert(`Vous avez pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
     } else if (category === 'prostitute') {
@@ -421,7 +422,7 @@ if (socket) {
     await showAppAlert("Le Chien Errant vous rejoint (+2 Atk / +2 Def) !\nIl reste avec vous jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
     refreshHud();
   });
-  socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
+  socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId, senderToken }) => {
     // Effet appliqué d'abord, puis écran « Touché ! »
     let stolen = null;
     if (effectType === 'siphon') localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
@@ -433,7 +434,7 @@ if (socket) {
     }
     else if (effectType === 'steal_item' && localPlayer.inventory.length > 0) {
       stolen = localPlayer.inventory.pop();
-      socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });
+      socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, targetToken: senderToken, item: stolen });
     }
     refreshHud();
     await msgIdle(); // « Touché ! » après les messages déjà ouverts

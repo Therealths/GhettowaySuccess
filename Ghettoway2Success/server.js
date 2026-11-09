@@ -536,6 +536,76 @@ io.on('connection', (socket) => {
     if (gs && gs.members.some(m => m.token === tok)) sock.emit('group_split_opened', gs);
     const ls = room.activeLootSplit;
     if (ls && (ls.leftToken === tok || ls.rightToken === tok)) sock.emit('loot_split_opened', ls);
+    resendActiveCombat(room, player, sock);
+    // Messages arrivés pendant son absence (résultat de combat, pillage, pouvoir subi…)
+    const box = player.mailbox || [];
+    delete player.mailbox;
+    box.forEach(m => sock.emit(m.event, Object.assign({}, m.data, { late: true })));
+  }
+
+  // Combat en cours au moment de la reconnexion (partie test : on bascule d'un Caïd à l'autre)
+  function resendActiveCombat(room, player, sock) {
+    const combat = room.activeCombat;
+    const tok = player.playerToken;
+    if (!combat || ![...combat.attackerTokens, combat.defenderToken].includes(tok)) return;
+    delete combat.readyByToken[tok]; // l'écran repart de zéro : il revalide « Prêt »
+    if (combat.riposteTargets) {
+      if (tok === combat.defenderToken) sock.emit('combat_choose_riposte_target', { targets: combat.riposteTargets });
+      else sock.emit('combat_waiting_defender_riposte_choice', { defenderCaid: combat.targetCaid });
+      return;
+    }
+    if (combat.phase === 2) {
+      const opp = room.players.find(p => p.playerToken === (tok === combat.defenderToken ? combat.attackerTokens[0] : combat.defenderToken));
+      sock.emit('combat_phase2_started', {
+        role: tok === combat.defenderToken ? 'defender' : 'attacker',
+        opponentCaid: opp ? opp.caidName : '',
+        myStat: tok === combat.defenderToken ? (player.def || 0) : (player.atk || 1),
+        weaponNullified: isWeaponNullifiedFor(room, combat, tok)
+      });
+    } else {
+      sock.emit('combat_duel_opened', duelOpenedPayload(room, combat, tok));
+    }
+    Object.keys(combat.readyByToken).forEach(t => {
+      const p = room.players.find(x => x.playerToken === t);
+      if (p) sock.emit('combat_opponent_is_ready', { caidName: p.caidName });
+    });
+  }
+
+  // Contenu de l'écran de duel (phase 1) pour un attaquant ou le défenseur
+  function duelOpenedPayload(room, combat, tok) {
+    const attackers = combat.attackerTokens.map(t => room.players.find(p => p.playerToken === t)).filter(Boolean);
+    const target = room.players.find(p => p.playerToken === combat.defenderToken);
+    if (tok === combat.defenderToken) {
+      return {
+        phase: 1,
+        role: 'defender',
+        isAlliedAttack: combat.isAlliedAttack,
+        allyCaid: null,
+        allyAtk: 0,
+        opponentCaid: combat.attackerCaid,
+        opponentSocketId: attackers[0] ? attackers[0].socketId : null,
+        targetMusclesCount: attackers.reduce((sum, p) => sum + (p.musclesCount || 0), 0),
+        targetHasProstitute: attackers.some(p => !!p.hasProstituteInTransit),
+        targetHasStrayDog: attackers.some(p => !!p.hasStrayDog),
+        weaponNullified: isWeaponNullifiedFor(room, combat, tok)
+      };
+    }
+    // Pour chaque attaquant : les autres attaquants sont ses alliés
+    const others = attackers.filter(x => x.playerToken !== tok);
+    return {
+      phase: 1,
+      role: 'attacker',
+      isAlliedAttack: combat.isAlliedAttack,
+      allyCaid: combat.isAlliedAttack ? others.map(x => x.caidName).join(' & ') : null,
+      allyAtk: combat.isAlliedAttack ? others.reduce((sum, x) => sum + (x.atk || 1), 0) : 0,
+      allies: others.map(x => ({ token: x.playerToken, caidName: x.caidName, atk: x.atk || 1 })),
+      opponentCaid: combat.targetCaid,
+      opponentSocketId: target ? target.socketId : null,
+      targetMusclesCount: target ? (target.musclesCount || 0) : 0,
+      targetHasProstitute: !!(target && target.hasProstituteInTransit),
+      targetHasStrayDog: !!(target && target.hasStrayDog),
+      weaponNullified: isWeaponNullifiedFor(room, combat, tok)
+    };
   }
 
   socket.on('create_room', ({ gameName, maxPlayers, selectionMode, playerToken }) => {
@@ -836,8 +906,6 @@ io.on('connection', (socket) => {
     const statsByToken = {};
     attackers.forEach(p => { statsByToken[p.playerToken] = p.atk || 1; });
 
-    const combinedMuscles = attackers.reduce((sum, p) => sum + (p.musclesCount || 0), 0);
-
     room.activeCombat = {
       phase: 1,
       isAlliedAttack: isAllied,
@@ -852,41 +920,8 @@ io.on('connection', (socket) => {
       targetDef: targetPlayer.def || 0
     };
 
-    attackers.forEach(p => {
-      const tok = p.playerToken;
-      // Pour chaque attaquant : les autres attaquants sont ses alliés
-      const others = attackers.filter(x => x.playerToken !== tok);
-      if (p) {
-        io.to(p.socketId).emit('combat_duel_opened', {
-          phase: 1,
-          role: 'attacker',
-          isAlliedAttack: isAllied,
-          allyCaid: isAllied ? others.map(x => x.caidName).join(' & ') : null,
-          allyAtk: isAllied ? others.reduce((sum, x) => sum + (x.atk || 1), 0) : 0,
-          allies: others.map(x => ({ token: x.playerToken, caidName: x.caidName, atk: x.atk || 1 })),
-          opponentCaid: room.activeCombat.targetCaid,
-          opponentSocketId: targetPlayer.socketId,
-          targetMusclesCount: targetPlayer.musclesCount || 0,
-          targetHasProstitute: !!targetPlayer.hasProstituteInTransit,
-          targetHasStrayDog: !!targetPlayer.hasStrayDog,
-          weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, tok)
-        });
-      }
-    });
-
-    io.to(targetPlayer.socketId).emit('combat_duel_opened', {
-      phase: 1,
-      role: 'defender',
-      isAlliedAttack: isAllied,
-      allyCaid: null,
-      allyAtk: 0,
-      opponentCaid: room.activeCombat.attackerCaid,
-      opponentSocketId: attackerPlayer.socketId,
-      targetMusclesCount: combinedMuscles,
-      targetHasProstitute: attackers.some(p => !!p.hasProstituteInTransit),
-      targetHasStrayDog: attackers.some(p => !!p.hasStrayDog),
-      weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, targetPlayer.playerToken)
-    });
+    attackers.forEach(p => io.to(p.socketId).emit('combat_duel_opened', duelOpenedPayload(room, room.activeCombat, p.playerToken)));
+    io.to(targetPlayer.socketId).emit('combat_duel_opened', duelOpenedPayload(room, room.activeCombat, targetPlayer.playerToken));
   });
 
   socket.on('combat_play_items', ({ itemNames, newTotalStat }) => {
@@ -972,6 +1007,7 @@ io.on('connection', (socket) => {
               });
             }
           });
+          combat.riposteTargets = targetsList;
           if (defenderP) {
             io.to(defenderP.socketId).emit('combat_choose_riposte_target', {
               targets: targetsList
@@ -988,7 +1024,7 @@ io.on('connection', (socket) => {
         involvedTokens.forEach(tok => {
           const p = room.players.find(x => x.playerToken === tok);
           if (p) {
-            io.to(p.socketId).emit('combat_finished_draw', {
+            sendToPlayer(p, 'combat_finished_draw', {
               message: "La contre-attaque a également été bloquée ! Match nul : personne ne perd de Cœur ni d'équipement."
             });
           }
@@ -1011,7 +1047,7 @@ io.on('connection', (socket) => {
     combat.attackerTokens.filter(t => t !== chosenTargetToken).forEach(unchosenToken => {
       const unchosenP = room.players.find(p => p.playerToken === unchosenToken);
       if (unchosenP) {
-        io.to(unchosenP.socketId).emit('combat_not_targeted_by_riposte', {
+        sendToPlayer(unchosenP, 'combat_not_targeted_by_riposte', {
           defenderCaid: defenderP.caidName,
           chosenCaid: chosenP ? chosenP.caidName : 'votre allié'
         });
@@ -1082,7 +1118,7 @@ io.on('connection', (socket) => {
       .map(t => room.players.find(p => p.playerToken === t)?.caidName || 'Vainqueur')
       .join(' & ');
 
-    io.to(loserP.socketId).emit('combat_finished_result', {
+    sendToPlayer(loserP, 'combat_finished_result', {
       outcome: 'loser',
       dmgNet,
       opponentCaid: winnerNames
@@ -1092,7 +1128,7 @@ io.on('connection', (socket) => {
     winnerTokens.forEach(tok => {
       const wP = room.players.find(p => p.playerToken === tok);
       if (!wP) return;
-      io.to(wP.socketId).emit('combat_finished_result', {
+      sendToPlayer(wP, 'combat_finished_result', {
         outcome: 'winner',
         dmgNet,
         opponentCaid: loserP.caidName,
@@ -1124,7 +1160,7 @@ io.on('connection', (socket) => {
     if (category === 'cash') {
       const stolenCash = loserP.pocketCash || 0;
       loserP.pocketCash = 0;
-      io.to(loserP.socketId).emit('you_were_pillaged', {
+      sendToPlayer(loserP, 'you_were_pillaged', {
         category: 'cash',
         amount: stolenCash,
         thiefCaid: primaryWinner.caidName
@@ -1153,7 +1189,7 @@ io.on('connection', (socket) => {
       } else {
         primaryWinner.pocketCash = (primaryWinner.pocketCash || 0) + stolenCash;
         checkVictory(room, socket.roomId);
-        io.to(primaryWinner.socketId).emit('pillage_gain_applied', {
+        sendToPlayer(primaryWinner, 'pillage_gain_applied', {
           category: 'cash',
           amount: stolenCash,
           loserCaid: loserP.caidName
@@ -1162,7 +1198,7 @@ io.on('connection', (socket) => {
     } else if (category === 'drugs') {
       const stolenDrugs = loserP.drugs || 0;
       loserP.drugs = 0;
-      io.to(loserP.socketId).emit('you_were_pillaged', {
+      sendToPlayer(loserP, 'you_were_pillaged', {
         category: 'drugs',
         amount: stolenDrugs,
         thiefCaid: primaryWinner.caidName
@@ -1190,7 +1226,7 @@ io.on('connection', (socket) => {
         });
       } else {
         primaryWinner.drugs = (primaryWinner.drugs || 0) + stolenDrugs;
-        io.to(primaryWinner.socketId).emit('pillage_gain_applied', {
+        sendToPlayer(primaryWinner, 'pillage_gain_applied', {
           category: 'drugs',
           amount: stolenDrugs,
           loserCaid: loserP.caidName
@@ -1206,13 +1242,13 @@ io.on('connection', (socket) => {
       destWinner.hasProstituteInTransit = true;
       destWinner.prostituteObj = stolenPros;
 
-      io.to(loserP.socketId).emit('you_were_pillaged', {
+      sendToPlayer(loserP, 'you_were_pillaged', {
         category: 'prostitute',
         amount: 1,
         thiefCaid: destWinner.caidName
       });
 
-      io.to(destWinner.socketId).emit('pillage_gain_applied', {
+      sendToPlayer(destWinner, 'pillage_gain_applied', {
         category: 'prostitute',
         prostituteObj: stolenPros,
         loserCaid: loserP.caidName
@@ -1232,7 +1268,7 @@ io.on('connection', (socket) => {
     const involved = [...room.activeCombat.attackerTokens, room.activeCombat.defenderToken];
     involved.forEach(tok => {
       const p = room.players.find(x => x.playerToken === tok);
-      if (p) io.to(p.socketId).emit('combat_cancelled_by_prayer', { caidName: defender.caidName });
+      sendToPlayer(p, 'combat_cancelled_by_prayer', { caidName: defender.caidName });
     });
     room.activeCombat = null;
   });
@@ -1243,7 +1279,7 @@ io.on('connection', (socket) => {
       const involved = [...room.activeCombat.attackerTokens, room.activeCombat.defenderToken];
       involved.forEach(tok => {
         const p = room.players.find(x => x.playerToken === tok);
-        if (p) io.to(p.socketId).emit('combat_aborted');
+        sendToPlayer(p, 'combat_aborted', {});
       });
       room.activeCombat = null;
     }
@@ -1446,15 +1482,19 @@ io.on('connection', (socket) => {
       return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} est à l'hôpital : intouchable jusqu'à son prochain tour !`);
     }
 
-    io.to(targetP.socketId).emit('received_special_effect', {
+    sendToPlayer(targetP, 'received_special_effect', {
       effectType,
       senderCaid,
-      senderSocketId: socket.id
+      senderSocketId: socket.id,
+      senderToken: sender.playerToken
     });
   });
 
-  socket.on('stolen_item_transferred', ({ targetSocketId, item }) => {
-    io.to(targetSocketId).emit('gain_stolen_item', { item });
+  socket.on('stolen_item_transferred', ({ targetSocketId, targetToken, item }) => {
+    const room = rooms[socket.roomId];
+    const thief = room && targetToken ? room.players.find(p => p.playerToken === targetToken) : null;
+    if (thief) sendToPlayer(thief, 'gain_stolen_item', { item });
+    else io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
   // Le joueur actif invite 1 à 3 Caïds ; chacun répond de son côté
@@ -1668,6 +1708,14 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// Joueur hors ligne (partie test pilotée depuis un seul téléphone, réseau coupé…) :
+// le message est gardé et lui est remis à sa reconnexion (marqué « late »)
+function sendToPlayer(p, event, data) {
+  if (!p) return;
+  if (p.socketId && io.sockets.sockets.get(p.socketId)) io.to(p.socketId).emit(event, data);
+  else (p.mailbox = p.mailbox || []).push({ event, data });
+}
 
 function handlePlayerDisconnect(socket) {
   const room = rooms[socket.roomId];
