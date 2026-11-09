@@ -102,13 +102,16 @@ function syncMultiplayerTargets() {
   // Caïd à l'hôpital : toujours listé, mais grisé et non sélectionnable
   const rivalName = r => r.caidName || r.name || 'Caïd Adverse';
   const rivalOpt = r => `<option value="${r.playerToken}">${rivalName(r)} (Lascars: ${r.musclesCount || 0} | Escort: ${r.hasProstituteInTransit ? 'Oui' : 'Non'} | Chien: ${r.hasStrayDog ? 'Oui' : 'Non'})</option>`;
-  const hospitalOpt = r => `<option value="" disabled style="color:#64748b">🏥 ${rivalName(r)} : à l’hôpital</option>`;
+  // Caïd absent (a quitté la partie) : grisé de la même façon
+  const hospitalOpt = r => r.away
+    ? `<option value="" disabled style="color:#64748b">💤 ${rivalName(r)} : absent</option>`
+    : `<option value="" disabled style="color:#64748b">🏥 ${rivalName(r)} : à l’hôpital</option>`;
   const buildOpts = (rivals, inHospital, emptyLabel) => {
     const ok = rivals.filter(r => !inHospital(r)), out = rivals.filter(inHospital);
     return (ok.length ? ok.map(rivalOpt).join('') : `<option value="" selected>${emptyLabel}</option>`) + out.map(hospitalOpt).join('');
   };
 
-  const combatOpts = buildOpts((connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken)), r => !!r.inHospital, 'Aucune cible attaquable (ou Pacte actif)');
+  const combatOpts = buildOpts((connectedRivals || []).filter(r => !isRivalProtectedByPact(r.playerToken)), r => !!r.inHospital || !!r.away, 'Aucune cible attaquable (ou Pacte actif)');
 
   if (specialSel) specialSel.innerHTML = combatOpts;
   // Écrans d'alliance ou de combat ouverts sur le choix : la liste des Caïds suit
@@ -133,12 +136,23 @@ function updateArenaLiveStats() {
   }
 }
 async function confirmLeaveGame() {
-  if (await showAppConfirm("Voulez-vous quitter définitivement cette partie ?", "Quitter")) {
-    localStorage.removeItem('g2s_room_id');
-    localStorage.removeItem('g2s_saved_caid_id');
-    if (socket) socket.emit('leave_room');
-    window.location.reload();
-  }
+  // Partie test : on rend simplement la vraie identité du joueur
+  if (typeof isTestPlayer !== 'undefined' && isTestPlayer) return leaveTestGame();
+  const msg = activeTurnPlayerToken // partie lancée (le tour actif est connu)
+    ? "Quitter la partie ?\n\nTon Caïd est gardé avec tout ce qu'il possède, mais ses tours seront passés tant que tu es absent.\nTu pourras reprendre la partie plus tard depuis « Rejoindre »."
+    : "Quitter ce salon ?";
+  if (await showAppConfirm(msg, "⚠️ Quitter la partie", "Quitter", "Rester")) leaveGameNow();
+}
+// Départ effectif (bouton Quitter, ou « Quitter aussi » après le départ d'un autre joueur)
+function leaveGameNow() {
+  if (typeof isTestPlayer !== 'undefined' && isTestPlayer) return leaveTestGame();
+  localStorage.removeItem('g2s_room_id');
+  localStorage.removeItem('g2s_saved_caid_id');
+  if (!socket || !socket.connected) return window.location.reload();
+  // On attend que le serveur ait bien enregistré le départ avant de recharger
+  const reload = () => window.location.reload();
+  socket.emit('leave_room', reload);
+  setTimeout(reload, 1500);
 }
 function switchMainCaidTab(tabKey) {
   const pInter = document.getElementById('panelInteractions');
@@ -430,7 +444,7 @@ function setPatrolDie(n) {
 function nextPlayerLabel() {
   const order = lastTurnOrder || [];
   const i = order.findIndex(p => p.token === activeTurnPlayerToken);
-  const next = order.slice(i + 1).find(p => !p.played && !(lastAlliedTokens || []).includes(p.token));
+  const next = order.slice(i + 1).find(p => !p.played && !p.away && !(lastAlliedTokens || []).includes(p.token));
   return next ? `Passer la main à ${next.token === myPlayerToken ? 'toi' : next.caidName}` : 'Passer à la manche suivante';
 }
 function showPatrolScreen() {
@@ -511,9 +525,11 @@ function renderTurnOrder(turnOrder, activeToken, alliedTokens = []) {
     if (isActive) { cls = 'bg-amber-400/20 border-amber-400 text-amber-300'; icon = '▶ '; }
     else if (isAllied) { cls = 'bg-purple-500/20 border-purple-400 text-purple-300'; icon = '🤝 '; }
     else if (p.played) { cls = 'bg-white/5 border-white/5 text-slate-500 line-through'; icon = '✓ '; }
-    const name = p.caidName || 'Caïd';
+    else if (p.away) cls = 'bg-white/5 border-white/5 text-slate-500';
+    const name = escapeHtml(p.caidName || 'Caïd');
     const dog = p.hasStrayDog ? ' 🐕' : '';
-    return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (vous)' : ''}${dog}</span>`;
+    const away = p.away ? ' 💤' : ''; // a quitté la partie : ses tours sont passés
+    return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (vous)' : ''}${dog}${away}</span>`;
   }).join('');
   document.querySelectorAll('.turn-order-list').forEach(el => { el.innerHTML = html; });
 }

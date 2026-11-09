@@ -213,7 +213,7 @@
           <button onclick="navTo('page-1')" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center"><i class="ph-bold ph-caret-left text-lg"></i></button>
           <div>
             <h2 class="text-base font-black text-white uppercase tracking-wider">Rejoindre</h2>
-            <p class="text-[10px] text-slate-400">Salons disponibles en direct</p>
+            <p class="text-[10px] text-slate-400">Salons ouverts et parties à reprendre</p>
           </div>
         </div>
         <div id="gamesListContainer" class="space-y-2 overflow-y-auto max-h-[380px]"></div>
@@ -359,6 +359,8 @@
         <div class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
           <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center z-10 shadow-md"><i class="ph-bold ph-caret-left text-sm"></i></button>
+          <!-- Quitter la partie : au-dessus du voile « Tour de… » pour rester accessible à tout moment -->
+          <button onclick="confirmLeaveGame()" class="absolute top-2 right-2 h-8 px-2.5 rounded-xl bg-black/70 border border-rose-500/60 text-rose-300 flex items-center gap-1.5 z-[45] shadow-md text-[10px] font-black uppercase" aria-label="Quitter la partie"><i class="ph-bold ph-sign-out text-sm"></i> Quitter</button>
         </div>
         <!-- STATS -->
         <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">

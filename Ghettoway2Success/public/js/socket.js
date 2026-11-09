@@ -13,6 +13,7 @@ if (socket) {
     if (savedRoomId) socket.emit('reconnect_player', { roomId: savedRoomId, playerToken: myPlayerToken });
   });
   socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, players, selectionMode }) => {
+    resumeRequested = false;
     localStorage.setItem('g2s_room_id', roomId);
     if (selectionMode) roomSelectionMode = selectionMode;
     if (player && player.caidId) {
@@ -36,30 +37,72 @@ if (socket) {
     } else if (localPlayer.caidId) navTo('page-lobby');
     else navTo('page-4');
   });
-  socket.on('reconnect_failed', () => { localStorage.removeItem('g2s_room_id'); });
+  // Reprise demandée depuis la liste « Rejoindre » : en cas de refus, on explique pourquoi
+  let resumeRequested = false;
+  socket.on('reconnect_failed', ({ reason } = {}) => {
+    localStorage.removeItem('g2s_room_id');
+    if (!resumeRequested) return;
+    resumeRequested = false;
+    showAppAlert(reason === 'not_member' ? "Tu ne fais pas partie de cette partie." : "Cette partie n'existe plus.", "Reprendre la partie");
+  });
   socket.on('rooms_list', (list) => {
     const container = document.getElementById('gamesListContainer');
     if (!container) return;
     container.innerHTML = list.length ? '' : '<p class="text-xs text-slate-500 italic p-3 text-center">Aucun salon actif détecté.</p>';
+    const delBtn = `<button type="button" class="w-8 h-8 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 flex items-center justify-center flex-shrink-0" aria-label="Supprimer la partie"><i class="ph-bold ph-trash text-sm"></i></button>`;
     list.forEach(r => {
       const modeBadge = r.selectionMode === 'manual' ? '👆 Au Choix' : '🎲 Aléatoire';
       const div = document.createElement('div');
-      div.className = "p-3.5 glass-panel rounded-2xl flex items-center justify-between cursor-pointer hover:border-cyan-400/40";
+      div.className = "p-3.5 glass-panel rounded-2xl flex items-center justify-between gap-2 cursor-pointer hover:border-cyan-400/40";
       if (r.isTest) {
         div.onclick = () => enterTestGame(1);
-        div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${r.name}</h4><span class="text-[10px] text-slate-400 font-mono">Partie de test • 3 Caïds sur ce téléphone</span></div><span class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-3 py-1 rounded-lg border border-amber-500/30">Tester</span>`;
+        div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${escapeHtml(r.name)}</h4><span class="text-[10px] text-slate-400 font-mono">Partie de test • 3 Caïds sur ce téléphone</span></div><span class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-3 py-1 rounded-lg border border-amber-500/30">Tester</span>`;
         return container.appendChild(div);
       }
-      div.onclick = () => {
-        caidLocked = false;
-        localPlayer.caidId = null;
-        localStorage.removeItem('g2s_saved_caid_id');
-        localStorage.setItem('g2s_room_id', r.id);
-        socket.emit('join_room', { roomId: r.id, playerToken: myPlayerToken });
-      };
-      div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${r.name}</h4><span class="text-[10px] text-slate-400 font-mono">${r.connectedCount} / ${r.maxPlayers} Caïds • ${modeBadge}</span></div><span class="text-[10px] font-bold text-ghetto-cyan bg-cyan-950/60 px-3 py-1 rounded-lg border border-cyan-500/30">Rejoindre</span>`;
+      if (r.started) {
+        // Partie lancée : un appui = reprise (le serveur vérifie que notre jeton en fait partie)
+        div.onclick = () => {
+          resumeRequested = true;
+          caidLocked = false;
+          localStorage.setItem('g2s_room_id', r.id);
+          socket.emit('reconnect_player', { roomId: r.id, playerToken: myPlayerToken });
+        };
+        const caids = (r.caids || []).map(c => escapeHtml(c.name) + (c.away ? ' 💤' : '')).join(', ');
+        const badge = r.paused
+          ? '<span class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-2.5 py-1 rounded-lg border border-amber-500/30 whitespace-nowrap">En pause</span>'
+          : '<span class="text-[10px] font-bold text-emerald-300 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-500/30 whitespace-nowrap">En cours</span>';
+        div.innerHTML = `<div class="min-w-0"><h4 class="font-black text-xs text-white uppercase truncate">${escapeHtml(r.name)}</h4><span class="block text-[10px] text-slate-400 font-mono">Manche ${r.round || 1} • Reprendre</span><span class="block text-[10px] text-slate-300 leading-snug">${caids}</span></div><div class="flex items-center gap-2 flex-shrink-0">${badge}${delBtn}</div>`;
+      } else {
+        div.onclick = () => {
+          caidLocked = false;
+          localPlayer.caidId = null;
+          localStorage.removeItem('g2s_saved_caid_id');
+          localStorage.setItem('g2s_room_id', r.id);
+          socket.emit('join_room', { roomId: r.id, playerToken: myPlayerToken });
+        };
+        div.innerHTML = `<div class="min-w-0"><h4 class="font-black text-xs text-white uppercase truncate">${escapeHtml(r.name)}</h4><span class="text-[10px] text-slate-400 font-mono">${r.connectedCount} / ${r.maxPlayers} Caïds • ${modeBadge}</span></div><div class="flex items-center gap-2 flex-shrink-0"><span class="text-[10px] font-bold text-ghetto-cyan bg-cyan-950/60 px-3 py-1 rounded-lg border border-cyan-500/30">Rejoindre</span>${delBtn}</div>`;
+      }
+      div.querySelector('[aria-label="Supprimer la partie"]').onclick = (e) => { e.stopPropagation(); confirmDeleteRoom(r); };
       container.appendChild(div);
     });
+  });
+  // Suppression définitive d'une partie (le serveur refuse si on n'en est pas joueur)
+  async function confirmDeleteRoom(r) {
+    if (!await showAppConfirm(`Supprimer définitivement la partie ${r.name} ?\n\nTous les Caïds et leur progression seront perdus. Cette action est irréversible.`, "🗑️ Supprimer la partie", "Supprimer", "Annuler")) return;
+    socket.emit('delete_room', { roomId: r.id, playerToken: myPlayerToken });
+  }
+  socket.on('room_deleted', async ({ name } = {}) => {
+    localStorage.removeItem('g2s_room_id');
+    localStorage.removeItem('g2s_saved_caid_id');
+    await showAppAlert(`La partie ${name || ''} a été supprimée par un joueur.`, "🗑️ Partie supprimée");
+    window.location.reload();
+  });
+  // Un autre joueur a quitté la partie : on propose de quitter aussi (la partie est gardée)
+  socket.on('player_left_game', async ({ caidName } = {}) => {
+    if (await showAppConfirm(`${caidName || 'Un Caïd'} a quitté la partie.\n\nVoulez-vous quitter aussi ? La partie est gardée : vous pourrez la reprendre plus tard.`, "🚪 Départ d'un joueur", "Quitter aussi", "Continuer")) leaveGameNow();
+  });
+  socket.on('player_returned', ({ caidName } = {}) => {
+    showAppAlert(`${caidName || 'Un Caïd'} est de retour dans la partie !`, "👋 Retour");
   });
   socket.on('room_created', ({ roomId, selectionMode }) => {
     localStorage.setItem('g2s_room_id', roomId);

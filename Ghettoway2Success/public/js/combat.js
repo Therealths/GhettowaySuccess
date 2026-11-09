@@ -215,7 +215,7 @@ function fightPactUntil(token) {
 
 function renderFightChoice() {
   const rivals = connectedRivals || [];
-  const isOff = r => !!r.inHospital || isRivalProtectedByPact(r.playerToken);
+  const isOff = r => !!r.inHospital || !!r.away || isRivalProtectedByPact(r.playerToken);
   const free = rivals.filter(r => !isOff(r));
   if (!free.some(r => r.playerToken === fightTargetToken)) fightTargetToken = free.length ? free[0].playerToken : null;
   const target = free.find(r => r.playerToken === fightTargetToken);
@@ -230,6 +230,7 @@ function renderFightChoice() {
   const pick = r => {
     const img = allyCaidImg(r.caidId, allyRivalName(r)), name = escapeHtml(allyRivalName(r));
     if (isRivalProtectedByPact(r.playerToken)) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🤝 ${name}</b><span>Pacte actif : pas d’attaque jusqu’à la manche ${fightPactUntil(r.playerToken) || (currentSession.round || 1)}</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
+    if (r.away) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>💤 ${name}</b><span>A quitté la partie : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     if (r.inHospital) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🏥 ${name}</b><span>À l’hôpital : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     const on = r.playerToken === fightTargetToken;
     return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickFightTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)} • Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'} • Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;

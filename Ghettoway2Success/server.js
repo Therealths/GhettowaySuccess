@@ -23,6 +23,8 @@ const DATA_DIR = process.env.GAME_DATA_DIR || path.join(__dirname, 'data');
 const SAVE_FILE = path.join(DATA_DIR, 'parties.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'historique.json');
 const ROOM_MAX_IDLE_MS = 3 * 24 * 3600 * 1000;
+// Partie en pause (tous les joueurs ont quitté) : gardée 60 jours pour être reprise plus tard
+const PAUSED_ROOM_MAX_IDLE_MS = 60 * 24 * 3600 * 1000;
 const roomSnapshots = {};
 let lastSavedJson = '';
 
@@ -58,7 +60,9 @@ function saveRooms() {
       room.lastActivity = now;
       roomSnapshots[roomId] = JSON.stringify(room);
     }
-    if (roomId !== TEST_ROOM_ID && now - room.lastActivity > ROOM_MAX_IDLE_MS) {
+    // Partie lancée (en pause ou simplement quittée en fermant l'appli) : gardée 60 jours pour la reprendre un autre jour
+    const maxIdle = (room.paused || room.gameStarted) ? PAUSED_ROOM_MAX_IDLE_MS : ROOM_MAX_IDLE_MS;
+    if (roomId !== TEST_ROOM_ID && now - room.lastActivity > maxIdle) {
       archiveFinishedRoom(roomId, room);
       delete rooms[roomId];
       delete roomSnapshots[roomId];
@@ -242,6 +246,62 @@ function createTestRoom() {
 // Après loadSavedRooms() (et RADIO_EVENTS chargé) : on crée TEST s'il n'existe pas déjà
 if (!REDIRECT_TO && !rooms[TEST_ROOM_ID]) createTestRoom();
 
+// Passe la main au joueur suivant de la manche (fin de tour, ou joueur actif qui quitte la partie)
+function advanceTurn(room, roomId, activePlayer) {
+  // Le joueur actif et ses alliés du tour ont joué leur tour de la manche
+  room.playedThisRoundTokens = [...new Set([
+    ...(room.playedThisRoundTokens || []),
+    activePlayer.playerToken,
+    ...(room.currentTurnAlliedTokens || [])
+  ])];
+
+  room.currentTurnAlliedTokens = [];
+  room.pendingAlliance = null; // une demande d'alliance non répondue expire avec le tour
+  // Le Chien Errant reste avec le dernier joueur qui l'a sifflé, jusqu'au prochain coup de sifflet
+
+  // Joueur suivant dans l'ordre de la manche ; on saute ceux qui ont déjà joué (en alliance pendant le tour d'un autre)
+  if (!room.roundOrder) { room.roundOrder = buildRoundOrder(room); room.turnPos = room.currentTurnIndex; }
+  for (let guard = 0; guard < 2 * room.players.length + 2; guard++) {
+    room.turnPos++;
+
+    if (room.turnPos >= room.roundOrder.length) {
+      room.round++;
+      room.playedThisRoundTokens = [];
+      room.alliedWithThisRound = {};
+      // Les pactes expirent à la fin de la manche qui suit celle de l'alliance
+      room.nonAggressionPacts = (room.nonAggressionPacts || []).filter(p => p.untilRound >= room.round);
+      room.roundOrder = buildRoundOrder(room);
+      room.turnPos = 0;
+      room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
+      io.to(roomId).emit('new_round_started', {
+        round: room.round,
+        radio: room.currentRadio,
+        players: room.players
+      });
+    }
+
+    const next = getActivePlayer(room);
+    if (!next) continue; // joueur parti
+    if (next.away) continue; // joueur absent (a quitté la partie) : son tour est passé
+    if (room.playedThisRoundTokens.includes(next.playerToken)) {
+      io.to(next.socketId).emit('turn_skipped', {
+        allyCaid: (room.alliedWithThisRound || {})[next.playerToken] || null
+      });
+      continue;
+    }
+    room.currentTurnIndex = room.players.indexOf(next);
+    break;
+  }
+
+  broadcastTurnState(roomId);
+  io.to(roomId).emit('update_room_players', {
+    players: room.players,
+    isReady: true,
+    maxPlayers: room.maxPlayers,
+    selectionMode: room.selectionMode || 'random'
+  });
+}
+
 function getActivePlayer(room) {
   if (!room.roundOrder) return room.players[room.currentTurnIndex] || null;
   const token = room.roundOrder[room.turnPos];
@@ -257,7 +317,7 @@ function broadcastTurnState(roomId) {
   const turnOrder = (room.roundOrder || [])
     .map(token => room.players.find(p => p.playerToken === token))
     .filter(Boolean)
-    .map(p => ({ token: p.playerToken, caidName: p.caidName, played: played.includes(p.playerToken), hasStrayDog: p.playerToken === room.strayDogHolderToken }));
+    .map(p => ({ token: p.playerToken, caidName: p.caidName, played: played.includes(p.playerToken), hasStrayDog: p.playerToken === room.strayDogHolderToken, away: !!p.away }));
 
   io.to(roomId).emit('turn_state_updated', {
     activePlayerToken: activePlayer ? activePlayer.playerToken : null,
@@ -344,17 +404,18 @@ io.on('connection', (socket) => {
   socket.emit('app_version', APP_VERSION);
   socket.emit('rooms_list', getAvailableRooms());
 
-  socket.on('reconnect_player', ({ roomId, playerToken }) => {
+  socket.on('reconnect_player', ({ roomId, playerToken } = {}) => {
     const room = rooms[roomId];
-    if (!room) return socket.emit('reconnect_failed');
+    if (!room) return socket.emit('reconnect_failed', { reason: 'no_room' });
 
     const existingPlayer = room.players.find(p => p.playerToken === playerToken);
-    if (!existingPlayer) return socket.emit('reconnect_failed');
+    if (!existingPlayer) return socket.emit('reconnect_failed', { reason: 'not_member' });
 
     if (room.isTestRoom) room.players.forEach(p => { if (p.socketId === socket.id) p.socketId = null; });
     existingPlayer.socketId = socket.id;
     socket.join(roomId);
     socket.roomId = roomId;
+    const wasAway = clearPlayerAway(room, existingPlayer);
 
     socket.emit('reconnect_success', {
       roomId,
@@ -377,10 +438,79 @@ io.on('connection', (socket) => {
     });
 
     if (room.gameStarted) {
+      if (wasAway) resumeAfterReturn(room, roomId, existingPlayer, socket);
       broadcastTurnState(roomId);
       resendPendingState(room, existingPlayer, socket);
     }
   });
+
+  // Joueur qui a quitté la partie (bouton Quitter) et revient : il n'est plus absent, la partie n'est plus en pause
+  function clearPlayerAway(room, player) {
+    if (!player.away) return false;
+    delete player.away;
+    delete room.paused;
+    return true;
+  }
+  // Après le retour : on prévient les autres ; si le joueur actif est absent (partie en pause), la main passe au prochain joueur présent
+  function resumeAfterReturn(room, roomId, player, sock) {
+    sock.to(roomId).emit('player_returned', { caidName: player.caidName || 'Un Caïd' });
+    const active = getActivePlayer(room);
+    if (active && active.away) advanceTurn(room, roomId, active);
+    io.emit('rooms_list', getAvailableRooms());
+  }
+
+  // Bouton « Quitter » dans une partie lancée : le Caïd est gardé (argent, objets…) mais marqué absent,
+  // ses tours sont passés jusqu'à son retour. Tous absents = partie en pause, reprise possible plus tard.
+  function setPlayerAway(sock, room) {
+    const roomId = sock.roomId;
+    const leaving = room.players.find(x => x.socketId === sock.id);
+    sock.leave(roomId);
+    sock.roomId = null;
+    if (!leaving) return;
+    const active = getActivePlayer(room);
+    leaving.away = true;
+    leaving.socketId = null;
+    if (room.currentTurnAlliedTokens) room.currentTurnAlliedTokens = room.currentTurnAlliedTokens.filter(t => t !== leaving.playerToken);
+    // Combat en cours avec lui : annulé
+    const combat = room.activeCombat;
+    if (combat && [...combat.attackerTokens, combat.defenderToken].includes(leaving.playerToken)) {
+      [...combat.attackerTokens, combat.defenderToken].forEach(tok => {
+        const p = room.players.find(x => x.playerToken === tok);
+        if (p && p.socketId) io.to(p.socketId).emit('combat_aborted');
+      });
+      room.activeCombat = null;
+    }
+    // Invitation d'alliance en attente : vaut un refus
+    const pa = room.pendingAlliance;
+    if (pa && pa.invitees && pa.invitees[leaving.playerToken] === 'wait') {
+      pa.invitees[leaving.playerToken] = 'no';
+      emitAllianceStatus(room);
+      const statuses = Object.values(pa.invitees);
+      const sender = room.players.find(p => p.playerToken === pa.senderToken);
+      if (sender && sender.socketId && !statuses.includes('wait') && !statuses.includes('ok')) {
+        pa.declinedSent = true;
+        io.to(sender.socketId).emit('alliance_declined', { refused: allianceNamesByStatus(room, 'no') });
+      }
+    }
+
+    if (room.players.every(p => p.away)) {
+      room.paused = true; // personne : la partie attend, le tour actif reste tel quel
+    } else {
+      io.to(roomId).emit('player_left_game', { caidName: leaving.caidName || 'Un Caïd' });
+      if (active && active.playerToken === leaving.playerToken) advanceTurn(room, roomId, leaving);
+      else {
+        broadcastTurnState(roomId);
+        io.to(roomId).emit('update_room_players', {
+          players: room.players,
+          isReady: true,
+          maxPlayers: room.maxPlayers,
+          selectionMode: room.selectionMode || 'random'
+        });
+      }
+    }
+    saveRooms();
+    io.emit('rooms_list', getAvailableRooms());
+  }
 
   // Joueur reconnecté (page rechargée, changement de Caïd dans la partie test) :
   // on lui renvoie ce qu'il a pu manquer pendant qu'il n'était pas connecté
@@ -471,6 +601,7 @@ io.on('connection', (socket) => {
       existing.socketId = socket.id;
       socket.join(roomId);
       socket.roomId = roomId;
+      const wasAway = clearPlayerAway(room, existing);
       socket.emit('reconnect_success', {
         roomId,
         room,
@@ -482,6 +613,11 @@ io.on('connection', (socket) => {
         isReady: checkRoomReady(room),
         selectionMode: room.selectionMode || 'random'
       });
+      if (room.gameStarted && wasAway) {
+        resumeAfterReturn(room, roomId, existing, socket);
+        broadcastTurnState(roomId);
+        resendPendingState(room, existing, socket);
+      }
       return io.to(roomId).emit('update_room_players', {
         players: room.players,
         isReady: checkRoomReady(room),
@@ -604,58 +740,7 @@ io.on('connection', (socket) => {
 
     const activePlayer = getActivePlayer(room);
     if (!activePlayer || activePlayer.socketId !== socket.id) return;
-
-    // Le joueur actif et ses alliés du tour ont joué leur tour de la manche
-    room.playedThisRoundTokens = [...new Set([
-      ...(room.playedThisRoundTokens || []),
-      activePlayer.playerToken,
-      ...(room.currentTurnAlliedTokens || [])
-    ])];
-
-    room.currentTurnAlliedTokens = [];
-    room.pendingAlliance = null; // une demande d'alliance non répondue expire avec le tour
-    // Le Chien Errant reste avec le dernier joueur qui l'a sifflé, jusqu'au prochain coup de sifflet
-
-    // Joueur suivant dans l'ordre de la manche ; on saute ceux qui ont déjà joué (en alliance pendant le tour d'un autre)
-    if (!room.roundOrder) { room.roundOrder = buildRoundOrder(room); room.turnPos = room.currentTurnIndex; }
-    for (let guard = 0; guard < 2 * room.players.length + 2; guard++) {
-      room.turnPos++;
-
-      if (room.turnPos >= room.roundOrder.length) {
-        room.round++;
-        room.playedThisRoundTokens = [];
-        room.alliedWithThisRound = {};
-        // Les pactes expirent à la fin de la manche qui suit celle de l'alliance
-        room.nonAggressionPacts = (room.nonAggressionPacts || []).filter(p => p.untilRound >= room.round);
-        room.roundOrder = buildRoundOrder(room);
-        room.turnPos = 0;
-        room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
-        io.to(socket.roomId).emit('new_round_started', {
-          round: room.round,
-          radio: room.currentRadio,
-          players: room.players
-        });
-      }
-
-      const next = getActivePlayer(room);
-      if (!next) continue; // joueur parti
-      if (room.playedThisRoundTokens.includes(next.playerToken)) {
-        io.to(next.socketId).emit('turn_skipped', {
-          allyCaid: (room.alliedWithThisRound || {})[next.playerToken] || null
-        });
-        continue;
-      }
-      room.currentTurnIndex = room.players.indexOf(next);
-      break;
-    }
-
-    broadcastTurnState(socket.roomId);
-    io.to(socket.roomId).emit('update_room_players', {
-      players: room.players,
-      isReady: true,
-      maxPlayers: room.maxPlayers,
-      selectionMode: room.selectionMode || 'random'
-    });
+    advanceTurn(room, socket.roomId, activePlayer);
   });
 
   // Un allié (qui joue pendant le tour d'un autre) termine sa participation : il ne peut plus agir ce tour
@@ -721,6 +806,10 @@ io.on('connection', (socket) => {
 
     if (arePlayersInNonAggressionPact(room, attackerPlayer.playerToken, targetPlayer.playerToken)) {
       return socket.emit('error_msg', "Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni durant ce tour, ni au tour suivant) !");
+    }
+    // Caïd absent (a quitté la partie) : intouchable jusqu'à son retour
+    if (targetPlayer.away) {
+      return socket.emit('error_msg', `${targetPlayer.caidName || 'Ce Caïd'} a quitté la partie : impossible de l'attaquer tant qu'il est absent.`);
     }
     // Caïd à l'hôpital : intouchable jusqu'au début de son prochain tour
     if (targetPlayer.inHospital) {
@@ -1349,6 +1438,9 @@ io.on('connection', (socket) => {
     if (arePlayersInNonAggressionPact(room, sender.playerToken, targetP.playerToken)) {
       return socket.emit('error_msg', "Pacte d'Alliance actif : impossible de cibler votre allié (ni durant ce tour, ni au tour suivant) !");
     }
+    if (targetP.away) {
+      return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} a quitté la partie : impossible de le cibler tant qu'il est absent.`);
+    }
     // Caïd à l'hôpital : intouchable jusqu'au début de son prochain tour
     if (targetP.inHospital) {
       return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} est à l'hôpital : intouchable jusqu'à son prochain tour !`);
@@ -1385,6 +1477,10 @@ io.on('connection', (socket) => {
       const targetP = room.players.find(p => p.playerToken === tok);
       if (!targetP) return; // joueur absent
       if ((room.currentTurnAlliedTokens || []).includes(tok)) return; // déjà allié ce tour
+      if (targetP.away) {
+        refusedSome = true;
+        return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} a quitté la partie : pas d'alliance possible tant qu'il est absent.`);
+      }
       // Caïd envoyé à l'hôpital pendant cette manche : pas d'alliance avant la manche suivante
       if (targetP.inHospital && targetP.inHospital.round === room.round) {
         refusedSome = true;
@@ -1540,8 +1636,29 @@ io.on('connection', (socket) => {
     io.to(TEST_ROOM_ID).emit('test_room_reset');
   });
 
-  socket.on('leave_room', () => {
-    handlePlayerDisconnect(socket);
+  socket.on('leave_room', (ack) => {
+    const room = rooms[socket.roomId];
+    // Partie lancée (hors partie test) : le Caïd est gardé, le joueur est marqué absent
+    if (room && room.gameStarted && !room.isTestRoom) setPlayerAway(socket, room);
+    else handlePlayerDisconnect(socket);
+    if (typeof ack === 'function') ack();
+  });
+
+  // Suppression définitive d'une partie, par un de ses joueurs (jamais la partie test)
+  socket.on('delete_room', ({ roomId, playerToken } = {}) => {
+    const room = rooms[roomId];
+    if (!room) return socket.emit('rooms_list', getAvailableRooms());
+    if (room.isTestRoom || roomId === TEST_ROOM_ID) return socket.emit('error_msg', 'La partie test ne peut pas être supprimée.');
+    if (!playerToken || !room.players.some(p => p.playerToken === playerToken)) {
+      return socket.emit('error_msg', 'Tu ne fais pas partie de cette partie : seuls ses joueurs peuvent la supprimer.');
+    }
+    io.to(roomId).emit('room_deleted', { name: room.name });
+    io.sockets.sockets.forEach(s => { if (s.roomId === roomId) { s.leave(roomId); s.roomId = null; } });
+    archiveFinishedRoom(roomId, room);
+    delete rooms[roomId];
+    delete roomSnapshots[roomId];
+    saveRooms();
+    io.emit('rooms_list', getAvailableRooms());
   });
 
   socket.on('disconnect', () => {
@@ -1567,7 +1684,15 @@ function handlePlayerDisconnect(socket) {
         room.strayDogHolderToken = null;
       }
     }
+    // Partie en cours : si c'était son tour, la main passe au suivant (sinon la partie resterait bloquée)
+    const leaving = room.players.find(x => x.socketId === socket.id);
+    const active = room.gameStarted ? getActivePlayer(room) : null;
     room.players = room.players.filter(x => x.socketId !== socket.id);
+    if (leaving && room.currentTurnAlliedTokens) room.currentTurnAlliedTokens = room.currentTurnAlliedTokens.filter(t => t !== leaving.playerToken);
+    if (room.players.length && room.gameStarted && leaving) {
+      if (active && active.playerToken === leaving.playerToken) advanceTurn(room, socket.roomId, leaving);
+      else broadcastTurnState(socket.roomId);
+    }
     if (room.players.length === 0) {
       delete rooms[socket.roomId];
     } else {
@@ -1587,7 +1712,8 @@ function handlePlayerDisconnect(socket) {
 }
 
 function getAvailableRooms() {
-  const list = Object.values(rooms)
+  const real = Object.values(rooms).filter(r => !r.isTestRoom && r.id !== TEST_ROOM_ID);
+  const list = real
     .filter(r => !r.gameStarted && r.players.length < r.maxPlayers)
     .map(r => ({
       id: r.id,
@@ -1595,6 +1721,18 @@ function getAvailableRooms() {
       maxPlayers: r.maxPlayers,
       connectedCount: r.players.length,
       selectionMode: r.selectionMode || 'random'
+    }));
+  // Parties lancées (en cours ou en pause) : reprise par leurs joueurs
+  real
+    .filter(r => r.gameStarted && !r.gameOver)
+    .sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0))
+    .forEach(r => list.push({
+      id: r.id,
+      name: r.name,
+      started: true,
+      paused: !!r.paused,
+      round: r.round || 1,
+      caids: r.players.map(p => ({ name: p.caidName || 'Caïd', away: !!p.away }))
     }));
   if (rooms[TEST_ROOM_ID]) list.push({ id: TEST_ROOM_ID, name: 'test', maxPlayers: 3, connectedCount: 3, selectionMode: 'manual', isTest: true });
   return list;

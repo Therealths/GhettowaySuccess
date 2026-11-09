@@ -72,6 +72,8 @@ function allyCaidImg(caidId, name) {
 function allyShort(name) { return String(name || 'Caïd').split(' ')[0]; }
 function allyRivalName(r) { return r.caidName || r.name || 'Caïd Adverse'; }
 function allyInHospital(r) { return !!(r.inHospital && r.inHospital.round === (currentSession.round || 1)); }
+// Caïd absent (a quitté la partie) ou à l'hôpital cette manche : pas d'alliance possible
+function allyUnavailable(r) { return !!r.away || allyInHospital(r); }
 // « A », « A et B », « A, B et C »
 function allyListNames(names) {
   names = (names || []).filter(Boolean);
@@ -148,9 +150,9 @@ async function openAllianceModal() {
 
 function renderAllianceChoice() {
   const rivals = connectedRivals || [];
-  allySelected = allySelected.filter(t => rivals.some(r => r.playerToken === t && !allyInHospital(r)));
+  allySelected = allySelected.filter(t => rivals.some(r => r.playerToken === t && !allyUnavailable(r)));
   const picked = allySelected.map(t => rivals.find(r => r.playerToken === t));
-  const free = rivals.filter(r => !allyInHospital(r)).length;
+  const free = rivals.filter(r => !allyUnavailable(r)).length;
   const me = getMyCaid();
 
   const right = picked.length
@@ -160,6 +162,7 @@ function renderAllianceChoice() {
 
   const lascars = n => `${n} Lascar${n > 1 ? 's' : ''}`;
   const pick = r => {
+    if (r.away) return `<div class="ally-pick off"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>💤 ${escapeHtml(allyRivalName(r))}</b><span>A quitté la partie : pas d’alliance</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     if (allyInHospital(r)) return `<div class="ally-pick off"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>🏥 ${escapeHtml(allyRivalName(r))}</b><span>À l’hôpital : pas d’alliance cette manche</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     const on = allySelected.includes(r.playerToken);
     return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="toggleAllyPick(this.dataset.token)"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>${escapeHtml(allyRivalName(r))}</b><span>${lascars(r.musclesCount || 0)} • Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'} • Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><span class="ally-chk"><i class="ph-bold ph-check"></i></span></button>`;
