@@ -54,38 +54,12 @@ body { background-color: #030407; margin: 0; padding: 0; display: flex; justify-
   backface-visibility: hidden;
 }
 
-/* Scanner QR carré 1:1 */
-#qr-reader {
-  position: relative !important;
-  width: 224px !important;
-  height: 224px !important;
-  margin: 0 auto !important;
-  background: #000;
-  border-radius: 20px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#qr-reader video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  border-radius: 20px;
-}
-#qr-reader img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-}
-#qr-reader__scan_region {
-  width: 100% !important;
-  height: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
+/* Scanner QR : la caméra remplit tout l'écran (cadre de visée dessiné par-dessus) */
+#qr-reader { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; background: #000; overflow: hidden; border: 0 !important; }
+#qr-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: center center !important; }
+#qr-reader img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+#qr-reader__scan_region { width: 100% !important; height: 100% !important; }
+#qr-shaded-region { display: none !important; }
 #qr-reader__dashboard { display: none !important; }
 
 input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
@@ -528,3 +502,35 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @keyframes hospGhost { 0%, 100% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 0.35; transform: translate(9px, -3px); } 55% { opacity: 0.2; transform: translate(-7px, 2px); } 80% { opacity: 0.3; transform: translate(5px, 1px); } }
 @keyframes hospBlur { 0%, 100% { opacity: 0; } 35% { opacity: 0.85; } 50% { opacity: 0.9; } 70% { opacity: 0.25; } }
 @media (prefers-reduced-motion: reduce) { .hosp-daze > img { animation: none !important; } }
+/* Scanner plein écran : cadre de visée doré, ligne de balayage, bandeau de ce qui a été flashé */
+.scan-screen { background: #000; overflow: hidden; color: #fff; }
+.scan-screen { --sw: min(72vw, 290px); }
+.scan-frame { position: absolute; z-index: 1; left: 50%; top: 40%; width: var(--sw); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 18px; pointer-events: none; }
+/* Voile sombre autour du cadre (découpe en « trou » au centre) */
+.scan-dim { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: rgba(5,6,10,0.62);
+  clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    calc(50% - var(--sw) / 2) calc(40% - var(--sw) / 2), calc(50% + var(--sw) / 2) calc(40% - var(--sw) / 2),
+    calc(50% + var(--sw) / 2) calc(40% + var(--sw) / 2), calc(50% - var(--sw) / 2) calc(40% + var(--sw) / 2),
+    calc(50% - var(--sw) / 2) calc(40% - var(--sw) / 2)); }
+.scan-screen[data-state="ok"] .scan-dim { background: rgba(5,6,10,0.75); }
+.scan-c { position: absolute; width: 34px; height: 34px; border: 4px solid #fbbf24; filter: drop-shadow(0 0 6px rgba(251,191,36,0.6)); }
+.scan-c.tl { left: -3px; top: -3px; border-right: 0; border-bottom: 0; border-radius: 18px 0 0 0; }
+.scan-c.tr { right: -3px; top: -3px; border-left: 0; border-bottom: 0; border-radius: 0 18px 0 0; }
+.scan-c.bl { left: -3px; bottom: -3px; border-right: 0; border-top: 0; border-radius: 0 0 0 18px; }
+.scan-c.br { right: -3px; bottom: -3px; border-left: 0; border-top: 0; border-radius: 0 0 18px 0; }
+.scan-line { will-change: transform; position: absolute; left: 8%; right: 8%; top: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, #fbbf24, transparent); box-shadow: 0 0 12px rgba(251,191,36,0.8); }
+.scan-screen:not(.hidden)[data-state="scan"] .scan-line { animation: scanSweep 2.2s ease-in-out infinite alternate; }
+@keyframes scanSweep { from { transform: translateY(8px); } to { transform: translateY(calc(var(--sw) - 10px)); } }
+.scan-screen[data-state="ok"] .scan-c { border-color: #34d399; filter: drop-shadow(0 0 10px rgba(52,211,153,0.9)); }
+.scan-screen[data-state="ok"] .scan-line, .scan-screen[data-state="nocam"] .scan-line { display: none; }
+.scan-screen[data-state="nocam"] .scan-c { border-color: #475569; filter: none; }
+.scan-tape { display: none; position: absolute; z-index: 3; left: -20px; right: -20px; top: 40%; padding: 6px 0; text-align: center; font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: 0.06em; color: #04120c; background: linear-gradient(90deg, #6ee7b7, #10b981); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transform: translateY(-50%) rotate(-7deg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scan-screen[data-state="ok"] .scan-tape { display: block; animation: scanTape 0.35s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes scanTape { from { opacity: 0; transform: translateY(-50%) rotate(-7deg) scale(1.6); } to { opacity: 1; transform: translateY(-50%) rotate(-7deg); } }
+.scan-panel { margin-bottom: 14px; }
+.scan-head { font-size: 34px; line-height: 1; text-align: center; color: #fff; }
+.scan-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 10px 0; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e2e8f0; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.scan-btn i { font-size: 20px; color: #fbbf24; }
+.scan-btn:disabled { opacity: 0.3; }
+.scan-btn.on { background: rgba(251,191,36,0.2); border-color: #fbbf24; }
+@media (prefers-reduced-motion: reduce) { .scan-screen * { animation: none !important; } }

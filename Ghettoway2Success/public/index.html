@@ -739,30 +739,38 @@
       </div>
     </div>
 
-    <!-- MODALE SCANNER TACTIQUE -->
-    <div id="modalQrScanner" class="hidden absolute inset-0 bg-black/95 backdrop-blur-md z-50 p-4 flex flex-col justify-between">
-      <div class="pt-0.5">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
-          <h3 onclick="tapScannerTitle()" class="select-none text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5"><i class="ph-bold ph-qr-code"></i> Scanner Tactique</h3>
-          <button onclick="closeQrScannerModal()" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
+    <!-- SCANNER : caméra plein écran, cadre de visée, puis bandeau de ce qui a été flashé -->
+    <div id="modalQrScanner" class="hidden absolute inset-0 z-50 scan-screen" data-state="scan">
+      <div id="qr-reader"></div>
+      <div class="scan-dim"></div>
+      <div class="scan-frame">
+        <i class="scan-c tl"></i><i class="scan-c tr"></i><i class="scan-c bl"></i><i class="scan-c br"></i>
+        <div class="scan-line"></div>
+        <div id="qr-photo-preview-box" class="hidden absolute inset-0 bg-black/95 rounded-[18px] flex items-center justify-center p-2">
+          <img id="qr-photo-preview-img" src="" alt="Photo QR" class="w-full h-full object-contain rounded-xl">
         </div>
-        <div class="relative w-[224px] h-[224px] mx-auto">
-          <div id="qr-reader" class="border-2 border-amber-400/50 shadow-2xl"></div>
-          <div id="qr-photo-preview-box" class="hidden absolute inset-0 bg-black/95 rounded-[20px] border-2 border-amber-400/70 flex flex-col items-center justify-center p-2 z-20">
-            <img id="qr-photo-preview-img" src="" alt="Photo QR" class="w-full h-full object-contain rounded-xl">
+      </div>
+      <div id="scanTape" class="scan-tape"></div>
+      <div class="relative z-[2] flex flex-col h-full pointer-events-none">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200 pointer-events-auto">
+          <span>Manche <span id="scanRound">1</span></span>
+          <div class="flex items-center gap-2">
+            <span onclick="tapScannerTitle()" class="select-none px-2.5 py-1 rounded-full bg-amber-500 text-black text-[10px] font-black"><i class="ph-bold ph-qr-code"></i> Scanner</span>
+            <button onclick="closeQrScannerModal()" class="w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-slate-200" aria-label="Fermer"><i class="ph-bold ph-x text-xs"></i></button>
           </div>
         </div>
-        <div id="qrScannerStatus" class="text-[10px] text-center font-mono text-amber-300 mt-1.5">Capteur vidéo...</div>
-        <div class="mt-1.5 flex items-center justify-center gap-2">
-          <label class="px-3 py-1.5 glass-panel rounded-xl text-[10px] font-mono text-slate-200 cursor-pointer inline-flex items-center gap-1.5 border border-white/15 active:scale-95 transition">
-            <i class="ph-bold ph-image text-amber-300"></i><span>Choisir Photo QR</span>
-            <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)">
-          </label>
-          <button type="button" id="btnCancelQrPhoto" onclick="cancelSelectedQrPhoto()" class="hidden px-3 py-1.5 bg-rose-500/20 border border-rose-500/50 rounded-xl text-[10px] font-mono text-rose-300 font-bold inline-flex items-center gap-1 active:scale-95 transition">
-            <i class="ph-bold ph-arrow-counter-clockwise"></i><span>Annuler Photo / Caméra</span>
-          </button>
-        </div>
-        <div id="qrTestButtons" class="hidden mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+        <div class="flex-1"></div>
+        <div class="police-panel scan-panel pointer-events-auto">
+          <h2 class="font-anton scan-head">FLASH UN QR CODE</h2>
+          <div id="qrScannerStatus" class="text-[11px] text-center font-bold text-amber-300 mt-1">Démarrage de la caméra…</div>
+          <div class="grid grid-cols-3 gap-2 mt-3">
+            <label class="scan-btn cursor-pointer"><i class="ph-bold ph-image"></i><span>Photo</span>
+              <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
+            <button type="button" id="btnQrTorch" onclick="toggleQrTorch()" class="scan-btn" disabled><i class="ph-bold ph-flashlight"></i><span>Lampe</span></button>
+            <button type="button" onclick="closeQrScannerModal()" class="scan-btn"><i class="ph-bold ph-x"></i><span>Fermer</span></button>
+          </div>
+          <button type="button" id="btnCancelQrPhoto" onclick="cancelSelectedQrPhoto()" class="hidden mt-2 w-full py-2 rounded-xl bg-rose-500/20 border border-rose-500/50 text-[11px] text-rose-300 font-bold"><i class="ph-bold ph-arrow-counter-clockwise"></i> Revenir à la caméra</button>
+          <div id="qrTestButtons" class="hidden mt-3 grid grid-cols-2 gap-1.5 text-[10px] font-mono max-h-40 overflow-y-auto">
           <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
           <button onclick='processQrPayload("{\"t\":\"concessionnaire\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🚗 Concessionnaire</button>
           <button onclick='processQrPayload("{\"t\":\"nightclub\"}")' class="p-2 glass-panel rounded-xl text-left text-pink-300 font-bold border border-pink-500/40">👠 Nightclub (Prostituées)</button>
@@ -774,8 +782,8 @@
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Couvercle de poubelle\",\"eff\":\"null_enemy_weapon\",\"dur\":\"combat\",\"desc\":\"Réduit l&apos;arme adverse à 0\"}")' class="col-span-2 p-2 glass-panel rounded-xl text-left text-slate-300">🗑️ Couvercle de poubelle</button>
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":2}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M • 8000€ + 2kg)</button>
         </div>
+        </div>
       </div>
-      <button onclick="closeQrScannerModal()" class="w-full py-3 glass-panel text-slate-300 font-bold rounded-2xl text-xs uppercase">Fermer</button>
     </div>
 
     <!-- PATROUILLE DE FIN DE TOUR : dé qui roule, puis déplacement et direction du pion de la patrouille -->

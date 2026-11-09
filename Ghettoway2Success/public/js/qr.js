@@ -22,7 +22,7 @@ async function startLiveQrCamera() {
     return;
   }
 
-  statusEl.innerText = "Initialisation caméra...";
+  statusEl.innerText = 'Démarrage de la caméra…';
   try {
     if (!html5QrScannerInstance) {
       html5QrScannerInstance = new Html5Qrcode("qr-reader");
@@ -32,29 +32,81 @@ async function startLiveQrCamera() {
     await html5QrScannerInstance.start(
       { facingMode: "environment" },
       {
-        fps: 15,
-        aspectRatio: 1.0,
-        qrbox: (viewfinderWidth, viewfinderHeight) => {
-          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-          const boxSize = Math.floor(minEdge * 0.78);
-          return { width: boxSize, height: boxSize };
-        }
+        // Caméra plein écran : toute l'image est lue (le cadre de visée n'est qu'un repère)
+        fps: 15
       },
-      (txt) => {
-        processQrPayload(txt);
-        closeQrScannerModal();
-      },
+      (txt) => onQrDetected(txt),
       () => {}
     );
-    statusEl.innerText = "Placez le QR Code au centre du carré...";
+    statusEl.innerText = 'Vise le QR code d’une case du plateau';
+    setupQrTorch();
   } catch (e) {
-    statusEl.innerText = "Caméra indisponible (utilisez Choisir Photo QR).";
+    document.getElementById('modalQrScanner').dataset.state = 'nocam';
+    statusEl.innerText = 'Caméra indisponible : autorise-la dans ton navigateur, ou utilise « Photo ».';
   }
+}
+
+// QR reconnu : cadre vert, vibration, bandeau de ce qui a été flashé, puis on ouvre la case
+const QR_LABELS = { armurerie: 'ARMURERIE', nightclub: 'NIGHTCLUB', sportclub: 'SPORTCLUB', concessionnaire: 'CONCESSIONNAIRE', dealer: 'CONCESSIONNAIRE', grossiste: 'GROSSISTE', obj: 'OBJET TROUVÉ', brq: 'BRAQUAGE', yen: 'DEAL YENCLI', gb: 'LASCAR', pr: 'NIGHTCLUB', eq: 'ÉQUIPEMENT' };
+// Fond de la case à précharger pendant le bandeau, pour qu'elle s'affiche d'un coup
+const QR_PRELOAD = { armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', brq: 'sac-butin.webp' };
+function qrType(txt) {
+  let data;
+  try { data = JSON.parse(String(txt).trim().replace(/[\u201C\u201D]/g, '"')); } catch (e) { data = { t: String(txt).trim() }; }
+  if (typeof data === 'string') data = { t: data };
+  return { data, type: String((data && (data.t || data.type)) || '').toLowerCase() };
+}
+function preloadQrTarget(txt) {
+  const src = QR_PRELOAD[qrType(txt).type];
+  if (!src) return;
+  const img = new Image();
+  img.src = src;
+  if (img.decode) img.decode().catch(() => {});
+}
+function qrLabel(txt) {
+  const { data, type } = qrType(txt);
+  const base = QR_LABELS[type] || 'QR CODE LU';
+  return type === 'brq' && data.n ? `${base} : ${String(data.n).toUpperCase()}` : base;
+}
+let qrDetectedLock = false;
+function onQrDetected(txt) {
+  if (qrDetectedLock) return;
+  qrDetectedLock = true;
+  const scr = document.getElementById('modalQrScanner');
+  scr.dataset.state = 'ok';
+  document.getElementById('scanTape').innerText = qrLabel(txt);
+  preloadQrTarget(txt);
+  document.getElementById('qrScannerStatus').innerText = 'QR code reconnu !';
+  try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  setTimeout(() => { qrDetectedLock = false; processQrPayload(txt); }, 650);
+}
+
+// Lampe du téléphone, seulement si la caméra la propose
+let qrTorchOn = false;
+function setupQrTorch() {
+  const btn = document.getElementById('btnQrTorch');
+  qrTorchOn = false;
+  btn.classList.remove('on');
+  let caps = {};
+  try { caps = html5QrScannerInstance.getRunningTrackCapabilities() || {}; } catch (e) {}
+  btn.disabled = !caps.torch;
+}
+async function toggleQrTorch() {
+  if (!html5QrScannerInstance) return;
+  try {
+    await html5QrScannerInstance.applyVideoConstraints({ advanced: [{ torch: !qrTorchOn }] });
+    qrTorchOn = !qrTorchOn;
+    document.getElementById('btnQrTorch').classList.toggle('on', qrTorchOn);
+  } catch (e) {}
 }
 
 async function openQrScannerModal() {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
-  document.getElementById('modalQrScanner').classList.remove('hidden');
+  const scr = document.getElementById('modalQrScanner');
+  scr.dataset.state = 'scan';
+  qrDetectedLock = false;
+  document.getElementById('scanRound').innerText = currentSession.round || 1;
+  scr.classList.remove('hidden');
   applyQrTestMode();
   await startLiveQrCamera();
 }
@@ -76,6 +128,7 @@ function tapScannerTitle() {
 }
 
 async function closeQrScannerModal() {
+  qrTorchOn = false;
   if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
     try { await html5QrScannerInstance.stop(); } catch (e) {}
   }
@@ -110,22 +163,18 @@ async function scanFromImageFile(input) {
   previewImg.src = currentQrPhotoObjectUrl;
   previewBox.classList.remove('hidden');
   cancelBtn.classList.remove('hidden');
-  statusEl.innerText = "Analyse de la photo en cours...";
+  statusEl.innerText = 'Analyse de la photo…';
 
   try {
     if (!html5QrScannerInstance) {
       html5QrScannerInstance = new Html5Qrcode("qr-reader");
     }
     const decodedText = await html5QrScannerInstance.scanFile(file, false);
-    statusEl.innerText = "✅ QR Code détecté sur la photo !";
-    setTimeout(() => {
-      processQrPayload(decodedText);
-      closeQrScannerModal();
-    }, 350);
+    onQrDetected(decodedText);
   } catch (err) {
-    statusEl.innerText = "❌ Aucun QR Code détecté sur cette photo.";
+    statusEl.innerText = 'Aucun QR code trouvé sur cette photo.';
     await showAppAlert(
-      "Impossible de lire un QR Code sur cette photo.\nVous pouvez cliquer sur « Annuler Photo / Caméra » ou choisir une autre image.",
+      "Impossible de lire un QR Code sur cette photo.\nTu peux revenir à la caméra ou choisir une autre image.",
       "QR Code Illisible"
     );
   } finally {
