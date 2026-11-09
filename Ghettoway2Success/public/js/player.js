@@ -15,7 +15,7 @@ function getTotalAtk() {
 }
 
 function getTotalDef() {
-  let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0);
+  let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0) - (localPlayer.canetteDefMalus || 0);
   if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
   const multM = combatModifiers.doubleMuscles ? 2 : 1;
   localPlayer.musclesOnPerson.forEach(m => {
@@ -77,6 +77,8 @@ async function triggerPoliceInspection() {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
   if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
 
+  // Passeport diplomatique : proposé avant tout le reste, annule le contrôle
+  if (await offerPassportAtPolice()) return;
   const caid = getMyCaid();
   if (caid.id === 'caid_5' && !localPlayer.specialUsedThisTurn) {
     if (await showAppConfirm("Tenter votre 'Prière Miraculeuse' (50% d'annuler ce contrôle) ?", "🙏 J-Lo Gramme")) {
@@ -315,6 +317,7 @@ function refreshHud() {
       baseDef: localPlayer.baseDef,
       tempAtkMalus: localPlayer.tempAtkMalus,
       tempDefMalus: localPlayer.tempDefMalus,
+      canetteDefMalus: localPlayer.canetteDefMalus || 0,
       firstWeaponDoubled: localPlayer.firstWeaponDoubled,
       specialUsedThisTurn: localPlayer.specialUsedThisTurn
     });
@@ -334,6 +337,12 @@ function renderInventoryList() {
     let primaryBtn = '';
     if (item.type === 'WEAPON' || item.type === 'ARMOR' || item.type === 'VEHICLE') {
       primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Équiper</button>`;
+    } else if (item.eff === 'def_malus_round') {
+      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500 text-white font-black rounded-lg font-mono text-[9px] uppercase">Lancer</button>`;
+    } else if (item.eff === 'cancel_police') {
+      primaryBtn = `<span class="px-2 py-1 bg-sky-500/15 text-sky-300 border border-sky-500/30 rounded-lg font-mono text-[9px] uppercase font-bold">Auto</span>`;
+    } else if (item.eff === 'none') {
+      primaryBtn = '';
     } else if (item.eff === 'stray_dog') {
       primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-purple-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Siffler</button>`;
     } else if (item.dur === 'combat') {
@@ -384,6 +393,10 @@ async function useItem(idx) {
     refreshHud();
     return;
   }
+  // Vieille canette : on choisit le rival à viser (écran des capacités spéciales)
+  if (it.eff === 'def_malus_round') return openCanetteThrow(it);
+  if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");
+  if (it.eff === 'none') return showAppAlert("Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !", "🍎 Trognon de pomme");
   if (it.eff === 'stray_dog') {
     const caid = getMyCaid();
     localPlayer.inventory.splice(idx, 1);

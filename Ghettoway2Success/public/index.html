@@ -636,28 +636,42 @@
     </div>
 
     <!-- MODALE SÉLECTEUR D'OBJETS DE COMBAT -->
-    <div id="modalCombatItemSelector" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-rose-500/40 max-w-sm mx-auto w-full">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 class="text-sm font-black text-rose-400 uppercase flex items-center gap-1.5"><i class="ph-bold ph-lightning"></i> Objets de Combat</h3>
-          <button onclick="closeModal('modalCombatItemSelector')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
+    <!-- OBJETS DE COMBAT : pile de cartes, on joue celles qu'on veut -->
+    <div id="modalCombatItemSelector" class="hidden absolute inset-0 z-50 deck-screen" data-theme="atk">
+      <div class="deck-scene"><img src="combat-duel.webp" alt=""></div>
+      <div class="relative z-10 flex flex-col h-full">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="deckRound">1</span></span>
+          <span id="deckChip" class="ally-chip deck-chip"></span>
         </div>
-        <div id="combatItemsChecklist" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
-        <button id="btnConfirmCombatItems" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black uppercase rounded-2xl text-xs">Activer la Sélection</button>
+        <div class="px-4 mt-5 deck-head"><h2 class="font-anton deck-title">TES OBJETS<br>DE COMBAT</h2><div class="text-[11px] font-bold text-slate-300 mt-1">Fais défiler tes cartes et joue celles que tu veux. Une carte jouée est perdue.</div></div>
+        <div class="relative w-full flex items-center justify-center mt-3">
+          <button type="button" onclick="stepItemDeck(-1)" class="deck-arrow left-2" aria-label="Carte précédente"><i class="ph-bold ph-caret-left"></i></button>
+          <div id="deckCards" class="deck-stage item-stage"></div>
+          <button type="button" onclick="stepItemDeck(1)" class="deck-arrow right-2" aria-label="Carte suivante"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+        <div id="deckDots" class="deck-dots"></div>
+        <div class="flex-1"></div>
+        <div class="px-4 pb-4">
+          <div class="flex items-center gap-2 flex-wrap min-h-[32px]"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Jouées :</span><span id="deckPicked" class="flex items-center gap-1.5 flex-wrap"></span></div>
+          <div id="deckStat" class="deck-stat mt-2"></div>
+          <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="ally-ghost" onclick="closeItemDeck()">Retour</button><button type="button" id="btnConfirmCombatItems" class="ally-cta deck-cta" onclick="confirmCombatItems()">Choisis une carte</button></div>
+        </div>
       </div>
     </div>
 
-    <!-- MODALE DÉCOUVERTE D'OBJET -->
-    <div id="modalLootDiscovery" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">
-        <div id="lootDiscoveryIcon" class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-300 mx-auto flex items-center justify-center text-3xl border border-amber-500/30"><i class="ph-bold ph-gift"></i></div>
-        <div>
-          <span class="text-[9px] font-mono uppercase text-slate-400 block font-bold">Découverte</span>
-          <h3 id="lootDiscoveryTitle" class="text-base font-black text-white mt-0.5">Objet trouvé</h3>
-          <p id="lootDiscoveryDesc" class="text-xs text-slate-300 mt-1 font-mono"></p>
-        </div>
-        <button id="btnLootAction" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Récupérer</button>
+    <!-- DÉCOUVERTE D'OBJET : on fouille la poubelle, puis la carte de l'objet apparaît -->
+    <div id="modalLootDiscovery" class="hidden absolute inset-0 z-50 find-screen" data-state="fouille">
+      <img class="find-bg" src="fouilles.webp" alt="">
+      <div class="find-shade"></div>
+      <div class="find-rays"></div>
+      <div class="relative z-10 flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+        <span>Manche <span id="findRound">1</span></span>
+        <span class="find-chip"><i class="ph-fill ph-magnifying-glass"></i> <span class="find-chip-t"></span></span>
       </div>
+      <div id="findCard" class="find-card"></div>
+      <div class="find-intro"><div class="font-anton">TU FOUILLES LA POUBELLE…</div><div class="find-dots mt-3"><i></i><i></i><i></i></div></div>
+      <div id="findBottom" class="find-bottom"></div>
     </div>
 
     <!-- PAIEMENT : cash en poche ou CB (coffre du QG), ou répartition choisie par le joueur -->
@@ -834,6 +848,10 @@
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque/Défense Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Sifflet\",\"eff\":\"stray_dog\",\"dur\":\"tour\",\"desc\":\"Rallie le Chien Errant (+2 Atk / +2 Def)\"}")' class="p-2 glass-panel rounded-xl text-left text-purple-300">🐕 Sifflet (Chien)</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Couvercle de poubelle\",\"eff\":\"null_enemy_weapon\",\"dur\":\"combat\",\"desc\":\"Réduit l&apos;arme adverse à 0\"}")' class="col-span-2 p-2 glass-panel rounded-xl text-left text-slate-300">🗑️ Couvercle de poubelle</button>
+          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Kebab\",\"eff\":\"heal\",\"val\":1,\"desc\":\"Restaure 1 Cœur de Vie\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">🥙 Kebab</button>
+          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Trognon de pomme\",\"eff\":\"none\",\"desc\":\"Bon... Ben... Faut pas gâcher !\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🍎 Trognon de pomme</button>
+          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Vieille canette\",\"eff\":\"def_malus_round\",\"val\":1,\"desc\":\"−1 Défense à un rival jusqu&apos;à la fin de la manche\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🥫 Vieille canette</button>
+          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Passeport diplomatique\",\"eff\":\"cancel_police\",\"desc\":\"Annule un contrôle de police\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🛂 Passeport diplomatique</button>
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":2}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M • 8000€ + 2kg)</button>
         </div>
         </div>
@@ -969,6 +987,7 @@
   <script src="js/combat.js"></script>
   <script src="js/alliance.js"></script>
   <script src="js/powers.js"></script>
+  <script src="js/items.js"></script>
   <script src="js/qr.js"></script>
   <script src="js/game.js"></script>
   <script src="js/socket.js"></script>

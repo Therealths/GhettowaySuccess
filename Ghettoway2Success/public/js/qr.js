@@ -186,15 +186,7 @@ async function cancelSelectedQrPhoto() {
   await startLiveQrCamera();
 }
 
-function openLootDiscoveryModal(title, desc, iconHtml, buttonText, onClaim) {
-  document.getElementById('lootDiscoveryTitle').innerText = title;
-  document.getElementById('lootDiscoveryDesc').innerText = desc;
-  document.getElementById('lootDiscoveryIcon').innerHTML = iconHtml;
-  const btn = document.getElementById('btnLootAction');
-  btn.innerText = buttonText;
-  btn.onclick = () => { closeModal('modalLootDiscovery'); onClaim(); };
-  document.getElementById('modalLootDiscovery').classList.remove('hidden');
-}
+// Découverte d'objet : voir js/items.js
 
 async function processQrPayload(payload) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
@@ -224,16 +216,14 @@ async function processQrPayload(payload) {
   if (type === 'obj') {
     if (data.eff === 'cash') {
       const v = data.val || 1000;
-      return openLootDiscoveryModal(data.n || "Cash", `+${v.toLocaleString()} €`, '<i class="ph-bold ph-coins text-emerald-300"></i>', "Récupérer", async () => { localPlayer.pocketCash += v; spendActionPm(); });
+      return openLootDiscoveryModal({ name: data.n || 'Cash', eff: 'cash', val: v, desc: `+${v.toLocaleString()} €` }, "Récupérer", () => { localPlayer.pocketCash += v; spendActionPm(); });
     }
     if (data.eff === 'drug') {
       const v = data.val || 1;
-      return openLootDiscoveryModal(data.n || "Drogue", `+${v} kg`, '<i class="ph-bold ph-plant text-emerald-400"></i>', "Récupérer", async () => { localPlayer.drugs += v; spendActionPm(); });
+      return openLootDiscoveryModal({ name: data.n || 'Drogue', eff: 'drug', val: v, desc: `+${v} kg` }, "Récupérer", () => { localPlayer.drugs += v; spendActionPm(); });
     }
-    return openLootDiscoveryModal(data.n || "Objet", data.desc || "Objet spécial", '<i class="ph-bold ph-backpack text-ghetto-gold"></i>', "Ajouter au sac", async () => {
-      localPlayer.inventory.push({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', name: data.n, eff: data.eff, val: data.val || 0, dur: data.dur || 'instant', desc: data.desc || "Objet" });
-      spendActionPm();
-    });
+    const it = { id: 'obj_' + Date.now(), type: 'ITEM_CARD', name: data.n || 'Objet', eff: data.eff || 'none', val: data.val || 0, dur: data.dur || 'instant', desc: data.desc || "Objet" };
+    return openLootDiscoveryModal(it, "Ajouter au sac", () => { localPlayer.inventory.push(it); spendActionPm(); });
   }
 
   if (type === 'eq' || type === 'gb' || type === 'pr') {

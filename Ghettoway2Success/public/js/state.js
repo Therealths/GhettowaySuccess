@@ -50,6 +50,7 @@ let localPlayer = {
   baseDef: 0,
   tempAtkMalus: 0,
   tempDefMalus: 0,
+  canetteDefMalus: 0, // Vieille canette reçue : −1 Défense par canette jusqu'à la fin de la manche
   strayDogActive: false,
   firstWeaponDoubled: false,
   equipped: { weapon: null, armor: null, vehicle: null },

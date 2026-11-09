@@ -183,6 +183,7 @@ if (socket) {
     localPlayer.specialUsedThisTurn = false;
     localPlayer.tempAtkMalus = 0;
     localPlayer.tempDefMalus = 0;
+    localPlayer.canetteDefMalus = 0;
     localPlayer.allianceActive = false;
     localPlayer.activeAllies = [];
     startRoundPhase1();
@@ -423,6 +424,10 @@ if (socket) {
     if (effectType === 'siphon') localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
     else if (effectType === 'shuriken') localPlayer.tempDefMalus = 3;
     else if (effectType === 'danse') localPlayer.tempAtkMalus = 3;
+    else if (effectType === 'canette') {
+      localPlayer.canetteDefMalus = (localPlayer.canetteDefMalus || 0) + 1;
+      if (currentDuelInfo) { fightLog(`🥫 <b>${escapeHtml(senderCaid)}</b> t'a lancé une vieille canette : −1 Défense jusqu'à la fin de la manche !`); updateArenaLiveStats(); }
+    }
     else if (effectType === 'steal_item' && localPlayer.inventory.length > 0) {
       stolen = localPlayer.inventory.pop();
       socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });

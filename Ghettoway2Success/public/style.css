@@ -779,3 +779,78 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
   .pow-bottom { padding-bottom: 12px; } .pow-screen .ally-pick { padding: 6px 10px; } .pow-screen .ally-pick img { width: 34px; height: 34px; }
 }
 @media (prefers-reduced-motion: reduce) { .pow-screen *, .pow-screen.show * { animation: none !important; } }
+.pow-can { font-size: 42px; line-height: 1; margin: -22px 0 0 -21px; filter: drop-shadow(0 4px 10px #000); }
+
+/* Objets de combat : pile de cartes sur la scène de combat assombrie */
+.deck-screen { --ac: #fb7185; --ac2: #e11d48; --ac3: #fb7185; --chip: #e11d48; background: #07080e; overflow: hidden; color: #fff; }
+.deck-screen[data-theme="def"] { --ac: #38bdf8; --ac2: #0284c7; --ac3: #7dd3fc; --chip: #0284c7; }
+.deck-scene { position: absolute; left: 0; right: 0; top: 0; height: 60%; }
+.deck-scene img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; opacity: 0.55; }
+.deck-scene::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(7,8,14,0.5), transparent 25%, rgba(7,8,14,0.6) 70%, #07080e); }
+.deck-title { font-size: 40px; line-height: 0.95; text-shadow: 0 4px 18px #000; }
+.deck-chip { background: var(--chip); }
+.deck-cta { color: #fff; }
+.deck-cta:disabled { color: #000; }
+.item-stage { height: 290px; }
+.deck-arrow { position: absolute; z-index: 30; width: 36px; height: 36px; border-radius: 99px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); }
+.item-card { width: 200px; height: 270px; border-color: color-mix(in srgb, var(--ac) 45%, transparent); border-width: 1px; }
+.item-card.sel { border: 2px solid var(--ac); box-shadow: 0 0 30px color-mix(in srgb, var(--ac) 45%, transparent), 0 18px 36px rgba(0,0,0,0.9) !important; }
+.item-card.sel::after { content: '✓'; position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #111; background: var(--ac); border: 3px solid #07080e; }
+.item-card.off .item-pic, .item-card.off h4, .item-card.off p { filter: grayscale(1); opacity: 0.45; }
+.item-pic { height: 112px; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--ac) 25%, transparent), rgba(0,0,0,0.85) 70%); border: 1px solid rgba(255,255,255,0.1); }
+.item-pic img { width: 100%; height: 100%; object-fit: cover; }
+.item-pic span { font-size: 50px; line-height: 1; }
+.item-badge { padding: 2px 6px; border-radius: 6px; font-size: 9px; font-weight: 900; border: 1px solid color-mix(in srgb, var(--ac) 40%, transparent); background: color-mix(in srgb, var(--ac) 18%, transparent); color: var(--ac3); }
+.item-badge:empty { display: none; }
+.deck-btn { width: 100%; padding: 8px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 4px; color: #fff; background: linear-gradient(90deg, var(--ac3), var(--ac2)); }
+.deck-btn.played { color: #fff; background: color-mix(in srgb, var(--ac2) 30%, #07080e); box-shadow: inset 0 0 0 2px var(--ac); }
+.deck-btn.off { color: #64748b; background: #1e293b; font-size: 10px; }
+.deck-dots { display: flex; justify-content: center; gap: 6px; margin-top: 4px; }
+.deck-dots i { width: 7px; height: 7px; border-radius: 9px; background: #334155; transition: width .2s, background .2s; }
+.deck-dots i.s { background: var(--ac3); opacity: 0.6; }
+.deck-dots i.on { width: 18px; background: var(--ac); opacity: 1; }
+.deck-chipsel { display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 3px; border-radius: 99px; font-size: 11px; font-weight: 800; background: color-mix(in srgb, var(--ac) 14%, transparent); border: 1px solid color-mix(in srgb, var(--ac) 40%, transparent); }
+.deck-chipsel img, .deck-chipsel b { width: 24px; height: 24px; border-radius: 99px; object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 14px; background: rgba(0,0,0,0.5); }
+.deck-stat { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 8px; border-radius: 16px; background: color-mix(in srgb, var(--ac) 10%, transparent); border: 1px solid color-mix(in srgb, var(--ac) 35%, transparent); }
+.deck-stat small { display: block; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ac3); }
+.deck-stat b { font-family: 'Anton', sans-serif; font-size: 32px; font-weight: 400; line-height: 1; color: var(--ac); }
+.deck-stat b.dim { color: #64748b; }
+.deck-stat > i { font-size: 20px; color: var(--ac3); }
+.deck-screen.show .deck-head { animation: allyUp 0.4s ease-out both; }
+.deck-screen.show .item-stage { animation: allyPop 0.45s cubic-bezier(.2,1.4,.4,1) 0.1s both; }
+@media (max-height: 700px) { .deck-title { font-size: 30px; } .item-stage { height: 270px; } }
+
+/* Découverte d'objet : fouille de la poubelle, puis la carte de l'objet */
+.find-screen { background: #07080e; overflow: hidden; color: #fff; }
+.find-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 37% center; }
+.find-shade { position: absolute; inset: 0; background: linear-gradient(rgba(7,8,14,0.4), transparent 25%, transparent 60%, #07080e); transition: opacity .5s; }
+.find-screen[data-state="carte"] .find-shade { background: linear-gradient(rgba(7,8,14,0.6), rgba(7,8,14,0.45) 30%, rgba(7,8,14,0.85) 68%, #07080e); }
+.find-screen[data-state="carte"] .find-bg { filter: brightness(0.6); transition: filter .5s; }
+.find-chip { font-size: 10px; font-weight: 900; padding: 4px 9px; border-radius: 999px; color: #111; background: #fbbf24; }
+.find-screen[data-state="fouille"] .find-chip-t::after { content: 'Fouille'; }
+.find-screen[data-state="carte"] .find-chip-t::after { content: 'Objet trouvé'; }
+.find-rays { position: absolute; left: 50%; top: 290px; width: 560px; height: 560px; margin: -280px 0 0 -280px; border-radius: 999px; background: repeating-conic-gradient(rgba(251,191,36,0.16) 0 8deg, transparent 8deg 22deg); -webkit-mask: radial-gradient(circle, #000 25%, transparent 68%); mask: radial-gradient(circle, #000 25%, transparent 68%); opacity: 0; }
+.find-card { position: absolute; z-index: 5; left: 50%; top: 70px; width: min(290px, 74%); transform: translateX(-50%) rotate(-3deg); opacity: 0; }
+.find-img { display: block; width: 100%; border-radius: 18px; box-shadow: 0 0 0 3px rgba(251,191,36,0.9), 0 0 50px rgba(251,191,36,0.45), 0 24px 50px rgba(0,0,0,0.8); }
+.find-carton { aspect-ratio: 822 / 1122; border-radius: 18px; padding: 24px 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: linear-gradient(160deg, #b98a5a, #8d6238); box-shadow: 0 0 0 3px rgba(251,191,36,0.9), 0 0 50px rgba(251,191,36,0.45), 0 24px 50px rgba(0,0,0,0.8); }
+.find-carton-ic { font-size: 84px; line-height: 1; filter: drop-shadow(0 8px 14px rgba(0,0,0,0.5)); }
+.find-carton-n { margin-top: 18px; font-family: 'Permanent Marker', cursive; font-size: 30px; line-height: 1.05; text-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+.find-carton-d { margin-top: 12px; font-size: 14px; font-weight: 700; color: #fef3c7; }
+.find-intro { position: absolute; z-index: 5; left: 0; right: 0; bottom: 32px; text-align: center; font-size: 30px; }
+.find-screen[data-state="carte"] .find-intro { display: none; }
+.find-dots i { display: inline-block; width: 8px; height: 8px; margin: 0 3px; border-radius: 9px; background: #fbbf24; animation: allyDot 1s ease-in-out infinite; }
+.find-dots i:nth-child(2) { animation-delay: .2s; } .find-dots i:nth-child(3) { animation-delay: .4s; }
+.find-bottom { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; padding: 0 16px 16px; opacity: 0; pointer-events: none; }
+.find-head { font-size: 40px; line-height: 1; text-align: center; text-shadow: 0 4px 18px #000; }
+.find-row i { color: #fbbf24; }
+.find-row .aft { font-weight: 900; color: #fff; text-align: right; }
+.find-cta { display: block; width: 100%; padding: 14px; border-radius: 16px; text-align: center; font-weight: 900; font-size: 14px; text-transform: uppercase; color: #111; background: linear-gradient(90deg, #fde68a, #f59e0b); }
+.find-screen.show[data-state="fouille"] .find-bg { animation: findShake 0.5s ease-in-out infinite; }
+.find-screen[data-state="carte"] .find-card { animation: findReveal 0.6s cubic-bezier(.2,1.5,.4,1) both; }
+.find-screen[data-state="carte"] .find-rays { animation: findRays 12s linear infinite, allyFade 0.6s ease-out both; opacity: 1; }
+.find-screen[data-state="carte"] .find-bottom { animation: allyUp 0.45s ease-out 0.35s both; opacity: 1; pointer-events: auto; }
+@keyframes findShake { 0%, 100% { transform: none; } 25% { transform: translate(-3px, 1px) rotate(-0.4deg); } 75% { transform: translate(3px, -1px) rotate(0.4deg); } }
+@keyframes findReveal { 0% { opacity: 0; transform: translateX(-50%) translateY(120px) rotate(8deg) scale(0.6); } 100% { opacity: 1; transform: translateX(-50%) rotate(-3deg); } }
+@keyframes findRays { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@media (max-height: 700px) { .find-card { width: min(230px, 62%); top: 56px; } .find-head { font-size: 32px; } }
+@media (prefers-reduced-motion: reduce) { .find-screen *, .deck-screen * { animation: none !important; } .find-screen[data-state="carte"] .find-card, .find-screen[data-state="carte"] .find-bottom { opacity: 1; } }

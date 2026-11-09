@@ -421,47 +421,7 @@ function showFightDraw(message, last) {
   return fightRender('nul', 'draw', 'nul', stage, bottom);
 }
 
-async function openCombatItemSelectorModal() {
-  const items = localPlayer.inventory.filter(i => i && i.dur === 'combat');
-  if (!items.length) return showAppAlert("Aucun objet de combat dans votre Sac !", "Sac Vide");
-  const container = document.getElementById('combatItemsChecklist');
-  container.innerHTML = items.map(item => {
-    const isBP = (item.eff === 'double_weapon_atk');
-    const hasFA = isFirearm(localPlayer.equipped.weapon);
-    const dis = isBP && !hasFA;
-    return `
-      <label class="p-2.5 glass-panel rounded-xl flex items-center justify-between border-white/10 ${dis ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}">
-        <div class="flex-1 pr-2"><span class="text-xs font-black text-white block">${item.name}</span><span class="text-[10px] text-ghetto-gold font-mono block">${item.desc}</span>${dis ? '<span class="text-[9px] text-rose-400 block font-mono">Arme à feu requise !</span>' : ''}</div>
-        <input type="checkbox" value="${item.id}" ${dis ? 'disabled' : ''} class="combat-item-checkbox w-4 h-4 rounded">
-      </label>`;
-  }).join('');
-  document.getElementById('btnConfirmCombatItems').onclick = () => {
-    const checked = Array.from(document.querySelectorAll('.combat-item-checkbox:checked')).map(cb => cb.value);
-    if (!checked.length) return closeModal('modalCombatItemSelector');
-    const playedNames = [];
-    checked.forEach(id => {
-      const idx = localPlayer.inventory.findIndex(it => it.id === id);
-      if (idx >= 0) {
-        const it = localPlayer.inventory[idx];
-        playedNames.push(it.name);
-        if (it.eff === 'bonus_combat_atk') combatModifiers.flatAtkBonus += (it.val || 1);
-        else if (it.eff === 'double_muscles_atk') combatModifiers.doubleMuscles = true;
-        else if (it.eff === 'double_weapon_atk') combatModifiers.doubleWeapon = true;
-        else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
-        localPlayer.inventory.splice(idx, 1);
-      }
-    });
-    closeModal('modalCombatItemSelector');
-    refreshHud();
-    if (socket && currentDuelInfo) {
-      const stat = (currentDuelInfo.role === 'attacker') ? getTotalAtk() : getTotalDef();
-      socket.emit('combat_play_items', { itemNames: playedNames, newTotalStat: stat });
-    }
-    fightLog(`✔️ Activé : ${escapeHtml(playedNames.join(', '))}`);
-    updateArenaLiveStats();
-  };
-  document.getElementById('modalCombatItemSelector').classList.remove('hidden');
-}
+// Choix des objets de combat : voir js/items.js
 
 async function toggleCombatReadyState() {
   if (!currentDuelInfo) return;
