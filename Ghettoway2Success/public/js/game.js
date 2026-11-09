@@ -84,8 +84,14 @@ function emitCreateGame() {
 }
 function emitStartGame() { if (socket) socket.emit('start_game'); }
 function respondToAllianceRequest(accepted) {
-  closeAllianceScreen();
-  if (!pendingAllianceRequest) return;
+  if (!pendingAllianceRequest) return closeAllianceScreen();
+  if (accepted) {
+    // On reste sur la scène : le pacte scellé arrive par-dessus en fondu
+    document.querySelectorAll('#allyBottom button').forEach(btn => { btn.disabled = true; });
+    const cta = document.querySelector('#allyBottom .ally-cta');
+    if (cta) cta.innerText = 'Topé…';
+    setTimeout(() => { if (allyState() === 'recu') closeAllianceScreen(); }, 6000);
+  } else closeAllianceScreen();
   if (socket) socket.emit('respond_alliance', { requestId: pendingAllianceRequest.requestId, accepted, senderToken: pendingAllianceRequest.senderToken });
   pendingAllianceRequest = null;
 }

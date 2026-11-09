@@ -105,7 +105,21 @@ function allyRender(state, stage, bottom) {
   document.getElementById('allyRound').innerText = currentSession.round || 1;
   const img = state === 'scelle' ? 'alliance-pacte.webp' : 'alliance-deal.webp';
   const imgEl = document.getElementById('allyImg');
-  if (!imgEl.src.endsWith(img)) imgEl.src = img;
+  if (!imgEl.src.endsWith(img)) {
+    // Passage de la demande au pacte : l'ancienne scène s'efface en fondu par-dessus la nouvelle
+    const wasShown = !document.getElementById('allianceScreen').classList.contains('hidden');
+    if (wasShown) {
+      // Calque déjà chargé avec la page : pas d'écran noir le temps de décoder l'image
+      const prevImg = document.getElementById('allyPrev');
+      if (!prevImg.src.endsWith(imgEl.src.split('/').pop())) prevImg.src = imgEl.src;
+      prevImg.classList.remove('on');
+      void prevImg.offsetWidth;
+      prevImg.classList.add('on');
+      clearTimeout(allyRender.prevTimer);
+      allyRender.prevTimer = setTimeout(() => prevImg.classList.remove('on'), 1000);
+    }
+    imgEl.src = img;
+  }
   document.getElementById('allyStage').innerHTML = stage;
   document.getElementById('allyBottom').innerHTML = bottom;
   if (same) { scr.classList.add('static'); return; }

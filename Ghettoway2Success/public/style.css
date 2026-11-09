@@ -436,3 +436,95 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .gros-screen.show .gros-panel { animation: policeSlideUp 0.5s ease-out 0.15s both; }
 @media (max-height: 700px) { .gros-scene { height: 360px; } .gros-kg { font-size: 48px; } .gros-bubble { top: 140px; } .gros-tape { top: 250px; } }
 @media (prefers-reduced-motion: reduce) { .gros-screen * { animation: none !important; } }
+
+/* Ambiance des scènes : silhouettes qui respirent (calques détourés posés sur l'image) et lumières qui oscillent.
+   .amb recouvre la scène ; .amb-box reproduit le cadrage object-fit: cover de l'image (--ar = largeur/hauteur, --px/--py = object-position)
+   pour placer calques et lueurs en % de l'image. Les calques ne font que grandir depuis les pieds : la silhouette d'origine reste couverte. */
+.amb { position: absolute; inset: 0; overflow: hidden; pointer-events: none; container-type: size; --px: 0.5; --py: 0.5; }
+.amb-box { position: absolute;
+  width: max(100cqw, 100cqh * var(--ar)); height: max(100cqh, 100cqw / var(--ar));
+  left: calc((100cqw - max(100cqw, 100cqh * var(--ar))) * var(--px)); top: calc((100cqh - max(100cqh, 100cqw / var(--ar))) * var(--py)); }
+@supports not (width: 1cqw) { .amb { display: none; } }
+.amb img.amb-b { position: absolute; max-width: none; transform-origin: var(--bo, 50% 100%); will-change: transform; }
+.amb-glow { position: absolute; display: block; opacity: 0.8; will-change: opacity; }
+@keyframes breath { from { transform: none; } to { transform: scale(var(--bx, 1.018), var(--by, 1.04)); } }
+/* Lueur douce (phare, lampadaire) */
+@keyframes glowSoft { 0%, 100% { opacity: 0.25; } 18% { opacity: 0.8; } 34% { opacity: 0.2; } 52% { opacity: 1; } 61% { opacity: 0.4; } 78% { opacity: 0.9; } }
+/* Néon qui grésille de temps en temps */
+@keyframes glowNeon { 0%, 39%, 100% { opacity: 0.9; } 40% { opacity: 0.25; } 41% { opacity: 0.95; } 42.5% { opacity: 0.4; } 43.5%, 69% { opacity: 1; } 70% { opacity: 0.35; } 71.5% { opacity: 0.9; } }
+@keyframes veilNeon { 0%, 39%, 41%, 42%, 43.5%, 69%, 71.5%, 100% { opacity: 0; } 40% { opacity: 1; } 42.5% { opacity: 0.7; } 70% { opacity: 0.8; } }
+/* Lampe de hall : stable, puis un faux contact */
+@keyframes glowLamp { 0%, 100% { opacity: 0.45; } 30% { opacity: 1; } 55% { opacity: 0.6; } 56% { opacity: 0.05; } 57% { opacity: 0.9; } 58% { opacity: 0.15; } 59.5%, 85% { opacity: 0.95; } }
+@keyframes veilLamp { 0%, 55%, 57%, 59.5%, 100% { opacity: 0; } 56% { opacity: 1; } 58% { opacity: 0.75; } }
+
+/* Combat : ruelle (cadrage 50% 40%), phare au fond, lampe murale */
+.amb-fight { --ar: 1.3667; --py: 0.4; }
+.amb img.amb-fight-g { left: 5.61%; top: 21%; width: 42.439%; height: 79%; --bo: 50% 93.7%; --bd: 2.4s; --bdl: 0s; }
+.amb img.amb-fight-d { left: 50.976%; top: 15.667%; width: 47.805%; height: 84.333%; --bo: 49% 93.1%; --bd: 2.75s; --bdl: -1.7s; }
+.glow-phare { left: 52.4%; top: 47.5%; width: 24.4%; height: 20%; background: radial-gradient(closest-side, rgba(255,226,170,0.85), rgba(255,190,110,0.25) 55%, transparent); --gd: 3s; }
+.glow-murale { left: 15.2%; top: -4.7%; width: 14.6%; height: 13.3%; background: radial-gradient(closest-side, rgba(255,200,120,0.5), transparent); --gd: 3.4s; --gdl: -2.4s; }
+.fight-screen[data-theme="lose"] .amb { filter: grayscale(0.5) brightness(0.75); }
+
+/* Alliance : le deal (« ? » néon) puis le pacte (poignée de main, halo des lampadaires) */
+.amb-ally { --ar: 1.3667; }
+.ally-screen[data-state="scelle"] .amb-deal, .ally-screen:not([data-state="scelle"]) .amb-pacte { display: none; }
+.ally-screen[data-state="refus"] .amb { filter: grayscale(0.6) brightness(0.75); }
+.amb img.amb-deal-g { left: 11.463%; top: 13%; width: 31.585%; height: 87%; --bo: 50.6% 100%; --bd: 2.9s; --bdl: 0s; }
+.amb img.amb-deal-d { left: 59.756%; top: 12.333%; width: 28.902%; height: 87.667%; --bo: 50.6% 100%; --bd: 3.2s; --bdl: -2.1s; }
+.amb img.amb-pacte-duo { left: 11.707%; top: 12.333%; width: 83.415%; height: 87.667%; --bx: 1.01; --by: 1.03; --bd: 3.1s; --bdl: 0s; }
+.glow-neon { left: 36.2%; top: 18.8%; width: 28%; height: 45%; background: radial-gradient(closest-side, rgba(90,235,255,0.6), rgba(40,200,255,0.2) 60%, transparent); --gd: 3.8s; }
+.veil-neon { left: 41%; top: 24%; width: 18.5%; height: 35%; background: radial-gradient(closest-side, rgba(5,8,14,0.65), rgba(5,8,14,0.4) 70%, transparent); opacity: 0; --gd: 3.8s; }
+.glow-halo { left: 40.2%; top: 29.2%; width: 24.4%; height: 23.3%; background: radial-gradient(closest-side, rgba(255,200,130,0.7), rgba(255,170,90,0.2) 60%, transparent); --gd: 3.2s; }
+.glow-exit { left: 58.9%; top: 38.3%; width: 8.5%; height: 8.3%; background: radial-gradient(closest-side, rgba(90,235,255,0.55), transparent); --gd: 4s; --gdl: -3s; }
+
+/* Grossiste : hall 7, lampe au-dessus de la porte, trois guetteurs */
+.amb-gros { --ar: 1.4975; }
+.amb img.amb-gros-g { left: 1.667%; top: 20.133%; width: 17.778%; height: 64.226%; --bo: 43.75% 97.4%; --bd: 2.8s; --bdl: -0.8s; }
+.amb img.amb-gros-m { left: 55.333%; top: 32.446%; width: 7.778%; height: 34.609%; --bo: 67% 100%; --bd: 2.5s; --bdl: -2s; }
+.amb img.amb-gros-d { left: 78.111%; top: 18.636%; width: 20.889%; height: 73.045%; --bo: 56.9% 97.5%; --bd: 3s; --bdl: -3.1s; }
+.glow-hall { left: 38.3%; top: 1.7%; width: 28.9%; height: 25%; background: radial-gradient(closest-side, rgba(255,214,150,0.9), rgba(255,190,110,0.3) 60%, transparent); --gd: 4.4s; }
+.veil-hall { left: 40%; top: 4%; width: 25.5%; height: 22%; background: radial-gradient(closest-side, rgba(6,6,10,0.6), rgba(6,6,10,0.3) 70%, transparent); opacity: 0; --gd: 4.4s; }
+
+/* Animations seulement quand l'écran est affiché */
+.ally-screen:not(.hidden) .amb-b, .gros-screen:not(.hidden) .amb-b { animation: breath var(--bd, 2.8s) ease-in-out var(--bdl, 0s) infinite alternate; }
+.ally-screen:not(.hidden) .glow-phare, .ally-screen:not(.hidden) .glow-murale, .ally-screen:not(.hidden) .glow-halo, .ally-screen:not(.hidden) .glow-exit { animation: glowSoft var(--gd, 6s) ease-in-out var(--gdl, 0s) infinite; }
+.ally-screen:not(.hidden) .glow-neon { animation: glowNeon var(--gd) linear infinite; }
+.ally-screen:not(.hidden) .veil-neon { animation: veilNeon var(--gd) linear infinite; }
+.gros-screen:not(.hidden) .glow-hall { animation: glowLamp var(--gd) linear infinite; }
+.gros-screen:not(.hidden) .veil-hall { animation: veilLamp var(--gd) linear infinite; }
+.ally-screen.show:not(.static) .amb { animation: allyFade 0.6s ease-out both; }
+/* Contrôle de police et hôpital : l'équipe (déjà détourée) arrive puis respire depuis le bas */
+.police-screen.show:not(.hidden) .police-team:not(.patrol-car) { transform-origin: 50% 100%; --bx: 1.014; --by: 1.035;
+  animation: policeRise 0.7s ease-out 0.15s both, breath var(--bd, 2.8s) ease-in-out 0.85s infinite alternate; }
+.hosp-team { --bd: 3.1s; }
+@media (prefers-reduced-motion: reduce) { .amb, .amb *, .police-team { animation: none !important; } }
+/* Pacte scellé : fondu depuis la scène de la demande, puis le bandeau « PACTE SCELLÉ » est claqué comme l'autocollant de l'accueil */
+.ally-scene > img.ally-prev { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; z-index: 1; opacity: 0; visibility: hidden; pointer-events: none; }
+.ally-scene > img.ally-prev.on, .ally-screen.show:not(.static) .ally-scene > img.ally-prev.on { visibility: visible; animation: allyPrevOut 0.9s ease-in-out both; }
+@keyframes allyPrevOut { from { opacity: 1; transform: scale(1.06); } to { opacity: 0; transform: scale(1.06); } }
+.ally-screen[data-state="scelle"].show:not(.static) .ally-scene > img:not(.ally-prev) { animation: allyFade 0.9s ease-out both; }
+.ally-screen[data-state="scelle"].show:not(.static) .ally-tape { animation: allySlap 0.45s cubic-bezier(.5,0,.75,0) 0.85s both; }
+.ally-screen[data-state="scelle"].show:not(.static) { animation: allyShake 0.32s ease-out 1.28s; }
+.ally-screen[data-state="scelle"].show:not(.static) .ally-glow { animation: allyFlash 0.5s ease-out 1.25s both; }
+@keyframes allySlap {
+  0%   { opacity: 0; transform: translate(30%, -160%) scale(2.6) rotate(-30deg); }
+  25%  { opacity: 1; }
+  88%  { transform: translate(0, 0) scale(0.97) rotate(-5.5deg); }
+  100% { opacity: 1; transform: rotate(-7deg); }
+}
+@keyframes allyShake { 0%, 100% { transform: none; } 20% { transform: translate(-7px, 5px) rotate(-0.7deg); } 45% { transform: translate(6px, -4px) rotate(0.5deg); } 70% { transform: translate(-2px, 1px); } }
+@keyframes allyFlash { 0% { opacity: 0; transform: scale(1.6); } 20% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ally-screen[data-state="scelle"], .ally-screen[data-state="scelle"] * { animation: none !important; } .ally-scene > img.ally-prev { display: none; } }
+/* Hôpital K.O. : le Caïd est dans les vapes (image qui ondule, vision double, flou qui va et vient).
+   Le flou est une copie floutée à l'avance dont seule l'opacité varie : pas de filtre animé. */
+.hosp-daze { position: relative; height: 100%; filter: none; }
+.hosp-daze > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: bottom; }
+.hosp-daze > .hosp-img { position: relative; filter: drop-shadow(0 14px 22px rgba(0,0,0,0.7)); }
+.hosp-daze > .hosp-ghost, .hosp-daze > .hosp-blur { opacity: 0; pointer-events: none; }
+.hosp-screen[data-state="ko"]:not(.hidden) .hosp-img { animation: hospWave 3.2s ease-in-out infinite; transform-origin: 50% 100%; }
+.hosp-screen[data-state="ko"]:not(.hidden) .hosp-ghost { animation: hospGhost 4.6s ease-in-out infinite; }
+.hosp-screen[data-state="ko"]:not(.hidden) .hosp-blur { animation: hospBlur 3.8s ease-in-out infinite; }
+@keyframes hospWave { 0%, 100% { transform: none; } 25% { transform: skewX(1.6deg) scaleX(1.012); } 50% { transform: skewX(-0.6deg) scaleY(1.01); } 75% { transform: skewX(-1.6deg) scaleX(0.992); } }
+@keyframes hospGhost { 0%, 100% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 0.35; transform: translate(9px, -3px); } 55% { opacity: 0.2; transform: translate(-7px, 2px); } 80% { opacity: 0.3; transform: translate(5px, 1px); } }
+@keyframes hospBlur { 0%, 100% { opacity: 0; } 35% { opacity: 0.85; } 50% { opacity: 0.9; } 70% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .hosp-daze > img { animation: none !important; } }

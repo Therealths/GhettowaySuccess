@@ -565,7 +565,10 @@
 
     <!-- COMBAT DE RUE : écran plein page (choix de la cible, duel, choix de la riposte, victoire, défaite, match nul) -->
     <div id="fightScreen" class="hidden absolute inset-0 z-40 ally-screen fight-screen" data-state="choix">
-      <div class="ally-scene"><img id="fightImg" src="combat-duel.webp" alt=""><div id="fightStage" class="ally-stage"></div></div>
+      <div class="ally-scene"><img id="fightImg" src="combat-duel.webp" alt="">
+        <!-- Ambiance : phare et lampe qui oscillent, combattants qui respirent -->
+        <div class="amb amb-fight" aria-hidden="true"><div class="amb-box"><i class="amb-glow glow-phare"></i><i class="amb-glow glow-murale"></i><img class="amb-b amb-fight-g" src="combat-duel-g.webp" alt="" loading="lazy"><img class="amb-b amb-fight-d" src="combat-duel-d.webp" alt="" loading="lazy"></div></div>
+        <div id="fightStage" class="ally-stage"></div></div>
       <div class="ally-glow fight-glow"></div>
       <div class="ally-content">
         <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
@@ -689,7 +692,10 @@
 
     <!-- GROSSISTE : hall 7, choix des kilos puis livraison -->
     <div id="grossisteScreen" class="hidden absolute inset-0 z-40 gros-screen" data-state="choix">
-      <div class="gros-scene"><img src="grossiste-hall.webp" alt="Hall 7"></div>
+      <div class="gros-scene"><img src="grossiste-hall.webp" alt="Hall 7">
+        <!-- Ambiance : lampe du hall qui oscille, guetteurs qui respirent -->
+        <div class="amb amb-gros" aria-hidden="true"><div class="amb-box"><i class="amb-glow glow-hall"></i><i class="amb-glow veil-hall"></i><img class="amb-b amb-gros-g" src="grossiste-hall-g.webp" alt="" loading="lazy"><img class="amb-b amb-gros-m" src="grossiste-hall-m.webp" alt="" loading="lazy"><img class="amb-b amb-gros-d" src="grossiste-hall-d.webp" alt="" loading="lazy"></div></div>
+      </div>
       <div class="relative z-[1] flex flex-col h-full">
         <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
           <span>Manche <span id="grossisteRound">1</span></span>
@@ -835,7 +841,7 @@
           <span class="px-2.5 py-1 rounded-full bg-rose-500 text-white text-[10px] font-black"><i class="ph-fill ph-first-aid"></i> Urgences</span>
         </div>
         <h2 id="hospHeadline" class="font-anton police-headline px-4 mt-2"></h2>
-        <div class="police-team-wrap"><img src="ambulance-team.webp" alt="Ambulanciers" class="police-team hosp-team"></div>
+        <div class="police-team-wrap"><div class="police-team hosp-team hosp-daze"><img src="ambulance-team.webp" alt="Ambulanciers" class="hosp-img"><img src="ambulance-team.webp" alt="" class="hosp-ghost" aria-hidden="true"><img src="ambulance-team-flou.webp" alt="" class="hosp-blur" aria-hidden="true"></div></div>
         <div class="police-panel">
           <div class="flex items-center gap-3 mb-3">
             <img id="hospCaidImg" src="" alt="" class="w-12 h-12 rounded-full object-cover border-2 police-accent-border">
@@ -854,7 +860,12 @@
 
     <!-- ALLIANCE : écran plein page (choix des alliés, attente des réponses, demande reçue, pacte scellé, refus) -->
     <div id="allianceScreen" class="hidden absolute inset-0 z-40 ally-screen" data-state="choix">
-      <div class="ally-scene"><img id="allyImg" src="alliance-deal.webp" alt=""><div id="allyStage" class="ally-stage"></div></div>
+      <div class="ally-scene"><img id="allyImg" src="alliance-deal.webp" alt="">
+        <!-- Ambiance : « ? » néon qui grésille (deal), halo des lampadaires (pacte), silhouettes qui respirent -->
+        <div class="amb amb-ally amb-deal" aria-hidden="true"><div class="amb-box"><i class="amb-glow glow-neon"></i><i class="amb-glow veil-neon"></i><img class="amb-b amb-deal-g" src="alliance-deal-g.webp" alt="" loading="lazy"><img class="amb-b amb-deal-d" src="alliance-deal-d.webp" alt="" loading="lazy"></div></div>
+        <div class="amb amb-ally amb-pacte" aria-hidden="true"><div class="amb-box"><i class="amb-glow glow-halo"></i><i class="amb-glow glow-exit"></i><img class="amb-b amb-pacte-duo" src="alliance-pacte-duo.webp" alt="" loading="lazy"></div></div>
+        <img id="allyPrev" class="ally-prev" src="alliance-deal.webp" alt="" aria-hidden="true">
+        <div id="allyStage" class="ally-stage"></div></div>
       <div class="ally-glow"></div>
       <div class="ally-content">
         <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
