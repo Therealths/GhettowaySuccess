@@ -687,31 +687,20 @@
       </div>
     </div>
 
-    <!-- MODALE GROSSISTE -->
-    <div id="modalGrossiste" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
-      <div class="glass-panel p-5 rounded-3xl space-y-3.5 border-emerald-500/40 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 class="text-sm font-black text-emerald-400 uppercase flex items-center gap-1.5"><i class="ph-bold ph-storefront"></i> Grossiste de Drogue</h3>
-          <button onclick="closeModal('modalGrossiste')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
+    <!-- GROSSISTE : hall 7, choix des kilos puis livraison -->
+    <div id="grossisteScreen" class="hidden absolute inset-0 z-40 gros-screen" data-state="choix">
+      <div class="gros-scene"><img src="grossiste-hall.webp" alt="Hall 7"></div>
+      <div class="relative z-[1] flex flex-col h-full">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="grossisteRound">1</span></span>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-black"><i class="ph-fill ph-storefront"></i> Grossiste</span>
         </div>
-        <div class="p-3 bg-black/40 rounded-2xl border border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
-          <div class="border-r border-white/10 pr-2"><span class="text-[9px] text-amber-400 uppercase font-bold block">Cash en Poche</span><div id="grossistePocketCash" class="text-sm font-black text-white mt-0.5">5 000 €</div></div>
-          <div class="pl-2"><span class="text-[9px] text-emerald-400 uppercase font-bold block">Tarif Grossiste</span><div id="grossisteUnitPrice" class="text-sm font-black text-white mt-0.5">1 000 € / kg</div></div>
-        </div>
-        <div class="space-y-2">
-          <div class="flex items-center justify-between text-xs font-mono"><span class="text-[10px] uppercase text-slate-400 font-bold">Quantité (kg) :</span><span id="grossisteMaxKg" class="text-[10px] text-emerald-400 font-bold">Max : 5 kg</span></div>
-          <input type="number" id="grossisteKgInput" value="0" min="0" oninput="syncGrossisteInputToSlider()" class="w-full glass-input text-white px-3 py-2.5 rounded-xl text-sm font-mono font-bold">
-          <input type="range" id="grossisteRangeSlider" min="0" max="100" value="0" oninput="syncGrossisteSliderToInput()" class="w-full">
-          <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
-            <button onclick="setGrossistePercentage(0)" class="py-2 glass-panel rounded-xl text-slate-300 font-bold">0 %</button>
-            <button onclick="setGrossistePercentage(50)" class="py-2 glass-panel rounded-xl text-slate-300 font-bold">50 %</button>
-            <button onclick="setGrossistePercentage(100)" class="py-2 glass-panel rounded-xl text-emerald-400 font-bold">100 % (Tout)</button>
-          </div>
-        </div>
-        <div class="p-2.5 rounded-xl bg-emerald-950/20 border border-emerald-500/30 flex justify-between items-center text-xs font-mono">
-          <span class="text-slate-300 text-[10px] uppercase font-bold">Total en Cash :</span><span id="grossisteTotalPriceDisplay" class="text-sm font-black text-emerald-300">0 €</span>
-        </div>
-        <button onclick="confirmGrossistePurchase()" class="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black uppercase rounded-2xl text-xs">Acheter (Cash uniquement)</button>
+        <h2 id="grossisteHeadline" class="font-anton gros-head px-4 mt-2">HALL 7.</h2>
+        <div id="grossisteSub" class="px-4 text-sm font-bold text-slate-200 gros-sub">La marchandise est arrivée.</div>
+        <div id="grossisteBubble" class="gros-bubble">Combien tu prends ?</div>
+        <div class="gros-tape">MARCHANDISE LIVRÉE</div>
+        <div class="flex-1"></div>
+        <div id="grossistePanel" class="police-panel gros-panel"></div>
       </div>
     </div>
 

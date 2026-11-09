@@ -403,3 +403,36 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
   100% { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .patrol-screen .patrol-car { animation: none !important; } }
+/* Grossiste : hall 7 en fondu, compteur de kilos et livraison */
+.gros-screen { --accent: #34d399; background: #07080e; overflow-y: auto; }
+.gros-scene { position: absolute; left: 0; right: 0; top: 40px; height: 470px; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 14%, #000 72%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 14%, #000 72%, transparent);
+  mask-composite: intersect; }
+.gros-scene img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.gros-head { font-size: 44px; line-height: 0.95; color: #fff; text-shadow: 0 4px 18px rgba(0,0,0,0.8); }
+.gros-sub { text-shadow: 0 2px 8px #000; }
+.gros-bubble { position: absolute; right: 16px; top: 150px; z-index: 2; background: #fff; color: #111; border-radius: 18px; padding: 8px 14px; font-family: 'Permanent Marker', cursive; font-size: 16px; line-height: 1.1; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.gros-bubble:after { content: ''; position: absolute; bottom: -10px; right: 24px; border: 10px solid transparent; border-top-color: #fff; border-bottom: 0; }
+.gros-tape { display: none; position: absolute; z-index: 2; left: -20px; right: -20px; top: 330px; padding: 6px 0; text-align: center; font-family: 'Anton', sans-serif; font-size: 30px; letter-spacing: 0.06em; color: #04120c; background: linear-gradient(90deg, #6ee7b7, #10b981); transform: rotate(-7deg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.gros-screen[data-state="livre"] .gros-tape { display: block; animation: grosTape 0.45s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes grosTape { from { opacity: 0; transform: rotate(-7deg) scale(1.5); } to { opacity: 1; transform: rotate(-7deg); } }
+.gros-screen[data-state="livre"] .gros-head, .gros-screen[data-state="livre"] .gros-sub { visibility: hidden; }
+.gros-panel { position: relative; }
+.gros-stat { border-radius: 14px; padding: 8px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+.gros-stat span { display: block; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; }
+.gros-stat b { font-size: 15px; font-weight: 900; color: #fff; }
+.gros-malus { font-style: normal; font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: #f59e0b; color: #1c1300; }
+.gros-step { width: 52px; height: 52px; border-radius: 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; }
+.gros-step:disabled { opacity: 0.3; }
+.gros-kg { font-family: 'Anton', sans-serif; font-size: 64px; line-height: 1; color: #34d399; }
+.gros-kg small { font-size: 22px; color: #a7f3d0; }
+.gros-quick { flex: 1; padding: 8px 0; border-radius: 12px; text-align: center; font-size: 11px; font-weight: 900; text-transform: uppercase; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; }
+.gros-quick.on { background: rgba(52,211,153,0.15); border-color: #34d399; color: #6ee7b7; }
+.gros-ghost { width: 100%; padding: 12px; border-radius: 16px; font-weight: 800; text-transform: uppercase; font-size: 12px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+.gros-cta { color: #04120c; background: linear-gradient(90deg, #6ee7b7, #10b981); }
+.gros-screen.show .gros-scene { animation: policeRise 0.6s ease-out both; }
+.gros-screen.show .gros-panel { animation: policeSlideUp 0.5s ease-out 0.15s both; }
+@media (max-height: 700px) { .gros-scene { height: 360px; } .gros-kg { font-size: 48px; } .gros-bubble { top: 140px; } .gros-tape { top: 250px; } }
+@media (prefers-reduced-motion: reduce) { .gros-screen * { animation: none !important; } }

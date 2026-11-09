@@ -546,56 +546,77 @@ function getGrossisteMaxKg() {
   while (getGrossisteCost(kg + 1) <= localPlayer.pocketCash) kg++;
   return kg;
 }
-function showGrossisteTotal(kg) {
-  const doubled = Math.min(kg, getJloDoubledKgLeft());
-  document.getElementById('grossisteTotalPriceDisplay').innerText = `${getGrossisteCost(kg).toLocaleString()} €` + (doubled > 0 ? ` (dont ${doubled} kg au double)` : '');
-}
-
+// Grossiste plein écran : compteur de kilos, raccourcis, total, puis écran de livraison
+let grossisteKg = 0;
 function openGrossisteModal(unitPrice) {
   let basePrice = unitPrice || 1000;
   if (isRadioEffectActive('GROSSISTE_PRICE_SET')) {
     basePrice = getRadioEffectValue('GROSSISTE_PRICE_SET', 1500);
   }
   grossisteUnitCost = basePrice;
-  document.getElementById('grossistePocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
+  grossisteKg = Math.min(1, getGrossisteMaxKg());
+  const scr = document.getElementById('grossisteScreen');
+  document.getElementById('grossisteRound').innerText = currentSession.round || 1;
+  document.getElementById('grossisteHeadline').innerText = 'HALL 7.';
+  document.getElementById('grossisteSub').innerText = 'La marchandise est arrivée.';
+  document.getElementById('grossisteBubble').innerText = getJloDoubledKgLeft() > 0 ? 'Pour toi, c’est le double.' : 'Combien tu prends ?';
+  scr.dataset.state = 'choix';
+  scr.classList.remove('hidden', 'show');
+  void scr.offsetWidth; // relance les animations d'arrivée
+  scr.classList.add('show');
+  renderGrossiste();
+}
+function closeGrossiste() {
+  document.getElementById('grossisteScreen').classList.add('hidden');
+}
+function setGrossisteKg(kg) {
+  grossisteKg = Math.max(0, Math.min(getGrossisteMaxKg(), kg));
+  renderGrossiste();
+}
+function renderGrossiste() {
+  const maxKg = getGrossisteMaxKg();
+  const kg = grossisteKg;
   const jloLeft = getJloDoubledKgLeft();
-  document.getElementById('grossisteUnitPrice').innerText = `${grossisteUnitCost.toLocaleString()} € / kg` + (jloLeft > 0 ? ` (malus J-Lo : ${jloLeft} kg au double)` : '');
-  document.getElementById('grossisteMaxKg').innerText = `Max : ${getGrossisteMaxKg()} kg`;
-  setGrossistePercentage(0);
-  document.getElementById('modalGrossiste').classList.remove('hidden');
-}
-function setGrossistePercentage(pct) {
-  const maxKg = getGrossisteMaxKg();
-  const kg = Math.floor((maxKg * pct) / 100);
-  document.getElementById('grossisteKgInput').value = kg;
-  document.getElementById('grossisteRangeSlider').value = pct;
-  showGrossisteTotal(kg);
-}
-function syncGrossisteSliderToInput() {
-  const pct = parseInt(document.getElementById('grossisteRangeSlider').value) || 0;
-  const kg = Math.floor((getGrossisteMaxKg() * pct) / 100);
-  document.getElementById('grossisteKgInput').value = kg;
-  showGrossisteTotal(kg);
-}
-function syncGrossisteInputToSlider() {
-  const maxKg = getGrossisteMaxKg();
-  let kg = Math.min(maxKg, parseInt(document.getElementById('grossisteKgInput').value) || 0);
-  document.getElementById('grossisteKgInput').value = kg;
-  document.getElementById('grossisteRangeSlider').value = maxKg > 0 ? Math.round((kg / maxKg) * 100) : 0;
-  showGrossisteTotal(kg);
+  const doubled = Math.min(kg, jloLeft);
+  const quick = [1, Math.round(maxKg / 2), maxKg].filter((v, i, arr) => v > 0 && arr.indexOf(v) === i);
+  document.getElementById('grossistePanel').innerHTML = `
+    <div class="grid grid-cols-2 gap-2">
+      <div class="gros-stat"><span class="text-amber-300">Cash en poche</span><b>${localPlayer.pocketCash.toLocaleString()} €</b></div>
+      <div class="gros-stat"><span class="text-emerald-300">Tarif</span><b>${grossisteUnitCost.toLocaleString()} € / kg</b>${jloLeft > 0 ? ' <em class="gros-malus">×2</em>' : ''}</div>
+    </div>
+    <div class="flex items-center justify-between mt-4">
+      <button type="button" class="gros-step" onclick="setGrossisteKg(grossisteKg - 1)" ${kg <= 0 ? 'disabled' : ''} aria-label="Un kilo de moins"><i class="ph-bold ph-minus"></i></button>
+      <div class="text-center"><div class="gros-kg">${kg} <small>kg</small></div><div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">${maxKg > 0 ? `max ${maxKg} kg` : 'pas assez de cash'}</div></div>
+      <button type="button" class="gros-step" onclick="setGrossisteKg(grossisteKg + 1)" ${kg >= maxKg ? 'disabled' : ''} aria-label="Un kilo de plus"><i class="ph-bold ph-plus"></i></button>
+    </div>
+    ${quick.length ? `<div class="flex gap-2 mt-4">${quick.map(v => `<button type="button" class="gros-quick ${v === kg ? 'on' : ''}" onclick="setGrossisteKg(${v})">${v === maxKg && quick.length > 1 ? `Max · ${v}` : `${v} kg`}</button>`).join('')}</div>` : ''}
+    ${jloLeft > 0 ? `<div class="text-[11px] text-amber-300 font-bold text-center mt-3">Malus J-Lo : tes 5 premiers kg coûtent le double (encore ${jloLeft} kg)${doubled > 0 ? `, dont ${doubled} dans cet achat` : ''}</div>` : ''}
+    <div class="flex items-center justify-between mt-4 px-1"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total (cash uniquement)</span><span class="font-anton text-2xl text-emerald-300 whitespace-nowrap">${getGrossisteCost(kg).toLocaleString()} €</span></div>
+    <div class="grid grid-cols-[1fr_1.8fr] gap-2 mt-3"><button type="button" class="gros-ghost" onclick="closeGrossiste()">Partir</button><button type="button" class="police-cta gros-cta" style="margin-top:0" onclick="confirmGrossistePurchase()" ${kg <= 0 ? 'disabled' : ''}>Acheter ${kg} kg</button></div>`;
 }
 async function confirmGrossistePurchase() {
-  const kg = parseInt(document.getElementById('grossisteKgInput').value) || 0;
+  const kg = grossisteKg;
   if (kg <= 0) return showAppAlert("Sélectionnez au moins 1 kg.", "Achat");
   const cost = getGrossisteCost(kg);
   if (localPlayer.pocketCash < cost) return showAppAlert("Cash en poche insuffisant !", "Fonds Insuffisants");
+  const drugsBefore = localPlayer.drugs, cashBefore = localPlayer.pocketCash;
   if (localPlayer.caidId === 'caid_5') localPlayer.jloDoubledKgBought = (localPlayer.jloDoubledKgBought || 0) + Math.min(kg, getJloDoubledKgLeft());
   localPlayer.pocketCash -= cost;
   localPlayer.drugs += kg;
   spendActionPm();
-  closeModal('modalGrossiste');
-  await showAppAlert(`+${kg} kg de drogue achetés (-${cost.toLocaleString()} €).`, "🌿 Grossiste");
   refreshHud();
+  // Livraison : même écran, bilan avant → après
+  const scr = document.getElementById('grossisteScreen');
+  scr.dataset.state = 'livre';
+  document.getElementById('grossisteBubble').innerText = 'Fais-en bon usage.';
+  const row = (icon, color, label, before, after) => `<div class="police-row"><i class="ph-bold ${icon}" style="color:${color}"></i><span class="lbl">${label}</span>${before !== '' ? `<span class="bef">${before}</span><i class="ph-bold ph-arrow-right text-slate-500 text-xs"></i>` : ''}<span class="aft" style="color:${color}">${after}</span></div>`;
+  document.getElementById('grossistePanel').innerHTML = `<h2 class="font-anton text-center text-white" style="font-size:40px;line-height:1">+${kg} KG.</h2>
+    <div class="flex flex-col gap-1.5 mt-3">
+      ${row('ph-leaf', '#34d399', 'Drogue sur toi', `${drugsBefore} kg`, `${localPlayer.drugs} kg`)}
+      ${row('ph-money', '#fbbf24', 'Cash en poche', `${cashBefore.toLocaleString()} €`, `${localPlayer.pocketCash.toLocaleString()} €`)}
+      ${row('ph-sneaker-move', '#cbd5e1', 'Action', '', '1 PM dépensé')}
+    </div>
+    <button type="button" class="police-cta gros-cta" onclick="closeGrossiste()">Repartir</button>`;
 }
 
 function openPaymentChoiceModal(purchaseData) {
