@@ -247,7 +247,7 @@ async function processQrPayload(payload) {
       refreshHud();
       return;
     }
-    if (localPlayer.pocketCash + localPlayer.safeCash < cost) return showAppAlert("Fonds totaux insuffisants !", "Achat Impossible");
+    if (localPlayer.pocketCash + localPlayer.safeCash < cost) return showBrokeScreen(cost, itemName);
     return openPaymentChoiceModal({ type, data, cost, name: itemName });
   }
 

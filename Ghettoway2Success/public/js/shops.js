@@ -267,7 +267,7 @@ async function buyArmoryCatalogItem(itemId) {
   }
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
-    return showAppAlert(`Fonds totaux insuffisants !\nPrix requis : ${cost.toLocaleString()} €\nTotal disponible (Poche + QG) : ${totalFunds.toLocaleString()} €.`, "❌ Achat Impossible");
+    return showBrokeScreen(cost, item.nom || item.name);
   }
   const pPayload = {
     type: 'eq',
@@ -367,7 +367,7 @@ async function buyNightclubItem(itemId) {
     return;
   }
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
-    return showAppAlert("Fonds totaux insuffisants !", "❌ Achat Impossible");
+    return showBrokeScreen(cost, item.nom || item.name);
   }
   openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
 }
@@ -434,7 +434,7 @@ async function buySportclubItem(itemId) {
   }
   const cost = item.prix;
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
-    return showAppAlert("Fonds totaux insuffisants !", "❌ Achat Impossible");
+    return showBrokeScreen(cost, item.nom || item.name);
   }
   const atkVal = item.atk || item.bonusVal || (item.lvl === 2 ? 2 : 1);
   const dataPayload = { t: 'gb', lvl: item.lvl || 1, p: item.prix, atk: atkVal, def: atkVal, n: item.nom };
@@ -511,7 +511,7 @@ async function buyDealerCatalogItem(itemId) {
   const cost = item.prix || 0;
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
-    return showAppAlert(`Fonds totaux insuffisants !\nPrix requis : ${cost.toLocaleString()} €\nTotal disponible (Poche + QG) : ${totalFunds.toLocaleString()} €.`, "❌ Achat Impossible");
+    return showBrokeScreen(cost, item.nom || item.name);
   }
   const pPayload = {
     type: 'eq',
@@ -619,6 +619,22 @@ async function confirmGrossistePurchase() {
     <button type="button" class="police-cta gros-cta" onclick="closeGrossiste()">Repartir</button>`;
 }
 
+// Fauché : écran commun « pas assez d'argent » des boutiques (portefeuille vide et poussière animée)
+function showBrokeScreen(cost, itemName) {
+  const have = localPlayer.pocketCash + localPlayer.safeCash;
+  const scr = document.getElementById('brokeScreen');
+  document.getElementById('brokeItem').innerText = itemName ? `Pour : ${itemName}` : '';
+  document.getElementById('brokePrice').innerText = `${cost.toLocaleString()} €`;
+  document.getElementById('brokeHave').innerText = `${have.toLocaleString()} €`;
+  document.getElementById('brokeMiss').innerText = `${Math.max(0, cost - have).toLocaleString()} €`;
+  scr.classList.remove('hidden', 'show');
+  void scr.offsetWidth; // relance les animations d'arrivée
+  scr.classList.add('show');
+  try { if (navigator.vibrate) navigator.vibrate([40, 50, 40]); } catch (e) {}
+  return new Promise(resolve => {
+    document.getElementById('brokeCta').onclick = () => { scr.classList.add('hidden'); scr.classList.remove('show'); resolve(); };
+  });
+}
 // Paiement : cash en poche, CB (coffre du QG) ou répartition choisie par le joueur
 let paySplit = { cash: 0, min: 0, max: 0, step: 500 };
 function openPaymentChoiceModal(purchaseData) {

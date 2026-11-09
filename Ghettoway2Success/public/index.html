@@ -710,6 +710,27 @@
       </div>
     </div>
 
+    <!-- FAUCHÉ : pas assez d'argent pour un achat (portefeuille vide, poussière qui s'échappe) -->
+    <div id="brokeScreen" class="hidden absolute inset-0 z-[55] broke-screen">
+      <div class="relative flex flex-col h-full">
+        <div class="flex-1"></div>
+        <div class="broke-stage">
+          <img src="fauche.webp" alt="Portefeuille vide" class="broke-wallet">
+          <div class="broke-dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><b></b><b></b><b></b><b></b><b></b></div>
+        </div>
+        <div class="police-panel broke-panel">
+          <h2 class="font-anton broke-head">FAUCHÉ.</h2>
+          <div id="brokeItem" class="text-center text-sm font-bold text-slate-300 mt-1"></div>
+          <div class="flex flex-col gap-1.5 mt-3">
+            <div class="police-row"><i class="ph-bold ph-tag"></i><span class="lbl">Prix</span><span id="brokePrice" class="aft"></span></div>
+            <div class="police-row"><i class="ph-bold ph-wallet"></i><span class="lbl">Tu as<small>en poche + au coffre du QG</small></span><span id="brokeHave" class="aft"></span></div>
+            <div class="police-row broke-miss"><i class="ph-bold ph-warning"></i><span class="lbl">Il te manque</span><span id="brokeMiss" class="aft"></span></div>
+          </div>
+          <button type="button" id="brokeCta" class="broke-cta mt-4">Compris</button>
+        </div>
+      </div>
+    </div>
+
     <!-- GROSSISTE : hall 7, choix des kilos puis livraison -->
     <div id="grossisteScreen" class="hidden absolute inset-0 z-40 gros-screen" data-state="choix">
       <div class="gros-scene"><img src="grossiste-hall.webp" alt="Hall 7">

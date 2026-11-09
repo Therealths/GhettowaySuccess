@@ -600,3 +600,32 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @media (prefers-reduced-motion: reduce) { .qg-fly { display: none; } }
 /* Fiche du Caïd : ses couches (voile « Tour de… », bouton Quitter) restent sous les écrans plein page (grossiste, combat…) */
 #page-6 { isolation: isolate; }
+/* Fauché : portefeuille vide détouré, poussière qui s'échappe en boucle (transform + opacity uniquement) */
+.broke-screen { background: linear-gradient(rgba(7,8,14,0.72), rgba(7,8,14,0.94) 30%, #07080e 55%); color: #fff; overflow-y: auto; }
+.broke-stage { position: relative; width: min(84vw, 340px); margin: 0 auto 6px; }
+.broke-wallet { display: block; width: 100%; height: auto; filter: drop-shadow(0 12px 18px rgba(0,0,0,0.7)); }
+.broke-dust { position: absolute; left: 30%; top: 2%; width: 56%; height: 36%; pointer-events: none; }
+.broke-dust i { position: absolute; bottom: 0; width: 46%; aspect-ratio: 1; border-radius: 50%; opacity: 0; background: radial-gradient(closest-side, rgba(222,206,172,0.55), rgba(190,170,130,0.22) 55%, transparent); will-change: transform, opacity; }
+.broke-dust i:nth-child(1) { left: 2%; } .broke-dust i:nth-child(2) { left: 22%; } .broke-dust i:nth-child(3) { left: 42%; }
+.broke-dust i:nth-child(4) { left: 12%; } .broke-dust i:nth-child(5) { left: 34%; } .broke-dust i:nth-child(6) { left: 54%; }
+.broke-dust b { position: absolute; bottom: 10%; width: 3px; height: 3px; border-radius: 50%; background: #f5e6c4; opacity: 0; will-change: transform, opacity; }
+.broke-dust b:nth-child(7) { left: 20%; } .broke-dust b:nth-child(8) { left: 38%; } .broke-dust b:nth-child(9) { left: 55%; } .broke-dust b:nth-child(10) { left: 70%; } .broke-dust b:nth-child(11) { left: 48%; }
+.broke-screen:not(.hidden) .broke-dust i { animation: brokePuff 3.6s ease-out infinite; }
+.broke-screen:not(.hidden) .broke-dust i:nth-child(2) { animation-delay: 0.6s; } .broke-screen:not(.hidden) .broke-dust i:nth-child(3) { animation-delay: 1.2s; }
+.broke-screen:not(.hidden) .broke-dust i:nth-child(4) { animation-delay: 1.8s; } .broke-screen:not(.hidden) .broke-dust i:nth-child(5) { animation-delay: 2.4s; } .broke-screen:not(.hidden) .broke-dust i:nth-child(6) { animation-delay: 3s; }
+.broke-screen:not(.hidden) .broke-dust b { animation: brokeSpeck 2.8s ease-out infinite; }
+.broke-screen:not(.hidden) .broke-dust b:nth-child(8) { animation-delay: 0.7s; } .broke-screen:not(.hidden) .broke-dust b:nth-child(9) { animation-delay: 1.4s; } .broke-screen:not(.hidden) .broke-dust b:nth-child(10) { animation-delay: 2.1s; } .broke-screen:not(.hidden) .broke-dust b:nth-child(11) { animation-delay: 1s; }
+@keyframes brokePuff { 0% { opacity: 0; transform: translate(0, 10%) scale(0.45); } 25% { opacity: 0.85; } 100% { opacity: 0; transform: translate(12%, -120%) scale(1.7); } }
+@keyframes brokeSpeck { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(14px, -90px); } }
+.broke-panel { margin-bottom: 14px; }
+.broke-head { font-size: 44px; line-height: 1; text-align: center; color: #fff; }
+.broke-panel .police-row > i:first-child { color: #fbbf24; }
+.broke-panel .police-row .aft { color: #e2e8f0; }
+.broke-miss { border-color: rgba(251,113,133,0.45); background: rgba(251,113,133,0.08); }
+.broke-miss > i:first-child, .broke-panel .broke-miss .aft { color: #fb7185 !important; }
+.broke-cta { width: 100%; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 14px; text-transform: uppercase; color: #111; background: linear-gradient(90deg, #fde68a, #f59e0b); }
+.broke-screen.show .broke-wallet { animation: brokeDrop 0.55s cubic-bezier(.3,1.5,.5,1) both; }
+.broke-screen.show .broke-panel { animation: policeSlideUp 0.45s ease-out 0.1s both; }
+@keyframes brokeDrop { from { opacity: 0; transform: translateY(-40px) rotate(-4deg); } to { opacity: 1; transform: none; } }
+@media (max-height: 700px) { .broke-stage { width: min(64vw, 250px); } .broke-head { font-size: 34px; } }
+@media (prefers-reduced-motion: reduce) { .broke-screen * { animation: none !important; } }
