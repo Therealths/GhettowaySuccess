@@ -943,20 +943,24 @@
     </div>
 
     <!-- MODALES SYSTÈME STYLISÉES -->
-    <div id="modalAppAlert" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-6 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full text-center">
-        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 mx-auto flex items-center justify-center text-2xl border border-amber-400/40"><i class="ph-bold ph-bell-simple"></i></div>
-        <div><h3 id="appAlertTitle" class="text-base font-black text-white uppercase">Information</h3><p id="appAlertMessage" class="text-xs text-slate-300 mt-2 font-mono whitespace-pre-line"></p></div>
-        <button id="btnAppAlertOk" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-2xl text-xs">Compris</button>
+    <div id="modalAppAlert" class="hidden absolute inset-0 z-[60] msg-screen" data-tone="info">
+      <div class="msg-sheet">
+        <div class="msg-badge"><span id="appAlertIcon" class="msg-ico"></span><span class="msg-fx"></span></div>
+        <div id="appAlertTag" class="msg-tag">Info</div>
+        <h3 id="appAlertTitle" class="msg-title">Information</h3>
+        <p id="appAlertMessage" class="msg-text"></p>
+        <button id="btnAppAlertOk" class="msg-btn">Compris</button>
       </div>
     </div>
-    <div id="modalAppConfirm" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-6 rounded-3xl space-y-4 border-cyan-500/40 max-w-sm mx-auto w-full text-center">
-        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-300 mx-auto flex items-center justify-center text-2xl border border-sky-400/40"><i class="ph-bold ph-question"></i></div>
-        <div><h3 id="appConfirmTitle" class="text-base font-black text-white uppercase">Confirmation</h3><p id="appConfirmMessage" class="text-xs text-slate-300 mt-2 font-mono whitespace-pre-line"></p></div>
-        <div class="grid grid-cols-2 gap-2 pt-2">
-          <button id="btnAppConfirmYes" class="py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase rounded-xl text-xs">Confirmer</button>
-          <button id="btnAppConfirmNo" class="py-3 glass-panel text-slate-400 font-bold uppercase rounded-xl text-xs">Annuler</button>
+    <div id="modalAppConfirm" class="hidden absolute inset-0 z-[60] msg-screen" data-tone="ask">
+      <div class="msg-sheet">
+        <div class="msg-badge"><span id="appConfirmIcon" class="msg-ico"></span><span class="msg-fx"></span></div>
+        <div class="msg-tag">Attention</div>
+        <h3 id="appConfirmTitle" class="msg-title">Confirmation</h3>
+        <p id="appConfirmMessage" class="msg-text"></p>
+        <div class="grid grid-cols-2 gap-2 mt-4">
+          <button id="btnAppConfirmNo" class="msg-ghost">Annuler</button>
+          <button id="btnAppConfirmYes" class="msg-btn" style="margin-top:0">Confirmer</button>
         </div>
       </div>
     </div>

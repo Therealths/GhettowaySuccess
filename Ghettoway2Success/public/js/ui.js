@@ -49,27 +49,69 @@ window.addEventListener('appinstalled', hideInstallBanner);
 })();
 
 // --- MODALES SYSTÈME ---
+// Messages et confirmations : ton (bonne / mauvaise nouvelle, info, question) déduit du titre et du texte,
+// emoji du titre en grande icône animée, montants mis en couleur
+const MSG_EMOJI = /^\s*((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u200D(?:\p{Extended_Pictographic}))*)\s*/u;
+const MSG_WIN = /réussi|récupér|perçue|recrut|rallié|gagn|victoire|confirmé|sécuris|capturée|miracle|sieste|soign|de retour|livr|dérobé|acheté|pacte|butin|partag|encaiss|rente/i;
+const MSG_LOSE = /subi|volé|échec|impossible|défaite|siphon|shuriken|danse|insuffisant|refus|neutralis|supprim|perdu|interrompu|expiré|quitté|garde à vue|k\.o|danger/i;
+const MSG_TAGS = { win: 'Bonne nouvelle', lose: 'Aïe', info: 'Info', ask: 'Attention' };
+const MSG_DEFAULT_ICON = { win: '✅', lose: '⛔', info: '🔔', ask: '❓' };
+// Animations spéciales de certaines icônes
+const MSG_SPECIAL = { '🐕': 'dog', '🩸': 'drop', '⭐': 'shuriken', '💃': 'dance', '🏆': 'shine' };
+function msgParts(title, msg, confirm) {
+  const m = String(title || '').match(MSG_EMOJI);
+  const emoji = m ? m[1] : '';
+  const clean = m ? String(title).slice(m[0].length) : String(title || '');
+  const tone = confirm ? 'ask' : (MSG_LOSE.test(clean + ' ' + msg) && !MSG_WIN.test(clean) ? 'lose' : (MSG_WIN.test(clean) ? 'win' : 'info'));
+  return { emoji: emoji || MSG_DEFAULT_ICON[tone], clean, tone, special: MSG_SPECIAL[emoji] || '' };
+}
+// Texte échappé, retours à la ligne, montants « +8 000 € », « −3 kg », « +2 Atk » en couleur
+function msgHtml(msg) {
+  const esc = String(msg || '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+  return esc.replace(/([+\-−])\s?(\d[\d\s\u202f\u00a0.,]*\s?(?:€|kg|Atk|Def|PM|Cœurs?|cœurs?))/g,
+    (all, sign, rest) => `<span class="${sign === '+' ? 'msg-up' : 'msg-down'}">${sign === '-' ? '−' : sign}${rest}</span>`).replace(/\n/g, '<br>');
+}
+function msgShow(modal, iconEl, parts, title) {
+  modal.dataset.tone = parts.tone;
+  modal.dataset.special = parts.special;
+  iconEl.innerHTML = parts.special === 'shuriken' ? '<img src="shuriken.webp" alt="">' : parts.emoji;
+  title.innerText = parts.clean;
+  // Effets autour de l'icône : billets et pièces pour une bonne nouvelle, goutte de sang pour le siphon
+  const fx = modal.querySelector('.msg-fx');
+  fx.innerHTML = parts.tone === 'win'
+    ? [['💵', -70, -40, -30], ['🪙', 62, -50, 40], ['💵', 70, 30, 25], ['🪙', -60, 40, -50], ['🪙', 0, -80, 90], ['💵', -20, 70, -20]]
+      .map(([e, x, y, r], i) => `<i class="msg-coin" style="--x:${x}px;--y:${y}px;--r:${r}deg;animation-delay:${0.35 + i * 0.04}s">${e}</i>`).join('')
+    : (parts.special === 'drop' ? '<i class="msg-drop"></i>' : '');
+  modal.classList.remove('hidden', 'show');
+  void modal.offsetWidth; // relance les animations d'arrivée
+  modal.classList.add('show');
+  if (parts.tone === 'lose') { try { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); } catch (e) {} }
+}
 function showAppAlert(msg, title = "Information") {
   return new Promise(res => {
-    document.getElementById('appAlertTitle').innerText = title;
-    document.getElementById('appAlertMessage').innerText = msg;
     const m = document.getElementById('modalAppAlert');
-    m.classList.remove('hidden');
-    document.getElementById('btnAppAlertOk').onclick = () => { m.classList.add('hidden'); res(); };
+    const parts = msgParts(title, msg, false);
+    document.getElementById('appAlertTag').innerText = MSG_TAGS[parts.tone];
+    document.getElementById('appAlertMessage').innerHTML = msgHtml(msg);
+    msgShow(m, document.getElementById('appAlertIcon'), parts, document.getElementById('appAlertTitle'));
+    document.getElementById('btnAppAlertOk').onclick = () => { m.classList.add('hidden'); m.classList.remove('show'); res(); };
   });
 }
 function showAppConfirm(msg, title = "Confirmation", yesLabel = "Confirmer", noLabel = "Annuler") {
   return new Promise(res => {
-    document.getElementById('appConfirmTitle').innerText = title;
-    document.getElementById('appConfirmMessage').innerText = msg;
     const m = document.getElementById('modalAppConfirm');
-    m.classList.remove('hidden');
+    const parts = msgParts(title, msg, true);
+    document.getElementById('appConfirmMessage').innerHTML = msgHtml(msg);
+    msgShow(m, document.getElementById('appConfirmIcon'), parts, document.getElementById('appConfirmTitle'));
     const btnYes = document.getElementById('btnAppConfirmYes');
     const btnNo = document.getElementById('btnAppConfirmNo');
     btnYes.innerText = yesLabel;
     btnNo.innerText = noLabel;
-    btnYes.onclick = () => { m.classList.add('hidden'); res(true); };
-    btnNo.onclick = () => { m.classList.add('hidden'); res(false); };
+    // Action risquée : bouton rouge
+    btnYes.classList.toggle('danger', /quitter|supprimer|congédier|abandonner/i.test(yesLabel));
+    const close = v => { m.classList.add('hidden'); m.classList.remove('show'); res(v); };
+    btnYes.onclick = () => close(true);
+    btnNo.onclick = () => close(false);
   });
 }
 

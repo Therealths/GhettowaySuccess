@@ -629,3 +629,54 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @keyframes brokeDrop { from { opacity: 0; transform: translateY(-40px) rotate(-4deg); } to { opacity: 1; transform: none; } }
 @media (max-height: 700px) { .broke-stage { width: min(64vw, 250px); } .broke-head { font-size: 34px; } }
 @media (prefers-reduced-motion: reduce) { .broke-screen * { animation: none !important; } }
+/* Messages et confirmations : fenêtre du bas, ton automatique (vert / rouge / doré / bleu), icône animée */
+.msg-screen { --t: #fbbf24; background: linear-gradient(rgba(5,6,10,0.55), rgba(5,6,10,0.85) 60%); padding: 0 12px 14px; }
+.msg-screen:not(.hidden) { display: flex; flex-direction: column; justify-content: flex-end; }
+.msg-screen[data-tone="win"] { --t: #34d399; }
+.msg-screen[data-tone="lose"] { --t: #fb7185; }
+.msg-screen[data-tone="ask"] { --t: #38bdf8; }
+.msg-sheet { position: relative; padding: 22px 18px 18px; margin-top: 80px; border-radius: 26px; text-align: center; color: #fff; background: rgba(10,12,20,0.97); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 -10px 40px rgba(0,0,0,0.6); }
+.msg-badge { position: relative; width: 92px; height: 92px; margin: -70px auto 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--t) 35%, #0b0d14), #0b0d14 70%); border: 3px solid var(--t); box-shadow: 0 0 30px color-mix(in srgb, var(--t) 45%, transparent), 0 10px 20px rgba(0,0,0,0.6); }
+.msg-ico { font-size: 46px; line-height: 1; display: inline-flex; }
+.msg-ico img { width: 64px; height: 64px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.55)); }
+.msg-tag { margin-top: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; color: var(--t); }
+.msg-title { font-family: 'Anton', sans-serif; font-size: 30px; line-height: 1.05; margin-top: 6px; color: #fff; text-transform: uppercase; letter-spacing: 0.02em; }
+.msg-text { margin-top: 10px; font-size: 15px; font-weight: 600; line-height: 1.45; color: #cbd5e1; max-height: 45vh; overflow-y: auto; }
+.msg-up { color: #34d399; font-weight: 900; }
+.msg-down { color: #fb7185; font-weight: 900; }
+.msg-btn { display: block; width: 100%; margin-top: 16px; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 14px; text-transform: uppercase; color: #111; background: linear-gradient(90deg, color-mix(in srgb, var(--t) 70%, #fff), var(--t)); }
+.msg-btn.danger { color: #fff; background: linear-gradient(90deg, #fb7185, #e11d48); }
+.msg-ghost { display: block; width: 100%; padding: 14px; border-radius: 16px; font-weight: 800; font-size: 13px; text-transform: uppercase; color: #cbd5e1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+.msg-fx { position: absolute; inset: 0; pointer-events: none; }
+.msg-coin { position: absolute; left: 50%; top: 50%; font-size: 20px; font-style: normal; opacity: 0; }
+.msg-drop { position: absolute; left: 52%; top: 62%; width: 8px; height: 11px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: #e11d48; opacity: 0; }
+/* Arrivée et animations selon le ton */
+.msg-screen.show { animation: msgFade 0.25s ease-out both; }
+.msg-screen.show .msg-sheet { animation: msgUp 0.45s cubic-bezier(.2,1.3,.4,1) both; }
+.msg-screen.show[data-tone="win"] .msg-badge { animation: msgPop 0.6s cubic-bezier(.2,1.8,.4,1) 0.2s both, msgGlow 1.6s ease-in-out 0.9s infinite; }
+.msg-screen.show[data-tone="win"] .msg-coin { animation: msgBurst 1.1s ease-out both; }
+.msg-screen.show[data-tone="lose"] .msg-badge { animation: msgPop 0.45s ease-out 0.15s both, msgHit 0.5s ease-in-out 0.6s both; }
+.msg-screen.show[data-tone="lose"] .msg-badge::after { content: ''; position: absolute; inset: -3px; border-radius: 999px; background: radial-gradient(circle, rgba(251,113,133,0.7), transparent 70%); opacity: 0; animation: msgFlash 0.5s ease-out 0.6s both; }
+.msg-screen.show[data-tone="info"] .msg-badge { animation: msgPop 0.5s ease-out 0.15s both; }
+.msg-screen.show[data-tone="info"] .msg-ico { animation: msgSway 2s ease-in-out 0.6s infinite; }
+.msg-screen.show[data-tone="ask"] .msg-badge { animation: msgPop 0.5s ease-out 0.15s both, msgPulse 1.8s ease-in-out 0.7s infinite; }
+.msg-screen.show .msg-btn.danger { animation: msgBlink 1.6s ease-in-out 0.8s infinite; }
+/* Animations spéciales */
+.msg-screen.show[data-special="dog"] .msg-ico { animation: msgWag 0.5s ease-in-out 0.6s infinite alternate; transform-origin: 30% 80%; }
+.msg-screen.show[data-special="drop"] .msg-drop { animation: msgDrip 1.2s ease-in 0.7s infinite; }
+.msg-screen.show[data-special="shuriken"] .msg-ico { animation: msgSpin 0.9s linear 0.4s infinite; }
+.msg-screen.show[data-special="dance"] .msg-ico { animation: msgSway 1s ease-in-out 0.5s infinite; }
+@keyframes msgFade { from { opacity: 0; } }
+@keyframes msgUp { from { transform: translateY(110%); } }
+@keyframes msgPop { from { transform: scale(0); } }
+@keyframes msgGlow { 50% { box-shadow: 0 0 50px color-mix(in srgb, var(--t) 75%, transparent), 0 10px 20px rgba(0,0,0,0.6); } }
+@keyframes msgBurst { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.4); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1) rotate(var(--r)); } }
+@keyframes msgHit { 0%, 100% { transform: none; } 20% { transform: translateX(-10px) rotate(-8deg); } 40% { transform: translateX(9px) rotate(6deg); } 60% { transform: translateX(-6px) rotate(-4deg); } 80% { transform: translateX(3px); } }
+@keyframes msgFlash { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes msgSway { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
+@keyframes msgPulse { 50% { transform: scale(1.08); box-shadow: 0 0 46px color-mix(in srgb, var(--t) 70%, transparent), 0 10px 20px rgba(0,0,0,0.6); } }
+@keyframes msgBlink { 50% { filter: brightness(1.25); } }
+@keyframes msgWag { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+@keyframes msgDrip { 0% { opacity: 0; transform: translateY(0) scale(0.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(46px) scale(1); } }
+@keyframes msgSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .msg-screen, .msg-screen * { animation: none !important; } }
