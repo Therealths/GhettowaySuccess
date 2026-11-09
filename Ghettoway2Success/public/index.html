@@ -661,32 +661,50 @@
       </div>
     </div>
 
-    <!-- MODALE CHOIX DU COMPTE A DÉBITER -->
-    <div id="modalPaymentChoice" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-center">
-      <div class="glass-panel p-5 rounded-3xl space-y-4 border-amber-500/40 max-w-sm mx-auto w-full">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 class="text-sm font-black text-ghetto-gold uppercase flex items-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Compte à Débiter</h3>
-          <button onclick="closeModal('modalPaymentChoice')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
+    <!-- PAIEMENT : cash en poche ou CB (coffre du QG), ou répartition choisie par le joueur -->
+    <div id="modalPaymentChoice" class="hidden absolute inset-0 z-50 pay-screen">
+      <div class="relative flex flex-col h-full">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span id="payShopName">Achat</span>
+          <span class="px-2.5 py-1 rounded-full bg-amber-500 text-black text-[10px] font-black"><i class="ph-fill ph-wallet"></i> Paiement</span>
         </div>
-        <div>
-          <p class="text-xs text-white font-bold" id="paymentItemNameTitle">Achat</p>
-          <p class="text-[11px] text-slate-300">Coût requis : <strong id="paymentItemPriceDisplay" class="text-ghetto-gold font-mono">0 €</strong></p>
+        <div class="flex-1"></div>
+        <div class="police-panel pay-panel">
+          <div class="text-center">
+            <div class="text-[11px] font-black uppercase tracking-widest text-slate-400">Tu achètes</div>
+            <div id="paymentItemNameTitle" class="font-anton text-2xl mt-0.5 text-white">Achat</div>
+            <div id="paymentItemPriceDisplay" class="font-anton text-5xl text-amber-300 mt-1">0 €</div>
+          </div>
+          <div class="text-center text-sm font-bold text-slate-300 mt-3 mb-3">Avec quoi tu paies ?</div>
+          <div class="flex gap-3">
+            <button type="button" id="btnPayWithPocket" onclick="confirmPaymentSource('pocket')" class="pay-opt cash">
+              <div class="pay-ill"><img src="pay-cash.webp" alt="Portefeuille plein de billets"></div>
+              <b>Cash en poche</b><span id="paymentPocketAvailable" class="pay-sold">0 €</span><span class="pay-why">pas assez</span>
+            </button>
+            <button type="button" id="btnPayWithSafe" onclick="confirmPaymentSource('safe')" class="pay-opt cb">
+              <div class="pay-ill"><img src="pay-cb.webp" alt="Carte bancaire Hall 7 Bank"></div>
+              <b>CB · Coffre QG</b><span id="paymentSafeAvailable" class="pay-sold">0 €</span><span class="pay-why">pas assez</span>
+            </button>
+          </div>
+          <div id="paySplit" class="pay-split mt-3">
+            <button type="button" id="btnPaySplitToggle" class="pay-split-head" onclick="togglePaySplit()">
+              <i class="ph-bold ph-arrows-left-right text-emerald-300 text-lg"></i><span class="flex-1 text-left">Répartir poche + CB</span><i class="ph-bold ph-caret-down pay-caret"></i>
+            </button>
+            <div class="pay-split-body">
+              <div class="flex items-center justify-between gap-2 mt-2">
+                <button type="button" class="pay-step" onclick="stepPaySplit(-1)" aria-label="Moins de cash"><i class="ph-bold ph-minus"></i></button>
+                <div class="flex-1 grid grid-cols-2 gap-2 text-center">
+                  <div><div class="text-[9px] font-black uppercase tracking-widest text-amber-300">Cash</div><div id="paySplitCash" class="font-anton text-2xl text-amber-200">0 €</div></div>
+                  <div><div class="text-[9px] font-black uppercase tracking-widest text-sky-300">CB</div><div id="paySplitCb" class="font-anton text-2xl text-sky-200">0 €</div></div>
+                </div>
+                <button type="button" class="pay-step" onclick="stepPaySplit(1)" aria-label="Plus de cash"><i class="ph-bold ph-plus"></i></button>
+              </div>
+              <input type="range" id="paySplitRange" class="w-full mt-2" min="0" max="1" value="0" oninput="setPaySplit(+this.value)">
+              <button type="button" id="btnPayWithCumul" onclick="confirmPaymentSource('split')" class="pay-cta mt-2">Payer</button>
+            </div>
+          </div>
+          <button type="button" onclick="closeModal('modalPaymentChoice')" class="pay-ghost mt-3">Annuler</button>
         </div>
-        <div class="space-y-2">
-          <button id="btnPayWithPocket" onclick="confirmPaymentSource('pocket')" class="w-full p-3 glass-panel rounded-xl flex items-center justify-between border-amber-500/30">
-            <div class="text-left"><span class="text-xs font-black text-amber-300 block uppercase">En Poche (Cash)</span><span id="paymentPocketAvailable" class="text-[10px] font-mono text-slate-400">Solde : 5 000 €</span></div>
-            <i class="ph-bold ph-arrow-right text-amber-400"></i>
-          </button>
-          <button id="btnPayWithSafe" onclick="confirmPaymentSource('safe')" class="w-full p-3 glass-panel rounded-xl flex items-center justify-between border-sky-500/30">
-            <div class="text-left"><span class="text-xs font-black text-sky-300 block uppercase">Coffre du QG</span><span id="paymentSafeAvailable" class="text-[10px] font-mono text-slate-400">Solde : 0 €</span></div>
-            <i class="ph-bold ph-arrow-right text-sky-400"></i>
-          </button>
-          <button id="btnPayWithCumul" onclick="confirmPaymentSource('cumul')" class="w-full p-3 glass-panel rounded-xl flex items-center justify-between border-emerald-500/40">
-            <div class="text-left"><span class="text-xs font-black text-emerald-300 block uppercase">Cumul (Poche + Coffre)</span><span id="paymentCumulDetail" class="text-[10px] font-mono text-slate-300 block">Cumuler les deux comptes</span></div>
-            <i class="ph-bold ph-plus-circle text-emerald-400"></i>
-          </button>
-        </div>
-        <button onclick="closeModal('modalPaymentChoice')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
       </div>
     </div>
 

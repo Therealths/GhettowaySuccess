@@ -619,32 +619,68 @@ async function confirmGrossistePurchase() {
     <button type="button" class="police-cta gros-cta" onclick="closeGrossiste()">Repartir</button>`;
 }
 
+// Paiement : cash en poche, CB (coffre du QG) ou répartition choisie par le joueur
+let paySplit = { cash: 0, min: 0, max: 0, step: 500 };
 function openPaymentChoiceModal(purchaseData) {
   pendingPurchaseData = purchaseData;
   const cost = purchaseData.cost;
-  document.getElementById('paymentItemNameTitle').innerText = `Article : ${purchaseData.name}`;
+  const pocket = localPlayer.pocketCash, safe = localPlayer.safeCash;
+  // Nom de la boutique ouverte derrière (sinon « Achat »)
+  const shops = { modalArmoryShop: 'Armurerie', modalNightclubShop: 'Nightclub', modalSportclubShop: 'Sportclub', modalDealerShop: 'Concessionnaire' };
+  const shop = Object.keys(shops).find(id => !document.getElementById(id).classList.contains('hidden'));
+  document.getElementById('payShopName').innerText = shop ? shops[shop] : 'Achat';
+  document.getElementById('paymentItemNameTitle').innerText = purchaseData.name;
   document.getElementById('paymentItemPriceDisplay').innerText = `${cost.toLocaleString()} €`;
-  document.getElementById('paymentPocketAvailable').innerText = `Solde : ${localPlayer.pocketCash.toLocaleString()} €`;
-  document.getElementById('paymentSafeAvailable').innerText = `Solde : ${localPlayer.safeCash.toLocaleString()} €`;
-  const bP = document.getElementById('btnPayWithPocket');
-  const bS = document.getElementById('btnPayWithSafe');
-  if (localPlayer.pocketCash < cost) bP.classList.add('opacity-40', 'pointer-events-none');
-  else bP.classList.remove('opacity-40', 'pointer-events-none');
-  if (localPlayer.safeCash < cost) bS.classList.add('opacity-40', 'pointer-events-none');
-  else bS.classList.remove('opacity-40', 'pointer-events-none');
-  const partP = Math.min(localPlayer.pocketCash, cost);
-  document.getElementById('paymentCumulDetail').innerText = `Prendre ${partP.toLocaleString()} € en poche + ${(cost - partP).toLocaleString()} € au coffre`;
+  document.getElementById('paymentPocketAvailable').innerText = `${pocket.toLocaleString()} €`;
+  document.getElementById('paymentSafeAvailable').innerText = `${safe.toLocaleString()} €`;
+  document.getElementById('btnPayWithPocket').disabled = pocket < cost;
+  document.getElementById('btnPayWithSafe').disabled = safe < cost;
+  // Répartition : la part de cash va de « ce que la CB ne couvre pas » à « tout le cash disponible »
+  const step = cost % 500 === 0 ? 500 : 100;
+  const min = Math.max(0, cost - safe), max = Math.min(pocket, cost);
+  paySplit = { cash: Math.min(max, Math.max(min, Math.round(cost / 2 / step) * step)), min, max, step };
+  const range = document.getElementById('paySplitRange');
+  range.min = min; range.max = max; range.step = step;
+  const possible = max >= min && pocket + safe >= cost;
+  document.getElementById('paySplit').classList.toggle('hidden', !possible || max === min && (pocket >= cost || safe >= cost));
+  // Aucun moyen ne suffit seul : la répartition est dépliée d'office
+  document.getElementById('paySplit').classList.toggle('open', pocket < cost && safe < cost);
+  setPaySplit(paySplit.cash);
   document.getElementById('modalPaymentChoice').classList.remove('hidden');
+}
+function togglePaySplit() { document.getElementById('paySplit').classList.toggle('open'); }
+function setPaySplit(cash) {
+  const { min, max } = paySplit;
+  paySplit.cash = Math.max(min, Math.min(max, Math.round(cash)));
+  const cost = pendingPurchaseData ? pendingPurchaseData.cost : 0;
+  const cb = cost - paySplit.cash;
+  document.getElementById('paySplitRange').value = paySplit.cash;
+  document.getElementById('paySplitCash').innerText = `${paySplit.cash.toLocaleString()} €`;
+  document.getElementById('paySplitCb').innerText = `${cb.toLocaleString()} €`;
+  document.getElementById('btnPayWithCumul').innerText = `Payer ${paySplit.cash.toLocaleString()} € cash + ${cb.toLocaleString()} € CB`;
+}
+function stepPaySplit(dir) {
+  // Pas de 500 € (ou 100 €), en restant dans les limites des deux soldes
+  const { step, min, max } = paySplit;
+  let next = paySplit.cash + dir * step;
+  if (dir > 0 && next > max) next = max;
+  if (dir < 0 && next < min) next = min;
+  setPaySplit(next);
 }
 async function confirmPaymentSource(source) {
   if (!pendingPurchaseData) return;
   const cost = pendingPurchaseData.cost;
-  if (source === 'pocket') localPlayer.pocketCash -= cost;
-  else if (source === 'safe') localPlayer.safeCash -= cost;
-  else {
-    const partP = Math.min(localPlayer.pocketCash, cost);
-    localPlayer.pocketCash -= partP;
-    localPlayer.safeCash -= (cost - partP);
+  if (source === 'pocket') {
+    if (localPlayer.pocketCash < cost) return;
+    localPlayer.pocketCash -= cost;
+  } else if (source === 'safe') {
+    if (localPlayer.safeCash < cost) return;
+    localPlayer.safeCash -= cost;
+  } else {
+    const cash = paySplit.cash, cb = cost - cash;
+    if (cash > localPlayer.pocketCash || cb > localPlayer.safeCash || cash < 0 || cb < 0) return showAppAlert("Répartition impossible avec tes soldes.", "Paiement");
+    localPlayer.pocketCash -= cash;
+    localPlayer.safeCash -= cb;
   }
   const pData = pendingPurchaseData;
   closeModal('modalPaymentChoice');

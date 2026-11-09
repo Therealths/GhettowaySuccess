@@ -539,3 +539,25 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 #combatLiveLog { height: calc(2.7em + 16px); overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .scan-status { min-height: 2.8em; line-height: 1.4; }
 @media (max-height: 700px) { #policeRows { min-height: 8.4rem; } }
+/* Paiement : la boutique reste visible derrière, deux grandes cartes (cash / CB) et la répartition au choix */
+.pay-screen { background: linear-gradient(rgba(7,8,14,0.35), rgba(7,8,14,0.65) 40%, #07080e 78%); overflow-y: auto; color: #fff; }
+.pay-panel { margin-bottom: 14px; }
+.pay-opt { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 8px 12px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.1); }
+.pay-opt.cash { border-color: rgba(251,191,36,0.55); background: rgba(251,191,36,0.07); }
+.pay-opt.cb { border-color: rgba(56,189,248,0.55); background: rgba(56,189,248,0.07); }
+.pay-opt:disabled { opacity: 0.38; filter: grayscale(1); }
+.pay-opt b { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; }
+.pay-sold { font-family: 'Share Tech Mono', ui-monospace, monospace; font-size: 14px; font-weight: 700; color: #e2e8f0; }
+.pay-why { font-size: 10px; font-weight: 800; color: #fb7185; text-transform: uppercase; visibility: hidden; }
+.pay-opt:disabled .pay-why { visibility: visible; }
+.pay-ill { height: 100px; width: 100%; display: flex; align-items: center; justify-content: center; }
+.pay-ill img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.65)); }
+.pay-split { border-radius: 16px; padding: 10px 12px; background: rgba(52,211,153,0.08); border: 2px solid rgba(52,211,153,0.45); }
+.pay-split-head { width: 100%; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 900; text-transform: uppercase; color: #6ee7b7; }
+.pay-split-body { display: none; }
+.pay-split.open .pay-split-body { display: block; }
+.pay-split.open .pay-caret { transform: rotate(180deg); }
+.pay-step { flex: none; width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+.pay-cta { width: 100%; padding: 12px; border-radius: 14px; font-weight: 900; font-size: 13px; text-transform: uppercase; color: #04120c; background: linear-gradient(90deg, #6ee7b7, #10b981); }
+.pay-ghost { width: 100%; padding: 12px; border-radius: 16px; font-weight: 800; text-transform: uppercase; font-size: 12px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+@media (max-height: 700px) { .pay-ill { height: 70px; } }
