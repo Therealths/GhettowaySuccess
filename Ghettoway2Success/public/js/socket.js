@@ -418,27 +418,18 @@ if (socket) {
     refreshHud();
   });
   socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId }) => {
-    if (effectType === 'siphon') {
-      localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
-      refreshHud();
-      await showAppAlert(`${senderCaid} vous vole 1 Cœur de Vie !`, "🩸 Siphon Vital");
-      await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
-      refreshHud();
-    } else if (effectType === 'shuriken') {
-      localPlayer.tempDefMalus = 3;
-      await showAppAlert(`${senderCaid} réduit votre Défense de 3 points ce tour !`, "⭐ Shuriken");
-    } else if (effectType === 'danse') {
-      localPlayer.tempAtkMalus = 3;
-      await showAppAlert(`${senderCaid} réduit votre Attaque de 3 points ce tour !`, "💃 Danse Lascive");
-    } else if (effectType === 'steal_item') {
-      if (localPlayer.inventory.length > 0) {
-        const stolen = localPlayer.inventory.pop();
-        await showAppAlert(`${senderCaid} vous a dérobé : ${stolen.name} !`, "🦹 Vol à la Tire");
-        socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });
-      } else await showAppAlert(`${senderCaid} a tenté de vous voler, mais votre sac est vide !`, "🦹 Vol Déjoué");
-    } else if (effectType === 'swap_pos') {
-      await showAppAlert(`${senderCaid} a échangé sa position avec la vôtre sur le plateau !`, "🔄 Tour de Passe-Passe");
+    // Effet appliqué d'abord, puis écran « Touché ! »
+    let stolen = null;
+    if (effectType === 'siphon') localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+    else if (effectType === 'shuriken') localPlayer.tempDefMalus = 3;
+    else if (effectType === 'danse') localPlayer.tempAtkMalus = 3;
+    else if (effectType === 'steal_item' && localPlayer.inventory.length > 0) {
+      stolen = localPlayer.inventory.pop();
+      socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, item: stolen });
     }
+    refreshHud();
+    await showPowerHit(effectType, senderCaid, stolen);
+    if (effectType === 'siphon') await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
     refreshHud();
   });
   socket.on('gain_stolen_item', async ({ item }) => {

@@ -680,3 +680,102 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @keyframes msgDrip { 0% { opacity: 0; transform: translateY(0) scale(0.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(46px) scale(1); } }
 @keyframes msgSpin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .msg-screen, .msg-screen * { animation: none !important; } }
+
+/* Capacités spéciales : bandeau du Caïd, nom du pouvoir, scène animée, cibles */
+.pow-screen { --ac: #facc15; --accent: var(--ac); container-type: size; background: #07080e; overflow: hidden; color: #fff; }
+.pow-banner { position: absolute; left: 0; right: 0; top: 0; height: 30cqh; }
+.pow-banner img { width: 100%; height: 100%; object-fit: cover; object-position: 78% center; }
+.pow-banner::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(rgba(7,8,14,0.3), transparent 30%, rgba(7,8,14,0.7) 72%, #07080e); }
+.pow-screen[data-state="touche"] .pow-banner img { filter: grayscale(0.5) brightness(0.7); }
+.pow-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
+.pow-chip { color: #111; background: var(--ac); }
+.pow-screen[data-state="touche"] .pow-chip { color: #fff; background: #e11d48; }
+.pow-head { padding: 0 16px; margin-top: max(40px, calc(30cqh - 96px)); }
+.pow-kicker, .pow-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ac); }
+.pow-title { font-size: 40px; line-height: 0.95; text-transform: uppercase; text-shadow: 0 4px 18px #000; }
+.pow-desc { margin-top: 4px; font-size: 13px; font-weight: 700; color: #e2e8f0; text-shadow: 0 2px 8px #000; }
+.pow-ac { color: var(--ac); }
+.pow-stage { position: relative; flex: 1; min-height: 120px; container-type: size; }
+.pow-bottom { padding: 14px 16px 16px; background: linear-gradient(transparent, #07080e 18px); max-height: 62%; overflow-y: auto; }
+.pow-cta { color: #111; background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 55%, #fff), var(--ac)); }
+.pow-screen[data-state="touche"] .pow-cta { color: #fff; background: linear-gradient(90deg, #fb7185, #e11d48); }
+.pow-screen .ally-pick.on { border-color: var(--ac); background: color-mix(in srgb, var(--ac) 12%, transparent); }
+.pow-row i { color: var(--ac); }
+.pow-row .aft { white-space: nowrap; font-family: 'Anton', sans-serif; font-size: 20px; font-weight: 400; }
+/* Avatars */
+.pow-av { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pow-av img { width: 84px; height: 84px; border-radius: 999px; object-fit: cover; border: 3px solid var(--ac); box-shadow: 0 0 24px color-mix(in srgb, var(--ac) 45%, transparent), 0 6px 20px rgba(0,0,0,0.6); }
+.pow-av b { font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 99px; background: rgba(0,0,0,0.75); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+.pow-av.hit img { border-color: #fb7185; }
+.pow-av.halo::before { content: ''; position: absolute; left: 50%; top: 42px; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 999px; background: radial-gradient(circle, color-mix(in srgb, var(--ac) 55%, transparent), transparent 65%); animation: powHalo 2.4s ease-in-out infinite; }
+.pow-av.ball b { display: none; }
+.pow-duo { position: absolute; inset: 0; }
+.pow-side { position: absolute; top: 50%; transform: translate(-50%, -50%); }
+.pow-side.l { left: 24%; } .pow-side.r { left: 76%; }
+.pow-solo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.pow-solo .pow-av img { width: 100px; height: 100px; }
+/* Ce qui file d'un Caïd à l'autre : la piste va du centre de l'un au centre de l'autre */
+.pow-track { position: absolute; left: 24%; right: 24%; top: calc(50% - 12px); height: 0; z-index: 2; }
+.pow-mv { position: absolute; left: 0; top: 0; width: 100%; height: 0; }
+.pow-mv > * { position: absolute; left: 0; top: 0; }
+.pow-spin { width: 56px; height: 56px; margin: -28px 0 0 -28px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.6)); }
+.pow-drop { font-size: 30px; margin: -15px 0 0 -15px; color: #f43f5e; filter: drop-shadow(0 0 8px rgba(244,63,94,0.8)); }
+.pow-beam { position: absolute; left: 0; right: 0; top: -2px; height: 4px; border-radius: 9px; background: linear-gradient(90deg, #fb7185, rgba(225,29,72,0.2)); transform-origin: right; }
+.pow-note { font-size: 28px; margin: -16px 0 0 -10px; color: var(--ac); text-shadow: 0 0 10px color-mix(in srgb, var(--ac) 70%, transparent); }
+.pow-note.n1 { margin-top: -40px; } .pow-note.n2 { margin-top: 8px; }
+.pow-hand { font-size: 38px; margin: -19px 0 0 -19px; color: var(--ac); filter: drop-shadow(0 4px 10px #000); }
+.pow-z { position: absolute; right: -14px; top: -6px; font-family: 'Permanent Marker', cursive; font-size: 26px; color: var(--ac); text-shadow: 0 2px 6px #000; opacity: 0; animation: powZ 2.4s ease-out 0.5s infinite; }
+.pow-z.z1 { animation-delay: 1.3s; } .pow-z.z2 { animation-delay: 2.1s; }
+.pow-roll { position: absolute; inset: 0; }
+.pow-roll .pow-mv { left: 50%; top: 50%; width: auto; height: auto; transform: translate(-50%, -50%); }
+.pow-roll .pow-mv > * { position: relative; }
+.pow-hearts { display: flex; justify-content: center; gap: 10px; font-size: 30px; }
+.pow-hearts i { color: #f43f5e; filter: drop-shadow(0 0 8px rgba(244,63,94,0.5)); }
+.pow-hearts i.off { color: #334155; filter: none; }
+/* Arrivée de l'écran (pas rejouée quand il se met à jour : classe static) */
+.pow-screen.show:not(.static) .pow-banner img { animation: allyFade 0.6s ease-out both; }
+.pow-screen.show:not(.static) .pow-head { animation: allyUp 0.45s ease-out 0.1s both; }
+.pow-screen.show:not(.static) .pow-side.l .pow-av, .pow-screen.show:not(.static) .pow-solo .pow-av { animation: allyFromLeft 0.5s cubic-bezier(.2,1.2,.4,1) 0.15s both; }
+.pow-screen.show:not(.static) .pow-side.r .pow-av { animation: allyFromRight 0.5s cubic-bezier(.2,1.2,.4,1) 0.25s both; }
+.pow-screen.show:not(.static) .pow-bottom { animation: allyUp 0.45s ease-out 0.15s both; }
+.pow-screen.show:not(.static) .pow-result { animation: allyUp 0.45s ease-out 1.5s both; }
+.pow-screen.show:not(.static) .pow-av.sleep img { animation: powBreath 2.4s ease-in-out 0.6s infinite; }
+.pow-screen.show:not(.static) .pow-hearts i.new { animation: powHeart 0.6s cubic-bezier(.2,1.6,.4,1) 1.5s both; }
+/* Lancement : l'effet part 0,6 s après l'arrivée, la cible encaisse vers 1,2 s */
+.pow-screen.show:not(.static) .fx-throw { animation: powThrow 0.6s cubic-bezier(.3,.6,.6,1) 0.6s both; }
+.pow-screen.show:not(.static) .fx-throw .pow-spin { animation: powSpin 0.6s linear 0.6s both; }
+.pow-screen.show:not(.static) .pow-av.hit img { animation: powShake 0.45s ease-in-out 1.2s both; }
+.pow-screen.show:not(.static) .fx-siphon .pow-beam { animation: powBeam 1.6s ease-in-out 0.5s both; }
+.pow-screen.show:not(.static) .fx-back { animation: powBack 0.9s ease-in-out 0.7s both; }
+.pow-screen.show:not(.static) .fx-siphon .pow-av.hit img { animation: powShake 0.45s ease-in-out 0.6s both; }
+.pow-screen.show:not(.static) .fx-float { animation: powFloat 1.5s ease-in-out 0.6s infinite both; }
+.pow-screen.show:not(.static) .fx-float .pow-note { animation: powBob 0.5s ease-in-out infinite alternate; }
+.pow-screen.show:not(.static) .fx-danse .pow-av.hit img { animation: powSway 1.2s ease-in-out 1.1s infinite; }
+.pow-screen.show:not(.static) .fx-grab { animation: powGrab 1.3s ease-in-out 0.6s both; }
+.pow-screen.show:not(.static) .fx-steal_item .pow-av.hit img { animation: powShake 0.45s ease-in-out 1.05s both; }
+.pow-screen.show:not(.static) .fx-swap_pos .pow-side.l { animation: powSwapL 1s cubic-bezier(.5,0,.3,1) 0.7s both; }
+.pow-screen.show:not(.static) .fx-swap_pos .pow-side.r { animation: powSwapR 1s cubic-bezier(.5,0,.3,1) 0.7s both; }
+.pow-screen.show:not(.static) .fx-swap_pos .pow-av.hit img { animation: none; }
+.pow-screen.show:not(.static) .fx-roll { animation: powRoll 1.1s cubic-bezier(.3,.7,.4,1) 0.3s both; }
+@keyframes powThrow { 0% { transform: translateX(8%); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateX(86%); opacity: 1; } }
+@keyframes powSpin { from { transform: rotate(0); } to { transform: rotate(900deg); } }
+@keyframes powShake { 0%, 100% { transform: none; } 20% { transform: translateX(-7px) rotate(-5deg); } 40% { transform: translateX(6px) rotate(4deg); } 60% { transform: translateX(-4px) rotate(-2deg); } 80% { transform: translateX(2px); } }
+@keyframes powBeam { 0% { transform: scaleX(0); opacity: 0; } 25% { transform: scaleX(1); opacity: 1; } 75% { opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes powBack { 0% { transform: translateX(92%) scale(0.4); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateX(8%) scale(1); opacity: 1; } }
+@keyframes powFloat { 0% { transform: translateX(10%); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateX(90%); opacity: 0; } }
+@keyframes powBob { from { transform: translateY(-6px) rotate(-10deg); } to { transform: translateY(6px) rotate(10deg); } }
+@keyframes powSway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes powGrab { 0% { transform: translateX(10%); opacity: 0; } 15% { opacity: 1; } 45%, 55% { transform: translateX(84%); opacity: 1; } 90% { opacity: 1; } 100% { transform: translateX(10%); opacity: 0; } }
+@keyframes powSwapL { 0% { transform: translate(-50%, -50%); } 50% { transform: translate(calc(-50% + 26cqw), calc(-50% - 34px)); } 100% { transform: translate(calc(-50% + 52cqw), -50%); } }
+@keyframes powSwapR { 0% { transform: translate(-50%, -50%); } 50% { transform: translate(calc(-50% - 26cqw), calc(-50% + 34px)); } 100% { transform: translate(calc(-50% - 52cqw), -50%); } }
+@keyframes powRoll { from { transform: translate(calc(-50% - 50cqw), -50%) rotate(-720deg); } to { transform: translate(-50%, -50%) rotate(0); } }
+@keyframes powZ { 0% { transform: translate(0, 0) scale(0.6); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(26px, -54px) scale(1.4); opacity: 0; } }
+@keyframes powBreath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes powHeart { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes powHalo { 0%, 100% { opacity: 0.45; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.06); } }
+@media (max-height: 700px) {
+  .pow-title { font-size: 32px; } .pow-desc { font-size: 12px; }
+  .pow-av img { width: 64px; height: 64px; } .pow-solo .pow-av img { width: 76px; height: 76px; }
+  .pow-bottom { padding-bottom: 12px; } .pow-screen .ally-pick { padding: 6px 10px; } .pow-screen .ally-pick img { width: 34px; height: 34px; }
+}
+@media (prefers-reduced-motion: reduce) { .pow-screen *, .pow-screen.show * { animation: none !important; } }

@@ -548,20 +548,17 @@
       </div>
     </div>
 
-    <!-- MODALE CAPACITÉ SPÉCIALE CIBLÉE -->
-    <div id="modalTargetSpecial" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 p-6 flex flex-col justify-end">
-      <div class="glass-panel p-5 rounded-3xl space-y-4 border-purple-500/40 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2">
-          <h3 class="text-sm font-black text-purple-300 uppercase flex items-center gap-1.5"><i class="ph-bold ph-sparkle"></i> Attaque Spéciale</h3>
-          <button onclick="closeModal('modalTargetSpecial')" class="w-7 h-7 rounded-full glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-x text-xs"></i></button>
+    <!-- CAPACITÉ SPÉCIALE : écran plein page (choix de la cible, lancement, pouvoir sans cible, Prière, « Touché ! » côté victime) -->
+    <div id="powerScreen" class="hidden absolute inset-0 z-50 pow-screen" data-state="choix">
+      <div class="pow-banner"><img id="powBanner" src="bandeau-jaune.jpg" alt=""></div>
+      <div class="pow-content">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="powRound">1</span></span>
+          <span id="powChip" class="ally-chip pow-chip"></span>
         </div>
-        <div>
-          <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Choisir le Caïd Cible :</label>
-          <select id="specialTargetSelect" class="w-full glass-input text-white p-3 rounded-xl text-xs font-bold outline-none"></select>
-        </div>
-        <p id="specialTargetDesc" class="text-xs text-slate-300 italic"></p>
-        <button onclick="executeTargetedSpecialPower()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-black uppercase rounded-2xl text-xs">Lancer l'Effet</button>
-        <button onclick="closeModal('modalTargetSpecial')" class="w-full py-2.5 glass-panel text-slate-400 font-bold rounded-xl text-xs">Annuler</button>
+        <div id="powHead" class="pow-head"></div>
+        <div id="powStage" class="pow-stage"></div>
+        <div id="powBottom" class="pow-bottom"></div>
       </div>
     </div>
 
@@ -971,6 +968,7 @@
   <script src="js/player.js"></script>
   <script src="js/combat.js"></script>
   <script src="js/alliance.js"></script>
+  <script src="js/powers.js"></script>
   <script src="js/qr.js"></script>
   <script src="js/game.js"></script>
   <script src="js/socket.js"></script>

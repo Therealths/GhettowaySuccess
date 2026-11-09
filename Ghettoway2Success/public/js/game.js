@@ -117,6 +117,7 @@ function syncMultiplayerTargets() {
   // Écrans d'alliance ou de combat ouverts sur le choix : la liste des Caïds suit
   if (typeof refreshAllianceChoice === 'function') refreshAllianceChoice();
   if (typeof refreshFightChoice === 'function') refreshFightChoice();
+  if (typeof refreshPowerChoice === 'function') refreshPowerChoice();
 }
 
 // Écran de combat : ma stat en direct (attaque, cumulée avec mes alliés, ou défense) ; celle de l'adversaire reste secrète

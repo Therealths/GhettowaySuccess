@@ -71,64 +71,7 @@ async function depositProstituteToSafe() {
   await showAppAlert("Prostituée installée au QG ! Sa rente sera versée au coffre à chaque manche.", "🎉 Sécurisation QG");
   refreshHud();
 }
-async function openSpecialAbilityPrompt() {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour de jouer !", "Tour Inactif");
-  if (localPlayer.specialUsedThisTurn) return showAppAlert("Capacité spéciale déjà utilisée durant ce tour !", "Capacité Épuisée");
-  const caid = getMyCaid();
-  const targetedSkills = ['caid_2', 'caid_4', 'caid_6', 'caid_7', 'caid_8'];
-  if (targetedSkills.includes(caid.id)) {
-    syncMultiplayerTargets();
-    const sel = document.getElementById('specialTargetSelect');
-    if (!sel || !sel.value) return showAppAlert("Aucune cible attaquable (ou Pacte d'Alliance actif) !", "Cible Introuvable");
-    document.getElementById('specialTargetDesc').innerText = `${caid.skillName} : ${caid.skillDesc}`;
-    document.getElementById('modalTargetSpecial').classList.remove('hidden');
-  } else if (caid.id === 'caid_5') {
-    // La Prière ne s'active pas à l'avance : elle est proposée automatiquement au moment du contrôle ou de l'agression
-    return showAppAlert("Prière Miraculeuse : elle vous sera proposée automatiquement lors d'un contrôle de police ou si un rival vous attaque (50% de chance d'annuler).\n\nUtilisable 1x par manche.", "🙏 J-Lo Gramme");
-  } else {
-    if (!await showAppConfirm(`${caid.skillName} : ${caid.skillDesc}\n\nUtilisable 1x par tour. Activer ?`, "⚡ Capacité Spéciale")) return;
-    if (caid.id === 'caid_3') {
-      localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
-      await showAppAlert("+1 Cœur de Vie restauré !", "⚡ La Grosse Sieste");
-    } else {
-      await showAppAlert(`${caid.skillName} activée !`, "⚡ Capacité Active");
-    }
-    localPlayer.specialUsedThisTurn = true;
-    refreshHud();
-  }
-}
-async function executeTargetedSpecialPower() {
-  const sel = document.getElementById('specialTargetSelect');
-  const target = connectedRivals.find(r => r.playerToken === sel.value || r.socketId === sel.value);
-  if (!target) return showAppAlert("Sélectionnez une cible.", "Cible Requise");
-  if (isRivalProtectedByPact(target.playerToken)) {
-    return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas cibler votre allié !", "Pacte Actif");
-  }
-  const caid = getMyCaid();
-  closeModal('modalTargetSpecial');
-  let effect = '';
-  if (caid.id === 'caid_8') effect = 'siphon';
-  else if (caid.id === 'caid_6') effect = 'shuriken';
-  else if (caid.id === 'caid_4') effect = 'danse';
-  else if (caid.id === 'caid_7') effect = 'steal_item';
-  else if (caid.id === 'caid_2') effect = 'swap_pos';
-  if (socket) {
-    socket.emit('apply_special_to_target', {
-      targetSocketId: target.socketId,
-      targetPlayerToken: target.playerToken,
-      effectType: effect,
-      senderCaid: caid.name
-    });
-  }
-  if (effect === 'siphon') {
-    localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
-    await showAppAlert(`Siphon Vital réussi sur ${target.caidName || 'le rival'} : +1 Cœur !`, "🩸 Siphon Vital");
-  } else {
-    await showAppAlert(`${caid.skillName} lancée sur ${target.caidName || 'la cible'} !`, "⚡ Attaque Spéciale");
-  }
-  localPlayer.specialUsedThisTurn = true;
-  refreshHud();
-}
+// Capacités spéciales : voir js/powers.js
 
 async function triggerPoliceInspection() {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
