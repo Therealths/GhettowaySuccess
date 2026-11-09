@@ -492,6 +492,10 @@ function renderEquipmentSlotsView() {
 // Coffre du QG : sur toi ⇄ au QG pour l'argent et la drogue, installation d'une escort (aller simple)
 let transferAmount = 0;
 const escortRent = pr => pr.revenue || (pr.level === 2 ? 2500 : 1000);
+// Le coffre ne s'ouvre qu'en flashant le QR de la case QG du plateau
+async function qgOnlyHint() {
+  await showAppAlert("Le coffre s'ouvre au QG : rends-toi sur la case QG du plateau et flashe son QR code.", "🏦 Coffre du QG");
+}
 async function openTransferModal(mode, res) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
   currentTransferMode = mode === 'withdraw' ? 'withdraw' : 'deposit';

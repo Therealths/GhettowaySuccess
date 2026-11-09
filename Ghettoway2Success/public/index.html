@@ -384,7 +384,7 @@
             </div>
             <div class="flex items-center gap-1.5">
               <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <button onclick="openTransferModal('deposit', 'escort')" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center"><span class="text-[9px] font-mono font-black uppercase">QG</span></button>
+              <button onclick="qgOnlyHint()" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center"><span class="text-[9px] font-mono font-black uppercase">QG</span></button>
             </div>
           </div>
         </div>
@@ -450,12 +450,12 @@
                 <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex flex-col justify-between">
                   <span class="text-[8px] text-amber-400 font-bold uppercase">En Poche</span>
                   <div class="my-1 flex items-center justify-between"><span id="hudPocketCash" class="text-xs font-black text-amber-300">5 000 €</span><span id="hudDrugs" class="text-xs font-black text-emerald-400">🌿 5 kg</span></div>
-                  <button onclick="openTransferModal('deposit')" class="w-full py-1.5 bg-amber-500/20 text-amber-300 text-[8px] font-bold rounded uppercase">Déposer au QG</button>
+                  <button onclick="qgOnlyHint()" class="w-full py-1.5 bg-amber-500/20 text-amber-300 text-[8px] font-bold rounded uppercase"><i class="ph-bold ph-qr-code"></i> Déposer : flashe le QG</button>
                 </div>
                 <div class="p-2 rounded-lg bg-sky-500/10 border border-sky-500/30 flex flex-col justify-between">
                   <span class="text-[8px] text-sky-400 font-bold uppercase">Planque / QG</span>
                   <div class="my-1 flex items-center justify-between"><span id="hudSafeCash" class="text-xs font-black text-sky-300">0 €</span><span id="hudSafeDrugs" class="text-xs font-black text-sky-200">📦 0 kg</span></div>
-                  <button onclick="openTransferModal('withdraw')" class="w-full py-1.5 bg-sky-500/20 text-sky-300 text-[8px] font-bold rounded uppercase">Récupérer du QG</button>
+                  <button onclick="qgOnlyHint()" class="w-full py-1.5 bg-sky-500/20 text-sky-300 text-[8px] font-bold rounded uppercase"><i class="ph-bold ph-qr-code"></i> Récupérer : flashe le QG</button>
                 </div>
               </div>
               <div class="pt-1"><span class="text-[9px] font-mono uppercase text-slate-400 block font-bold px-1 mb-1">Objets & Équipements en Stock :</span><div id="inventoryItemsList" class="space-y-1.5"></div></div>
@@ -808,6 +808,7 @@
           <button onclick='processQrPayload("{\"t\":\"concessionnaire\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🚗 Concessionnaire</button>
           <button onclick='processQrPayload("{\"t\":\"nightclub\"}")' class="p-2 glass-panel rounded-xl text-left text-pink-300 font-bold border border-pink-500/40">👠 Nightclub (Prostituées)</button>
           <button onclick='processQrPayload("{\"t\":\"sportclub\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300 font-bold border border-sky-500/40">💪 Sportclub (Lascars)</button>
+          <button onclick='processQrPayload("qg")' class="p-2 glass-panel rounded-xl text-left text-sky-300 font-bold border border-sky-500/40">🏦 Case QG (Coffre)</button>
           <button onclick='processQrPayload("{\"t\":\"grossiste\",\"p\":1000}")' class="p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold border border-emerald-500/40">🌿 Case Grossiste</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Balle perforante\",\"eff\":\"double_weapon_atk\",\"dur\":\"combat\",\"desc\":\"Dégâts arme à feu doublés\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">💥 Balle perforante</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Pot de Protéine\",\"eff\":\"double_muscles_atk\",\"dur\":\"combat\",\"desc\":\"Attaque/Défense Lascars doublée\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🥛 Pot de Protéine</button>

@@ -47,9 +47,9 @@ async function startLiveQrCamera() {
 }
 
 // QR reconnu : cadre vert, vibration, bandeau de ce qui a été flashé, puis on ouvre la case
-const QR_LABELS = { armurerie: 'ARMURERIE', nightclub: 'NIGHTCLUB', sportclub: 'SPORTCLUB', concessionnaire: 'CONCESSIONNAIRE', dealer: 'CONCESSIONNAIRE', grossiste: 'GROSSISTE', obj: 'OBJET TROUVÉ', brq: 'BRAQUAGE', yen: 'DEAL YENCLI', gb: 'LASCAR', pr: 'NIGHTCLUB', eq: 'ÉQUIPEMENT' };
+const QR_LABELS = { qg: 'COFFRE DU QG', coffre: 'COFFRE DU QG', armurerie: 'ARMURERIE', nightclub: 'NIGHTCLUB', sportclub: 'SPORTCLUB', concessionnaire: 'CONCESSIONNAIRE', dealer: 'CONCESSIONNAIRE', grossiste: 'GROSSISTE', obj: 'OBJET TROUVÉ', brq: 'BRAQUAGE', yen: 'DEAL YENCLI', gb: 'LASCAR', pr: 'NIGHTCLUB', eq: 'ÉQUIPEMENT' };
 // Fond de la case à précharger pendant le bandeau, pour qu'elle s'affiche d'un coup
-const QR_PRELOAD = { armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', brq: 'sac-butin.webp' };
+const QR_PRELOAD = { qg: 'qg-coffre.webp', coffre: 'qg-coffre.webp', armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', brq: 'sac-butin.webp' };
 function qrType(txt) {
   let data;
   try { data = JSON.parse(String(txt).trim().replace(/[\u201C\u201D]/g, '"')); } catch (e) { data = { t: String(txt).trim() }; }
@@ -212,6 +212,8 @@ async function processQrPayload(payload) {
   if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
   const type = (data.t || data.type || '').toLowerCase();
 
+  // Case QG du plateau : seule façon d'ouvrir le coffre (dépôt, retrait, escort)
+  if (type === 'qg' || type === 'coffre') return openTransferModal('deposit');
   if (type === 'armurerie') return openArmoryShopModal();
   if (type === 'nightclub') return openNightclubShopModal();
   if (type === 'sportclub') return openSportclubShopModal();
