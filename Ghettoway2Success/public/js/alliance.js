@@ -303,7 +303,7 @@ function renderAllianceSealed(pact) {
   if (refused.length) extra.push(`${escapeHtml(allyListNames(refused))} ${refused.length > 1 ? 'ont' : 'a'} refusé`);
   if (pending.length) extra.push(`${escapeHtml(allyListNames(pending))} réfléchi${pending.length > 1 ? 'ssent' : 't'} encore`);
   const bottom = `${allies.length > 1 ? `<div class="text-center text-sm font-bold text-slate-200 mb-1">${escapeHtml(allyListNames(['Toi', ...allies.map(a => a.caidName)]))}</div>` : ''}
-    <div class="text-center ${allies.length > 1 ? 'text-xs text-slate-400' : 'text-sm font-bold text-slate-200'} mb-3">Alliés jusqu’à la fin de la <span class="ally-ac">manche ${until}</span>${extra.map(t => ` · ${t}`).join('')}</div>
+    <div class="text-center ${allies.length > 1 ? 'text-xs text-slate-400' : 'text-sm font-bold text-slate-200'} mb-3">Alliés pour ce tour · pas d’attaque entre vous jusqu’à la fin de la <span class="ally-ac">manche ${until}</span>${extra.map(t => ` · ${t}`).join('')}</div>
     ${allyPerks(n)}
     <button type="button" class="ally-cta mt-4" onclick="closeAllianceScreen()">On y va</button>`;
   return allyRender('scelle', stage, bottom);
@@ -312,17 +312,18 @@ function renderAllianceSealed(pact) {
 // REFUS : personne n'a accepté
 function showAllianceRefused(data) {
   const names = (data && data.refused) || [];
+  const kept = (data && data.allies) || []; // alliés gagnés par une demande précédente
   const inv = allyOutgoing ? allyOutgoing.invitees.filter(i => i.status === 'no') : [];
   const who = inv.length ? inv : names.map(n => ({ caidName: n }));
   allyOutgoing = null;
-  allyHeldPact = null;
+  if (!kept.length) allyHeldPact = null;
   const me = getMyCaid();
   const right = who.length > 1
     ? allyAt('r', '30%', who.map(i => allyMini(allyCaidImg(i.caidId, i.caidName), i.caidName, 'no')).join(''), '12px')
     : allyAt('r', '61%', allyTag(allyCaidImg(who[0] && who[0].caidId, who[0] && who[0].caidName), (who[0] && who[0].caidName) || 'Le Caïd'));
   const stage = allyBubble('Sans moi.', 'r', '4%') + `<div class="ally-stamp" style="top:33%">REFUSÉ</div>` + allyAt('l', '61%', allyTag(me.imageFile, 'Toi')) + right;
   const bottom = `<h2 class="font-anton ally-head">PAS DE DEAL.</h2>
-    <div class="text-center text-sm font-bold text-slate-200 mt-1 mb-4">Ton tour continue, seul.</div>
+    <div class="text-center text-sm font-bold text-slate-200 mt-1 mb-4">${kept.length ? `Ton alliance avec ${escapeHtml(allyListNames(kept))} continue.` : 'Ton tour continue, seul.'}</div>
     <button type="button" class="ally-cta" onclick="closeAllianceScreen()">Tant pis</button>`;
   return allyRender('refus', stage, bottom);
 }

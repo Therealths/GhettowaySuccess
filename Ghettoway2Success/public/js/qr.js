@@ -47,9 +47,9 @@ async function startLiveQrCamera() {
 }
 
 // QR reconnu : cadre vert, vibration, bandeau de ce qui a été flashé, puis on ouvre la case
-const QR_LABELS = { qg: 'COFFRE DU QG', coffre: 'COFFRE DU QG', armurerie: 'ARMURERIE', nightclub: 'NIGHTCLUB', sportclub: 'SPORTCLUB', concessionnaire: 'CONCESSIONNAIRE', dealer: 'CONCESSIONNAIRE', grossiste: 'GROSSISTE', obj: 'OBJET TROUVÉ', brq: 'BRAQUAGE', yen: 'DEAL YENCLI', gb: 'LASCAR', pr: 'NIGHTCLUB', eq: 'ÉQUIPEMENT' };
+const QR_LABELS = { qg: 'COFFRE DU QG', coffre: 'COFFRE DU QG', armurerie: 'ARMURERIE', nightclub: 'NIGHTCLUB', sportclub: 'SPORTCLUB', concessionnaire: 'CONCESSIONNAIRE', dealer: 'CONCESSIONNAIRE', grossiste: 'GROSSISTE', obj: 'OBJET TROUVÉ', brq: 'BRAQUAGE', yen: 'DEAL YENCLI', gb: 'LASCAR', pr: 'NIGHTCLUB', eq: 'ÉQUIPEMENT', fouilles: 'FOUILLES', fouille: 'FOUILLES' };
 // Fond de la case à précharger pendant le bandeau, pour qu'elle s'affiche d'un coup
-const QR_PRELOAD = { qg: 'qg-coffre.webp', coffre: 'qg-coffre.webp', armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', brq: 'sac-butin.webp' };
+const QR_PRELOAD = { qg: 'qg-coffre.webp', coffre: 'qg-coffre.webp', armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', brq: 'sac-butin.webp', fouilles: 'fouilles.webp', fouille: 'fouilles.webp' };
 function qrType(txt) {
   let data;
   try { data = JSON.parse(String(txt).trim().replace(/[\u201C\u201D]/g, '"')); } catch (e) { data = { t: String(txt).trim() }; }
@@ -202,6 +202,8 @@ async function processQrPayload(payload) {
     }
   }
   if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
+  // Montants imprimés entre guillemets ("3000") : convertis en nombres
+  ['c', 'd', 'p', 'val', 'req', 'm', 'lvl'].forEach(k => { if (data[k] !== undefined && data[k] !== null && data[k] !== '') data[k] = Number(data[k]) || 0; });
   const type = (data.t || data.type || '').toLowerCase();
 
   // Case QG du plateau : seule façon d'ouvrir le coffre (dépôt, retrait, escort)
@@ -230,10 +232,10 @@ async function processQrPayload(payload) {
 
   if (type === 'eq' || type === 'gb' || type === 'pr') {
     let cost = data.p || (type === 'gb' ? (data.lvl === 2 ? 3000 : 1500) : (data.lvl === 2 ? 4000 : 2000));
-    let itemName = data.n || (type === 'gb' ? `Lascar L${data.lvl||1}` : `Prostituée L${data.lvl||1}`);
+    let itemName = data.n || (type === 'gb' ? `Lascar Niv. ${data.lvl||1}` : `Prostituée Niv. ${data.lvl||1}`);
     if (type === 'gb' && localPlayer.musclesOnPerson.length >= 3) return showAppAlert("3 Lascars maximum sur le terrain !", "Limite Atteinte");
     if (type === 'pr' && localPlayer.prostituteInTransit) return showAppAlert("Déjà 1 prostituée en transit !", "Limite Atteinte");
-    if (type === 'pr' && getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed && data.lvl === 1) {
+    if (type === 'pr' && getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed && (data.lvl || 1) === 1) {
       localPlayer.freeProstituteClaimed = true;
       await finalizePurchaseExecution({ type, data, cost: 0, name: itemName });
       refreshHud();
@@ -304,4 +306,6 @@ async function processQrPayload(payload) {
     }
     return;
   }
+  // QR lisible mais d'un type inconnu (faute à l'impression…)
+  return showAppAlert("QR Code non reconnu.", "Erreur");
 }

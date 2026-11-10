@@ -259,6 +259,15 @@ function advanceTurn(room, roomId, activePlayer) {
 
   room.currentTurnAlliedTokens = [];
   room.pendingAlliance = null; // une demande d'alliance non répondue expire avec le tour
+  // Combat resté ouvert (téléphone éteint en plein duel) : annulé, sinon plus personne ne pourrait attaquer
+  const combat = room.activeCombat;
+  if (combat) {
+    [...combat.attackerTokens, combat.defenderToken].forEach(tok => {
+      const p = room.players.find(x => x.playerToken === tok);
+      if (p) sendToPlayer(p, 'combat_aborted');
+    });
+    room.activeCombat = null;
+  }
   // Le Chien Errant reste avec le dernier joueur qui l'a sifflé, jusqu'au prochain coup de sifflet
 
   // Joueur suivant dans l'ordre de la manche ; on saute ceux qui ont déjà joué (en alliance pendant le tour d'un autre)
@@ -339,7 +348,29 @@ function isWeaponNullifiedFor(room, combat, token) {
   return opponents.some(t => room.players.find(p => p.playerToken === t)?.nullEnemyWeapon);
 }
 
+// Caïd à 0 Cœur (K.O.) : intouchable comme à l'hôpital, même avant que son téléphone ait affiché l'écran Hôpital
+function isKnockedOut(p) { return typeof p.hearts === 'number' && p.hearts <= 0; }
+
+// Un seul partage à la fois : un nouveau partage attend que le précédent soit validé (sinon le butin du premier serait perdu)
+function splitBusy(room) { return !!(room.activeLootSplit || room.activeGroupSplit); }
+function queueSplit(room, kind, data) {
+  room.pendingSplits = room.pendingSplits || [];
+  room.pendingSplits.push({ kind, data });
+  const tokens = kind === 'loot' ? [data.leftToken, data.rightToken] : (data.tokens || []);
+  tokens.forEach(t => {
+    const p = room.players.find(x => x.playerToken === t);
+    if (p && p.socketId) io.to(p.socketId).emit('error_msg', `${data.title || 'Partage du butin'} : il s'ouvrira dès que le partage en cours sera validé.`);
+  });
+}
+function openNextSplit(room, roomId) {
+  const next = (room.pendingSplits || []).shift();
+  if (!next) return;
+  if (next.kind === 'loot') openLootShareSession(room, roomId, next.data);
+  else openGroupSplit(room, next.data);
+}
+
 function openLootShareSession(room, roomId, sessionData) {
+  if (splitBusy(room)) return queueSplit(room, 'loot', sessionData);
   room.activeLootSplit = {
     sourceType: sessionData.sourceType, // 'heist' | 'combat'
     title: sessionData.title || 'Partage du Butin',
@@ -363,6 +394,7 @@ function openLootShareSession(room, roomId, sessionData) {
 
 // Partage de groupe (3 membres ou plus) : parts en %, le premier membre (celui qui a mené l'action) reçoit les restes
 function openGroupSplit(room, sessionData) {
+  if (splitBusy(room)) return queueSplit(room, 'group', sessionData);
   const members = [];
   (sessionData.tokens || []).forEach(tok => {
     const p = room.players.find(x => x.playerToken === tok);
@@ -483,7 +515,7 @@ io.on('connection', (socket) => {
     if (combat && [...combat.attackerTokens, combat.defenderToken].includes(leaving.playerToken)) {
       [...combat.attackerTokens, combat.defenderToken].forEach(tok => {
         const p = room.players.find(x => x.playerToken === tok);
-        if (p && p.socketId) io.to(p.socketId).emit('combat_aborted');
+        if (p) sendToPlayer(p, 'combat_aborted');
       });
       room.activeCombat = null;
     }
@@ -500,14 +532,14 @@ io.on('connection', (socket) => {
       const sender = room.players.find(p => p.playerToken === pa.senderToken);
       if (sender && sender.socketId && !statuses.includes('wait') && !statuses.includes('ok')) {
         pa.declinedSent = true;
-        io.to(sender.socketId).emit('alliance_declined', { refused: allianceNamesByStatus(room, 'no') });
+        io.to(sender.socketId).emit('alliance_declined', declinedPayload(room));
       }
     }
 
     if (room.players.every(p => p.away)) {
       room.paused = true; // personne : la partie attend, le tour actif reste tel quel
     } else {
-      io.to(roomId).emit('player_left_game', { caidName: leaving.caidName || 'Un Caïd' });
+      if (!room.gameOver) io.to(roomId).emit('player_left_game', { caidName: leaving.caidName || 'Un Caïd' });
       if (active && active.playerToken === leaving.playerToken) advanceTurn(room, roomId, leaving);
       else {
         broadcastTurnState(roomId);
@@ -525,6 +557,13 @@ io.on('connection', (socket) => {
 
   // Joueur reconnecté (page rechargée, changement de Caïd dans la partie test) :
   // on lui renvoie ce qu'il a pu manquer pendant qu'il n'était pas connecté
+  // Refus : avec les alliés déjà gagnés par une demande précédente (l'alliance continue avec eux)
+  function declinedPayload(room) {
+    const pa = room.pendingAlliance;
+    const allies = (room.currentTurnAlliedTokens || []).filter(t => !pa || t !== pa.senderToken).map(t => room.players.find(p => p.playerToken === t)?.caidName || 'Caïd');
+    return { refused: allianceNamesByStatus(room, 'no'), allies };
+  }
+
   function resendPendingState(room, player, sock) {
     const tok = player.playerToken;
     const pa = room.pendingAlliance;
@@ -535,7 +574,7 @@ io.on('connection', (socket) => {
         const statuses = Object.values(pa.invitees);
         if (!pa.declinedSent && !statuses.includes('wait') && !statuses.includes('ok')) {
           pa.declinedSent = true;
-          sock.emit('alliance_declined', { refused: allianceNamesByStatus(room, 'no') });
+          sock.emit('alliance_declined', declinedPayload(room));
         }
       }
     }
@@ -548,6 +587,10 @@ io.on('connection', (socket) => {
     const ls = room.activeLootSplit;
     if (ls && (ls.leftToken === tok || ls.rightToken === tok)) sock.emit('loot_split_opened', ls);
     resendActiveCombat(room, player, sock);
+    const pp = room.pendingPillage;
+    if (pp && pp.winnerTokens[0] === tok && !(player.mailbox || []).some(m => m.event === 'combat_finished_result')) {
+      sock.emit('combat_finished_result', { outcome: 'winner', opponentCaid: pp.loserCaid, isPrimaryPicker: true, pillageInfo: pp, late: true });
+    }
     // Messages arrivés pendant son absence (résultat de combat, pillage, pouvoir subi…)
     const box = player.mailbox || [];
     delete player.mailbox;
@@ -694,8 +737,8 @@ io.on('connection', (socket) => {
         isReady: checkRoomReady(room),
         selectionMode: room.selectionMode || 'random'
       });
-      if (room.gameStarted && wasAway) {
-        resumeAfterReturn(room, roomId, existing, socket);
+      if (room.gameStarted) {
+        if (wasAway) resumeAfterReturn(room, roomId, existing, socket);
         broadcastTurnState(roomId);
         resendPendingState(room, existing, socket);
       }
@@ -707,6 +750,9 @@ io.on('connection', (socket) => {
       });
     }
 
+    if (room.gameStarted) {
+      return socket.emit('error_msg', 'Cette partie a déjà commencé : impossible de la rejoindre.');
+    }
     if (room.players.length >= room.maxPlayers) {
       return socket.emit('error_msg', 'Ce salon est complet.');
     }
@@ -785,8 +831,9 @@ io.on('connection', (socket) => {
     if (room.hostSocketId !== socket.id) {
       return socket.emit('error_msg', "Seul l'Hôte peut démarrer la partie.");
     }
+    if (room.gameStarted) return; // double appui : la partie est déjà lancée
     if (!checkRoomReady(room)) {
-      return socket.emit('error_msg', "Au moins 2 Caïds prêts sont nécessaires pour démarrer !");
+      return socket.emit('error_msg', "Tous les joueurs doivent avoir choisi leur Caïd (2 minimum) pour démarrer !");
     }
 
     room.gameStarted = true;
@@ -802,10 +849,12 @@ io.on('connection', (socket) => {
     room.activeCombat = null;
     room.activeLootSplit = null;
     room.activeGroupSplit = null;
+    room.pendingSplits = [];
     room.pendingAlliance = null;
     room.pendingPillage = null;
     room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
 
+    io.emit('rooms_list', getAvailableRooms());
     io.to(socket.roomId).emit('game_started', {
       round: room.round,
       radio: room.currentRadio,
@@ -851,7 +900,7 @@ io.on('connection', (socket) => {
       const prevPlayer = room.players.find(p => p.playerToken === prevToken);
       if (prevPlayer) {
         prevPlayer.hasStrayDog = false;
-        io.to(prevPlayer.socketId).emit('lost_stray_dog', {
+        sendToPlayer(prevPlayer, 'lost_stray_dog', {
           thiefCaid: senderCaid || "Un rival"
         });
       }
@@ -883,21 +932,26 @@ io.on('connection', (socket) => {
     if (!targetPlayer) targetPlayer = room.players.find(p => p.socketId === targetSocketId);
     const attackerPlayer = room.players.find(p => p.socketId === socket.id);
 
-    if (!targetPlayer || !attackerPlayer) return;
+    if (!targetPlayer || !attackerPlayer || targetPlayer === attackerPlayer || room.gameOver) return;
+    // Seuls le joueur actif et ses alliés du tour peuvent attaquer
+    const activeNow = getActivePlayer(room);
+    if (!room.isTestRoom && activeNow && activeNow.playerToken !== attackerPlayer.playerToken && !(room.currentTurnAlliedTokens || []).includes(attackerPlayer.playerToken)) {
+      return socket.emit('error_msg', "Ce n'est pas ton tour.");
+    }
     // Un seul combat à la fois (le joueur actif et son allié pourraient attaquer en même temps)
     if (room.activeCombat) {
       return socket.emit('error_msg', "Un combat est déjà en cours : attends qu'il soit terminé.");
     }
 
     if (arePlayersInNonAggressionPact(room, attackerPlayer.playerToken, targetPlayer.playerToken)) {
-      return socket.emit('error_msg', "Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni cette manche, ni la suivante) !");
+      return socket.emit('error_msg', "Pacte de non-agression avec ce Caïd : impossible de l'attaquer jusqu'à la fin du pacte.");
     }
     // Caïd absent (a quitté la partie) : intouchable jusqu'à son retour
     if (targetPlayer.away) {
       return socket.emit('error_msg', `${targetPlayer.caidName || 'Ce Caïd'} a quitté la partie : impossible de l'attaquer tant qu'il est absent.`);
     }
     // Caïd à l'hôpital : intouchable jusqu'au début de son prochain tour
-    if (targetPlayer.inHospital) {
+    if (targetPlayer.inHospital || isKnockedOut(targetPlayer)) {
       return socket.emit('error_msg', `${targetPlayer.caidName || 'Ce Caïd'} est à l'hôpital : intouchable jusqu'à son prochain tour !`);
     }
 
@@ -906,6 +960,8 @@ io.on('connection', (socket) => {
     const allyPlayers = canCoordinate
       ? room.currentTurnAlliedTokens
           .filter(t => t !== attackerPlayer.playerToken && t !== targetPlayer.playerToken)
+          // Un allié lié à la cible par un pacte de non-agression ne participe pas
+          .filter(t => !arePlayersInNonAggressionPact(room, t, targetPlayer.playerToken))
           .map(t => room.players.find(p => p.playerToken === t))
           .filter(Boolean)
       : [];
@@ -1050,7 +1106,7 @@ io.on('connection', (socket) => {
           const p = room.players.find(x => x.playerToken === tok);
           if (p) {
             sendToPlayer(p, 'combat_finished_draw', {
-              message: "La contre-attaque a également été bloquée ! Match nul : personne ne perd de Cœur ni d'équipement."
+              message: "La contre-attaque a également été bloquée ! Match nul : personne ne perd de Cœur ni de butin."
             });
           }
         });
@@ -1136,7 +1192,7 @@ io.on('connection', (socket) => {
       availableCash: loserP.pocketCash || 0,
       availableDrugs: loserP.drugs || 0,
       hasProstitute: !!loserP.hasProstituteInTransit,
-      prostituteObj: loserP.prostituteObj || { level: 1, name: 'Prostituée L1', revenue: 1000 }
+      prostituteObj: loserP.prostituteObj || { level: 1, name: 'Prostituée Niv. 1', revenue: 1000 }
     };
 
     const winnerNames = winnerTokens
@@ -1260,14 +1316,15 @@ io.on('connection', (socket) => {
         });
       }
     } else if (category === 'prostitute') {
-      const targetWinnerToken = recipientToken || primaryWinner.playerToken;
+      if (!pillage.hasProstitute) return socket.emit('error_msg', "Le perdant n'a pas de prostituée.");
+      const targetWinnerToken = pillage.winnerTokens.includes(recipientToken) ? recipientToken : primaryWinner.playerToken;
       let destWinner = room.players.find(p => p.playerToken === targetWinnerToken) || primaryWinner;
       // 1 prostituée en transit maximum : si l'allié en a déjà une, elle revient au vainqueur principal
       if (destWinner.hasProstituteInTransit) destWinner = primaryWinner;
       if (destWinner.hasProstituteInTransit) {
         return socket.emit('error_msg', "Tu as déjà une prostituée en transit : choisis un autre butin.");
       }
-      const stolenPros = loserP.prostituteObj || { level: 1, name: 'Prostituée L1', revenue: 1000 };
+      const stolenPros = loserP.prostituteObj || { level: 1, name: 'Prostituée Niv. 1', revenue: 1000 };
 
       loserP.hasProstituteInTransit = false;
       loserP.prostituteObj = null;
@@ -1364,6 +1421,8 @@ io.on('connection', (socket) => {
     const room = rooms[socket.roomId];
     if (!room || !room.activeLootSplit) return;
     const split = room.activeLootSplit;
+    const actor = room.players.find(p => p.socketId === socket.id);
+    if (!actor || (actor.playerToken !== split.leftToken && actor.playerToken !== split.rightToken)) return;
 
     const pct = Math.max(0, Math.min(100, parseInt(leftPct) || 0));
     if (kind === 'drugs') split.drugLeftPct = pct;
@@ -1421,6 +1480,7 @@ io.on('connection', (socket) => {
       }
 
       room.activeLootSplit = null;
+      openNextSplit(room);
     } else {
       if (leftP) io.to(leftP.socketId).emit('loot_split_updated', split);
       if (rightP) io.to(rightP.socketId).emit('loot_split_updated', split);
@@ -1501,6 +1561,7 @@ io.on('connection', (socket) => {
     });
 
     room.activeGroupSplit = null;
+    openNextSplit(room, roomId);
     checkVictory(room, roomId);
   }
 
@@ -1514,18 +1575,20 @@ io.on('connection', (socket) => {
     const sender = room.players.find(p => p.socketId === socket.id);
     let targetP = room.players.find(p => p.playerToken === targetPlayerToken);
     if (!targetP) targetP = room.players.find(p => p.socketId === targetSocketId);
-    if (!sender || !targetP) return;
+    if (!sender || !targetP || sender === targetP || room.gameOver) return;
 
     if (arePlayersInNonAggressionPact(room, sender.playerToken, targetP.playerToken)) {
-      return socket.emit('error_msg', "Pacte d'Alliance actif : impossible de cibler votre allié (ni cette manche, ni la suivante) !");
+      return socket.emit('error_msg', "Pacte de non-agression avec ce Caïd : impossible de le cibler jusqu'à la fin du pacte.");
     }
     if (targetP.away) {
       return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} a quitté la partie : impossible de le cibler tant qu'il est absent.`);
     }
     // Caïd à l'hôpital : intouchable jusqu'au début de son prochain tour
-    if (targetP.inHospital) {
+    if (targetP.inHospital || isKnockedOut(targetP)) {
       return socket.emit('error_msg', `${targetP.caidName || 'Ce Caïd'} est à l'hôpital : intouchable jusqu'à son prochain tour !`);
     }
+    // Siphon : le cœur est retiré ici, aussi quand la cible est hors ligne (son téléphone le retrouve à la reconnexion)
+    if (effectType === 'siphon') targetP.hearts = Math.max(0, (typeof targetP.hearts === 'number' ? targetP.hearts : 1) - 1);
 
     const activeNow = getActivePlayer(room);
     sendToPlayer(targetP, 'received_special_effect', {
@@ -1647,6 +1710,11 @@ io.on('connection', (socket) => {
     if (pending.invitees[responder.playerToken] !== 'wait') return; // déjà répondu
     const sender = room.players.find(p => p.playerToken === pending.senderToken);
     if (!sender) return;
+    // Mis K.O. (ou a joué) pendant que la demande attendait : l'acceptation compte comme un refus
+    if (accepted && ((responder.inHospital && responder.inHospital.round === room.round) || isKnockedOut(responder) || (room.playedThisRoundTokens || []).includes(responder.playerToken))) {
+      accepted = false;
+      socket.emit('error_msg', "Tu ne peux plus rejoindre cette alliance (hôpital ou tour déjà joué).");
+    }
 
     pending.invitees[responder.playerToken] = accepted ? 'ok' : 'no';
     emitAllianceStatus(room);
@@ -1707,7 +1775,7 @@ io.on('connection', (socket) => {
       const statuses = Object.values(pending.invitees);
       if (!statuses.includes('wait') && !statuses.includes('ok')) {
         pending.declinedSent = !!sender.socketId;
-        io.to(sender.socketId).emit('alliance_declined', { refused: allianceNamesByStatus(room, 'no') });
+        io.to(sender.socketId).emit('alliance_declined', declinedPayload(room));
       }
     }
   });

@@ -52,7 +52,7 @@
       "id": "wp_pompe",
       "categorie": "arme",
       "slot": "WEAPON",
-      "nom": "Fusil a pompe",
+      "nom": "Fusil à pompe",
       "prix": 12000,
       "bonusVal": 10,
       "bonusLabel": "+10 Attaque",
@@ -70,7 +70,7 @@
       "bonusLabel": "+1 Défense",
       "isFirearm": false,
       "image": "equip-duck.jpg",
-      "desc": "Coin !? Qu'est ce qu'y a !?"
+      "desc": "Coin !? Qu'est-ce qu'il y a !?"
     },
     {
       "id": "ar_roller",
@@ -100,7 +100,7 @@
       "id": "ar_gilet",
       "categorie": "equipement",
       "slot": "ARMOR",
-      "nom": "Gilet par balle",
+      "nom": "Gilet pare-balles",
       "prix": 8000,
       "bonusVal": 8,
       "bonusLabel": "+8 Défense",

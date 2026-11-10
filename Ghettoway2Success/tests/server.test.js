@@ -240,8 +240,10 @@ test('un seul combat à la fois, et seul le vainqueur choisit le butin', async (
   const { players: [a, b] } = await startGame();
   a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
   await waitFor(b, 'combat_duel_opened');
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  assert.match(await waitFor(a, 'error_msg'), /déjà en cours/);
   b.emit('start_combat_engagement', { targetPlayerToken: a.token, attackerCaid: 'Jamel Pépouze' });
-  assert.match(await waitFor(b, 'error_msg'), /déjà en cours/);
+  assert.match(await waitFor(b, 'error_msg'), /pas ton tour/); // hors de son tour
   a.emit('combat_set_ready', { currentStat: 3 });
   b.emit('combat_set_ready', { currentStat: 0 });
   await waitFor(a, 'combat_finished_result');
@@ -322,4 +324,78 @@ test('après la fin de partie, plus de tour ni de nouvelle manche', async () => 
   a.emit('next_player_turn');
   await never(b, 'new_round_started');
   await never(b, 'turn_state_updated', 500);
+});
+
+test('un Caïd K.O. (0 cœur) est intouchable, même avant que son téléphone affiche l’hôpital', async () => {
+  const { players: [a, b] } = await startGame();
+  b.emit('sync_player', { hearts: 1 });
+  await waitFor(a, 'player_updated');
+  a.emit('apply_special_to_target', { targetPlayerToken: b.token, effectType: 'siphon', senderCaid: 'Burger Queen' });
+  await waitFor(b, 'received_special_effect');
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  assert.match(await waitFor(a, 'error_msg'), /hôpital/);
+  a.emit('apply_special_to_target', { targetPlayerToken: b.token, effectType: 'shuriken', senderCaid: 'Burger Queen' });
+  assert.match(await waitFor(a, 'error_msg'), /hôpital/);
+});
+
+test('deux partages à la suite : le second attend le premier, aucun butin perdu', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('propose_alliance', { targetPlayerTokens: [b.token], senderName: 'Burger Queen' });
+  const req = await waitFor(b, 'alliance_request_received');
+  b.emit('respond_alliance', { requestId: req.requestId, accepted: true });
+  await waitFor(a, 'alliance_confirmed');
+  a.emit('initiate_allied_heist_split', { heistName: 'Bijouterie', totalCash: 10000, totalDrugs: 0, allyTokens: [b.token] });
+  await waitFor(b, 'loot_split_opened');
+  a.emit('initiate_allied_heist_split', { heistName: 'Banque', totalCash: 2000, totalDrugs: 0, allyTokens: [b.token] });
+  assert.match(await waitFor(a, 'error_msg'), /Banque.*partage en cours/);
+  a.emit('accept_loot_split'); b.emit('accept_loot_split');
+  assert.strictEqual((await waitFor(a, 'loot_split_completed')).cashGained, 5000);
+  assert.strictEqual((await waitFor(b, 'loot_split_opened', d => d.title === 'Braquage : Banque')).totalCash, 2000);
+  a.emit('accept_loot_split'); b.emit('accept_loot_split');
+  assert.strictEqual((await waitFor(b, 'loot_split_completed', d => d.title === 'Braquage : Banque')).cashGained, 1000);
+});
+
+test('partie lancée : impossible de la rejoindre, et un second « Lancer » ne la remet pas à zéro', async () => {
+  const { roomId, players: [a] } = await startGame();
+  const c = await connect();
+  c.emit('join_room', { roomId, playerToken: 'tok_intrus' });
+  assert.match(await waitFor(c, 'error_msg'), /déjà commencé/);
+  a.emit('next_player_turn');
+  a.events.length = 0;
+  a.emit('start_game');
+  await never(a, 'game_started');
+});
+
+test('combat resté ouvert (téléphone éteint en plein duel) : annulé au changement de tour', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  a.emit('combat_set_ready', { currentStat: 3 });
+  a.emit('next_player_turn');
+  await waitFor(b, 'combat_aborted');
+  b.emit('start_combat_engagement', { targetPlayerToken: a.token, attackerCaid: 'Jamel Pépouze' });
+  await waitFor(a, 'combat_duel_opened');
+});
+
+test('attaque en alliance : l’allié lié à la cible par un pacte ne participe pas', async () => {
+  const { players: [a, b, c] } = await startGame([['caid_1', 'Burger Queen'], ['caid_7', 'Jamel Pépouze'], ['caid_5', 'J-Lo Gramme']]);
+  // Manche 1 (ordre A B C) : A s'allie avec C, pacte A-C jusqu'à la manche 2
+  a.emit('propose_alliance', { targetPlayerTokens: [c.token], senderName: 'Burger Queen' });
+  const r1 = await waitFor(c, 'alliance_request_received');
+  c.emit('respond_alliance', { requestId: r1.requestId, accepted: true });
+  await waitFor(a, 'alliance_confirmed');
+  a.emit('next_player_turn');
+  await waitFor(b, 'turn_state_updated', t => t.activePlayerToken === b.token);
+  b.emit('next_player_turn');
+  // Manche 2 (ordre B C A) : B s'allie avec C et attaque A « en alliance »
+  await waitFor(b, 'turn_state_updated', t => t.round === 2 && t.activePlayerToken === b.token);
+  b.emit('propose_alliance', { targetPlayerTokens: [c.token], senderName: 'Jamel Pépouze' });
+  const r2 = await waitFor(c, 'alliance_request_received');
+  c.emit('respond_alliance', { requestId: r2.requestId, accepted: true });
+  await waitFor(b, 'alliance_confirmed', d => d !== undefined, 2000);
+  c.events.length = 0;
+  b.emit('start_combat_engagement', { targetPlayerToken: a.token, attackerCaid: 'Jamel Pépouze', useAlliance: true });
+  const duel = await waitFor(a, 'combat_duel_opened');
+  assert.strictEqual(duel.opponentCaid, 'Jamel Pépouze');
+  await never(c, 'combat_duel_opened');
 });

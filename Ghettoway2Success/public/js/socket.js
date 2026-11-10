@@ -132,6 +132,9 @@ if (socket) {
   });
   socket.on('update_room_players', ({ players, isReady, maxPlayers, selectionMode }) => {
     if (selectionMode) roomSelectionMode = selectionMode;
+    // L'hôte a quitté le salon : le serveur a passé la main à un autre joueur
+    const meInRoom = (players || []).find(p => p.playerToken === myPlayerToken);
+    if (meInRoom && meInRoom.isHost !== undefined) localPlayer.isHost = !!meInRoom.isHost;
     updateRivalsList(players);
     const countEl = document.getElementById('lobbyPlayerCount');
     if (countEl) countEl.innerText = `${players.length} / ${maxPlayers} Joueurs connectés`;
@@ -398,7 +401,7 @@ if (socket) {
       refreshHud();
       await showAppAlert(`Vous avez pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
     } else if (category === 'prostitute') {
-      localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée L1', revenue: 1000 };
+      localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée Niv. 1', revenue: 1000 };
       refreshHud();
       await showAppAlert(`Vous avez récupéré la Prostituée de ${loserCaid} en transit !`, "👠 Escort Capturée");
     }
@@ -450,7 +453,8 @@ if (socket) {
     // Malus reçu hors ligne pendant une manche déjà terminée : il ne compte plus
     if (late && round && round < (currentSession.round || 1) && ['shuriken', 'danse', 'canette'].includes(effectType)) return;
     // K.O. subi hors ligne : rattaché au tour où il a eu lieu (soigné au début de son prochain tour, pas de fin de tour)
-    if (late && effectType === 'siphon' && localPlayer.hearts <= 1 && !localPlayer.inHospital) {
+    // (le cœur a déjà été retiré par le serveur : l'état rendu à la reconnexion en tient compte)
+    if (late && effectType === 'siphon' && localPlayer.hearts <= 0 && !localPlayer.inHospital) {
       localPlayer.hearts = 0;
       localPlayer.inHospital = { round: round || currentSession.round || 1, turnToken: turnToken || null };
       refreshHud();
@@ -460,7 +464,7 @@ if (socket) {
       return;
     }
     let stolen = null;
-    if (effectType === 'siphon') localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
+    if (effectType === 'siphon' && !late) localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
     else if (effectType === 'shuriken') localPlayer.tempDefMalus = 3;
     else if (effectType === 'danse') localPlayer.tempAtkMalus = 3;
     else if (effectType === 'canette') {

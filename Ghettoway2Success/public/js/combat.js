@@ -253,12 +253,13 @@ async function initiateCombatEngagement() {
   if (!target) return showAppAlert("Aucune cible attaquable sélectionnée.", "Cible Requise");
 
   if (isRivalProtectedByPact(target.playerToken)) {
-    return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni cette manche, ni la suivante) !", "🤝 Pacte Actif");
+    return showAppAlert(`Pacte de non-agression avec ce Caïd jusqu’à la fin de la manche ${fightPactUntil(target.playerToken) || ((currentSession.round || 1) + 1)} : impossible de l’attaquer.`, "🤝 Cible protégée");
   }
 
   let useAlliance = false;
   // Alliés du tour, sauf la cible éventuelle
-  const combatAllies = (localPlayer.activeAllies || []).filter(a => a.allyToken !== target.playerToken);
+  // (un allié lié à la cible par un pacte de non-agression n'attaque pas avec toi)
+  const combatAllies = (localPlayer.activeAllies || []).filter(a => a.allyToken !== target.playerToken && !pactBetween(a.allyToken, target.playerToken));
   if (localPlayer.allianceActive && combatAllies.length) {
     const n = combatAllies.length + 1;
     useAlliance = await showAppConfirm(

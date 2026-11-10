@@ -45,7 +45,7 @@ function showHospitalScreen(mode, cause, heartsBefore = 0, endsTurn = false) {
   box.innerHTML = ko
     ? (cause ? row('ph-warning', 'Cause', '', '', cause) : '') +
       row('ph-heart-break', 'Cœurs de vie', '', '0 / 3') +
-      row('ph-shield-check', 'Intouchable', '', 'jusqu’à ton tour', 'Ni attaque, ni pouvoir, ni alliance cette manche') +
+      row('ph-shield-check', 'Intouchable', '', 'jusqu’à ton tour', 'Ni attaque ni pouvoir jusqu’à ton prochain tour ; pas d’alliance cette manche') +
       (endsTurn ? row('ph-hourglass-simple', 'Ton tour', 'en cours', 'terminé') : '')
     : row('ph-heart', 'Cœurs de vie', `${heartsBefore}`, `${localPlayer.hearts} / 3`) +
       row('ph-person-simple-walk', 'Ton tour', '', 'à toi de jouer');

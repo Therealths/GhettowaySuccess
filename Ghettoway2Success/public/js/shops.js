@@ -8,11 +8,11 @@ let ARMORY_CATALOG = [
   { id: "wp_knife", categorie: "arme", slot: "WEAPON", nom: "Cran d'arrêt", prix: 2000, bonusVal: 4, bonusLabel: "+4 Attaque", isFirearm: false, image: "arme-knife.jpg", desc: "Idéal pour intimider au corps à corps." },
   { id: "wp_axe", categorie: "arme", slot: "WEAPON", nom: "Hache", prix: 5000, bonusVal: 6, bonusLabel: "+6 Attaque", isFirearm: false, image: "arme-axe.jpg", desc: "On peut même couper du bois avec..." },
   { id: "wp_gun", categorie: "arme", slot: "WEAPON", nom: "Revolver", prix: 8000, bonusVal: 8, bonusLabel: "+8 Attaque", isFirearm: true, image: "arme-gun.jpg", desc: "Pan ! Pan ! Pan !" },
-  { id: "wp_pompe", categorie: "arme", slot: "WEAPON", nom: "Fusil a pompe", prix: 12000, bonusVal: 10, bonusLabel: "+10 Attaque", isFirearm: true, image: "arme-pompe.jpg", desc: "Hasta la vista baby !" },
-  { id: "ar_duck", categorie: "equipement", slot: "ARMOR", nom: "Bouée canard", prix: 0, bonusVal: 1, bonusLabel: "+1 Défense", isFirearm: false, image: "equip-duck.jpg", desc: "Coin !? Qu'est ce qu'y a !?" },
+  { id: "wp_pompe", categorie: "arme", slot: "WEAPON", nom: "Fusil à pompe", prix: 12000, bonusVal: 10, bonusLabel: "+10 Attaque", isFirearm: true, image: "arme-pompe.jpg", desc: "Hasta la vista baby !" },
+  { id: "ar_duck", categorie: "equipement", slot: "ARMOR", nom: "Bouée canard", prix: 0, bonusVal: 1, bonusLabel: "+1 Défense", isFirearm: false, image: "equip-duck.jpg", desc: "Coin !? Qu'est-ce qu'il y a !?" },
   { id: "ar_roller", categorie: "equipement", slot: "ARMOR", nom: "Protections Rollers", prix: 2000, bonusVal: 3, bonusLabel: "+3 Défense", isFirearm: false, image: "equip-roller.jpg", desc: "Paré à la chute !" },
   { id: "ar_hat", categorie: "equipement", slot: "ARMOR", nom: "Casque de soldat", prix: 5000, bonusVal: 5, bonusLabel: "+5 Défense", isFirearm: false, image: "equip-hat.jpg", desc: "J'ai la tête dure !" },
-  { id: "ar_gilet", categorie: "equipement", slot: "ARMOR", nom: "Gilet par balle", prix: 8000, bonusVal: 8, bonusLabel: "+8 Défense", isFirearm: false, image: "equip-gilet.jpg", desc: "J'ai mis une petite laine" },
+  { id: "ar_gilet", categorie: "equipement", slot: "ARMOR", nom: "Gilet pare-balles", prix: 8000, bonusVal: 8, bonusLabel: "+8 Défense", isFirearm: false, image: "equip-gilet.jpg", desc: "J'ai mis une petite laine" },
   { id: "ar_crs", categorie: "equipement", slot: "ARMOR", nom: "Armure de CRS", prix: 12000, bonusVal: 10, bonusLabel: "+10 Défense", isFirearm: false, image: "equip-crs.jpg", desc: "Robocop style" }
 ];
 
@@ -264,7 +264,7 @@ function freeItemClaimed(item) { return !item.prix && (localPlayer.freeItemsClai
 async function buyArmoryCatalogItem(itemId) {
   const item = ARMORY_CATALOG.find(i => i.id === itemId);
   if (!item) return;
-  if (freeItemClaimed(item)) return showAppAlert(`${item.nom} : déjà récupérée, une seule par partie !`, "Déjà récupérée");
+  if (freeItemClaimed(item)) return showAppAlert(`${item.nom} : déjà récupérée, une seule par partie !`, "⛔ Déjà prise");
   let cost = getArmoryItemEffectivePrice(item);
   const isWeapon = item.categorie === 'arme';
   if (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled && cost > 0) {
@@ -289,6 +289,7 @@ async function buyArmoryCatalogItem(itemId) {
       desc: item.desc
     }
   };
+  pPayload.shop = 'Armurerie';
   closeModal('modalArmoryShop');
   if (cost === 0) {
     if (!item.prix) localPlayer.freeItemsClaimed = [...(localPlayer.freeItemsClaimed || []), item.id];
@@ -376,7 +377,7 @@ async function buyNightclubItem(itemId) {
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
   }
-  openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom });
+  openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom, shop: 'Nightclub' });
 }
 
 // --- 3. SPORTCLUB ---
@@ -446,7 +447,7 @@ async function buySportclubItem(itemId) {
   const atkVal = item.atk || item.bonusVal || (item.lvl === 2 ? 2 : 1);
   const dataPayload = { t: 'gb', lvl: item.lvl || 1, p: item.prix, atk: atkVal, def: atkVal, n: item.nom };
   closeModal('modalSportclubShop');
-  openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom });
+  openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom, shop: 'Sportclub' });
 }
 
 // --- 4. CONCESSIONNAIRE ---
@@ -532,6 +533,7 @@ async function buyDealerCatalogItem(itemId) {
       desc: item.desc
     }
   };
+  pPayload.shop = 'Concessionnaire';
   closeModal('modalDealerShop');
   if (cost === 0) {
     await finalizePurchaseExecution(pPayload);
@@ -649,10 +651,10 @@ function openPaymentChoiceModal(purchaseData) {
   pendingPurchaseData = purchaseData;
   const cost = purchaseData.cost;
   const pocket = localPlayer.pocketCash, safe = localPlayer.safeCash;
-  // Nom de la boutique ouverte derrière (sinon « Achat »)
+  // Nom de la boutique (donné par l'achat, sinon celle ouverte derrière, sinon « Achat »)
   const shops = { modalArmoryShop: 'Armurerie', modalNightclubShop: 'Nightclub', modalSportclubShop: 'Sportclub', modalDealerShop: 'Concessionnaire' };
   const shop = Object.keys(shops).find(id => !document.getElementById(id).classList.contains('hidden'));
-  document.getElementById('payShopName').innerText = shop ? shops[shop] : 'Achat';
+  document.getElementById('payShopName').innerText = purchaseData.shop || (shop ? shops[shop] : 'Achat');
   document.getElementById('paymentItemNameTitle').innerText = purchaseData.name;
   document.getElementById('paymentItemPriceDisplay').innerText = `${cost.toLocaleString()} €`;
   document.getElementById('paymentPocketAvailable').innerText = `${pocket.toLocaleString()} €`;
@@ -738,21 +740,21 @@ async function finalizePurchaseExecution(pData) {
       desc: data.desc || `Confère ${bTxt}`
     });
     refreshHud(); // objet enregistré tout de suite, sans attendre la lecture du message
-    await showAppAlert(`${data.n} ajouté au Sac !`, "📦 Achat Confirmé");
+    await showAppAlert(`Rangé dans ton Sac : ${data.n}`, "📦 Achat Confirmé");
   } else if (type === 'gb') {
     const bVal = data.atk || (data.lvl === 2 ? 2 : 1);
     localPlayer.musclesOnPerson.push({
       id: 'gb_' + Date.now(),
       type: 'MUSCLE',
       level: data.lvl || 1,
-      name: `Lascar L${data.lvl || 1}`,
+      name: `Lascar Niv. ${data.lvl || 1}`,
       bonusVal: bVal,
       bonusLabel: `+${bVal} Atk / +${bVal} Def`
     });
     refreshHud();
     await showAppAlert(`Lascar recruté (+${bVal} Attaque et +${bVal} Défense) !`, "💪 Recrutement");
   } else if (type === 'pr') {
-    localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée L${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
+    localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée Niv. ${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
     refreshHud();
     await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
   }

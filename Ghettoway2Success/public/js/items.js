@@ -69,7 +69,7 @@ const FOUILLE_TABLE = [
   [1, { name: 'Kebab', eff: 'heal', val: 1, desc: 'Restaure 1 Cœur de Vie' }],
   [1, { name: 'Couvercle de poubelle', eff: 'null_enemy_weapon', dur: 'combat', desc: 'Réduit l’arme adverse à 0' }],
   [1, { name: 'Pot de Protéine', eff: 'double_muscles_atk', dur: 'combat', desc: 'Attaque/Défense Lascars doublée jusqu’à la fin de la manche' }],
-  [1, { name: 'Balle perforante', eff: 'double_weapon_atk', dur: 'combat', desc: 'Dégâts arme à feu doublés' }],
+  [1, { name: 'Balle perforante', eff: 'double_weapon_atk', dur: 'combat', desc: 'Bonus d’Attaque de l’arme à feu doublé (1 combat)' }],
   [1, { name: 'Passeport diplomatique', eff: 'cancel_police', desc: 'Annule un contrôle de police' }],
   [1, { name: 'Sifflet', eff: 'stray_dog', dur: 'tour', desc: 'Rallie le Chien Errant (+2 Atk / +2 Def)' }]
 ];
@@ -96,7 +96,7 @@ const deckAttacking = () => !!currentDuelInfo && currentDuelInfo.role === 'attac
 function deckGain(it) {
   const lascars = localPlayer.musclesOnPerson.reduce((s, m) => s + (m.bonusVal || 1), 0);
   const w = localPlayer.equipped.weapon;
-  if (it.eff === 'double_muscles_atk') return `+${lascars} ${deckAttacking() ? 'ATK' : 'DÉF'}`;
+  if (it.eff === 'double_muscles_atk') return musclesDoubled() ? 'Déjà actif' : `+${lascars} ${deckAttacking() ? 'ATK' : 'DÉF'}`;
   if (it.eff === 'double_weapon_atk') return `+${w && !myWeaponNullified ? w.bonusVal : 0} ATK`;
   if (it.eff === 'bonus_combat_atk') return `+${it.val || 1} ATK`;
   if (it.eff === 'null_enemy_weapon') return 'Arme 0';
@@ -111,7 +111,7 @@ function deckBlocked(it) {
 const DECK_TAG = { double_muscles_atk: 'x2 Lascars', double_weapon_atk: '🔥 Arme à feu', null_enemy_weapon: 'Bouclier', bonus_combat_atk: 'Bonus', def_malus_round: 'À lancer' };
 const DECK_DESC = {
   double_muscles_atk: 'Tes Lascars comptent double jusqu’à la fin de la manche.',
-  double_weapon_atk: 'Les dégâts de ton arme à feu sont doublés.',
+  double_weapon_atk: 'Le bonus d’Attaque de ton arme à feu est doublé pour ce combat.',
   null_enemy_weapon: 'L’arme de ton adversaire est réduite à 0 pour ce combat.',
   def_malus_round: 'Lance-la sur ton adversaire : −1 Défense jusqu’à la fin de la manche.'
 };

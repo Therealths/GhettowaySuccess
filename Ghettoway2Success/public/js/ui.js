@@ -53,7 +53,7 @@ window.addEventListener('appinstalled', hideInstallBanner);
 // emoji du titre en grande icône animée, montants mis en couleur
 const MSG_EMOJI = /^\s*((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u200D(?:\p{Extended_Pictographic}))*)\s*/u;
 const MSG_WIN = /réussi|récupér|perçue|recrut|rallié|gagn|victoire|confirmé|sécuris|capturée|miracle|sieste|soign|de retour|livr|dérobé|acheté|pacte|butin|partag|encaiss|rente/i;
-const MSG_LOSE = /subi|volé|échec|impossible|défaite|siphon|shuriken|danse|insuffisant|refus|neutralis|supprim|perdu|interrompu|expiré|quitté|garde à vue|k\.o|danger/i;
+const MSG_LOSE = /subi|volé|échec|impossible|défaite|siphon|shuriken|danse|insuffisant|refus|déjà récupérée|ne pouvez pas|impossible de l|protégée|neutralis|supprim|perdu|interrompu|expiré|quitté|garde à vue|k\.o|danger/i;
 const MSG_TAGS = { win: 'Bonne nouvelle', lose: 'Aïe', info: 'Info', ask: 'Attention' };
 const MSG_DEFAULT_ICON = { win: '✅', lose: '⛔', info: '🔔', ask: '❓' };
 // Animations spéciales de certaines icônes

@@ -164,7 +164,7 @@ function openCanetteThrow(item) {
 function launchTargetedPower() {
   const target = (connectedRivals || []).find(r => r.playerToken === powTargetToken);
   if (!target || (!powItem && localPlayer.specialUsedThisTurn)) return;
-  if (isRivalProtectedByPact(target.playerToken)) return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas cibler votre allié !", "Pacte Actif");
+  if (isRivalProtectedByPact(target.playerToken)) return showAppAlert(`Pacte de non-agression avec ce Caïd jusqu’à la fin de la manche ${fightPactUntil(target.playerToken) || ((currentSession.round || 1) + 1)} : impossible de le cibler.`, "🤝 Cible protégée");
   const caid = powCaid();
   const effect = POW_TARGETED[caid.id];
   if (socket) {
@@ -175,6 +175,8 @@ function launchTargetedPower() {
       senderCaid: getMyCaid().name
     });
   }
+  // Siphon déjà à 3 Cœurs : la cible perd son cœur, mais le lanceur ne gagne rien
+  const siphonGain = effect === 'siphon' && localPlayer.hearts < 3;
   if (effect === 'siphon') localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
   if (powItem) {
     // La canette est lancée : elle quitte le sac, le pouvoir du Caïd reste disponible
@@ -185,7 +187,7 @@ function launchTargetedPower() {
   refreshHud();
   const name = allyRivalName(target);
   const stage = powDuo(powAv(caid.imageFile, 'Toi', 'me'), powAv(allyCaidImg(target.caidId, name), name, 'hit'), powFx(effect), `fx-${effect}`);
-  const [icon, label, after] = POW_OUT[effect];
+  const [icon, label, after] = effect === 'siphon' && !siphonGain ? ['ph-heart-break', 'Cœur détruit', 'déjà au max'] : POW_OUT[effect];
   const bottom = `<div class="pow-result">${powRow(icon, `${label}`, `<span class="pow-ac">${after}</span>`)}
     <div class="text-center text-[11px] font-bold text-slate-400 mt-2">${effect === 'canette' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'shuriken' || effect === 'danse' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'swap_pos' ? `Échange ton pion avec celui de ${escapeHtml(name)}.` : `Sur ${escapeHtml(name)}.`}</div>
     <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">Continuer</button></div>`;
