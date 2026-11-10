@@ -42,7 +42,7 @@ function openPillageModalUI(pillageInfo) {
           <button onclick="choosePillageReward('prostitute', '${myPlayerToken}')" class="w-full p-3 glass-panel rounded-2xl border border-pink-500/40 flex items-center justify-between text-left">
             <div>
               <span class="text-xs font-black text-pink-300 uppercase block">👠 Prendre sa Prostituée (Pour Moi)</span>
-              <span class="text-[10px] font-mono text-white">Place l'escort dans votre slot transit</span>
+              <span class="text-[10px] font-mono text-white">Place l'escort dans ton slot transit</span>
             </div>
             <i class="ph-bold ph-arrow-right text-pink-400"></i>
           </button>
@@ -53,8 +53,8 @@ function openPillageModalUI(pillageInfo) {
         btns.push(`
           <button onclick="choosePillageReward('prostitute', '${escapeHtml(a.allyToken)}')" class="w-full p-3 glass-panel rounded-2xl border border-purple-500/40 flex items-center justify-between text-left">
             <div>
-              <span class="text-xs font-black text-purple-300 uppercase block">👠 Donner sa Prostituée à ${escapeHtml(a.caid || 'votre allié')}</span>
-              <span class="text-[10px] font-mono text-white">Place l'escort chez votre allié</span>
+              <span class="text-xs font-black text-purple-300 uppercase block">👠 Donner sa Prostituée à ${escapeHtml(a.caid || 'ton allié')}</span>
+              <span class="text-[10px] font-mono text-white">Place l'escort chez ton allié</span>
             </div>
             <i class="ph-bold ph-arrow-right text-purple-400"></i>
           </button>
@@ -66,7 +66,7 @@ function openPillageModalUI(pillageInfo) {
         <button onclick="choosePillageReward('prostitute', '${myPlayerToken}')" class="w-full p-3 glass-panel rounded-2xl border border-pink-500/40 flex items-center justify-between text-left ${!canTakePros ? 'opacity-40 pointer-events-none' : ''}">
           <div>
             <span class="text-xs font-black text-pink-300 uppercase block">👠 Capturer sa Prostituée</span>
-            <span class="text-[10px] font-mono text-white">${canTakePros ? 'Disponible en transit' : 'Votre slot transit est déjà occupé'}</span>
+            <span class="text-[10px] font-mono text-white">${canTakePros ? 'Disponible en transit' : 'Ton slot transit est déjà occupé'}</span>
           </div>
           <i class="ph-bold ph-arrow-right text-pink-400"></i>
         </button>
@@ -201,7 +201,7 @@ function fightLog(html, reset) {
 
 // CHOIX : cartes des Caïds rivaux (pacte actif et hôpital grisés)
 async function openCombatModal() {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour d'attaquer !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour d'attaquer !", "Tour Inactif");
   isCombatReady = false;
   fightTargetToken = null;
   syncMultiplayerTargets();
@@ -263,7 +263,7 @@ async function initiateCombatEngagement() {
   if (localPlayer.allianceActive && combatAllies.length) {
     const n = combatAllies.length + 1;
     useAlliance = await showAppConfirm(
-      `Vous êtes en Alliance avec ${formatAllyNames(combatAllies)}.\n\nComment voulez-vous attaquer ?\n\n• SOLO : vous attaquez seul.\n• EN ALLIANCE : attaque coordonnée à ${n} (si vous êtes ${n === 2 ? 'tous deux' : 'tous'} sur la bonne case).`,
+      `Tu es en Alliance avec ${formatAllyNames(combatAllies)}.\n\nComment veux-tu attaquer ?\n\n• SOLO : tu attaques seul.\n• EN ALLIANCE : attaque coordonnée à ${n} (si vous êtes ${n === 2 ? 'tous deux' : 'tous'} sur la bonne case).`,
       "⚔️ Solo ou en Alliance ?",
       "🤝 En Alliance",
       "Solo"

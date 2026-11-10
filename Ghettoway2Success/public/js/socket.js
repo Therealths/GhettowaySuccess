@@ -100,7 +100,7 @@ if (socket) {
   });
   // Un autre joueur a quitté la partie : on propose de quitter aussi (la partie est gardée)
   socket.on('player_left_game', async ({ caidName } = {}) => {
-    if (await showAppConfirm(`${caidName || 'Un Caïd'} a quitté la partie.\n\nVoulez-vous quitter aussi ? La partie est gardée : vous pourrez la reprendre plus tard.`, "🚪 Départ d'un joueur", "Quitter aussi", "Continuer")) leaveGameNow();
+    if (await showAppConfirm(`${caidName || 'Un Caïd'} a quitté la partie.\n\nVeux-tu quitter aussi ? La partie est gardée : tu pourras la reprendre plus tard.`, "🚪 Départ d'un joueur", "Quitter aussi", "Continuer")) leaveGameNow();
   });
   socket.on('player_returned', ({ caidName } = {}) => {
     showAppAlert(`${caidName || 'Un Caïd'} est de retour dans la partie !`, "👋 Retour");
@@ -166,13 +166,13 @@ if (socket) {
     }
   });
   socket.on('ally_ended_turn', async ({ allyCaid }) => {
-    await showAppAlert(`${allyCaid || 'Votre allié'} a terminé sa participation à votre tour.\nVous continuez seul jusqu'à la fin de votre tour.`, "🤝 Fin de l'Alliance");
+    await showAppAlert(`${allyCaid || 'Ton allié'} a terminé sa participation à ton tour.\nTu continues seul jusqu'à la fin de ton tour.`, "🤝 Fin de l'Alliance");
   });
   socket.on('turn_skipped', async ({ allyCaid }) => {
     // allyCaid : un nom, une liste de noms (texte) ou un tableau
     const names = Array.isArray(allyCaid) ? allyCaid : [];
     const withWho = names.length ? ` avec ${allyListNames(names)}` : (allyCaid && !Array.isArray(allyCaid) ? ` avec ${allyCaid}` : ' en alliance');
-    await showAppAlert(`Votre tour est passé : vous avez déjà joué cette manche${withWho}.\n\nVous rejouerez à la manche suivante.`, "⏭️ Tour déjà joué");
+    await showAppAlert(`Ton tour est passé : tu as déjà joué cette manche${withWho}.\n\nTu rejoueras à la manche suivante.`, "⏭️ Tour déjà joué");
   });
   socket.on('game_started', ({ round, radio, players }) => {
     updateRivalsList(players);
@@ -256,7 +256,7 @@ if (socket) {
 
     // J-Lo Gramme agressée : Prière Miraculeuse (50% d'annuler l'agression), 1x par manche
     if (role === 'defender' && (phase || 1) === 1 && localPlayer.caidId === 'caid_5' && !localPlayer.specialUsedThisTurn) {
-      if (await showAppConfirm(`${opponentCaid} vous agresse !\n\nTenter votre 'Prière Miraculeuse' (50% d'annuler cette agression) ?`, "🙏 J-Lo Gramme")) {
+      if (await showAppConfirm(`${opponentCaid} t'agresse !\n\nTenter ta 'Prière Miraculeuse' (50 % d'annuler cette agression) ?`, "🙏 J-Lo Gramme")) {
         localPlayer.specialUsedThisTurn = true;
         refreshHud();
         if (Math.random() >= 0.5) {
@@ -272,7 +272,7 @@ if (socket) {
     myWeaponNullified = true;
     updateArenaLiveStats();
     fightLog(`🗑️ <b>${escapeHtml(byCaid)}</b> a sorti un Couvercle de poubelle : ton arme compte pour 0 !`);
-    await showAppAlert(`${byCaid} se protège avec un Couvercle de poubelle : votre arme compte pour 0 dans ce combat !`, "🗑️ Arme Neutralisée");
+    await showAppAlert(`${byCaid} se protège avec un Couvercle de poubelle : ton arme compte pour 0 dans ce combat !`, "🗑️ Arme Neutralisée");
   });
   socket.on('combat_cancelled_by_prayer', async ({ caidName }) => {
     endSingleCombatEffects();
@@ -286,7 +286,7 @@ if (socket) {
   socket.on('combat_waiting_defender_riposte_choice', ({ defenderCaid }) => {
     closeModal('modalCombatItemSelector');
     fightWaiting = `${defenderCaid || 'Le défenseur'} choisit qui reçoit sa contre-attaque…`;
-    fightLog(`🛡️ Votre assaut a été bloqué ! <b>${escapeHtml(defenderCaid)}</b> choisit sa cible pour contre-attaquer…`);
+    fightLog(`🛡️ L'assaut a été bloqué ! <b>${escapeHtml(defenderCaid)}</b> choisit sa cible pour contre-attaquer…`);
     renderFightDuel(true);
   });
 
@@ -327,7 +327,7 @@ if (socket) {
 
   socket.on('combat_opponent_played_items', async ({ senderCaid, itemNames }) => {
     fightLog(`⚠️ <b>${escapeHtml(senderCaid)}</b> a joué : ${escapeHtml(itemNames.join(', '))} !`);
-    await showAppAlert(`${senderCaid} vient d'activer : ${itemNames.join(', ')} !\nVous pouvez aussi jouer des objets.`, "⚠️ Action Adverse");
+    await showAppAlert(`${senderCaid} vient d'activer : ${itemNames.join(', ')} !\nTu peux aussi jouer des objets.`, "⚠️ Action Adverse");
   });
 
   socket.on('combat_opponent_is_ready', ({ caidName }) => {
@@ -379,15 +379,15 @@ if (socket) {
     if (category === 'cash') {
       localPlayer.pocketCash = 0;
       refreshHud();
-      await showAppAlert(`${thiefCaid} vous a dépouillé de 100% de votre Cash en poche (${amount.toLocaleString()} €) !`, "💸 Pillage Subi");
+      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ton Cash en poche (${amount.toLocaleString()} €) !`, "💸 Pillage Subi");
     } else if (category === 'drugs') {
       localPlayer.drugs = 0;
       refreshHud();
-      await showAppAlert(`${thiefCaid} vous a dépouillé de 100% de votre Drogue en poche (${amount} kg) !`, "🌿 Pillage Subi");
+      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ta Drogue en poche (${amount} kg) !`, "🌿 Pillage Subi");
     } else if (category === 'prostitute') {
       localPlayer.prostituteInTransit = null;
       refreshHud();
-      await showAppAlert(`${thiefCaid} a capturé votre Prostituée en transit !`, "👠 Pillage Subi");
+      await showAppAlert(`${thiefCaid} a capturé ta Prostituée en transit !`, "👠 Pillage Subi");
     }
   });
 
@@ -395,15 +395,15 @@ if (socket) {
     if (category === 'cash') {
       if (!late) localPlayer.pocketCash += (amount || 0);
       refreshHud();
-      await showAppAlert(`Vous avez pris +${(amount || 0).toLocaleString()} € en cash sur ${loserCaid} !`, "💰 Butin Récupéré");
+      await showAppAlert(`Tu as pris +${(amount || 0).toLocaleString()} € en cash sur ${loserCaid} !`, "💰 Butin Récupéré");
     } else if (category === 'drugs') {
       if (!late) localPlayer.drugs += (amount || 0);
       refreshHud();
-      await showAppAlert(`Vous avez pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
+      await showAppAlert(`Tu as pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
     } else if (category === 'prostitute') {
       localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée Niv. 1', revenue: 1000 };
       refreshHud();
-      await showAppAlert(`Vous avez récupéré la Prostituée de ${loserCaid} en transit !`, "👠 Escort Capturée");
+      await showAppAlert(`Tu as récupéré la Prostituée de ${loserCaid} en transit !`, "👠 Escort Capturée");
     }
   });
 
@@ -442,12 +442,12 @@ if (socket) {
   socket.on('lost_stray_dog', async ({ thiefCaid }) => {
     localPlayer.strayDogActive = false;
     refreshHud();
-    await showAppAlert(`${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant !`, "🐕 Chien Errant Volé");
+    await showAppAlert(`${thiefCaid} a utilisé un sifflet et t'a volé le Chien Errant !`, "🐕 Chien Errant Volé");
   });
   socket.on('stray_dog_granted', async () => {
     localPlayer.strayDogActive = true;
     refreshHud();
-    await showAppAlert("Le Chien Errant vous rejoint (+2 Atk / +2 Def) !\nIl reste avec vous jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
+    await showAppAlert("Le Chien Errant te rejoint (+2 Atk / +2 Def) !\nIl reste avec toi jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
   });
   socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId, senderToken, late, round, turnToken }) => {
     // Malus reçu hors ligne pendant une manche déjà terminée : il ne compte plus
@@ -484,7 +484,7 @@ if (socket) {
   socket.on('gain_stolen_item', async ({ item }) => {
     localPlayer.inventory.push(item);
     refreshHud();
-    await showAppAlert(`${item.name} a été ajouté à votre Sac !`, "🎁 Butin Dérobé");
+    await showAppAlert(`${item.name} a été ajouté à ton Sac !`, "🎁 Butin Dérobé");
   });
   // Alliance : écrans plein page (js/alliance.js)
   socket.on('alliance_request_received', (data) => { if (data) showAllianceRequest(data); });

@@ -101,7 +101,7 @@ async function toggleQrTorch() {
 }
 
 async function openQrScannerModal() {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   const scr = document.getElementById('modalQrScanner');
   scr.dataset.state = 'scan';
   qrDetectedLock = false;
@@ -189,7 +189,7 @@ async function cancelSelectedQrPhoto() {
 // Découverte d'objet : voir js/items.js
 
 async function processQrPayload(payload) {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   closeQrScannerModal();
   let data = payload;
   if (typeof payload === 'string') {
@@ -265,7 +265,7 @@ async function processQrPayload(payload) {
     const n = heistAllies.length + 1;
     if (localPlayer.allianceActive && heistAllies.length) {
       coordinateWithAlly = await showAppConfirm(
-        `Vous êtes en Alliance avec ${formatAllyNames(heistAllies)}.\n\nComment voulez-vous faire ce braquage ?\n\n• SOLO : vous tentez le braquage seul.\n• EN ALLIANCE : braquage coordonné à ${n} (${n === 2 ? 'tous les deux' : 'tous'} sur la case : forces cumulées & butin partagé).`,
+        `Tu es en Alliance avec ${formatAllyNames(heistAllies)}.\n\nComment veux-tu faire ce braquage ?\n\n• SOLO : tu tentes le braquage seul.\n• EN ALLIANCE : braquage coordonné à ${n} (${n === 2 ? 'tous les deux' : 'tous'} sur la case : forces cumulées & butin partagé).`,
         "💥 Solo ou en Alliance ?",
         "🤝 En Alliance",
         "Solo"

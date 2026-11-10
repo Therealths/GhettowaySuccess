@@ -104,7 +104,7 @@ function pickPowerTarget(token) { powTargetToken = token; powChoice(); }
 function refreshPowerChoice() { if (powState() === 'choix') powChoice(); }
 
 async function openSpecialAbilityPrompt() {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour de jouer !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour de jouer !", "Tour Inactif");
   if (localPlayer.specialUsedThisTurn) return showAppAlert("Capacité spéciale déjà utilisée cette manche !", "Capacité Épuisée");
   powItem = null;
   const caid = getMyCaid();

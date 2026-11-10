@@ -131,7 +131,7 @@
     <!-- BANDEAU "C'EST VOTRE TOUR" -->
     <div id="yourTurnToast" class="hidden absolute top-3 left-3 right-3 z-[60] py-3 px-4 rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-center shadow-2xl pointer-events-none">
       <span class="text-[9px] font-mono uppercase font-black block">Manche <span id="yourTurnToastRound">1</span></span>
-      <span class="text-sm font-black uppercase">🎲 C'est votre tour !</span>
+      <span class="text-sm font-black uppercase">🎲 C'est ton tour !</span>
     </div>
     <!-- PAGE 1 : ACCUEIL -->
     <div id="page-1" class="screen-view active justify-end p-5 ghetto-home-bg relative">
@@ -173,7 +173,7 @@
           <button onclick="navTo('page-1')" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center"><i class="ph-bold ph-caret-left text-lg"></i></button>
           <div>
             <h2 class="text-base font-black text-white uppercase tracking-wider">Créer un salon</h2>
-            <p class="text-[10px] text-slate-400">Configurez votre empire</p>
+            <p class="text-[10px] text-slate-400">Configure ton empire</p>
           </div>
         </div>
         <div class="space-y-5">
@@ -337,7 +337,7 @@
           <div>
             <span class="text-[9px] font-mono uppercase tracking-widest text-slate-400 block font-bold">Tour Par Tour</span>
             <h3 class="text-sm font-black text-white uppercase mt-0.5">Tour de <span id="blockerCaidName" class="text-ghetto-gold">...</span></h3>
-            <p class="text-[11px] text-slate-300 mt-1">Patientez pendant que ce Caïd effectue ses actions...</p>
+            <p class="text-[11px] text-slate-300 mt-1">Patiente pendant que ce Caïd effectue ses actions...</p>
           </div>
           <div class="border-t border-white/10 pt-3">
             <span class="text-[9px] font-mono uppercase tracking-widest text-slate-400 block font-bold mb-1.5">Ordre de la manche</span>
@@ -475,7 +475,7 @@
           <button id="tabBtnArmoryWeapons" onclick="switchArmoryTab('arme')" class="py-1.5 rounded-xl font-black uppercase bg-rose-500 text-white flex items-center justify-center gap-1.5 shadow-lg transition"><i class="ph-bold ph-sword"></i> Armes</button>
           <button id="tabBtnArmoryArmor" onclick="switchArmoryTab('equipement')" class="py-1.5 rounded-xl font-bold uppercase text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition"><i class="ph-bold ph-shield"></i> Équipements</button>
         </div>
-        <div onclick="stepArmoryDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-rose-500/40 text-[10px] font-mono text-rose-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir</div>
+        <div onclick="stepArmoryDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-rose-500/40 text-[10px] font-mono text-rose-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glisse à gauche ou à droite pour parcourir</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="stepArmoryDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="armoryCardsContainer" class="deck-stage"></div>
@@ -493,7 +493,7 @@
           <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="nightclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
           <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="nightclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
         </div>
-        <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)</div>
+        <div onclick="toggleNightclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-pink-500/40 text-[10px] font-mono text-pink-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glisse ou touche pour permuter (Niv.1 ↔ Niv.2)</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="toggleNightclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="nightclubStackContainer" class="deck-stage"></div>
@@ -511,7 +511,7 @@
           <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="sportclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
           <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="sportclubSafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
         </div>
-        <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez ou touchez pour permuter (Niv.1 ↔ Niv.2)</div>
+        <div onclick="toggleSportclubStackCard()" class="py-1 px-3 rounded-full bg-black/80 border border-sky-500/40 text-[10px] font-mono text-sky-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glisse ou touche pour permuter (Niv.1 ↔ Niv.2)</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="toggleSportclubStackCard()" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="sportclubStackContainer" class="deck-stage"></div>
@@ -529,7 +529,7 @@
           <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="dealerPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
           <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="dealerSafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
         </div>
-        <div onclick="stepDealerDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-amber-500/40 text-[10px] font-mono text-amber-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glissez à gauche ou à droite pour parcourir les véhicules</div>
+        <div onclick="stepDealerDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-amber-500/40 text-[10px] font-mono text-amber-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-arrows-left-right"></i> Glisse à gauche ou à droite pour parcourir les véhicules</div>
         <div class="relative w-full flex items-center justify-center">
           <button type="button" onclick="stepDealerDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
           <div id="dealerCardsContainer" class="deck-stage"></div>
@@ -576,7 +576,7 @@
       <div class="loot-panel space-y-4">
         <div class="text-center">
           <h3 class="font-anton loot-head">RACKET</h3>
-          <p class="text-xs text-slate-300 mt-0.5">Choisissez ce que vous prenez (100%) sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
+          <p class="text-xs text-slate-300 mt-0.5">Choisis ce que tu prends (100 %) sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
         </div>
         <div id="pillageOptionsContainer" class="space-y-2"></div>
       </div>

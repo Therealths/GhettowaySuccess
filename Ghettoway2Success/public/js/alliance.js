@@ -38,7 +38,7 @@ function renderLootSplitModalUI(split) {
   const myAccepted = (myPlayerToken === split.leftToken && split.leftAccepted) || (myPlayerToken === split.rightToken && split.rightAccepted);
   const btn = document.getElementById('btnAcceptLootSplit');
   if (myAccepted) {
-    btn.innerText = "En attente de votre allié...";
+    btn.innerText = "En attente de ton allié...";
     btn.className = "w-full py-3.5 bg-emerald-700 text-white font-black uppercase rounded-2xl text-xs opacity-75";
   } else {
     btn.innerText = "Accepter ce Partage";
@@ -144,7 +144,7 @@ function closeAllianceScreen() {
 
 // CHOIX : le joueur actif coche 1 à 3 Caïds
 async function openAllianceModal() {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   if (activeTurnPlayerToken && activeTurnPlayerToken !== myPlayerToken) return showAppAlert("Seul le Caïd dont c'est le tour peut proposer une alliance.", "Alliance");
   allySelected = [];
   return renderAllianceChoice();
@@ -192,7 +192,7 @@ function refreshAllianceChoice() { if (allyState() === 'choix') renderAllianceCh
 function confirmAlliance() {
   if (!isMyTurnToPlay || !allySelected.length) return;
   const targets = allySelected.map(t => connectedRivals.find(r => r.playerToken === t)).filter(Boolean);
-  if (!targets.length) return showAppAlert("Choisissez un Caïd.", "Alliance");
+  if (!targets.length) return showAppAlert("Choisis un Caïd.", "Alliance");
   const caid = getMyCaid();
   if (socket) socket.emit('propose_alliance', { targetPlayerTokens: targets.map(r => r.playerToken), senderName: caid.name });
   allyOutgoing = { requestId: null, done: false, invitees: targets.map(r => ({ token: r.playerToken, caidName: allyRivalName(r), caidId: r.caidId, status: 'wait' })) };

@@ -269,7 +269,7 @@ async function buyArmoryCatalogItem(itemId) {
   const isWeapon = item.categorie === 'arme';
   if (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled && cost > 0) {
     cost *= 2;
-    await showAppAlert(`Malus Tonteushi Kitano : votre premier achat d'arme à l'Armurerie coûte le double (${cost.toLocaleString()} €) !`, "🥋 Malus Kitano");
+    await showAppAlert(`Malus Tonteushi Kitano : ton premier achat d'arme à l'Armurerie coûte le double (${cost.toLocaleString()} €) !`, "🥋 Malus Kitano");
   }
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
@@ -362,7 +362,7 @@ async function buyNightclubItem(itemId) {
   const item = NIGHTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
   if (!item) return;
   if (localPlayer.prostituteInTransit) {
-    return showAppAlert("Vous avez déjà 1 prostituée en transit ! Déposez-la d'abord au QG.", "Limite Atteinte");
+    return showAppAlert("Tu as déjà 1 prostituée en transit ! Dépose-la d'abord au QG.", "Limite Atteinte");
   }
   let cost = item.prix;
   const rev = item.rev || item.bonusVal || (item.lvl === 2 ? 2500 : 1000);
@@ -438,7 +438,7 @@ async function buySportclubItem(itemId) {
   const item = SPORTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
   if (!item) return;
   if (localPlayer.musclesOnPerson.length >= 3) {
-    return showAppAlert("Vous avez déjà 3 Lascars maximum sur le terrain !", "Limite Atteinte");
+    return showAppAlert("Tu as déjà 3 Lascars, le maximum !", "Limite Atteinte");
   }
   const cost = item.prix;
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
@@ -606,7 +606,7 @@ function renderGrossiste() {
 async function confirmGrossistePurchase() {
   if (!isMyTurnToPlay) { closeGrossiste(); return showAppAlert("Ce n'est plus ton tour !", "Tour Inactif"); }
   const kg = grossisteKg;
-  if (kg <= 0) return showAppAlert("Sélectionnez au moins 1 kg.", "Achat");
+  if (kg <= 0) return showAppAlert("Sélectionne au moins 1 kg.", "Achat");
   const cost = getGrossisteCost(kg);
   if (localPlayer.pocketCash < cost) return showAppAlert("Cash en poche insuffisant !", "Fonds Insuffisants");
   const drugsBefore = localPlayer.drugs, cashBefore = localPlayer.pocketCash;
@@ -756,6 +756,6 @@ async function finalizePurchaseExecution(pData) {
   } else if (type === 'pr') {
     localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée Niv. ${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
     refreshHud();
-    await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
+    await showAppAlert("Prostituée en transit. Dépose-la au QG !", "💃 Recrutement");
   }
 }

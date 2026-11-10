@@ -1022,7 +1022,7 @@ io.on('connection', (socket) => {
           itemNames
         });
         if (actor.nullEnemyWeapon && isWeaponNullifiedFor(room, combat, p.playerToken)) {
-          io.to(p.socketId).emit('combat_weapon_nullified', { byCaid: actor.caidName || 'Votre adversaire' });
+          io.to(p.socketId).emit('combat_weapon_nullified', { byCaid: actor.caidName || 'Ton adversaire' });
         }
       }
       io.to(p.socketId).emit('combat_ready_state_reset');
@@ -1130,7 +1130,7 @@ io.on('connection', (socket) => {
       if (unchosenP) {
         sendToPlayer(unchosenP, 'combat_not_targeted_by_riposte', {
           defenderCaid: defenderP.caidName,
-          chosenCaid: chosenP ? chosenP.caidName : 'votre allié'
+          chosenCaid: chosenP ? chosenP.caidName : 'ton allié'
         });
       }
     });

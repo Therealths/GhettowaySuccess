@@ -229,7 +229,7 @@ function initCarouselDOM() {
   if (!available.length) return;
 
   if (roomSelectionMode === 'manual') {
-    headerTitle.innerText = "Choisissez votre Caïd";
+    headerTitle.innerText = "Choisis ton Caïd";
     btnSpin.classList.add('hidden');
     btnManual.classList.remove('hidden');
     btnManual.disabled = false;
@@ -412,7 +412,7 @@ async function startRoundPhase1() {
     const income = baseIncome * revMult;
     localPlayer.safeCash += income;
     const vipNote = revMult > 1 ? ` (Soirée VIP x${revMult} !)` : '';
-    await showAppAlert(`+${income.toLocaleString()} € versés au coffre par vos prostituées${vipNote}.`, "💰 Rente QG perçue");
+    await showAppAlert(`+${income.toLocaleString()} € versés au coffre par tes prostituées${vipNote}.`, "💰 Rente QG perçue");
   }
   refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');
@@ -424,13 +424,13 @@ async function endCurrentPlayerTurn(forced = false) {
   const isAllyHelping = activeTurnPlayerToken && activeTurnPlayerToken !== myPlayerToken;
   // Bouton "Tour terminé" : on demande confirmation (la garde à vue, elle, met fin au tour d'office)
   if (!forced && !await showAppConfirm(
-    isAllyHelping ? "Terminer votre participation à ce tour ?\nVous ne pourrez plus agir avant la manche suivante." : "Terminer votre tour ?\nLa main passera au joueur suivant.",
+    isAllyHelping ? "Terminer ta participation à ce tour ?\nTu ne pourras plus agir avant la manche suivante." : "Terminer ton tour ?\nLa main passera au joueur suivant.",
     "⏭️ Fin de tour"
   )) return;
   // Allié qui joue pendant le tour d'un autre : il termine sa participation, le joueur actif garde la main (et lance le dé de patrouille)
   if (isAllyHelping) {
     if (socket) socket.emit('end_allied_turn');
-    showAppAlert("Votre participation à ce tour est terminée.\nVous rejouerez à la manche suivante.", "🤝 Fin de votre tour");
+    showAppAlert("Ta participation à ce tour est terminée.\nTu rejoueras à la manche suivante.", "🤝 Fin de ton tour");
     return;
   }
   showPatrolScreen();
@@ -530,7 +530,7 @@ function renderTurnOrder(turnOrder, activeToken, alliedTokens = []) {
     const name = escapeHtml(p.caidName || 'Caïd');
     const dog = p.hasStrayDog ? ' 🐕' : '';
     const away = p.away ? ' 💤' : ''; // a quitté la partie : ses tours sont passés
-    return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (vous)' : ''}${dog}${away}</span>`;
+    return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (toi)' : ''}${dog}${away}</span>`;
   }).join('');
   document.querySelectorAll('.turn-order-list').forEach(el => { el.innerHTML = html; });
 }

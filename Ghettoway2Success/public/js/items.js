@@ -131,7 +131,7 @@ function deckPreview() {
 
 function openCombatItemSelectorModal() {
   deckItems = localPlayer.inventory.filter(i => i && (i.dur === 'combat' || i.eff === 'def_malus_round'));
-  if (!deckItems.length) return showAppAlert("Aucun objet de combat dans votre Sac !", "Sac Vide");
+  if (!deckItems.length) return showAppAlert("Aucun objet de combat dans ton Sac !", "Sac Vide");
   deckItems.forEach((it, i) => { if (!it.id) it.id = 'obj_' + Date.now() + '_' + i; });
   deckIndex = 0;
   deckPicked = new Set();

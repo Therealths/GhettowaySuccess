@@ -68,7 +68,7 @@ async function clickProstituteTransitSlot() {
       localPlayer.prostituteInTransit = null;
       refreshHud();
     }
-  } else await showAppAlert("Aucune prostituée en transit. Flashez le Nightclub pour en recruter !", "Slot Vide");
+  } else await showAppAlert("Aucune prostituée en transit. Flashe le Nightclub pour en recruter !", "Slot Vide");
 }
 async function depositProstituteToSafe() {
   if (!isMyTurnToPlay || !localPlayer.prostituteInTransit) return;
@@ -80,14 +80,14 @@ async function depositProstituteToSafe() {
 // Capacités spéciales : voir js/powers.js
 
 async function triggerPoliceInspection() {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
 
   // Passeport diplomatique : proposé avant tout le reste, annule le contrôle
   if (await offerPassportAtPolice()) return;
   const caid = getMyCaid();
   if (caid.id === 'caid_5' && !localPlayer.specialUsedThisTurn) {
-    if (await showAppConfirm("Tenter votre 'Prière Miraculeuse' (50% d'annuler ce contrôle) ?", "🙏 J-Lo Gramme")) {
+    if (await showAppConfirm("Tenter ta 'Prière Miraculeuse' (50 % d'annuler ce contrôle) ?", "🙏 J-Lo Gramme")) {
       localPlayer.specialUsedThisTurn = true;
       refreshHud();
       if (Math.random() >= 0.5) return showAppAlert("FACE ! Contrôle annulé ce tour !", "🙏 Miracle");
@@ -372,7 +372,7 @@ function renderInventoryList() {
 }
 
 async function equipItemFromInventory(idx) {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   const item = localPlayer.inventory[idx];
   if (!item) return;
   const slotKey = item.type === 'WEAPON' ? 'weapon' : (item.type === 'ARMOR' ? 'armor' : 'vehicle');
@@ -383,7 +383,7 @@ async function equipItemFromInventory(idx) {
 }
 
 async function unequipSlot(slotKey) {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   const item = localPlayer.equipped[slotKey];
   if (!item) return;
   localPlayer.inventory.push(item);
@@ -392,11 +392,11 @@ async function unequipSlot(slotKey) {
 }
 
 async function useItem(idx) {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   const it = localPlayer.inventory[idx];
   if (!it) return;
   if (it.eff === 'heal' || it.type === 'CONSUMABLE' || (it.name && it.name.includes('Kebab'))) {
-    if (localPlayer.hearts >= 3) return showAppAlert("Vos Cœurs sont déjà au maximum !", "Santé Pleine");
+    if (localPlayer.hearts >= 3) return showAppAlert("Tes Cœurs sont déjà au maximum !", "Santé Pleine");
     localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
     localPlayer.inventory.splice(idx, 1);
     refreshHud();
@@ -425,8 +425,8 @@ async function useItem(idx) {
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
     localPlayer.inventory.splice(idx, 1);
     refreshHud();
-    const lasts = (it.eff === 'double_weapon_atk' || it.eff === 'null_enemy_weapon') ? 'pour votre prochain combat de ce tour' : it.eff === 'double_muscles_atk' ? "jusqu'à la fin de la manche" : "jusqu'à la fin du tour en cours";
-    await showAppAlert(`${it.name} activé ${lasts} ! Vos statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
+    const lasts = (it.eff === 'double_weapon_atk' || it.eff === 'null_enemy_weapon') ? 'pour ton prochain combat de ce tour' : it.eff === 'double_muscles_atk' ? "jusqu'à la fin de la manche" : "jusqu'à la fin du tour en cours";
+    await showAppAlert(`${it.name} activé ${lasts} ! Tes statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
     return;
   }
   localPlayer.inventory.splice(idx, 1);
@@ -463,7 +463,7 @@ async function qgOnlyHint() {
   await showAppAlert("Le coffre s'ouvre au QG : rends-toi sur la case QG du plateau et flashe son QR code.", "🏦 Coffre du QG");
 }
 async function openTransferModal(mode, res) {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour !", "Tour Inactif");
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   currentTransferMode = mode === 'withdraw' ? 'withdraw' : 'deposit';
   currentTransferResource = res || (currentTransferResource === 'escort' ? 'cash' : currentTransferResource || 'cash');
   if (currentTransferResource === 'escort') currentTransferMode = 'deposit';
