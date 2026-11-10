@@ -97,7 +97,7 @@ function resetCombatModifiers() {
   combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
 }
 // Fin d'un combat : Balle perforante et Couvercle de poubelle ne valent que pour un seul combat
-// (le Pot de Protéine reste actif jusqu'à la fin du tour)
+// (le Pot de Protéine reste actif jusqu'à la fin de la manche)
 function endSingleCombatEffects() {
   combatModifiers.doubleWeapon = false;
   combatModifiers.nullEnemyWeapon = false;
@@ -171,7 +171,7 @@ function fightRender(state, theme, chip, stage, bottom, replay) {
   scr.dataset.theme = theme;
   document.getElementById('fightRound').innerText = currentSession.round || 1;
   document.getElementById('fightChip').innerHTML = FIGHT_CHIPS[chip] || '';
-  document.getElementById('fightAbort').classList.toggle('hidden', state !== 'choix' && state !== 'duel');
+  document.getElementById('fightAbort').classList.toggle('hidden', !fightCanAbort(state));
   document.getElementById('fightStage').innerHTML = stage;
   document.getElementById('fightBottom').innerHTML = bottom;
   if (same) { scr.classList.add('static'); return; }
@@ -253,7 +253,7 @@ async function initiateCombatEngagement() {
   if (!target) return showAppAlert("Aucune cible attaquable sélectionnée.", "Cible Requise");
 
   if (isRivalProtectedByPact(target.playerToken)) {
-    return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni durant ce tour, ni au tour suivant) !", "🤝 Pacte Actif");
+    return showAppAlert("Pacte d'Alliance actif : vous ne pouvez pas attaquer votre allié (ni cette manche, ni la suivante) !", "🤝 Pacte Actif");
   }
 
   let useAlliance = false;
@@ -283,6 +283,12 @@ async function initiateCombatEngagement() {
   }
 }
 
+// Croix « annuler » : sur le choix de la cible, ou pour l'attaquant tant que le duel n'a pas commencé (personne n'est prêt)
+function fightCanAbort(state) {
+  if (state === 'choix') return true;
+  const d = currentDuelInfo;
+  return state === 'duel' && !!d && d.role === 'attacker' && (d.phase || 1) === 1 && !isCombatReady && !fightReadyNames.size;
+}
 function abortCombat() {
   if (socket && currentDuelInfo) socket.emit('combat_cancel');
   else closeFightScreen();
@@ -428,7 +434,7 @@ async function toggleCombatReadyState() {
   isCombatReady = !isCombatReady;
   if (socket) {
     const stat = (currentDuelInfo.role === 'attacker') ? getTotalAtk() : getTotalDef();
-    socket.emit('combat_set_ready', { currentStat: stat });
+    socket.emit('combat_set_ready', { currentStat: stat, ready: isCombatReady });
   }
   fightLog(isCombatReady ? `⏳ Tu es prêt ! En attente…` : `Non prêt.`);
   updateCombatReadyButtonUI();

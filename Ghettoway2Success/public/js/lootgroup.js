@@ -141,12 +141,14 @@ if (socket) {
     groupSplitEl.classList.remove('hidden');
   });
 
-  socket.on('group_split_completed', async ({ title, cashGained, drugsGained }) => {
+  socket.on('group_split_completed', async ({ title, cashGained, drugsGained, late }) => {
     const nb = groupSplitState ? (groupSplitState.members || []).length : 0;
     groupSplitState = null;
     groupSplitEl.classList.add('hidden');
-    localPlayer.pocketCash += (cashGained || 0);
-    localPlayer.drugs += (drugsGained || 0);
+    if (!late) { // late : part déjà créditée par le serveur pendant l'absence
+      localPlayer.pocketCash += (cashGained || 0);
+      localPlayer.drugs += (drugsGained || 0);
+    }
     refreshHud();
     await showAppAlert(
       `Accord validé par ${nb ? `les ${nb} alliés` : 'tous les alliés'} (${title}) !\nVotre part reçue : +${(cashGained || 0).toLocaleString()} € et +${drugsGained || 0} kg.`,

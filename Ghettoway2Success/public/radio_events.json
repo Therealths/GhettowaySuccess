@@ -26,8 +26,8 @@
     {
       "id": "rad_drug_shortage",
       "title": "Pénurie dans la cité",
-      "impact": "Yencli +1 500 € ce tour",
-      "desc": "Le cours du deal explose : tous les contrats Yencli rapportent +1 500 € ce tour.",
+      "impact": "Yencli +1 500 € cette manche",
+      "desc": "Le cours du deal explose : tous les contrats Yencli rapportent +1 500 € cette manche.",
       "effectType": "YENCLI_CASH_BONUS",
       "effectVal": 1500,
       "message": "Plus rien à fumer dans la cité, les clients sont en manque… c'est le moment de dealer !",
@@ -85,7 +85,7 @@
       "id": "rad_gang_war",
       "title": "Guerre des Gangs",
       "impact": "-30% sur toutes les armes",
-      "desc": "L'Armurerie liquide ses stocks : -30% sur tous les équipements offensifs ce tour.",
+      "desc": "L'Armurerie liquide ses stocks : -30% sur tous les équipements offensifs cette manche.",
       "effectType": "WEAPON_PRICE_MULT",
       "effectVal": 0.7,
       "message": "Guerre des gangs ! L'Armurerie liquide ses stocks, tout le monde veut s'armer…",
@@ -113,8 +113,8 @@
     {
       "id": "rad_lake_fog",
       "title": "Brouillard sur Le Lac",
-      "impact": "Le Lac infranchissable ce tour",
-      "desc": "Le terrain marécageux est totalement infranchissable pour l'ensemble des Caïds ce tour-ci.",
+      "impact": "Le Lac infranchissable cette manche",
+      "desc": "Le terrain marécageux est totalement infranchissable pour l'ensemble des Caïds cette manche.",
       "effectType": "BOARD_RULE_ONLY",
       "effectVal": 0,
       "message": "Un brouillard épais tombe sur le Lac, on n'y voit plus rien… personne ne passe !",
@@ -126,7 +126,7 @@
         "rows": [
           [
             "ph-waves",
-            "Le Lac ne peut pas être traversé ce tour",
+            "Le Lac ne peut pas être traversé cette manche",
             "",
             ""
           ]
@@ -136,7 +136,7 @@
     {
       "id": "rad_police_strike",
       "title": "Grève au Commissariat",
-      "impact": "Patrouille immobile ce tour",
+      "impact": "Patrouille immobile cette manche",
       "desc": "Les syndicats de police bloquent le poste : la patrouille ne se déplace pas en fin de tour.",
       "effectType": "PATROL_FREEZE",
       "effectVal": 0,
@@ -145,7 +145,7 @@
         "big": "0",
         "tone": "bonus",
         "label": "point de déplacement pour la patrouille",
-        "sub": "elle reste au poste ce tour",
+        "sub": "elle reste au poste cette manche",
         "rows": [
           [
             "ph-dice-five",
@@ -160,7 +160,7 @@
       "id": "rad_customs_seizure",
       "title": "Saisie record aux Douanes",
       "impact": "Grossiste à 1 500 € / kg",
-      "desc": "Les arrivages sont bloqués à la frontière : le tarif du Grossiste passe à 1 500 € / kg ce tour.",
+      "desc": "Les arrivages sont bloqués à la frontière : le tarif du Grossiste passe à 1 500 € / kg cette manche.",
       "effectType": "GROSSISTE_PRICE_SET",
       "effectVal": 1500,
       "message": "Saisie record aux douanes ! Plus rien ne passe la frontière, le kilo va coûter une blinde…",
@@ -183,7 +183,7 @@
       "id": "rad_vip_party",
       "title": "Soirée VIP au Nightclub",
       "impact": "Rente Prostituées doublée",
-      "desc": "Affluence record dans le quartier : les prostituées installées au QG rapportent double ce tour.",
+      "desc": "Affluence record dans le quartier : les prostituées installées au QG rapportent double cette manche.",
       "effectType": "PROSTITUTE_REV_MULT",
       "effectVal": 2,
       "message": "Soirée VIP au Nightclub ! Le quartier est plein à craquer, ça va rapporter gros…",
@@ -211,8 +211,8 @@
     {
       "id": "rad_mma_tournament",
       "title": "Tournoi clandestin au Sportclub",
-      "impact": "Lascars +1 Attaque ce tour",
-      "desc": "Les gros bras sont chauffés à blanc : chaque Lascar recruté confère +1 Attaque supplémentaire ce tour.",
+      "impact": "Lascars +1 Attaque cette manche",
+      "desc": "Les gros bras sont chauffés à blanc : chaque Lascar recruté confère +1 Attaque supplémentaire cette manche.",
       "effectType": "LASCAR_ATK_BONUS",
       "effectVal": 1,
       "message": "Tournoi clandestin au Sportclub ! Les gros bras sont chauffés à blanc…",
@@ -240,7 +240,7 @@
     {
       "id": "rad_armored_truck",
       "title": "Panne de Fourgon Blindé",
-      "impact": "Braquages +2 000 € ce tour",
+      "impact": "Braquages +2 000 € cette manche",
       "desc": "La sécurité est débordée : tous les braquages réussis rapportent un bonus de +2 000 € durant cette manche.",
       "effectType": "HEIST_CASH_BONUS",
       "effectVal": 2000,

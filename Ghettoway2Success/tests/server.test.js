@@ -138,6 +138,7 @@ test('objets joués en combat : l’adversaire est prévenu et doit revalider «
   await waitFor(b, 'combat_ready_state_reset');
   a.emit('combat_set_ready', { currentStat: 2 });
   await never(a, 'combat_finished_result'); // b n'a pas revalidé
+  a.emit('combat_set_ready', { currentStat: 2, ready: false });
   a.emit('combat_cancel');
   await waitFor(b, 'combat_aborted');
 });
@@ -219,4 +220,106 @@ test('partie test : un pouvoir lancé sur un Caïd hors ligne lui est remis à s
   const fx = await waitFor(j3, 'received_special_effect');
   assert.deepStrictEqual([fx.effectType, fx.late], ['shuriken', true]);
   j3.disconnect();
+});
+
+test('« Prêt (annuler) » : le joueur n’est plus prêt côté serveur et l’adversaire en est prévenu', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  a.emit('combat_set_ready', { currentStat: 3, ready: true });
+  await waitFor(b, 'combat_opponent_is_ready');
+  a.emit('combat_set_ready', { currentStat: 3, ready: false });
+  assert.strictEqual((await waitFor(b, 'combat_opponent_not_ready')).caidName, 'Burger Queen');
+  b.emit('combat_set_ready', { currentStat: 0, ready: true });
+  await never(b, 'combat_finished_result'); // a a annulé : le combat attend
+  a.emit('combat_set_ready', { currentStat: 3, ready: true });
+  assert.strictEqual((await waitFor(b, 'combat_finished_result')).outcome, 'loser');
+});
+
+test('un seul combat à la fois, et seul le vainqueur choisit le butin', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  b.emit('start_combat_engagement', { targetPlayerToken: a.token, attackerCaid: 'Jamel Pépouze' });
+  assert.match(await waitFor(b, 'error_msg'), /déjà en cours/);
+  a.emit('combat_set_ready', { currentStat: 3 });
+  b.emit('combat_set_ready', { currentStat: 0 });
+  await waitFor(a, 'combat_finished_result');
+  b.emit('execute_pillage_choice', { category: 'cash' }); // le perdant ne peut pas choisir
+  await never(b, 'you_were_pillaged');
+  a.emit('execute_pillage_choice', { category: 'cash' });
+  await waitFor(b, 'you_were_pillaged');
+});
+
+test('à 2 joueurs, le dernier de la manche rejoue en premier : son tour est bien un nouveau tour', async () => {
+  const { players: [a, b] } = await startGame();
+  const t1 = await waitFor(a, 'turn_state_updated');
+  assert.strictEqual(t1.activePlayerToken, a.token);
+  a.emit('next_player_turn');
+  const t2 = await waitFor(b, 'turn_state_updated', t => t.activePlayerToken === b.token);
+  b.emit('next_player_turn');
+  await waitFor(b, 'new_round_started');
+  const t3 = await waitFor(b, 'turn_state_updated', t => t.round === 2);
+  assert.strictEqual(t3.activePlayerToken, b.token);
+  assert.notStrictEqual(t3.turnId, t2.turnId);
+});
+
+test('alliance : impossible avec un Caïd qui a déjà joué sa manche', async () => {
+  const { players: [a, b, c] } = await startGame([['caid_1', 'Burger Queen'], ['caid_7', 'Jamel Pépouze'], ['caid_5', 'J-Lo Gramme']]);
+  a.emit('next_player_turn');
+  await waitFor(b, 'turn_state_updated', t => t.activePlayerToken === b.token);
+  b.emit('propose_alliance', { targetPlayerTokens: [a.token], senderName: 'Jamel Pépouze' });
+  assert.match(await waitFor(b, 'error_msg'), /déjà joué/);
+  b.emit('propose_alliance', { targetPlayerTokens: [c.token], senderName: 'Jamel Pépouze' });
+  await waitFor(c, 'alliance_request_received');
+});
+
+test('partage du butin : un allié qui quitte la partie l’accepte d’office, l’autre peut valider', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('propose_alliance', { targetPlayerTokens: [b.token], senderName: 'Burger Queen' });
+  const req = await waitFor(b, 'alliance_request_received');
+  b.emit('respond_alliance', { requestId: req.requestId, accepted: true });
+  await waitFor(a, 'alliance_confirmed');
+  a.emit('initiate_allied_heist_split', { heistName: 'Bijouterie', totalCash: 10000, totalDrugs: 2, allyTokens: [b.token] });
+  await waitFor(b, 'loot_split_opened');
+  b.emit('leave_room');
+  const upd = await waitFor(a, 'loot_split_updated');
+  assert.strictEqual(upd.rightAccepted, true);
+  a.emit('accept_loot_split');
+  assert.deepStrictEqual(await waitFor(a, 'loot_split_completed'), { title: 'Braquage : Bijouterie', cashGained: 5000, drugsGained: 1 });
+});
+
+test('annulation du combat : seulement par l’attaquant, avant que quelqu’un soit prêt', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  b.emit('combat_cancel'); // le défenseur ne peut pas fuir
+  await never(a, 'combat_aborted');
+  a.emit('combat_set_ready', { currentStat: 1 });
+  await waitFor(b, 'combat_opponent_is_ready');
+  a.emit('combat_cancel'); // trop tard : il est prêt
+  await never(b, 'combat_aborted');
+  a.emit('combat_set_ready', { currentStat: 1, ready: false });
+  await waitFor(b, 'combat_opponent_not_ready');
+  a.emit('combat_cancel');
+  await waitFor(b, 'combat_aborted');
+});
+
+test('une attaque à 0 (Danse lascive) compte 0 : contre 0 de défense, l’assaut est repoussé', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  a.emit('combat_set_ready', { currentStat: 0 });
+  b.emit('combat_set_ready', { currentStat: 0 });
+  assert.strictEqual((await waitFor(b, 'combat_phase2_started')).role, 'attacker');
+});
+
+test('après la fin de partie, plus de tour ni de nouvelle manche', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('sync_player', { pocketCash: 100000 });
+  await waitFor(b, 'game_over');
+  b.events.length = 0;
+  a.emit('next_player_turn');
+  await never(b, 'new_round_started');
+  await never(b, 'turn_state_updated', 500);
 });

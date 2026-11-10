@@ -298,9 +298,9 @@ async function processQrPayload(payload) {
     } else {
       localPlayer.pocketCash += totalCash;
       localPlayer.drugs += totalDrugs;
+      refreshHud(); // gain enregistré tout de suite, sans attendre la lecture du message
       const bonusTxt = radioHeistBonus > 0 ? ` (dont +${radioHeistBonus.toLocaleString()} € Bonus Radio !)` : '';
       await showAppAlert(`+${totalCash.toLocaleString()} € et +${totalDrugs} kg gagnés en solo !${bonusTxt}`, "🏆 Braquage Réussi");
-      refreshHud();
     }
     return;
   }

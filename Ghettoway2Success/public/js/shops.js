@@ -17,8 +17,8 @@ let ARMORY_CATALOG = [
 ];
 
 let NIGHTCLUB_CATALOG = [
-  { id: "pr_lvl1", categorie: "prostituee", slot: "PROSTITUTE", lvl: 1, nom: "Prostituée Niv. 1", prix: 2000, rev: 1000, bonusVal: 1000, bonusLabel: "+1 000 € / tour au QG", image: "plvl1.jpg", desc: "Escort débutante à ramener au QG." },
-  { id: "pr_lvl2", categorie: "prostituee", slot: "PROSTITUTE", lvl: 2, nom: "Prostituée Niv. 2", prix: 4000, rev: 2500, bonusVal: 2500, bonusLabel: "+2 500 € / tour au QG", image: "plvl2.jpg", desc: "Escort VIP haut de gamme, rente élevée." }
+  { id: "pr_lvl1", categorie: "prostituee", slot: "PROSTITUTE", lvl: 1, nom: "Prostituée Niv. 1", prix: 2000, rev: 1000, bonusVal: 1000, bonusLabel: "+1 000 € / manche au QG", image: "plvl1.jpg", desc: "Escort débutante à ramener au QG." },
+  { id: "pr_lvl2", categorie: "prostituee", slot: "PROSTITUTE", lvl: 2, nom: "Prostituée Niv. 2", prix: 4000, rev: 2500, bonusVal: 2500, bonusLabel: "+2 500 € / manche au QG", image: "plvl2.jpg", desc: "Escort VIP haut de gamme, rente élevée." }
 ];
 
 let SPORTCLUB_CATALOG = [
@@ -230,9 +230,11 @@ function buildArmoryStackDOM() {
             <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
             <span class="text-xs font-black text-ghetto-gold">${priceHtml}</span>
           </div>
-          <button onclick="event.stopPropagation(); buyArmoryCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
+          ${freeItemClaimed(item) ? `<button type="button" disabled class="deck-buy-btn w-full py-2 bg-slate-800 text-slate-500 font-black uppercase tracking-wider rounded-xl text-[11px] flex items-center justify-center gap-1">
+            <i class="ph-bold ph-check"></i> Déjà récupérée
+          </button>` : `<button onclick="event.stopPropagation(); buyArmoryCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
             <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
-          </button>
+          </button>`}
         </div>
       </div>`;
   }).join('');
@@ -256,9 +258,13 @@ function onArmoryCardClick(idx) {
   }
 }
 
+// Objet gratuit de l'Armurerie (Bouée canard) : une seule fois par partie
+function freeItemClaimed(item) { return !item.prix && (localPlayer.freeItemsClaimed || []).includes(item.id); }
+
 async function buyArmoryCatalogItem(itemId) {
   const item = ARMORY_CATALOG.find(i => i.id === itemId);
   if (!item) return;
+  if (freeItemClaimed(item)) return showAppAlert(`${item.nom} : déjà récupérée, une seule par partie !`, "Déjà récupérée");
   let cost = getArmoryItemEffectivePrice(item);
   const isWeapon = item.categorie === 'arme';
   if (isWeapon && getMyCaid().id === 'caid_6' && !localPlayer.firstWeaponDoubled && cost > 0) {
@@ -285,6 +291,7 @@ async function buyArmoryCatalogItem(itemId) {
   };
   closeModal('modalArmoryShop');
   if (cost === 0) {
+    if (!item.prix) localPlayer.freeItemsClaimed = [...(localPlayer.freeItemsClaimed || []), item.id];
     await finalizePurchaseExecution(pPayload);
     refreshHud();
     return;
@@ -595,6 +602,7 @@ function renderGrossiste() {
     <div class="grid grid-cols-[1fr_1.8fr] gap-2 mt-3"><button type="button" class="gros-ghost" onclick="closeGrossiste()">Partir</button><button type="button" class="police-cta gros-cta" style="margin-top:0" onclick="confirmGrossistePurchase()" ${kg <= 0 ? 'disabled' : ''}>Acheter ${kg} kg</button></div>`;
 }
 async function confirmGrossistePurchase() {
+  if (!isMyTurnToPlay) { closeGrossiste(); return showAppAlert("Ce n'est plus ton tour !", "Tour Inactif"); }
   const kg = grossisteKg;
   if (kg <= 0) return showAppAlert("Sélectionnez au moins 1 kg.", "Achat");
   const cost = getGrossisteCost(kg);
@@ -614,7 +622,7 @@ async function confirmGrossistePurchase() {
     <div class="flex flex-col gap-1.5 mt-3">
       ${row('ph-leaf', '#34d399', 'Drogue sur toi', `${drugsBefore} kg`, `${localPlayer.drugs} kg`)}
       ${row('ph-money', '#fbbf24', 'Cash en poche', `${cashBefore.toLocaleString()} €`, `${localPlayer.pocketCash.toLocaleString()} €`)}
-      ${row('ph-sneaker-move', '#cbd5e1', 'Action', '', '1 PM dépensé')}
+      ${row('ph-sneaker-move', '#cbd5e1', 'Action', '', '2 PM dépensés')}
     </div>
     <button type="button" class="police-cta gros-cta" onclick="closeGrossiste()">Repartir</button>`;
 }
@@ -685,6 +693,7 @@ function stepPaySplit(dir) {
 }
 async function confirmPaymentSource(source) {
   if (!pendingPurchaseData) return;
+  if (!isMyTurnToPlay) { closeModal('modalPaymentChoice'); pendingPurchaseData = null; return showAppAlert("Ce n'est plus ton tour !", "Tour Inactif"); }
   const cost = pendingPurchaseData.cost;
   if (source === 'pocket') {
     if (localPlayer.pocketCash < cost) return;
@@ -728,6 +737,7 @@ async function finalizePurchaseExecution(pData) {
       isFirearm: !!data.isFirearm,
       desc: data.desc || `Confère ${bTxt}`
     });
+    refreshHud(); // objet enregistré tout de suite, sans attendre la lecture du message
     await showAppAlert(`${data.n} ajouté au Sac !`, "📦 Achat Confirmé");
   } else if (type === 'gb') {
     const bVal = data.atk || (data.lvl === 2 ? 2 : 1);
@@ -739,9 +749,11 @@ async function finalizePurchaseExecution(pData) {
       bonusVal: bVal,
       bonusLabel: `+${bVal} Atk / +${bVal} Def`
     });
+    refreshHud();
     await showAppAlert(`Lascar recruté (+${bVal} Attaque et +${bVal} Défense) !`, "💪 Recrutement");
   } else if (type === 'pr') {
     localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée L${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
+    refreshHud();
     await showAppAlert("Prostituée en transit. Déposez-la au QG !", "💃 Recrutement");
   }
 }

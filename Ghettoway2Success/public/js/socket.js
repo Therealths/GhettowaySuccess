@@ -23,7 +23,7 @@ if (socket) {
       localStorage.setItem('g2s_saved_caid_id', player.caidId);
       const refCaid = CAID_ROSTER.find(c => c.id === player.caidId);
       if (refCaid && (!localPlayer.inventory || localPlayer.inventory.length === 0) && !gameStarted) {
-        localPlayer.inventory = JSON.parse(JSON.stringify(refCaid.startItems));
+        localPlayer.inventory = caidStartItems(refCaid);
       }
     }
     localPlayer = Object.assign(localPlayer, player);
@@ -34,6 +34,7 @@ if (socket) {
       currentSession.currentRadioEvent = radio;
       navTo('page-6');
       refreshHud();
+      if (player && player.roundSeen && round > player.roundSeen) enterNewRound(round, radio);
     } else if (localPlayer.caidId) navTo('page-lobby');
     else navTo('page-4');
   });
@@ -174,12 +175,20 @@ if (socket) {
     updateRivalsList(players);
     currentSession.round = round;
     currentSession.currentRadioEvent = radio;
+    localPlayer.roundSeen = round;
     startRoundPhase1();
   });
   socket.on('new_round_started', ({ round, radio, players }) => {
+    if (document.getElementById('page-end').classList.contains('active')) return; // partie terminée
     if (players) updateRivalsList(players);
+    enterNewRound(round, radio);
+  });
+  // Nouvelle manche : pouvoir rechargé, malus effacés, rente et Flash Radio.
+  // Aussi rejouée à la reconnexion si le téléphone était en veille au changement de manche.
+  function enterNewRound(round, radio) {
     currentSession.round = round;
     currentSession.currentRadioEvent = radio;
+    localPlayer.roundSeen = round;
     localPlayer.specialUsedThisTurn = false;
     localPlayer.tempAtkMalus = 0;
     localPlayer.tempDefMalus = 0;
@@ -187,14 +196,18 @@ if (socket) {
     localPlayer.allianceActive = false;
     localPlayer.activeAllies = [];
     startRoundPhase1();
-  });
-  let lastActivePlayerToken = null;
-  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder }) => {
+  }
+  let lastActivePlayerToken = null, lastTurnId = null;
+  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId }) => {
     if (serverPacts) nonAggressionPacts = serverPacts;
     renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
-    if (activePlayerToken === myPlayerToken && lastActivePlayerToken !== myPlayerToken) notifyMyTurn(round);
-    // Pot de Protéine, Balle perforante... : effets valables jusqu'à la fin du tour en cours
-    if (activePlayerToken !== lastActivePlayerToken) { resetCombatModifiers(); myWeaponNullified = false; refreshHud(); }
+    // Nouveau tour, même si c'est encore le même joueur (à 2 : A B puis B A, B joue deux tours d'affilée)
+    const newTurn = turnId ? turnId !== lastTurnId : activePlayerToken !== lastActivePlayerToken;
+    lastTurnId = turnId;
+    if (activePlayerToken === myPlayerToken && newTurn) notifyMyTurn(round);
+    // Balle perforante, Couvercle... : effets valables jusqu'à la fin du tour en cours (le Pot de Protéine dure la manche)
+    if (newTurn && !currentDuelInfo) { resetCombatModifiers(); myWeaponNullified = false; refreshHud(); }
+    if (newTurn && activePlayerToken === myPlayerToken && lastActivePlayerToken === myPlayerToken) { pmSpentThisTurn = 0; refreshHud(); }
     lastActivePlayerToken = activePlayerToken;
     activeTurnPlayerToken = activePlayerToken;
     const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
@@ -208,6 +221,10 @@ if (socket) {
     const wasMyTurn = isMyTurnToPlay;
     isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
     if (isMyTurnToPlay && !wasMyTurn) { pmSpentThisTurn = 0; refreshHud(); }
+    // Fin du tour (ou de sa participation d'allié) : boutiques, coffre et paiement se ferment
+    if (wasMyTurn && !isMyTurnToPlay) {
+      ['modalArmoryShop', 'modalDealerShop', 'modalNightclubShop', 'modalSportclubShop', 'modalPaymentChoice', 'modalTransfer', 'grossisteScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    }
     // Sortie d'hôpital au début de son tour, ou quand il rejoint le tour d'un allié
     if (activePlayerToken === myPlayerToken || (isMyTurnToPlay && !wasMyTurn)) checkHospitalRelease(round);
     const blocker = document.getElementById('turnBlockerOverlay');
@@ -316,6 +333,11 @@ if (socket) {
     updateCombatReadyButtonUI();
   });
 
+  socket.on('combat_opponent_not_ready', ({ caidName }) => {
+    fightReadyNames.delete(caidName);
+    fightLog(`↩️ <b>${escapeHtml(caidName || 'Un combattant')}</b> n'est plus prêt.`);
+    updateCombatReadyButtonUI();
+  });
   socket.on('combat_ready_state_reset', () => { isCombatReady = false; fightReadyNames = new Set(); updateCombatReadyButtonUI(); });
 
   socket.on('combat_finished_draw', async ({ message }) => {
@@ -401,10 +423,12 @@ if (socket) {
     renderLootSplitModalUI(splitState);
   });
 
-  socket.on('loot_split_completed', async ({ title, cashGained, drugsGained }) => {
+  socket.on('loot_split_completed', async ({ title, cashGained, drugsGained, late }) => {
     closeModal('modalAlliedLootSplit');
-    localPlayer.pocketCash += (cashGained || 0);
-    localPlayer.drugs += (drugsGained || 0);
+    if (!late) { // late : part déjà créditée par le serveur pendant l'absence
+      localPlayer.pocketCash += (cashGained || 0);
+      localPlayer.drugs += (drugsGained || 0);
+    }
     refreshHud();
     await showAppAlert(
       `Accord validé par les 2 alliés (${title}) !\nVotre part reçue : +${(cashGained || 0).toLocaleString()} € et +${drugsGained || 0} kg.`,
@@ -414,16 +438,27 @@ if (socket) {
 
   socket.on('lost_stray_dog', async ({ thiefCaid }) => {
     localPlayer.strayDogActive = false;
-    await showAppAlert(`${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant !`, "🐕 Chien Errant Volé");
     refreshHud();
+    await showAppAlert(`${thiefCaid} a utilisé un sifflet et vous a volé le Chien Errant !`, "🐕 Chien Errant Volé");
   });
   socket.on('stray_dog_granted', async () => {
     localPlayer.strayDogActive = true;
-    await showAppAlert("Le Chien Errant vous rejoint (+2 Atk / +2 Def) !\nIl reste avec vous jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
     refreshHud();
+    await showAppAlert("Le Chien Errant vous rejoint (+2 Atk / +2 Def) !\nIl reste avec vous jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
   });
-  socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId, senderToken }) => {
-    // Effet appliqué d'abord, puis écran « Touché ! »
+  socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId, senderToken, late, round, turnToken }) => {
+    // Malus reçu hors ligne pendant une manche déjà terminée : il ne compte plus
+    if (late && round && round < (currentSession.round || 1) && ['shuriken', 'danse', 'canette'].includes(effectType)) return;
+    // K.O. subi hors ligne : rattaché au tour où il a eu lieu (soigné au début de son prochain tour, pas de fin de tour)
+    if (late && effectType === 'siphon' && localPlayer.hearts <= 1 && !localPlayer.inHospital) {
+      localPlayer.hearts = 0;
+      localPlayer.inHospital = { round: round || currentSession.round || 1, turnToken: turnToken || null };
+      refreshHud();
+      await msgIdle();
+      await showPowerHit(effectType, senderCaid, null);
+      if (isMyTurnToPlay) checkHospitalRelease(currentSession.round); // déjà son tour : il est soigné maintenant
+      return;
+    }
     let stolen = null;
     if (effectType === 'siphon') localPlayer.hearts = Math.max(0, localPlayer.hearts - 1);
     else if (effectType === 'shuriken') localPlayer.tempDefMalus = 3;
@@ -444,8 +479,8 @@ if (socket) {
   });
   socket.on('gain_stolen_item', async ({ item }) => {
     localPlayer.inventory.push(item);
-    await showAppAlert(`${item.name} a été ajouté à votre Sac !`, "🎁 Butin Dérobé");
     refreshHud();
+    await showAppAlert(`${item.name} a été ajouté à votre Sac !`, "🎁 Butin Dérobé");
   });
   // Alliance : écrans plein page (js/alliance.js)
   socket.on('alliance_request_received', (data) => { if (data) showAllianceRequest(data); });

@@ -66,8 +66,8 @@ function powFx(effect) {
   return '';
 }
 const POW_OUT = {
-  shuriken: ['ph-shield', 'Sa défense ce tour', '−3'],
-  danse: ['ph-sword', 'Son attaque ce tour', '−3'],
+  shuriken: ['ph-shield', 'Sa défense cette manche', '−3'],
+  danse: ['ph-sword', 'Son attaque cette manche', '−3'],
   siphon: ['ph-heart', 'Cœur volé', '+1 ❤️'],
   steal_item: ['ph-backpack', 'Objet dérobé', 'si son sac n’est pas vide'],
   swap_pos: ['ph-arrows-left-right', 'Échangez vos pions', 'sur le plateau'],
@@ -105,7 +105,7 @@ function refreshPowerChoice() { if (powState() === 'choix') powChoice(); }
 
 async function openSpecialAbilityPrompt() {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas votre tour de jouer !", "Tour Inactif");
-  if (localPlayer.specialUsedThisTurn) return showAppAlert("Capacité spéciale déjà utilisée durant ce tour !", "Capacité Épuisée");
+  if (localPlayer.specialUsedThisTurn) return showAppAlert("Capacité spéciale déjà utilisée cette manche !", "Capacité Épuisée");
   powItem = null;
   const caid = getMyCaid();
   if (POW_TARGETED[caid.id]) {
@@ -129,7 +129,7 @@ async function openSpecialAbilityPrompt() {
   const info = sieste
     ? `${powHearts(h)}<div class="text-center text-sm font-bold text-slate-300 mt-2">Cœurs de vie : ${h} / 3${h < 3 ? ` → <b class="pow-ac">${h + 1} / 3</b>` : ' (déjà au maximum)'}</div>`
     : powRow('ph-path', 'Déplacement', 'jusqu’à 5 cases');
-  const bottom = `${info}<div class="text-center text-[11px] font-bold text-slate-500 mt-2">Utilisable 1 fois par tour</div>
+  const bottom = `${info}<div class="text-center text-[11px] font-bold text-slate-500 mt-2">Utilisable 1 fois par manche</div>
     <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchSelfPower()">${POW_CTA[caid.id] || 'Activer'}</button></div>`;
   return powRender('self', caid, powChipHtml('ph-lightning', 'Capacité spéciale'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), stage, bottom);
 }
@@ -187,7 +187,7 @@ function launchTargetedPower() {
   const stage = powDuo(powAv(caid.imageFile, 'Toi', 'me'), powAv(allyCaidImg(target.caidId, name), name, 'hit'), powFx(effect), `fx-${effect}`);
   const [icon, label, after] = POW_OUT[effect];
   const bottom = `<div class="pow-result">${powRow(icon, `${label}`, `<span class="pow-ac">${after}</span>`)}
-    <div class="text-center text-[11px] font-bold text-slate-400 mt-2">${effect === 'canette' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'shuriken' || effect === 'danse' ? `Pour ${escapeHtml(name)}, jusqu’à la fin du tour.` : effect === 'swap_pos' ? `Échange ton pion avec celui de ${escapeHtml(name)}.` : `Sur ${escapeHtml(name)}.`}</div>
+    <div class="text-center text-[11px] font-bold text-slate-400 mt-2">${effect === 'canette' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'shuriken' || effect === 'danse' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'swap_pos' ? `Échange ton pion avec celui de ${escapeHtml(name)}.` : `Sur ${escapeHtml(name)}.`}</div>
     <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">Continuer</button></div>`;
   powRender('fx', caid, caid.id === 'canette' ? powChipHtml('ph-backpack', 'Objet lancé') : powChipHtml('ph-lightning', 'Capacité lancée'), powHeadHtml(caid.name, caid.skillName, ''), stage, bottom);
 }
@@ -195,8 +195,8 @@ function launchTargetedPower() {
 // VICTIME : « Touché ! » avec l'effet subi ; se résout quand le joueur encaisse
 const POW_HIT = {
   siphon: (s) => [`${s} t’aspire 1 Cœur de Vie.`, 'ph-heart', 'Tes cœurs de vie', '−1'],
-  shuriken: (s) => [`${s} t’a lancé un shuriken.`, 'ph-shield', 'Ta défense ce tour', '−3'],
-  danse: (s) => [`${s} t’a envoûté avec sa danse.`, 'ph-sword', 'Ton attaque ce tour', '−3'],
+  shuriken: (s) => [`${s} t’a lancé un shuriken.`, 'ph-shield', 'Ta défense cette manche', '−3'],
+  danse: (s) => [`${s} t’a envoûté avec sa danse.`, 'ph-sword', 'Ton attaque cette manche', '−3'],
   steal_item: (s, item) => item ? [`${s} t’a fait les poches.`, 'ph-backpack', escapeHtml(item.name), 'volé'] : [`${s} a tenté de te faire les poches…`, 'ph-backpack', 'Ton sac était vide', 'raté'],
   swap_pos: (s) => [`${s} a échangé sa place avec toi.`, 'ph-arrows-left-right', 'Échangez vos pions', 'sur le plateau'],
   canette: (s) => [`${s} t’a balancé une vieille canette.`, 'ph-shield', 'Ta défense jusqu’à la fin de la manche', '−1']

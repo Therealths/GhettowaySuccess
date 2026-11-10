@@ -1,10 +1,16 @@
 // Stats du joueur, capacités, police, inventaire, HUD, transferts coffre
 
 // Lascars donnent Attaque ET Défense
+// Pot de Protéine : Lascars doublés jusqu'à la fin de la manche
+const musclesDoubled = () => combatModifiers.doubleMuscles || (!!localPlayer.proteinRound && localPlayer.proteinRound === (currentSession.round || 1));
+
 function getTotalAtk() {
-  let atk = localPlayer.baseAtk - (localPlayer.tempAtkMalus || 0);
-  if (localPlayer.equipped.weapon && !myWeaponNullified) atk += (localPlayer.equipped.weapon.bonusVal * (combatModifiers.doubleWeapon ? 2 : 1));
-  const multM = combatModifiers.doubleMuscles ? 2 : 1;
+  const armed = !!localPlayer.equipped.weapon && !myWeaponNullified;
+  // Kitano : Attaque à mains nues = 3, seulement sans arme
+  const base = (armed && localPlayer.caidId === 'caid_6') ? 1 : localPlayer.baseAtk;
+  let atk = base - (localPlayer.tempAtkMalus || 0);
+  if (armed) atk += (localPlayer.equipped.weapon.bonusVal * (combatModifiers.doubleWeapon ? 2 : 1));
+  const multM = musclesDoubled() ? 2 : 1;
   const radioLascarBonus = isRadioEffectActive('LASCAR_ATK_BONUS') ? getRadioEffectValue('LASCAR_ATK_BONUS', 1) : 0;
   localPlayer.musclesOnPerson.forEach(m => {
     atk += (((m.bonusVal || 1) + radioLascarBonus) * multM);
@@ -17,7 +23,7 @@ function getTotalAtk() {
 function getTotalDef() {
   let def = localPlayer.baseDef - (localPlayer.tempDefMalus || 0) - (localPlayer.canetteDefMalus || 0);
   if (localPlayer.equipped.armor) def += localPlayer.equipped.armor.bonusVal;
-  const multM = combatModifiers.doubleMuscles ? 2 : 1;
+  const multM = musclesDoubled() ? 2 : 1;
   localPlayer.musclesOnPerson.forEach(m => {
     def += ((m.bonusVal || 1) * multM);
   });
@@ -68,8 +74,8 @@ async function depositProstituteToSafe() {
   if (!isMyTurnToPlay || !localPlayer.prostituteInTransit) return;
   localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
   localPlayer.prostituteInTransit = null;
-  await showAppAlert("Prostituée installée au QG ! Sa rente sera versée au coffre à chaque manche.", "🎉 Sécurisation QG");
   refreshHud();
+  await showAppAlert("Prostituée installée au QG ! Sa rente sera versée au coffre à chaque manche.", "🎉 Sécurisation QG");
 }
 // Capacités spéciales : voir js/powers.js
 
@@ -204,7 +210,7 @@ async function sellItem(idx) {
   if (!isMyTurnToPlay) return;
   const item = localPlayer.inventory[idx];
   if (!item) return;
-  const val = Math.floor((item.price || item.p || 3000) * 0.5);
+  const val = Math.floor((item.price ?? item.p ?? 3000) * 0.5);
   if (await showAppConfirm(`Revendre "${item.name}" pour ${val.toLocaleString()} € ?`, "💰 Revente")) {
     localPlayer.inventory.splice(idx, 1);
     localPlayer.pocketCash += val;
@@ -319,7 +325,11 @@ function refreshHud() {
       tempDefMalus: localPlayer.tempDefMalus,
       canetteDefMalus: localPlayer.canetteDefMalus || 0,
       firstWeaponDoubled: localPlayer.firstWeaponDoubled,
-      specialUsedThisTurn: localPlayer.specialUsedThisTurn
+      specialUsedThisTurn: localPlayer.specialUsedThisTurn,
+      jloDoubledKgBought: localPlayer.jloDoubledKgBought || 0,
+      freeItemsClaimed: localPlayer.freeItemsClaimed || [],
+      roundSeen: localPlayer.roundSeen || 0,
+      proteinRound: localPlayer.proteinRound || 0
     });
   }
 }
@@ -351,7 +361,7 @@ function renderInventoryList() {
       primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Utiliser</button>`;
     }
     const isSellable = (item.type === 'WEAPON' || item.type === 'ARMOR' || item.type === 'VEHICLE');
-    const resellVal = Math.floor((item.price || item.p || 3000) * 0.5);
+    const resellVal = Math.floor((item.price ?? item.p ?? 3000) * 0.5);
     const sellBtn = isSellable ? `<button onclick="sellItem(${realIdx})" class="px-2 py-1 glass-panel text-amber-300 border border-amber-500/30 rounded-lg font-mono text-[9px] font-bold">Vendre (${resellVal}€)</button>` : '';
     return `
       <div class="p-2.5 bg-black/60 rounded-xl border border-white/10 flex items-center justify-between text-xs gap-2">
@@ -389,8 +399,8 @@ async function useItem(idx) {
     if (localPlayer.hearts >= 3) return showAppAlert("Vos Cœurs sont déjà au maximum !", "Santé Pleine");
     localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
     localPlayer.inventory.splice(idx, 1);
-    await showAppAlert("+1 Cœur de Vie restauré !", "🥙 Kebab");
     refreshHud();
+    await showAppAlert("+1 Cœur de Vie restauré !", "🥙 Kebab");
     return;
   }
   // Vieille canette : on choisit le rival à viser (écran des capacités spéciales)
@@ -410,18 +420,18 @@ async function useItem(idx) {
         return showAppAlert("Requiert une arme à feu équipée !", "Arme Incompatible");
       }
       combatModifiers.doubleWeapon = true;
-    } else if (it.eff === 'double_muscles_atk') combatModifiers.doubleMuscles = true;
+    } else if (it.eff === 'double_muscles_atk') localPlayer.proteinRound = currentSession.round || 1;
     else if (it.eff === 'bonus_combat_atk') combatModifiers.flatAtkBonus += (it.val || 1);
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
     localPlayer.inventory.splice(idx, 1);
     refreshHud();
-    const lasts = (it.eff === 'double_weapon_atk' || it.eff === 'null_enemy_weapon') ? 'pour votre prochain combat de ce tour' : "jusqu'à la fin du tour en cours";
+    const lasts = (it.eff === 'double_weapon_atk' || it.eff === 'null_enemy_weapon') ? 'pour votre prochain combat de ce tour' : it.eff === 'double_muscles_atk' ? "jusqu'à la fin de la manche" : "jusqu'à la fin du tour en cours";
     await showAppAlert(`${it.name} activé ${lasts} ! Vos statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
     return;
   }
   localPlayer.inventory.splice(idx, 1);
-  await showAppAlert(`${it.name} utilisé !`, "Objet");
   refreshHud();
+  await showAppAlert(`${it.name} utilisé !`, "Objet");
 }
 
 function renderEquipmentSlotsView() {

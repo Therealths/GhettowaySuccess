@@ -131,7 +131,7 @@
       "prix": 2000,
       "rev": 1000,
       "bonusVal": 1000,
-      "bonusLabel": "+1 000 € / tour au QG",
+      "bonusLabel": "+1 000 € / manche au QG",
       "image": "plvl1.jpg",
       "desc": "Escort débutante à ramener au QG."
     },
@@ -144,7 +144,7 @@
       "prix": 4000,
       "rev": 2500,
       "bonusVal": 2500,
-      "bonusLabel": "+2 500 € / tour au QG",
+      "bonusLabel": "+2 500 € / manche au QG",
       "image": "plvl2.jpg",
       "desc": "Escort VIP haut de gamme, rente élevée."
     }

@@ -24,11 +24,11 @@ function findRows(it) {
   const e = it.eff;
   if (e === 'cash') return itemRow('ph-coins', 'Gain', `+${(it.val || 0).toLocaleString()} €`);
   if (e === 'drug') return itemRow('ph-plant', 'Gain', `+${it.val || 0} kg`);
-  if (e === 'heal' || /kebab/i.test(it.name || '')) return itemRow('ph-heart', 'Effet', '+1 Cœur de vie') + itemRow('ph-backpack', 'Quand ?', 'à manger quand tu veux');
+  if (e === 'heal' || /kebab/i.test(it.name || '')) return itemRow('ph-heart', 'Effet', '+1 Cœur de vie') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'cancel_police') return itemRow('ph-siren', 'Effet', 'annule un contrôle') + itemRow('ph-backpack', 'Quand ?', 'proposé au prochain contrôle');
   if (e === 'none') return itemRow('ph-trash', 'Effet', 'aucun…') + itemRow('ph-backpack', 'Quand ?', 'faut pas gâcher');
   if (e === 'def_malus_round') return itemRow('ph-shield', 'Effet', '−1 Défense à un rival') + itemRow('ph-backpack', 'Quand ?', 'avant ou pendant un combat');
-  if (e === 'stray_dog') return itemRow('ph-dog', 'Effet', 'rallie le Chien Errant') + itemRow('ph-backpack', 'Quand ?', 'quand tu veux');
+  if (e === 'stray_dog') return itemRow('ph-dog', 'Effet', 'rallie le Chien Errant') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (it.dur === 'combat') return itemRow('ph-sword', 'Effet', escapeHtml(it.desc || 'objet de combat')) + itemRow('ph-backpack', 'Quand ?', 'pendant un combat');
   return itemRow('ph-sparkle', 'Effet', escapeHtml(it.desc || 'objet spécial'));
 }
@@ -68,16 +68,19 @@ const FOUILLE_TABLE = [
   [1, { name: 'Vieille canette', eff: 'def_malus_round', val: 1, desc: '−1 Défense à un rival jusqu’à la fin de la manche' }],
   [1, { name: 'Kebab', eff: 'heal', val: 1, desc: 'Restaure 1 Cœur de Vie' }],
   [1, { name: 'Couvercle de poubelle', eff: 'null_enemy_weapon', dur: 'combat', desc: 'Réduit l’arme adverse à 0' }],
-  [1, { name: 'Pot de Protéine', eff: 'double_muscles_atk', dur: 'combat', desc: 'Attaque/Défense Lascars doublée' }],
+  [1, { name: 'Pot de Protéine', eff: 'double_muscles_atk', dur: 'combat', desc: 'Attaque/Défense Lascars doublée jusqu’à la fin de la manche' }],
   [1, { name: 'Balle perforante', eff: 'double_weapon_atk', dur: 'combat', desc: 'Dégâts arme à feu doublés' }],
   [1, { name: 'Passeport diplomatique', eff: 'cancel_police', desc: 'Annule un contrôle de police' }],
   [1, { name: 'Sifflet', eff: 'stray_dog', dur: 'tour', desc: 'Rallie le Chien Errant (+2 Atk / +2 Def)' }]
 ];
-function openFouille() {
+function drawFouilleItem() {
   const total = FOUILLE_TABLE.reduce((s, [w]) => s + w, 0);
   let r = Math.random() * total;
   const pick = (FOUILLE_TABLE.find(([w]) => (r -= w) < 0) || FOUILLE_TABLE[0])[1];
-  const it = Object.assign({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', val: 0, dur: 'instant' }, pick);
+  return Object.assign({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', val: 0, dur: 'instant' }, pick);
+}
+function openFouille() {
+  const it = drawFouilleItem();
   return openLootDiscoveryModal(it, "Ajouter au sac", () => { localPlayer.inventory.push(it); spendActionPm(); });
 }
 
@@ -102,12 +105,12 @@ function deckGain(it) {
 }
 function deckBlocked(it) {
   if (it.eff === 'double_weapon_atk' && !isFirearm(localPlayer.equipped.weapon)) return 'Arme à feu requise';
-  if (['double_weapon_atk', 'bonus_combat_atk', 'def_malus_round'].includes(it.eff) && !deckAttacking()) return 'Sert quand tu attaques';
+  if (['double_weapon_atk', 'bonus_combat_atk'].includes(it.eff) && !deckAttacking()) return 'Sert quand tu attaques';
   return '';
 }
 const DECK_TAG = { double_muscles_atk: 'x2 Lascars', double_weapon_atk: '🔥 Arme à feu', null_enemy_weapon: 'Bouclier', bonus_combat_atk: 'Bonus', def_malus_round: 'À lancer' };
 const DECK_DESC = {
-  double_muscles_atk: 'Tes Lascars comptent double pour ce combat.',
+  double_muscles_atk: 'Tes Lascars comptent double jusqu’à la fin de la manche.',
   double_weapon_atk: 'Les dégâts de ton arme à feu sont doublés.',
   null_enemy_weapon: 'L’arme de ton adversaire est réduite à 0 pour ce combat.',
   def_malus_round: 'Lance-la sur ton adversaire : −1 Défense jusqu’à la fin de la manche.'
@@ -191,7 +194,7 @@ function closeItemDeck() {
   scr.classList.remove('show');
 }
 
-// Rival visé par la canette pendant le combat : celui que j'attaque
+// Rival visé par la canette pendant le combat : mon adversaire (en attaque comme en défense)
 function deckOpponent() {
   const name = currentDuelInfo && currentDuelInfo.opponentCaid;
   return (connectedRivals || []).find(r => (currentDuelInfo.opponentSocketId && r.socketId === currentDuelInfo.opponentSocketId) || allyRivalName(r) === name);
@@ -206,7 +209,7 @@ function confirmCombatItems() {
     if (idx < 0) return;
     playedNames.push(it.name);
     if (it.eff === 'bonus_combat_atk') combatModifiers.flatAtkBonus += (it.val || 1);
-    else if (it.eff === 'double_muscles_atk') combatModifiers.doubleMuscles = true;
+    else if (it.eff === 'double_muscles_atk') localPlayer.proteinRound = currentSession.round || 1;
     else if (it.eff === 'double_weapon_atk') combatModifiers.doubleWeapon = true;
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
     else if (it.eff === 'def_malus_round') {
