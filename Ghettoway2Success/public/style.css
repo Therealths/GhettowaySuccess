@@ -791,15 +791,7 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .deck-chip { background: var(--chip); }
 .deck-cta { color: #fff; }
 .deck-cta:disabled { color: #000; }
-.item-stage { height: 290px; }
 .deck-arrow { position: absolute; z-index: 30; width: 36px; height: 36px; border-radius: 99px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); }
-.item-card { width: 200px; height: 270px; border-color: color-mix(in srgb, var(--ac) 45%, transparent); border-width: 1px; }
-.item-card.sel { border: 2px solid var(--ac); box-shadow: 0 0 30px color-mix(in srgb, var(--ac) 45%, transparent), 0 18px 36px rgba(0,0,0,0.9) !important; }
-.item-card.sel::after { content: '✓'; position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #111; background: var(--ac); border: 3px solid #07080e; }
-.item-card.off .item-pic, .item-card.off h4, .item-card.off p { filter: grayscale(1); opacity: 0.45; }
-.item-pic { height: 112px; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--ac) 25%, transparent), rgba(0,0,0,0.85) 70%); border: 1px solid rgba(255,255,255,0.1); }
-.item-pic img { width: 100%; height: 100%; object-fit: cover; }
-.item-pic span { font-size: 50px; line-height: 1; }
 .item-badge { padding: 2px 6px; border-radius: 6px; font-size: 9px; font-weight: 900; border: 1px solid color-mix(in srgb, var(--ac) 40%, transparent); background: color-mix(in srgb, var(--ac) 18%, transparent); color: var(--ac3); }
 .item-badge:empty { display: none; }
 .deck-btn { width: 100%; padding: 8px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 4px; color: #fff; background: linear-gradient(90deg, var(--ac3), var(--ac2)); }
@@ -818,7 +810,23 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .deck-stat > i { font-size: 20px; color: var(--ac3); }
 .deck-screen.show .deck-head { animation: allyUp 0.4s ease-out both; }
 .deck-screen.show .item-stage { animation: allyPop 0.45s cubic-bezier(.2,1.4,.4,1) 0.1s both; }
-@media (max-height: 700px) { .deck-title { font-size: 30px; } .item-stage { height: 270px; } }
+/* Pile des objets : les grandes cartes Fouille en pile 3D, comme dans les boutiques */
+.item-stage { --cw: 178px; height: calc(var(--cw) * 1226 / 768 + 52px); }
+.deck-card-item.item-deck { width: var(--cw); height: auto; padding: 0; background: transparent; border-radius: 14px; gap: 8px; justify-content: flex-start; }
+.deck-cardbox { position: relative; width: 100%; aspect-ratio: 768 / 1226; border-radius: 14px; overflow: hidden; background: #10121b; }
+.deck-face { display: block; width: 100%; height: 100%; object-fit: cover; -webkit-user-drag: none; user-select: none; pointer-events: none; }
+.deck-face-txt { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 14px; text-align: center; background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--ac) 25%, transparent), #10121b 70%); }
+.deck-face-txt span { font-size: 56px; line-height: 1; }
+.deck-face-txt h4 { font-size: 15px; font-weight: 900; text-transform: uppercase; }
+.deck-face-txt p { font-size: 11px; color: #cbd5e1; line-height: 1.25; }
+.item-deck.sel .deck-cardbox { box-shadow: 0 0 0 3px var(--ac), 0 0 30px color-mix(in srgb, var(--ac) 50%, transparent); }
+.item-deck.sel .deck-cardbox::after { content: '✓ JOUÉE'; position: absolute; top: 10px; right: 10px; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 900; color: #111; background: var(--ac); }
+.item-deck.off .deck-face { filter: grayscale(1) brightness(0.6); }
+.deck-under { display: flex; align-items: center; gap: 6px; }
+.deck-under .item-badge { flex: none; font-size: 11px; padding: 4px 7px; }
+.deck-under > button { flex: 1; }
+@media (max-height: 760px) { .item-stage { --cw: 158px; } }
+@media (max-height: 700px) { .deck-title { font-size: 30px; } .item-stage { --cw: 140px; } .deck-head .mt-1 { margin-top: 0; } }
 
 /* Découverte d'objet : fouille de la poubelle, puis la carte de l'objet */
 .find-screen { background: #07080e; overflow: hidden; color: #fff; }

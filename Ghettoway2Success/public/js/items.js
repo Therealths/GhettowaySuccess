@@ -37,14 +37,14 @@ function findRows(it) {
   const e = it.eff;
   if (e === 'cash') return itemRow('ph-coins', 'Gain', `+${(it.val || 0).toLocaleString()} €`);
   if (e === 'drug') return itemRow('ph-plant', 'Gain', `+${it.val || 0} kg`);
-  if (e === 'heal' || /kebab/i.test(it.name || '')) return itemRow('ph-heart', 'Effet', '+1 Cœur de vie') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
+  if (e === 'heal' || /kebab/i.test(it.name || '')) return itemRow('ph-heart', 'Effet', '+1 Cœur de vie') + itemRow('ph-backpack', 'Quand ?', 'ton tour ou en combat');
   if (e === 'cancel_police') return itemRow('ph-siren', 'Effet', 'annule un contrôle') + itemRow('ph-backpack', 'Quand ?', 'proposé au prochain contrôle');
   if (e === 'none') return itemRow('ph-trash', 'Effet', 'aucun…') + itemRow('ph-backpack', 'Quand ?', 'faut pas gâcher');
   if (e === 'pm_turn') return itemRow('ph-sneaker-move', 'Effet', `+${it.val || 3} PM jusqu’à la fin du tour`) + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'free_prostitute') return itemRow('ph-high-heel', 'Effet', '1 Prostituée Niv. 1 gratuite') + itemRow('ph-backpack', 'Quand ?', 'utilisé tout seul au Nightclub');
   if (e === 'voucher') return itemRow('ph-ticket', 'Effet', `−50 % : ${escapeHtml(it.shop || '')}`) + itemRow('ph-backpack', 'Quand ?', 'prochain achat (à activer)');
   if (e === 'def_malus_round') return itemRow('ph-shield', 'Effet', '−1 Défense à un rival') + itemRow('ph-backpack', 'Quand ?', 'avant ou pendant un combat');
-  if (e === 'stray_dog') return itemRow('ph-dog', 'Effet', 'rallie le Chien Errant') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
+  if (e === 'stray_dog') return itemRow('ph-dog', 'Effet', 'rallie le Chien Errant') + itemRow('ph-backpack', 'Quand ?', 'ton tour ou en combat');
   if (it.dur === 'combat') return itemRow('ph-sword', 'Effet', escapeHtml(it.desc || 'objet de combat')) + itemRow('ph-backpack', 'Quand ?', 'pendant un combat');
   return itemRow('ph-sparkle', 'Effet', escapeHtml(it.desc || 'objet spécial'));
 }
@@ -120,6 +120,8 @@ let deckItems = [];
 let deckIndex = 0;
 let deckPicked = new Set();
 
+// Cartes jouables pendant un combat (Kebab et Sifflet aussi : se soigner ou rallier le chien juste avant de cogner)
+const isCombatItem = it => it.dur === 'combat' || ['def_malus_round', 'heal', 'stray_dog'].includes(it.eff);
 const deckAttacking = () => !!currentDuelInfo && currentDuelInfo.role === 'attacker';
 // Ce que la carte rapporte, et pourquoi elle est injouable
 function deckGain(it) {
@@ -130,9 +132,14 @@ function deckGain(it) {
   if (it.eff === 'bonus_combat_atk') return `+${it.val || 1} ATK`;
   if (it.eff === 'null_enemy_weapon') return 'Arme 0';
   if (it.eff === 'def_malus_round') return '−1 DÉF';
+  if (it.eff === 'heal') return `+${it.val || 1} ❤️`;
+  if (it.eff === 'stray_dog') return `+2 ${deckAttacking() ? 'ATK' : 'DÉF'}`;
   return '';
 }
 function deckBlocked(it) {
+  if (!isCombatItem(it)) return 'Pas en combat';
+  if (it.eff === 'heal' && localPlayer.hearts >= 3) return 'Cœurs au max';
+  if (it.eff === 'stray_dog' && localPlayer.strayDogActive) return 'Chien déjà avec toi';
   if (it.eff === 'double_weapon_atk' && !isFirearm(localPlayer.equipped.weapon)) return 'Arme à feu requise';
   if (['double_weapon_atk', 'bonus_combat_atk'].includes(it.eff) && !deckAttacking()) return 'Sert quand tu attaques';
   return '';
@@ -142,25 +149,31 @@ const DECK_DESC = {
   double_muscles_atk: 'Tes Lascars comptent double jusqu’à la fin de la manche.',
   double_weapon_atk: 'Le bonus d’Attaque de ton arme à feu est doublé pour ce combat.',
   null_enemy_weapon: 'L’arme de ton adversaire est réduite à 0 pour ce combat.',
-  def_malus_round: 'Lance-la sur ton adversaire : −1 Défense jusqu’à la fin de la manche.'
+  def_malus_round: 'Lance-la sur ton adversaire : −1 Défense jusqu’à la fin de la manche.',
+  heal: 'Restaure 1 Cœur de Vie tout de suite.',
+  stray_dog: 'Le Chien Errant te rejoint : +2 Attaque / +2 Défense.'
 };
 
 // Ma stat si je joue les cartes choisies (sans rien modifier)
 function deckPreview() {
-  const saved = Object.assign({}, combatModifiers);
+  const saved = Object.assign({}, combatModifiers), dog = localPlayer.strayDogActive;
   deckItems.filter(it => deckPicked.has(it.id)).forEach(it => {
     if (it.eff === 'bonus_combat_atk') combatModifiers.flatAtkBonus += (it.val || 1);
     else if (it.eff === 'double_muscles_atk') combatModifiers.doubleMuscles = true;
     else if (it.eff === 'double_weapon_atk') combatModifiers.doubleWeapon = true;
+    else if (it.eff === 'stray_dog') localPlayer.strayDogActive = true;
   });
   const v = deckAttacking() ? getTotalAtk() : getTotalDef();
   combatModifiers = saved;
+  localPlayer.strayDogActive = dog;
   return v;
 }
 
 function openCombatItemSelectorModal() {
-  deckItems = localPlayer.inventory.filter(i => i && (i.dur === 'combat' || i.eff === 'def_malus_round'));
-  if (!deckItems.length) return showAppAlert("Aucun objet de combat dans ton Sac !", "Sac Vide");
+  // Tout le Sac : les objets de combat d'abord, les autres sont visibles mais grisés
+  const bag = localPlayer.inventory.filter(Boolean);
+  deckItems = [...bag.filter(isCombatItem), ...bag.filter(i => !isCombatItem(i))];
+  if (!deckItems.length) return showAppAlert("Ton Sac est vide !", "Sac Vide");
   deckItems.forEach((it, i) => { if (!it.id) it.id = 'obj_' + Date.now() + '_' + i; });
   deckIndex = 0;
   deckPicked = new Set();
@@ -168,30 +181,42 @@ function openCombatItemSelectorModal() {
   scr.dataset.theme = deckAttacking() ? 'atk' : 'def';
   document.getElementById('deckRound').innerText = currentSession.round || 1;
   document.getElementById('deckChip').innerHTML = deckAttacking() ? '<i class="ph-fill ph-sword"></i> Attaque' : '<i class="ph-fill ph-shield"></i> Défense';
-  renderItemDeck();
+  const n = deckItems.length, nc = deckItems.filter(isCombatItem).length;
+  document.getElementById('deckCount').innerText = n === 1
+    ? (nc ? 'Ton seul objet se joue en combat. Une carte jouée est perdue.' : 'Ton seul objet ne sert pas en combat.')
+    : `${n} objets dans ton Sac, fais-les glisser. ` + (nc ? `${nc > 1 ? nc + ' se jouent' : '1 se joue'} en combat. Une carte jouée est perdue.` : 'Aucun ne sert pendant un combat.');
+  buildItemDeck();
   scr.classList.remove('hidden', 'show');
   void scr.offsetWidth;
   scr.classList.add('show');
-  bindDeckSwipeAndDrag('deckCards', stepItemDeck);
 }
 
-function renderItemDeck() {
-  const total = deckItems.length;
+// Pile 3D comme dans les boutiques : on glisse ou on touche les flèches, la carte du dessus est la carte active
+function buildItemDeck() {
   document.getElementById('deckCards').innerHTML = deckItems.map((it, idx) => {
-    const art = itemArt(it, true), why = deckBlocked(it), on = deckPicked.has(it.id);
-    const btn = why
-      ? `<button type="button" class="deck-buy-btn deck-btn off" disabled><i class="ph-bold ph-prohibit"></i> ${why}</button>`
-      : `<button type="button" class="deck-buy-btn deck-btn ${on ? 'played' : ''}" onclick="event.stopPropagation(); toggleDeckItem(${idx})">${on ? '<i class="ph-bold ph-x"></i> Retirer' : '<i class="ph-bold ph-lightning"></i> Jouer'}</button>`;
-    return `<div id="itemDeckCard_${idx}" onclick="pickDeckCard(${idx})" class="deck-card-item item-card ${on ? 'sel' : ''} ${why ? 'off' : ''}">
-      <div>
-        <div class="item-pic">${art ? `<img src="${art}" alt="">` : `<span>${itemEmoji(it)}</span>`}</div>
-        <div class="flex items-center justify-between gap-1 mt-2"><span class="item-badge">${deckGain(it)}</span><span class="text-[9px] font-black text-slate-400">${DECK_TAG[it.eff] || ''}</span></div>
-        <h4 class="text-[13px] font-black uppercase mt-1.5 truncate">${escapeHtml(it.name || 'Objet')}</h4>
-        <p class="text-[10px] text-slate-300 mt-0.5 leading-tight line-clamp-2">${escapeHtml(DECK_DESC[it.eff] || it.desc || '')}</p>
-      </div>${btn}</div>`;
+    const big = itemArt(it);
+    const face = big ? `<img class="deck-face" src="${big}" alt="${escapeHtml(it.name || '')}" draggable="false">`
+      : `<div class="deck-face deck-face-txt"><span>${itemEmoji(it)}</span><h4>${escapeHtml(it.name || 'Objet')}</h4><p>${escapeHtml(DECK_DESC[it.eff] || it.desc || '')}</p></div>`;
+    return `<div id="itemDeckCard_${idx}" class="deck-card-item item-deck" onclick="pickDeckCard(${idx})">
+      <div class="deck-cardbox">${face}</div>
+      <div class="deck-under"><span class="item-badge">${deckGain(it)}</span><span id="itemDeckBtn_${idx}"></span></div></div>`;
   }).join('');
-  applyDeckStackPositions('itemDeckCard', total, deckIndex);
-  document.getElementById('deckDots').innerHTML = deckItems.map((it, i) => `<i class="${i === deckIndex ? 'on' : ''} ${deckPicked.has(it.id) ? 's' : ''}"></i>`).join('');
+  document.querySelectorAll('#modalCombatItemSelector .deck-arrow').forEach(b => b.classList.toggle('hidden', deckItems.length < 2));
+  bindDeckSwipeAndDrag('deckCards', stepItemDeck);
+  updateItemDeck();
+}
+
+function updateItemDeck() {
+  deckItems.forEach((it, idx) => {
+    const why = deckBlocked(it), on = deckPicked.has(it.id);
+    const slot = document.getElementById(`itemDeckCard_${idx}`);
+    if (!slot) return;
+    slot.className = `deck-card-item item-deck ${on ? 'sel' : ''} ${why ? 'off' : ''}`;
+    document.getElementById(`itemDeckBtn_${idx}`).outerHTML = why
+      ? `<button type="button" id="itemDeckBtn_${idx}" class="deck-buy-btn deck-btn off" disabled><i class="ph-bold ph-prohibit"></i> ${why}</button>`
+      : `<button type="button" id="itemDeckBtn_${idx}" class="deck-buy-btn deck-btn ${on ? 'played' : ''}" onclick="event.stopPropagation(); toggleDeckItem(${idx})">${on ? '<i class="ph-bold ph-x"></i> Retirer' : '<i class="ph-bold ph-lightning"></i> Jouer'}</button>`;
+  });
+  document.getElementById('deckDots').innerHTML = deckItems.length < 2 ? '' : deckItems.map((it, i) => `<i class="${i === deckIndex ? 'on' : ''} ${deckPicked.has(it.id) ? 's' : ''}"></i>`).join('');
   const picked = deckItems.filter(it => deckPicked.has(it.id));
   document.getElementById('deckPicked').innerHTML = picked.length
     ? picked.map(it => { const art = itemArt(it, true); return `<span class="deck-chipsel">${art ? `<img src="${art}" alt="">` : `<b>${itemEmoji(it)}</b>`}${escapeHtml(String(it.name || '').split(' ')[0])}</span>`; }).join('')
@@ -202,20 +227,21 @@ function renderItemDeck() {
   const cta = document.getElementById('btnConfirmCombatItems');
   cta.disabled = !picked.length;
   cta.innerText = picked.length ? `Jouer ${picked.length} carte${picked.length > 1 ? 's' : ''}` : 'Choisis une carte';
+  applyDeckStackPositions('itemDeckCard', deckItems.length, deckIndex);
 }
 
 function stepItemDeck(dir) {
   const next = deckIndex + dir;
   if (next < 0 || next >= deckItems.length) return;
   deckIndex = next;
-  renderItemDeck();
+  updateItemDeck();
 }
-function pickDeckCard(idx) { if (idx !== deckIndex) { deckIndex = idx; renderItemDeck(); } }
+function pickDeckCard(idx) { if (idx !== deckIndex) { deckIndex = idx; updateItemDeck(); } }
 function toggleDeckItem(idx) {
   const it = deckItems[idx];
   if (!it || deckBlocked(it)) return;
   if (deckPicked.has(it.id)) deckPicked.delete(it.id); else deckPicked.add(it.id);
-  renderItemDeck();
+  updateItemDeck();
 }
 function closeItemDeck() {
   const scr = document.getElementById('modalCombatItemSelector');
@@ -241,6 +267,11 @@ function confirmCombatItems() {
     else if (it.eff === 'double_muscles_atk') localPlayer.proteinRound = currentSession.round || 1;
     else if (it.eff === 'double_weapon_atk') combatModifiers.doubleWeapon = true;
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
+    else if (it.eff === 'heal') localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
+    else if (it.eff === 'stray_dog') {
+      localPlayer.strayDogActive = true;
+      if (socket) socket.emit('claim_stray_dog', { senderCaid: getMyCaid().name, playerToken: myPlayerToken });
+    }
     else if (it.eff === 'def_malus_round') {
       const opp = deckOpponent();
       if (opp && socket) socket.emit('apply_special_to_target', { targetPlayerToken: opp.playerToken, targetSocketId: opp.socketId, effectType: 'canette', senderCaid: getMyCaid().name });
