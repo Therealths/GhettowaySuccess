@@ -348,6 +348,13 @@ function isWeaponNullifiedFor(room, combat, token) {
   return opponents.some(t => room.players.find(p => p.playerToken === t)?.nullEnemyWeapon);
 }
 
+// Pied de biche : au plus 5 parts, 1 000 € ou 1 kg chacune
+function crowbarLootOf(l) {
+  const kg = Math.max(0, Math.min(5, Math.floor(Number(l && l.kg) || 0)));
+  const cash = Math.max(0, Math.min((5 - kg) * 1000, Math.floor(Number(l && l.cash) || 0)));
+  return { cash, kg };
+}
+
 // Caïd à 0 Cœur (K.O.) : intouchable comme à l'hôpital, même avant que son téléphone ait affiché l'écran Hôpital
 function isKnockedOut(p) { return typeof p.hearts === 'number' && p.hearts <= 0; }
 
@@ -1568,7 +1575,7 @@ io.on('connection', (socket) => {
   // =========================================================================
   // CAPACITÉS SPÉCIALES & ALLIANCES (AVEC IMMUNITÉ 2 TOURS)
   // =========================================================================
-  socket.on('apply_special_to_target', ({ targetPlayerToken, targetSocketId, effectType, senderCaid }) => {
+  socket.on('apply_special_to_target', ({ targetPlayerToken, targetSocketId, effectType, senderCaid, loot }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
 
@@ -1597,8 +1604,32 @@ io.on('connection', (socket) => {
       turnToken: activeNow ? activeNow.playerToken : null,
       senderCaid,
       senderSocketId: socket.id,
-      senderToken: sender.playerToken
+      senderToken: sender.playerToken,
+      // Pied de biche : 5 parts au total (1 000 € ou 1 kg chacune)
+      loot: effectType === 'crowbar' ? crowbarLootOf(loot) : undefined
     });
+  });
+
+  // Talkie-walkie de flic : dé et direction choisis à l'avance, pris par le prochain lancer de patrouille
+  socket.on('rig_patrol', ({ roll, left } = {}) => {
+    const room = rooms[socket.roomId];
+    if (!room) return;
+    room.patrolRig = { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), left: !!left };
+  });
+  socket.on('take_patrol_rig', (ack) => {
+    const room = rooms[socket.roomId];
+    const rig = room && room.patrolRig || null;
+    if (room) room.patrolRig = null;
+    if (typeof ack === 'function') ack(rig);
+  });
+
+  // Pied de biche : la victime renvoie au voleur ce qu'elle a perdu dans son coffre
+  socket.on('crowbar_loot_transferred', ({ targetSocketId, targetToken, cash, kg }) => {
+    const room = rooms[socket.roomId];
+    const thief = room && targetToken ? room.players.find(p => p.playerToken === targetToken) : null;
+    const loot = crowbarLootOf({ cash, kg });
+    if (thief) sendToPlayer(thief, 'gain_crowbar_loot', loot);
+    else io.to(targetSocketId).emit('gain_crowbar_loot', loot);
   });
 
   socket.on('stolen_item_transferred', ({ targetSocketId, targetToken, item }) => {

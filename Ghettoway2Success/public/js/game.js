@@ -458,10 +458,10 @@ function showPatrolScreen() {
   const info = document.getElementById('patrolInfo');
   const dirBox = document.getElementById('patrolDirection');
   const greve = isRadioEffectActive('PATROL_FREEZE');
-  const baseRoll = Math.floor(Math.random() * 6) + 1;
   const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
-  const finalMove = baseRoll + radioExtra;
-  const left = Math.random() < 0.5;
+  let baseRoll, finalMove, left, rigged = false;
+  const talkieFx = document.getElementById('patrolTalkie');
+  talkieFx.classList.add('hidden');
 
   document.getElementById('patrolRound').innerText = currentSession.round || 1;
   document.getElementById('patrolHeadline').innerHTML = 'LA PATROUILLE<br>TOURNE…';
@@ -481,6 +481,8 @@ function showPatrolScreen() {
   const land = () => {
     cta.disabled = false;
     scr.classList.add('result');
+    talkieFx.classList.toggle('hidden', !rigged); // bulle « message au talkie » + carte tamponnée
+    scr.classList.toggle('talkie', rigged); // choc à l'arrivée du tampon (secousse + flash)
     if (greve) {
       scr.dataset.state = 'greve';
       setPatrolDie(0);
@@ -498,15 +500,27 @@ function showPatrolScreen() {
   };
 
   // Le dé change de face quelques fois avant de tomber
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return land();
-  let k = 0;
-  const tick = () => {
-    if (k >= 10) return land();
-    setPatrolDie(1 + Math.floor(Math.random() * 6));
-    k++;
-    setTimeout(tick, 70 + k * 12);
+  // (Talkie-walkie de flic : un joueur a peut-être choisi à l'avance le dé et la direction, en secret)
+  const roll = rig => {
+    rigged = !!rig;
+    baseRoll = rig ? rig.roll : Math.floor(Math.random() * 6) + 1;
+    finalMove = baseRoll + radioExtra;
+    left = rig ? !!rig.left : Math.random() < 0.5;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return land();
+    let k = 0;
+    const tick = () => {
+      if (k >= 10) return land();
+      setPatrolDie(1 + Math.floor(Math.random() * 6));
+      k++;
+      setTimeout(tick, 70 + k * 12);
+    };
+    setTimeout(tick, 300);
   };
-  setTimeout(tick, 300);
+  if (!socket) return roll(null);
+  let asked = false;
+  const go = rig => { if (!asked) { asked = true; roll(rig); } };
+  socket.emit('take_patrol_rig', go);
+  setTimeout(() => go(null), 1500);
 }
 
 function skipPatrolWait() {

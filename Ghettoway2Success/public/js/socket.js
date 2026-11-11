@@ -450,7 +450,7 @@ if (socket) {
     refreshHud();
     await showAppAlert("Le Chien Errant te rejoint (+2 Atk / +2 Def) !\nIl reste avec toi jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
   });
-  socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId, senderToken, late, round, turnToken }) => {
+  socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId, senderToken, late, round, turnToken, loot }) => {
     // Malus reçu hors ligne pendant une manche déjà terminée : il ne compte plus
     if (late && round && round < (currentSession.round || 1) && ['shuriken', 'danse', 'canette'].includes(effectType)) return;
     // K.O. subi hors ligne : rattaché au tour où il a eu lieu (soigné au début de son prochain tour, pas de fin de tour)
@@ -472,6 +472,15 @@ if (socket) {
       localPlayer.canetteDefMalus = (localPlayer.canetteDefMalus || 0) + 1;
       if (currentDuelInfo) { fightLog(`🥫 <b>${escapeHtml(senderCaid)}</b> t'a lancé une vieille canette : −1 Défense jusqu'à la fin de la manche !`); updateArenaLiveStats(); }
     }
+    else if (effectType === 'crowbar') {
+      // Pied de biche : le voleur a choisi argent et/ou drogue, on prend ce qu'il y a dans mon coffre
+      const cash = Math.min((loot && loot.cash) || 0, localPlayer.safeCash || 0);
+      const kg = Math.min((loot && loot.kg) || 0, localPlayer.safeDrugs || 0);
+      localPlayer.safeCash -= cash;
+      localPlayer.safeDrugs -= kg;
+      stolen = { cash, kg };
+      socket.emit('crowbar_loot_transferred', { targetSocketId: senderSocketId, targetToken: senderToken, cash, kg });
+    }
     else if (effectType === 'steal_item' && localPlayer.inventory.length > 0) {
       stolen = localPlayer.inventory.pop();
       socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, targetToken: senderToken, item: stolen });
@@ -481,6 +490,12 @@ if (socket) {
     await showPowerHit(effectType, senderCaid, stolen);
     if (effectType === 'siphon') await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
     refreshHud();
+  });
+  socket.on('gain_crowbar_loot', async ({ cash, kg }) => {
+    localPlayer.pocketCash += cash || 0;
+    localPlayer.drugs += kg || 0;
+    refreshHud();
+    await showAppAlert(cash || kg ? `${crowbarLabel({ cash, kg })} pris dans son coffre, direct sur toi !` : "Son coffre était vide… Rien à prendre.", "🛠️ Pied de biche");
   });
   socket.on('gain_stolen_item', async ({ item }) => {
     localPlayer.inventory.push(item);

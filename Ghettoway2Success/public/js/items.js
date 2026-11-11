@@ -20,14 +20,19 @@ const ITEM_ART = [
   [/r[ée]duction nightclub/i, 'fouille-bon-nightclub'],
   [/r[ée]duction sportclub/i, 'fouille-bon-sportclub'],
   [/perforante/i, 'fouille-balle-or'],
-  [/botox/i, 'fouille-botox']
+  [/botox/i, 'fouille-botox'],
+  [/ticket .*gratter/i, 'fouille-ticket'],
+  [/talkie/i, 'fouille-talkie'],
+  [/pied de biche/i, 'fouille-pied-de-biche'],
+  [/lunettes/i, 'fouille-lunettes'],
+  [/rat crev/i, 'fouille-rat']
 ];
 function itemArt(item, thumb) {
   const hit = ITEM_ART.find(([re]) => re.test(item && (item.name || item.n) || ''));
   return hit ? `${hit[1]}${thumb ? '-vignette' : ''}.webp` : null;
 }
-const ITEM_EMOJI = { double_weapon_atk: '💥', double_muscles_atk: '🥛', null_enemy_weapon: '🗑️', bonus_combat_atk: '🔪', def_malus_round: '🥫', cancel_police: '🛂', heal: '🥙', stray_dog: '🐕', none: '🍎', cash: '💰', drug: '🌿', pm_turn: '👟', free_prostitute: '🧥', botox: '💉', voucher: '🎟️' };
-const itemEmoji = it => /arête|poisson/i.test(it.name || '') ? '🐟' : ITEM_EMOJI[it.eff] || (/kebab/i.test(it.name || '') ? '🥙' : '🎒');
+const ITEM_EMOJI = { double_weapon_atk: '💥', double_muscles_atk: '🥛', null_enemy_weapon: '🗑️', bonus_combat_atk: '🔪', def_malus_round: '🥫', cancel_police: '🛂', heal: '🥙', stray_dog: '🐕', none: '🍎', cash: '💰', drug: '🌿', pm_turn: '👟', free_prostitute: '🧥', botox: '💉', scratch: '🎰', crowbar: '🛠️', patrol_reroll: '📻', double_fouille: '🕶️', voucher: '🎟️' };
+const itemEmoji = it => /arête|poisson/i.test(it.name || '') ? '🐟' : /rat crev/i.test(it.name || '') ? '🐀' : ITEM_EMOJI[it.eff] || (/kebab/i.test(it.name || '') ? '🥙' : '🎒');
 const itemRow = (icon, label, after) => `<div class="police-row find-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${after}</span></div>`;
 
 // =========================================================================
@@ -43,6 +48,10 @@ function findRows(it) {
   if (e === 'none') return itemRow('ph-trash', 'Effet', 'aucun…') + itemRow('ph-backpack', 'Quand ?', 'faut pas gâcher');
   if (e === 'pm_turn') return itemRow('ph-sneaker-move', 'Effet', `+${it.val || 3} PM jusqu’à la fin du tour`) + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'free_prostitute') return itemRow('ph-high-heel', 'Effet', '1 Prostituée Niv. 1 gratuite') + itemRow('ph-backpack', 'Quand ?', 'utilisé tout seul au Nightclub');
+  if (e === 'scratch') return itemRow('ph-ticket', 'Effet', `1 chance sur 3 : +${(it.val || 5000).toLocaleString()} €`) + itemRow('ph-backpack', 'Quand ?', 'à gratter pendant ton tour');
+  if (e === 'crowbar') return itemRow('ph-vault', 'Effet', 'coffre d’un rival : 5 000 € ou 5 kg') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
+  if (e === 'patrol_reroll') return itemRow('ph-dice-five', 'Effet', 'tu choisis le prochain dé de patrouille') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
+  if (e === 'double_fouille') return itemRow('ph-eye', 'Effet', '2 objets, tu gardes le meilleur') + itemRow('ph-backpack', 'Quand ?', 'tout seul à ta prochaine Fouille');
   if (e === 'botox') return itemRow('ph-syringe', 'Effet', 'prochaine rente des prostituées x2') + itemRow('ph-backpack', 'Quand ?', 'tout seul au début de la manche');
   if (e === 'voucher') return itemRow('ph-ticket', 'Effet', `−50 % : ${escapeHtml(it.shop || '')}`) + itemRow('ph-backpack', 'Quand ?', 'prochain achat (à activer)');
   if (e === 'def_malus_round') return itemRow('ph-shield', 'Effet', '−1 Défense à un rival') + itemRow('ph-backpack', 'Quand ?', 'avant ou pendant un combat');
@@ -54,21 +63,51 @@ function findRows(it) {
 const findFallback = it => `<div class="find-carton"><div class="find-carton-ic">${itemEmoji(it)}</div><div class="find-carton-n">${escapeHtml(it.name || 'Objet')}</div><div class="find-carton-d">${escapeHtml(it.desc || '')}</div></div>`;
 
 // it : { name, desc, eff, val, dur } ; cta : texte du bouton ; onClaim : appelé à la validation
+const findFace = it => { const art = itemArt(it); return art ? `<img class="find-img" src="${art}" alt="${escapeHtml(it.name || '')}">` : findFallback(it); };
 function openLootDiscoveryModal(it, cta, onClaim) {
-  const scr = document.getElementById('modalLootDiscovery');
-  const art = itemArt(it);
-  document.getElementById('findRound').innerText = currentSession.round || 1;
-  document.getElementById('findCard').innerHTML = art ? `<img class="find-img" src="${art}" alt="${escapeHtml(it.name || '')}">` : findFallback(it);
+  document.getElementById('findCard').classList.remove('duo');
+  document.getElementById('findCard').innerHTML = findFace(it);
   document.getElementById('findBottom').innerHTML = `<h2 class="font-anton find-head">${it.eff === 'none' ? 'BOF…' : 'BIEN JOUÉ !'}</h2>
     <div class="flex flex-col gap-1.5 mt-3">${findRows(it)}</div>
     <button type="button" id="btnLootAction" class="find-cta mt-4">${escapeHtml(cta)}</button>`;
   document.getElementById('btnLootAction').onclick = () => {
     clearTimeout(findTimer);
-    scr.classList.add('hidden');
+    document.getElementById('modalLootDiscovery').classList.add('hidden');
     onClaim();
     refreshHud();
   };
-  // La fouille dure le temps de charger la carte (et au moins 1 s)
+  revealFindScreen();
+}
+// Lunettes de soleil : 2 cartes côte à côte, on touche celle qu'on garde
+let findChoices = [];
+function openFouilleChoice(items) {
+  findChoices = items;
+  const card = document.getElementById('findCard');
+  card.classList.add('duo');
+  card.innerHTML = items.map((it, i) => `<button type="button" class="find-duo-c" onclick="pickFouilleChoice(${i})">${findFace(it)}<span>${escapeHtml(it.name || 'Objet')}</span></button>`).join('');
+  document.getElementById('findBottom').innerHTML = `<h2 class="font-anton find-head">LUNETTES DE SOLEIL</h2>
+    <div class="text-center text-sm font-bold text-slate-300 mt-2">Tu repères 2 objets dans la poubelle.<br>Touche celui que tu gardes, l'autre reste au fond.</div>`;
+  revealFindScreen();
+}
+function pickFouilleChoice(i) {
+  const it = findChoices[i];
+  if (!it) return;
+  findChoices = [];
+  findInstant = true; // déjà fouillée : la carte choisie s'affiche tout de suite
+  claimFouille(it);
+}
+// La fouille dure le temps de charger la carte (et au moins 1 s)
+let findInstant = false;
+function revealFindScreen() {
+  const scr = document.getElementById('modalLootDiscovery');
+  document.getElementById('findRound').innerText = currentSession.round || 1;
+  if (findInstant) {
+    findInstant = false;
+    clearTimeout(findTimer);
+    scr.classList.remove('hidden');
+    scr.dataset.state = 'carte';
+    return;
+  }
   scr.dataset.state = 'fouille';
   scr.classList.remove('hidden', 'show');
   void scr.offsetWidth;
@@ -99,7 +138,12 @@ const FOUILLE_TABLE = [
   [1, { name: 'Bon de réduction Concessionnaire', eff: 'voucher', shop: 'Concessionnaire', desc: '−50 % sur ton prochain achat au Concessionnaire' }],
   [1, { name: 'Bon de réduction Nightclub', eff: 'voucher', shop: 'Nightclub', desc: '−50 % sur ton prochain achat au Nightclub' }],
   [1, { name: 'Bon de réduction Sportclub', eff: 'voucher', shop: 'Sportclub', desc: '−50 % sur ton prochain achat au Sportclub' }],
-  [1, { name: 'Seringue de botox', eff: 'botox', desc: 'La prochaine rente de tes prostituées au QG est doublée (une seule fois)' }]
+  [1, { name: 'Seringue de botox', eff: 'botox', desc: 'La prochaine rente de tes prostituées au QG est doublée (une seule fois)' }],
+  [1, { name: 'Ticket à gratter', eff: 'scratch', val: 5000, desc: '1 chance sur 3 de gagner 5 000 €' }],
+  [1, { name: 'Pied de biche', eff: 'crowbar', desc: 'Vole dans le coffre du QG d’un rival : jusqu’à 5 000 €, 5 kg, ou un partage des deux' }],
+  [1, { name: 'Talkie-walkie de flic', eff: 'patrol_reroll', desc: 'Choisis à l’avance le dé et la direction du prochain déplacement de la patrouille' }],
+  [1, { name: 'Lunettes de soleil', eff: 'double_fouille', desc: 'À ta prochaine Fouille, tu vois 2 objets et tu gardes le meilleur' }],
+  [1, { name: 'Rat crevé', eff: 'none', desc: 'Il a eu une vie plus dure que toi.' }]
 ];
 // bagOnly : sans le cash ni la drogue (objet de départ de Jamel, rangé dans le sac)
 function drawFouilleItem(bagOnly) {
@@ -110,7 +154,17 @@ function drawFouilleItem(bagOnly) {
   return Object.assign({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', val: 0, dur: 'instant' }, pick);
 }
 function openFouille() {
-  const it = drawFouilleItem();
+  // Lunettes de soleil dans le Sac : utilisées toutes seules, 2 objets différents au choix
+  const g = localPlayer.inventory.findIndex(it => it && it.eff === 'double_fouille');
+  if (g < 0) return claimFouille(drawFouilleItem());
+  localPlayer.inventory.splice(g, 1);
+  const a = drawFouilleItem();
+  let b = drawFouilleItem();
+  for (let k = 0; k < 10 && b.name === a.name; k++) b = drawFouilleItem();
+  b.id += '_b';
+  openFouilleChoice([a, b]);
+}
+function claimFouille(it) {
   if (it.eff === 'cash') return openLootDiscoveryModal(it, "Récupérer", () => { localPlayer.pocketCash += it.val; spendActionPm(); });
   if (it.eff === 'drug') return openLootDiscoveryModal(it, "Récupérer", () => { localPlayer.drugs += it.val; spendActionPm(); });
   return openLootDiscoveryModal(it, "Ajouter au sac", () => { localPlayer.inventory.push(it); spendActionPm(); });
@@ -292,6 +346,40 @@ function confirmCombatItems() {
   }
   fightLog(`✔️ Joué : ${escapeHtml(playedNames.join(', '))}`);
   updateArenaLiveStats();
+}
+
+// =========================================================================
+// TALKIE-WALKIE DE FLIC : on choisit en secret le dé et la direction de la prochaine patrouille
+// =========================================================================
+let talkieItem = null, talkieRoll = 3, talkieLeft = true;
+function openTalkie(it) {
+  talkieItem = it;
+  const scr = document.getElementById('talkieScreen');
+  document.getElementById('talkieRound').innerText = currentSession.round || 1;
+  document.getElementById('talkiePic').src = itemArt(it) || 'patrol-car.webp';
+  renderTalkie();
+  scr.classList.remove('hidden', 'show');
+  void scr.offsetWidth;
+  scr.classList.add('show');
+}
+function renderTalkie() {
+  document.getElementById('talkieDice').innerHTML = [1, 2, 3, 4, 5, 6].map(n => `<button type="button" class="${n === talkieRoll ? 'on' : ''}" onclick="talkieRoll=${n};renderTalkie()">${n}</button>`).join('');
+  document.getElementById('talkieDirs').innerHTML = [[true, '⬅ Gauche'], [false, 'Droite ➡']].map(([l, t]) => `<button type="button" class="${l === talkieLeft ? 'on' : ''}" onclick="talkieLeft=${l};renderTalkie()">${t}</button>`).join('');
+}
+function closeTalkie() {
+  const scr = document.getElementById('talkieScreen');
+  scr.classList.add('hidden');
+  scr.classList.remove('show');
+}
+async function sendTalkieOrder() {
+  const idx = localPlayer.inventory.indexOf(talkieItem);
+  if (idx < 0) return closeTalkie();
+  if (socket) socket.emit('rig_patrol', { roll: talkieRoll, left: talkieLeft });
+  localPlayer.inventory.splice(idx, 1);
+  talkieItem = null;
+  closeTalkie();
+  refreshHud();
+  await showAppAlert(`Ordre reçu : au prochain tour de patrouille, le dé fera ${talkieRoll} et la voiture partira vers la ${talkieLeft ? 'gauche' : 'droite'}.\n(Les bonus de la radio s'ajoutent toujours.)`, "📻 Talkie-walkie de flic");
 }
 
 // =========================================================================

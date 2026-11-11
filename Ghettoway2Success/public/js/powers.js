@@ -1,18 +1,28 @@
 // Capacités spéciales : écran plein page (choix de la cible, lancement animé, pouvoir sans cible, Prière, « Touché ! » côté victime)
 
-const POW_TARGETED = { caid_2: 'swap_pos', caid_4: 'danse', caid_6: 'shuriken', caid_7: 'steal_item', caid_8: 'siphon', canette: 'canette' };
-const POW_CTA = { caid_1: 'Rouler', caid_2: 'Échanger les places', caid_3: 'Faire la sieste', caid_4: 'Lancer la danse', caid_6: 'Lancer le shuriken', caid_7: 'Faire les poches', caid_8: 'Siphonner', canette: 'Lancer la canette' };
+const POW_TARGETED = { caid_2: 'swap_pos', caid_4: 'danse', caid_6: 'shuriken', caid_7: 'steal_item', caid_8: 'siphon', canette: 'canette', crowbar: 'crowbar' };
+const POW_CTA = { caid_1: 'Rouler', caid_2: 'Échanger les places', caid_3: 'Faire la sieste', caid_4: 'Lancer la danse', caid_6: 'Lancer le shuriken', caid_7: 'Faire les poches', caid_8: 'Siphonner', canette: 'Lancer la canette', crowbar: 'Forcer le coffre' };
 // Accent de l'écran : couleur du Caïd (Weed-Nesday, gris, passe en rouge sang)
 const powAccent = c => c.id === 'caid_8' ? '#fb7185' : c.hex;
 let powTargetToken = null;
-// Vieille canette lancée depuis le sac : même écran, l'objet remplace le pouvoir du Caïd
+// Vieille canette ou Pied de biche utilisés depuis le sac : même écran, l'objet remplace le pouvoir du Caïd
 let powItem = null;
+const POW_ITEMS = {
+  def_malus_round: { id: 'canette', skillName: 'Vieille canette', skillDesc: '−1 Défense à un rival jusqu’à la fin de la manche.', hex: '#f87171' },
+  crowbar: { id: 'crowbar', skillName: 'Pied de biche', skillDesc: 'Force le coffre du QG d’un rival : jusqu’à 5 000 €, 5 kg, ou un partage des deux.', hex: '#fbbf24' }
+};
 function powCaid() {
   const me = getMyCaid();
   if (!powItem) return me;
-  return { id: 'canette', name: 'Objet du sac', skillName: 'Vieille canette', skillDesc: '−1 Défense à un rival jusqu’à la fin de la manche.', bannerFile: 'fouille-canette-vignette.webp', hex: '#f87171', imageFile: me.imageFile };
+  return Object.assign({ name: 'Objet du sac', bannerFile: itemArt(powItem, true) || 'wallpaper-clean.jpg', imageFile: me.imageFile }, POW_ITEMS[powItem.eff] || POW_ITEMS.def_malus_round);
 }
 let powResolve = null;
+// Pied de biche : 5 parts à prendre dans le coffre, chaque part = 1 000 € ou 1 kg
+let powLootKg = 0;
+const CROWBAR_PARTS = 5;
+const crowbarLoot = () => ({ cash: (CROWBAR_PARTS - powLootKg) * 1000, kg: powLootKg });
+const crowbarLabel = l => [l.cash ? `${l.cash.toLocaleString()} €` : '', l.kg ? `${l.kg} kg` : ''].filter(Boolean).join(' + ');
+function stepCrowbarLoot(d) { powLootKg = Math.max(0, Math.min(CROWBAR_PARTS, powLootKg + d)); powChoice(); }
 
 function powState() {
   const scr = document.getElementById('powerScreen');
@@ -62,6 +72,7 @@ function powFx(effect) {
   if (effect === 'siphon') return `<div class="pow-track"><div class="pow-beam"></div><div class="pow-mv fx-back"><i class="ph-fill ph-heart pow-drop"></i></div></div>`;
   if (effect === 'danse') return `<div class="pow-track">${['♪', '♥', '♫'].map((s, i) => `<div class="pow-mv fx-float" style="animation-delay:${i * 0.18}s"><span class="pow-note n${i}">${s}</span></div>`).join('')}</div>`;
   if (effect === 'canette') return `<div class="pow-track"><div class="pow-mv fx-throw"><span class="pow-spin pow-can">🥫</span></div></div>`;
+  if (effect === 'crowbar') return `<div class="pow-track"><div class="pow-mv fx-back"><span class="pow-can">💶</span></div></div>`;
   if (effect === 'steal_item') return `<div class="pow-track"><div class="pow-mv fx-grab"><i class="ph-fill ph-hand-grabbing pow-hand"></i></div></div>`;
   return '';
 }
@@ -71,7 +82,8 @@ const POW_OUT = {
   siphon: ['ph-heart', 'Cœur volé', '+1 ❤️'],
   steal_item: ['ph-backpack', 'Objet dérobé', 'si son sac n’est pas vide'],
   swap_pos: ['ph-arrows-left-right', 'Échangez vos pions', 'sur le plateau'],
-  canette: ['ph-shield', 'Sa défense', '−1']
+  canette: ['ph-shield', 'Sa défense', '−1'],
+  crowbar: ['ph-vault', 'Son coffre forcé', 'en cours…']
 };
 
 // CHOIX : cartes des Caïds rivaux (pacte actif, hôpital et absents grisés)
@@ -92,12 +104,18 @@ function powChoice() {
     const on = r.playerToken === powTargetToken;
     return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickPowerTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)} • Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'} • Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
   };
-  const bottom = `<div class="pow-label">Choisis ta cible</div>
+  const loot = caid.id === 'crowbar' ? crowbarLoot() : null;
+  const lootBox = loot ? `<div class="pow-label">Ce que tu prends dans son coffre</div>
+    <div class="pow-loot mt-2"><button type="button" onclick="stepCrowbarLoot(-1)" ${powLootKg ? '' : 'disabled'} aria-label="Plus d'argent"><i class="ph-bold ph-coins"></i></button>
+      <div class="flex-1 text-center"><b>${crowbarLabel(loot)}</b><small>au maximum, selon ce qu’il y a dedans</small></div>
+      <button type="button" onclick="stepCrowbarLoot(1)" ${powLootKg < CROWBAR_PARTS ? '' : 'disabled'} aria-label="Plus de drogue"><i class="ph-bold ph-plant"></i></button></div>
+    <div class="mt-3"></div>` : '';
+  const bottom = `${lootBox}<div class="pow-label">Choisis ta cible</div>
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible possible cette manche</div>' : ''}
     <div class="flex flex-col gap-2 mt-2">${rivals.map(pick).join('')}</div>
     <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchTargetedPower()" ${target ? '' : 'disabled'}>${POW_CTA[caid.id]}</button></div>`;
-  return powRender('choix', caid, caid.id === 'canette' ? powChipHtml('ph-backpack', 'Objet du sac') : powChipHtml('ph-lightning', 'Capacité spéciale'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), '', bottom);
+  return powRender('choix', caid, powItem ? powChipHtml('ph-backpack', 'Objet du sac') : powChipHtml('ph-lightning', 'Capacité spéciale'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), '', bottom);
 }
 function pickPowerTarget(token) { powTargetToken = token; powChoice(); }
 // Appelé par syncMultiplayerTargets : la liste des Caïds a changé
@@ -154,32 +172,37 @@ function launchSelfPower() {
 }
 
 // LANCEMENT ciblé : envoi au serveur, animation de l'effet vers la cible, puis le résultat
-function openCanetteThrow(item) {
+function openItemTargetPower(item) {
   powItem = item;
+  powLootKg = 0;
   powTargetToken = null;
   syncMultiplayerTargets();
   return powChoice();
 }
 
-function launchTargetedPower() {
+async function launchTargetedPower() {
   const target = (connectedRivals || []).find(r => r.playerToken === powTargetToken);
   if (!target || (!powItem && localPlayer.specialUsedThisTurn)) return;
   if (isRivalProtectedByPact(target.playerToken)) return showAppAlert(`Pacte de non-agression avec ce Caïd jusqu’à la fin de la manche ${fightPactUntil(target.playerToken) || ((currentSession.round || 1) + 1)} : impossible de le cibler.`, "🤝 Cible protégée");
   const caid = powCaid();
   const effect = POW_TARGETED[caid.id];
+  // Pied de biche : il faut être devant le QG de la cible sur le plateau
+  if (effect === 'crowbar' && !await showAppConfirm(`Ton pion est-il bien sur la case en face du QG de ${allyRivalName(target)} ?\n\nSinon, impossible de forcer son coffre.`, "🛠️ Pied de biche", "Oui, j'y suis", "Pas encore")) return;
   if (socket) {
     socket.emit('apply_special_to_target', {
       targetSocketId: target.socketId,
       targetPlayerToken: target.playerToken,
       effectType: effect,
-      senderCaid: getMyCaid().name
+      senderCaid: getMyCaid().name,
+      loot: effect === 'crowbar' ? crowbarLoot() : undefined
     });
   }
   // Siphon déjà à 3 Cœurs : la cible perd son cœur, mais le lanceur ne gagne rien
   const siphonGain = effect === 'siphon' && localPlayer.hearts < 3;
+  const fromBag = !!powItem;
   if (effect === 'siphon') localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
   if (powItem) {
-    // La canette est lancée : elle quitte le sac, le pouvoir du Caïd reste disponible
+    // L'objet est utilisé : il quitte le sac, le pouvoir du Caïd reste disponible
     const idx = localPlayer.inventory.indexOf(powItem);
     if (idx >= 0) localPlayer.inventory.splice(idx, 1);
     powItem = null;
@@ -187,11 +210,11 @@ function launchTargetedPower() {
   refreshHud();
   const name = allyRivalName(target);
   const stage = powDuo(powAv(caid.imageFile, 'Toi', 'me'), powAv(allyCaidImg(target.caidId, name), name, 'hit'), powFx(effect), `fx-${effect}`);
-  const [icon, label, after] = effect === 'siphon' && !siphonGain ? ['ph-heart-break', 'Cœur détruit', 'déjà au max'] : POW_OUT[effect];
+  const [icon, label, after] = effect === 'siphon' && !siphonGain ? ['ph-heart-break', 'Cœur détruit', 'déjà au max'] : effect === 'crowbar' ? ['ph-vault', 'Tu vises', crowbarLabel(crowbarLoot())] : POW_OUT[effect];
   const bottom = `<div class="pow-result">${powRow(icon, `${label}`, `<span class="pow-ac">${after}</span>`)}
-    <div class="text-center text-[11px] font-bold text-slate-400 mt-2">${effect === 'canette' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'shuriken' || effect === 'danse' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'swap_pos' ? `Échange ton pion avec celui de ${escapeHtml(name)}.` : `Sur ${escapeHtml(name)}.`}</div>
+    <div class="text-center text-[11px] font-bold text-slate-400 mt-2">${effect === 'crowbar' ? `Dans le coffre du QG de ${escapeHtml(name)}.` : effect === 'canette' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'shuriken' || effect === 'danse' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'swap_pos' ? `Échange ton pion avec celui de ${escapeHtml(name)}.` : `Sur ${escapeHtml(name)}.`}</div>
     <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">Continuer</button></div>`;
-  powRender('fx', caid, caid.id === 'canette' ? powChipHtml('ph-backpack', 'Objet lancé') : powChipHtml('ph-lightning', 'Capacité lancée'), powHeadHtml(caid.name, caid.skillName, ''), stage, bottom);
+  powRender('fx', caid, fromBag ? powChipHtml('ph-backpack', effect === 'canette' ? 'Objet lancé' : 'Objet utilisé') : powChipHtml('ph-lightning', 'Capacité lancée'), powHeadHtml(caid.name, caid.skillName, ''), stage, bottom);
 }
 
 // VICTIME : « Touché ! » avec l'effet subi ; se résout quand le joueur encaisse
@@ -201,12 +224,13 @@ const POW_HIT = {
   danse: (s) => [`${s} t’a envoûté avec sa danse.`, 'ph-sword', 'Ton attaque cette manche', '−3'],
   steal_item: (s, item) => item ? [`${s} t’a fait les poches.`, 'ph-backpack', escapeHtml(item.name), 'volé'] : [`${s} a tenté de te faire les poches…`, 'ph-backpack', 'Ton sac était vide', 'raté'],
   swap_pos: (s) => [`${s} a échangé sa place avec toi.`, 'ph-arrows-left-right', 'Échangez vos pions', 'sur le plateau'],
-  canette: (s) => [`${s} t’a balancé une vieille canette.`, 'ph-shield', 'Ta défense jusqu’à la fin de la manche', '−1']
+  canette: (s) => [`${s} t’a balancé une vieille canette.`, 'ph-shield', 'Ta défense jusqu’à la fin de la manche', '−1'],
+  crowbar: (s, loot) => loot && (loot.cash || loot.kg) ? [`${s} a forcé le coffre de ton QG.`, 'ph-vault', 'Volé dans ton coffre', `−${crowbarLabel(loot)}`] : [`${s} a forcé le coffre de ton QG…`, 'ph-vault', 'Ton coffre était vide', 'raté']
 };
 function showPowerHit(effectType, senderCaid, item) {
   const sender = CAID_ROSTER.find(c => c.name === senderCaid) || getMyCaid();
   const me = getMyCaid();
-  const missed = effectType === 'steal_item' && !item;
+  const missed = (effectType === 'steal_item' && !item) || (effectType === 'crowbar' && !(item && (item.cash || item.kg)));
   const [desc, icon, label, after] = (POW_HIT[effectType] || POW_HIT.shuriken)(escapeHtml(senderCaid || 'Un rival'), item);
   const stage = powDuo(powAv(sender.imageFile, senderCaid || 'Rival', 'foe'), powAv(me.imageFile, 'Toi', missed ? '' : 'hit'), powFx(effectType), `fx-${effectType} victim`);
   const extra = effectType === 'siphon' ? `<div class="mt-2">${powHearts(localPlayer.hearts)}</div>` : '';

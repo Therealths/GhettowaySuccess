@@ -350,10 +350,16 @@ function renderInventoryList() {
       primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Équiper</button>`;
     } else if (item.eff === 'def_malus_round') {
       primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500 text-white font-black rounded-lg font-mono text-[9px] uppercase">Lancer</button>`;
-    } else if (item.eff === 'cancel_police' || item.eff === 'free_prostitute' || item.eff === 'botox') {
+    } else if (['cancel_police', 'free_prostitute', 'botox', 'double_fouille'].includes(item.eff)) {
       primaryBtn = `<span class="px-2 py-1 bg-sky-500/15 text-sky-300 border border-sky-500/30 rounded-lg font-mono text-[9px] uppercase font-bold">Auto</span>`;
     } else if (item.eff === 'none') {
       primaryBtn = '';
+    } else if (item.eff === 'scratch') {
+      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Gratter</button>`;
+    } else if (item.eff === 'patrol_reroll') {
+      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-sky-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Utiliser</button>`;
+    } else if (item.eff === 'crowbar') {
+      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-amber-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Forcer</button>`;
     } else if (item.eff === 'voucher') {
       primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Activer</button>`;
     } else if (item.eff === 'stray_dog') {
@@ -406,8 +412,17 @@ async function useItem(idx) {
     await showAppAlert("+1 Cœur de Vie restauré !", "🥙 Kebab");
     return;
   }
-  // Vieille canette : on choisit le rival à viser (écran des capacités spéciales)
-  if (it.eff === 'def_malus_round') return openCanetteThrow(it);
+  // Vieille canette, Pied de biche : on choisit le rival à viser (écran des capacités spéciales)
+  if (it.eff === 'def_malus_round' || it.eff === 'crowbar') return openItemTargetPower(it);
+  if (it.eff === 'patrol_reroll') return openTalkie(it);
+  if (it.eff === 'double_fouille') return showAppAlert("Tes Lunettes de soleil serviront toutes seules à ta prochaine Fouille : tu verras 2 objets et tu garderas le meilleur.", "🕶️ Lunettes de soleil");
+  if (it.eff === 'scratch') {
+    localPlayer.inventory.splice(idx, 1);
+    const win = Math.random() < 1 / 3, prize = it.val || 5000;
+    if (win) localPlayer.pocketCash += prize;
+    refreshHud();
+    return showAppAlert(win ? `GAGNANT ! +${prize.toLocaleString()} € dans ta poche.` : "Perdu… Rien sous la pellicule. Tu feras mieux la prochaine fois.", "🎰 Ticket à gratter");
+  }
   if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");
   if (it.eff === 'none') return showAppAlert(/trognon/i.test(it.name || '') ? "Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !" : `${it.name} : ça ne sert à rien…`, `${itemEmoji(it)} ${it.name}`);
   if (it.eff === 'free_prostitute') return showAppAlert("Ton Manteau de fourrure sera utilisé tout seul au Nightclub : ta prochaine Prostituée Niv. 1 est gratuite.", "🧥 Manteau de fourrure");

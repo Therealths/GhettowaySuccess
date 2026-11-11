@@ -861,7 +861,10 @@
           <span class="px-2.5 py-1 rounded-full bg-blue-600 text-white text-[10px] font-black"><i class="ph-fill ph-siren"></i> Patrouille</span>
         </div>
         <h2 id="patrolHeadline" class="font-anton police-headline px-4 mt-2"></h2>
-        <div class="police-team-wrap"><img id="patrolImg" src="patrol-car.webp" alt="Voiture de patrouille" class="police-team patrol-car"></div>
+        <div class="police-team-wrap patrol-wrap"><img id="patrolImg" src="patrol-car.webp" alt="Voiture de patrouille" class="police-team patrol-car">
+          <!-- Talkie-walkie joué par un joueur : le dé était truqué -->
+          <div id="patrolTalkie" class="patrol-talkie hidden"><div class="ally-bubble l patrol-bubble">J'ai reçu un message au talkie !</div><div class="patrol-tk-card"><i class="patrol-tk-burst"></i><img src="fouille-talkie.webp" alt="Talkie-walkie de flic"><b>JOUÉE</b></div><i class="patrol-tk-flash"></i></div>
+        </div>
         <div class="police-panel">
           <div class="flex items-center gap-4">
             <div id="patrolDie" class="patrol-die"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -920,6 +923,29 @@
           <div class="police-row"><i class="ph-bold ph-siren"></i><span class="lbl">Contrôle de police</span><span class="aft">annulé</span></div>
           <div class="police-row mt-1.5"><i class="ph-bold ph-backpack"></i><span class="lbl">Passeport</span><span class="aft">utilisé</span></div>
           <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" id="passKeep" class="ally-ghost">Le garder</button><button type="button" id="passUse" class="police-cta" style="margin-top:0">Sortir le passeport</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Talkie-walkie de flic : on choisit en secret le dé et la direction de la prochaine patrouille -->
+    <div id="talkieScreen" class="hidden absolute inset-0 z-40 police-screen" data-state="talkie">
+      <img src="wallpaper-clean.jpg" alt="" class="police-bg">
+      <div class="police-lights"><i class="police-light-red"></i><i class="police-light-blue"></i></div>
+      <div class="police-shade"></div>
+      <div class="police-content">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="talkieRound">1</span></span>
+          <span class="px-2.5 py-1 rounded-full bg-sky-500 text-white text-[10px] font-black"><i class="ph-fill ph-broadcast"></i> Radio police</span>
+        </div>
+        <h2 class="font-anton police-headline text-center px-4 mt-2">FRÉQUENCE PIRATÉE</h2>
+        <div class="text-center text-sm font-bold text-slate-300 px-6 mt-1">Donne tes ordres à la patrouille : son prochain déplacement, c’est toi qui décides. Personne ne le saura.</div>
+        <div class="pass-card-wrap"><img id="talkiePic" src="" alt="" class="talkie-pic"></div>
+        <div class="police-panel">
+          <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mb-2">Dé de la patrouille</div>
+          <div id="talkieDice" class="talkie-dice"></div>
+          <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mt-3 mb-2">Direction</div>
+          <div id="talkieDirs" class="talkie-dirs"></div>
+          <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="ally-ghost" onclick="closeTalkie()">Annuler</button><button type="button" id="talkieGo" class="police-cta" style="margin-top:0" onclick="sendTalkieOrder()">Envoyer l’ordre</button></div>
         </div>
       </div>
     </div>
