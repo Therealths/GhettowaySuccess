@@ -148,7 +148,7 @@ function navTo(pageId) {
     slideTimer = setTimeout(() => current.classList.remove('active', 'slide-out-down'), 340);
   }
   if (pageId === 'page-4' && !caidLocked) initCarouselDOM();
-  if (pageId === 'page-6') { switchMainCaidTab('interactions'); refreshHud(); }
+  if (pageId === 'page-6') { closeSac(); refreshHud(); }
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
@@ -202,7 +202,7 @@ window.addEventListener('popstate', () => {
       return;
     }
     if (SLIDE_PAGES.includes(pageId)) navTo('page-1');
-    else if (pageId === 'page-6' && document.getElementById('panelInteractions').classList.contains('hidden')) switchMainCaidTab('interactions');
+    else if (pageId === 'page-6' && sacIsOpen()) closeSac();
   }
   armBackTrap();
 });

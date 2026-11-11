@@ -155,33 +155,6 @@ function leaveGameNow() {
   socket.emit('leave_room', reload);
   setTimeout(reload, 1500);
 }
-function switchMainCaidTab(tabKey) {
-  const pInter = document.getElementById('panelInteractions');
-  const pEquip = document.getElementById('panelEquipment');
-  const pInven = document.getElementById('panelInventory');
-  const bInter = document.getElementById('mainTabInteractions');
-  const bEquip = document.getElementById('mainTabEquipment');
-  const bInven = document.getElementById('mainTabInventory');
-  const tabsContainer = document.getElementById('mainTabsContentContainer');
-  pInter.classList.add('hidden'); pEquip.classList.add('hidden'); pInven.classList.add('hidden');
-  const inact = "flex-1 py-2 px-2 rounded-t-xl font-bold text-xs uppercase flex items-center justify-center gap-1.5 text-slate-400 bg-white/5 border border-white/10";
-  bInter.className = inact; bEquip.className = inact; bInven.className = inact;
-  if (tabKey === 'interactions') {
-    pInter.classList.remove('hidden');
-    bInter.className = "flex-1 py-2.5 px-2 rounded-t-xl font-black text-xs uppercase flex items-center justify-center gap-1.5 text-amber-300 bg-[#141622] border-t-2 border-amber-400";
-    tabsContainer.style.borderTopColor = "rgba(250, 204, 21, 0.7)";
-  } else if (tabKey === 'equipment') {
-    pEquip.classList.remove('hidden');
-    bEquip.className = "flex-1 py-2.5 px-2 rounded-t-xl font-black text-xs uppercase flex items-center justify-center gap-1.5 text-rose-300 bg-[#141622] border-t-2 border-rose-500";
-    tabsContainer.style.borderTopColor = "rgba(244, 63, 94, 0.7)";
-    renderEquipmentSlotsView();
-  } else {
-    pInven.classList.remove('hidden');
-    bInven.className = "flex-1 py-2.5 px-2 rounded-t-xl font-black text-xs uppercase flex items-center justify-center gap-1.5 text-emerald-300 bg-[#141622] border-t-2 border-emerald-500";
-    tabsContainer.style.borderTopColor = "rgba(16, 185, 129, 0.7)";
-    renderInventoryList();
-  }
-}
 function selectPlayerCount(count) {
   selectedPlayerCount = count;
   [2, 3, 4].forEach(c => {

@@ -288,11 +288,7 @@ function refreshHud() {
     actionLabel.innerText = "Activer";
     actionLabel.className = "text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block";
   }
-  let eqCount = (localPlayer.equipped.weapon ? 1 : 0) + (localPlayer.equipped.armor ? 1 : 0) + (localPlayer.equipped.vehicle ? 1 : 0);
-  document.getElementById('hudEquipCount').innerText = `${eqCount}/3`;
-  document.getElementById('hudItemCount').innerText = localPlayer.inventory.length;
-  renderInventoryList();
-  renderEquipmentSlotsView();
+  renderInventoryList(); // bouton Sac et écran Sac (js/sac.js)
   updateArenaLiveStats();
   if (socket) {
     socket.emit('sync_player', {
@@ -335,50 +331,6 @@ function refreshHud() {
   }
 }
 
-function renderInventoryList() {
-  const c = document.getElementById('inventoryItemsList');
-  if (!c) return;
-  const filtered = localPlayer.inventory.filter(item => item && item.name !== 'À pied' && item.type !== 'FOOT' && item.type !== 'MUSCLE' && item.type !== 'PROSTITUTE');
-  if (!filtered.length) {
-    c.innerHTML = '<p class="text-xs text-slate-400 italic p-4 text-center glass-panel rounded-xl">Aucun objet dans le sac.</p>';
-    return;
-  }
-  c.innerHTML = filtered.map(item => {
-    const realIdx = localPlayer.inventory.indexOf(item);
-    let primaryBtn = '';
-    if (item.type === 'WEAPON' || item.type === 'ARMOR' || item.type === 'VEHICLE') {
-      primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Équiper</button>`;
-    } else if (item.eff === 'def_malus_round') {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500 text-white font-black rounded-lg font-mono text-[9px] uppercase">Lancer</button>`;
-    } else if (['cancel_police', 'free_prostitute', 'botox', 'double_fouille'].includes(item.eff)) {
-      primaryBtn = `<span class="px-2 py-1 bg-sky-500/15 text-sky-300 border border-sky-500/30 rounded-lg font-mono text-[9px] uppercase font-bold">Auto</span>`;
-    } else if (item.eff === 'none') {
-      primaryBtn = '';
-    } else if (item.eff === 'scratch') {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Gratter</button>`;
-    } else if (item.eff === 'patrol_reroll') {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-sky-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Utiliser</button>`;
-    } else if (item.eff === 'crowbar') {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-amber-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Forcer</button>`;
-    } else if (item.eff === 'voucher') {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Activer</button>`;
-    } else if (item.eff === 'stray_dog') {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-purple-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Siffler</button>`;
-    } else if (item.dur === 'combat') {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-lg font-mono text-[9px] uppercase font-bold">Activer</button>`;
-    } else {
-      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Utiliser</button>`;
-    }
-    const isSellable = (item.type === 'WEAPON' || item.type === 'ARMOR' || item.type === 'VEHICLE');
-    const resellVal = Math.floor((item.price ?? item.p ?? 3000) * 0.5);
-    const sellBtn = isSellable ? `<button onclick="sellItem(${realIdx})" class="px-2 py-1 glass-panel text-amber-300 border border-amber-500/30 rounded-lg font-mono text-[9px] font-bold">Vendre (${resellVal}€)</button>` : '';
-    return `
-      <div class="p-2.5 bg-black/60 rounded-xl border border-white/10 flex items-center justify-between text-xs gap-2">
-        <div class="min-w-0 flex-1"><span class="font-bold text-white block truncate">${item.name}</span><span class="text-[10px] text-ghetto-gold font-mono block">${item.bonusLabel || item.desc || 'Objet spécial'}</span></div>
-        <div class="flex items-center gap-1.5 flex-shrink-0">${primaryBtn}${sellBtn}<button onclick="discardItem(${realIdx})" class="px-2 py-1 glass-panel text-rose-400 border border-rose-500/30 rounded-lg font-mono text-[9px]">Jeter</button></div>
-      </div>`;
-  }).join('');
-}
 
 async function equipItemFromInventory(idx) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
@@ -467,26 +419,6 @@ async function useItem(idx) {
   await showAppAlert(`${it.name} utilisé !`, "Objet");
 }
 
-function renderEquipmentSlotsView() {
-  const w = localPlayer.equipped.weapon;
-  document.getElementById('slotWeaponTitle').innerText = w ? w.name : "Mains nues";
-  document.getElementById('slotWeaponStats').innerText = w ? `Attaque +${w.bonusVal}` : "Attaque +0";
-  document.getElementById('slotWeaponStatusContainer').innerHTML = w
-    ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('weapon')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
-    : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
-  const a = localPlayer.equipped.armor;
-  document.getElementById('slotArmorTitle').innerText = a ? a.name : "Aucune protection";
-  document.getElementById('slotArmorStats').innerText = a ? `Défense +${a.bonusVal}` : "Défense +0";
-  document.getElementById('slotArmorStatusContainer').innerHTML = a
-    ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-sky-500/20 text-sky-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('armor')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
-    : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
-  const v = localPlayer.equipped.vehicle;
-  document.getElementById('slotVehicleTitle').innerText = v ? v.name : "À pied";
-  document.getElementById('slotVehicleStats').innerText = v ? `Déplacement +${v.bonusVal} PM (${getTotalPm()} PM)` : `Déplacement ${getTotalPm()} PM`;
-  document.getElementById('slotVehicleStatusContainer').innerHTML = v
-    ? `<div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold uppercase">Occupé</span><button onclick="unequipSlot('vehicle')" class="w-6 h-6 rounded-lg glass-panel flex items-center justify-center text-slate-400"><i class="ph-bold ph-arrow-u-down-left text-xs"></i></button></div>`
-    : `<span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase">Libre</span>`;
-}
 
 // Coffre du QG : sur toi ⇄ au QG pour l'argent et la drogue, installation d'une escort (aller simple)
 let transferAmount = 0;
