@@ -409,10 +409,14 @@ async function startRoundPhase1() {
   if (localPlayer.prostitutesAtSafeList.length > 0) {
     const revMult = isRadioEffectActive('PROSTITUTE_REV_MULT') ? getRadioEffectValue('PROSTITUTE_REV_MULT', 2) : 1;
     const baseIncome = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || (p.level === 2 ? 2500 : 1000)), 0);
-    const income = baseIncome * revMult;
+    // Seringue de botox : prise toute seule dans le Sac, double cette rente une fois
+    const botoxIdx = localPlayer.inventory.findIndex(it => it && it.eff === 'botox');
+    if (botoxIdx >= 0) localPlayer.inventory.splice(botoxIdx, 1);
+    const income = baseIncome * revMult * (botoxIdx >= 0 ? 2 : 1);
     localPlayer.safeCash += income;
     const vipNote = revMult > 1 ? ` (Soirée VIP x${revMult} !)` : '';
-    await showAppAlert(`+${income.toLocaleString()} € versés au coffre par tes prostituées${vipNote}.`, "💰 Rente QG perçue");
+    const botoxNote = botoxIdx >= 0 ? `\n\n💉 Seringue de botox : rente doublée !` : '';
+    await showAppAlert(`+${income.toLocaleString()} € versés au coffre par tes prostituées${vipNote}.${botoxNote}`, "💰 Rente QG perçue");
   }
   refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');

@@ -153,6 +153,10 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .police-screen[data-state="ras"] .police-cta { background: linear-gradient(90deg, #34d399, #10b981); }
 .police-screen[data-state="gav"] .police-cta { background: linear-gradient(90deg, #fb7185, #e11d48); }
 .police-cta:disabled { opacity: 0.35; }
+/* Passeport diplomatique au contrôle : la carte au centre */
+.pass-card-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 12px 0; }
+.pass-card { height: 100%; max-height: 330px; border-radius: 14px; transform: rotate(-3deg); box-shadow: 0 0 0 2px #38bdf8, 0 0 40px rgba(56,189,248,.45), 0 20px 40px rgba(0,0,0,.7); }
+.police-screen.show .pass-card { animation: policeRise 0.7s ease-out 0.15s both; }
 /* Animations : gyrophare en continu, arrivée de la scène, puis du résultat */
 .police-screen.show .police-light-red { animation: policeFlash 0.9s ease-in-out infinite; }
 .police-screen.show .police-light-blue { animation: policeFlash 0.9s ease-in-out 0.45s infinite; }

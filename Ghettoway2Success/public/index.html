@@ -903,6 +903,27 @@
       </div>
     </div>
 
+    <!-- Passeport diplomatique : proposé au début du contrôle de police -->
+    <div id="passportScreen" class="hidden absolute inset-0 z-40 police-screen pass-screen" data-state="passeport">
+      <img src="wallpaper-clean.jpg" alt="" class="police-bg">
+      <div class="police-lights"><i class="police-light-red"></i><i class="police-light-blue"></i></div>
+      <div class="police-shade"></div>
+      <div class="police-content">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="passRound">1</span></span>
+          <span class="px-2.5 py-1 rounded-full bg-rose-500 text-white text-[10px] font-black"><i class="ph-fill ph-siren"></i> Contrôle</span>
+        </div>
+        <h2 class="font-anton police-headline text-center px-4 mt-2">LES FLICS DÉBARQUENT !</h2>
+        <div class="text-center text-sm font-bold text-slate-300 px-6 mt-1">Tu as un Passeport diplomatique dans ton Sac.</div>
+        <div class="pass-card-wrap"><img src="fouille-passeport.webp" alt="Passeport diplomatique" class="pass-card"></div>
+        <div class="police-panel">
+          <div class="police-row"><i class="ph-bold ph-siren"></i><span class="lbl">Contrôle de police</span><span class="aft">annulé</span></div>
+          <div class="police-row mt-1.5"><i class="ph-bold ph-backpack"></i><span class="lbl">Passeport</span><span class="aft">utilisé</span></div>
+          <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" id="passKeep" class="ally-ghost">Le garder</button><button type="button" id="passUse" class="police-cta" style="margin-top:0">Sortir le passeport</button></div>
+        </div>
+      </div>
+    </div>
+
     <div id="hospitalScreen" class="hidden absolute inset-0 z-40 police-screen hosp-screen" data-state="ko">
       <img src="wallpaper-clean.jpg" alt="" class="police-bg">
       <div class="police-lights"><i class="police-light-red"></i><i class="police-light-blue"></i></div>

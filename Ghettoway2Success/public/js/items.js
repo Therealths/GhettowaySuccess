@@ -3,8 +3,8 @@
 // Image de la carte d'un objet (trouvée par son nom) ; null = carte en carton dessinée
 const ITEM_ART = [
   [/kebab/i, 'fouille-kebab'],
-  [/passeport/i, 'obj-passeport'],
-  [/couvercle/i, 'obj-couvercle'],
+  [/passeport/i, 'fouille-passeport'],
+  [/couvercle/i, 'fouille-couvercle'],
   // Cartes au cadre « Fouille »
   [/trognon/i, 'fouille-trognon'],
   [/canette/i, 'fouille-canette'],
@@ -19,13 +19,14 @@ const ITEM_ART = [
   [/r[ée]duction concessionnaire/i, 'fouille-bon-concessionnaire'],
   [/r[ée]duction nightclub/i, 'fouille-bon-nightclub'],
   [/r[ée]duction sportclub/i, 'fouille-bon-sportclub'],
-  [/perforante/i, 'fouille-balle-or']
+  [/perforante/i, 'fouille-balle-or'],
+  [/botox/i, 'fouille-botox']
 ];
 function itemArt(item, thumb) {
   const hit = ITEM_ART.find(([re]) => re.test(item && (item.name || item.n) || ''));
   return hit ? `${hit[1]}${thumb ? '-vignette' : ''}.webp` : null;
 }
-const ITEM_EMOJI = { double_weapon_atk: '💥', double_muscles_atk: '🥛', null_enemy_weapon: '🗑️', bonus_combat_atk: '🔪', def_malus_round: '🥫', cancel_police: '🛂', heal: '🥙', stray_dog: '🐕', none: '🍎', cash: '💰', drug: '🌿', pm_turn: '👟', free_prostitute: '🧥', voucher: '🎟️' };
+const ITEM_EMOJI = { double_weapon_atk: '💥', double_muscles_atk: '🥛', null_enemy_weapon: '🗑️', bonus_combat_atk: '🔪', def_malus_round: '🥫', cancel_police: '🛂', heal: '🥙', stray_dog: '🐕', none: '🍎', cash: '💰', drug: '🌿', pm_turn: '👟', free_prostitute: '🧥', botox: '💉', voucher: '🎟️' };
 const itemEmoji = it => /arête|poisson/i.test(it.name || '') ? '🐟' : ITEM_EMOJI[it.eff] || (/kebab/i.test(it.name || '') ? '🥙' : '🎒');
 const itemRow = (icon, label, after) => `<div class="police-row find-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${after}</span></div>`;
 
@@ -42,6 +43,7 @@ function findRows(it) {
   if (e === 'none') return itemRow('ph-trash', 'Effet', 'aucun…') + itemRow('ph-backpack', 'Quand ?', 'faut pas gâcher');
   if (e === 'pm_turn') return itemRow('ph-sneaker-move', 'Effet', `+${it.val || 3} PM jusqu’à la fin du tour`) + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'free_prostitute') return itemRow('ph-high-heel', 'Effet', '1 Prostituée Niv. 1 gratuite') + itemRow('ph-backpack', 'Quand ?', 'utilisé tout seul au Nightclub');
+  if (e === 'botox') return itemRow('ph-syringe', 'Effet', 'prochaine rente des prostituées x2') + itemRow('ph-backpack', 'Quand ?', 'tout seul au début de la manche');
   if (e === 'voucher') return itemRow('ph-ticket', 'Effet', `−50 % : ${escapeHtml(it.shop || '')}`) + itemRow('ph-backpack', 'Quand ?', 'prochain achat (à activer)');
   if (e === 'def_malus_round') return itemRow('ph-shield', 'Effet', '−1 Défense à un rival') + itemRow('ph-backpack', 'Quand ?', 'avant ou pendant un combat');
   if (e === 'stray_dog') return itemRow('ph-dog', 'Effet', 'rallie le Chien Errant') + itemRow('ph-backpack', 'Quand ?', 'ton tour ou en combat');
@@ -96,7 +98,8 @@ const FOUILLE_TABLE = [
   [1, { name: 'Bon de réduction Armurerie', eff: 'voucher', shop: 'Armurerie', desc: '−50 % sur ton prochain achat à l’Armurerie' }],
   [1, { name: 'Bon de réduction Concessionnaire', eff: 'voucher', shop: 'Concessionnaire', desc: '−50 % sur ton prochain achat au Concessionnaire' }],
   [1, { name: 'Bon de réduction Nightclub', eff: 'voucher', shop: 'Nightclub', desc: '−50 % sur ton prochain achat au Nightclub' }],
-  [1, { name: 'Bon de réduction Sportclub', eff: 'voucher', shop: 'Sportclub', desc: '−50 % sur ton prochain achat au Sportclub' }]
+  [1, { name: 'Bon de réduction Sportclub', eff: 'voucher', shop: 'Sportclub', desc: '−50 % sur ton prochain achat au Sportclub' }],
+  [1, { name: 'Seringue de botox', eff: 'botox', desc: 'La prochaine rente de tes prostituées au QG est doublée (une seule fois)' }]
 ];
 // bagOnly : sans le cash ni la drogue (objet de départ de Jamel, rangé dans le sac)
 function drawFouilleItem(bagOnly) {
@@ -297,7 +300,19 @@ function confirmCombatItems() {
 async function offerPassportAtPolice() {
   const idx = localPlayer.inventory.findIndex(it => it && it.eff === 'cancel_police');
   if (idx < 0) return false;
-  if (!await showAppConfirm("Sortir ton Passeport diplomatique ?\n\nLe contrôle est annulé, le passeport est utilisé.", "🛂 Passeport diplomatique", "Sortir le passeport", "Le garder")) return false;
+  // Écran plein page avec la carte du passeport : on le sort ou on le garde
+  const scr = document.getElementById('passportScreen');
+  document.getElementById('passRound').innerText = currentSession.round || 1;
+  scr.classList.remove('hidden', 'show');
+  void scr.offsetWidth;
+  scr.classList.add('show');
+  const use = await new Promise(resolve => {
+    document.getElementById('passUse').onclick = () => resolve(true);
+    document.getElementById('passKeep').onclick = () => resolve(false);
+  });
+  scr.classList.add('hidden');
+  scr.classList.remove('show');
+  if (!use) return false;
   localPlayer.inventory.splice(idx, 1);
   refreshHud();
   await showAppAlert("« Bonjour m'sieur l'agent… On ne va pas risquer un incident diplomatique, si ? »\n\nContrôle annulé !", "🛂 Contrôle annulé");

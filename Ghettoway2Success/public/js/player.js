@@ -350,7 +350,7 @@ function renderInventoryList() {
       primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Équiper</button>`;
     } else if (item.eff === 'def_malus_round') {
       primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500 text-white font-black rounded-lg font-mono text-[9px] uppercase">Lancer</button>`;
-    } else if (item.eff === 'cancel_police' || item.eff === 'free_prostitute') {
+    } else if (item.eff === 'cancel_police' || item.eff === 'free_prostitute' || item.eff === 'botox') {
       primaryBtn = `<span class="px-2 py-1 bg-sky-500/15 text-sky-300 border border-sky-500/30 rounded-lg font-mono text-[9px] uppercase font-bold">Auto</span>`;
     } else if (item.eff === 'none') {
       primaryBtn = '';
@@ -411,6 +411,7 @@ async function useItem(idx) {
   if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");
   if (it.eff === 'none') return showAppAlert(/trognon/i.test(it.name || '') ? "Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !" : `${it.name} : ça ne sert à rien…`, `${itemEmoji(it)} ${it.name}`);
   if (it.eff === 'free_prostitute') return showAppAlert("Ton Manteau de fourrure sera utilisé tout seul au Nightclub : ta prochaine Prostituée Niv. 1 est gratuite.", "🧥 Manteau de fourrure");
+  if (it.eff === 'botox') return showAppAlert("Ta Seringue de botox sera utilisée toute seule au début d'une manche où tu as des prostituées au QG : leur rente sera doublée.", "💉 Seringue de botox");
   if (it.eff === 'pm_turn') {
     localPlayer.inventory.splice(idx, 1);
     pmBonusThisTurn += it.val || 3;
