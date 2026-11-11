@@ -37,6 +37,9 @@ function openSac() {
   sacFilter = 'tout';
   sacIndex = 0;
   const scr = document.getElementById('sacScreen');
+  // Le Sac monte sous le bandeau du Caïd et le cadre de ses stats, qui restent visibles
+  const bar = document.getElementById('hudStatsBar').getBoundingClientRect();
+  scr.style.top = `${Math.round(bar.bottom - document.getElementById('app-container').getBoundingClientRect().top + 6)}px`;
   document.getElementById('sacRound').innerText = currentSession.round || 1;
   renderSac();
   scr.classList.remove('hidden', 'show');

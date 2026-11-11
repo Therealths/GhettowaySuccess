@@ -354,7 +354,7 @@
           <button onclick="confirmLeaveGame()" class="absolute top-2 right-2 h-8 px-2.5 rounded-xl bg-black/70 border border-rose-500/60 text-rose-300 flex items-center gap-1.5 z-[45] shadow-md text-[10px] font-black uppercase" aria-label="Quitter la partie"><i class="ph-bold ph-sign-out text-sm"></i> Quitter</button>
         </div>
         <!-- STATS -->
-        <div class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
+        <div id="hudStatsBar" class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
           <div class="flex items-center justify-center border-r border-white/10"><span id="hudHearts" class="text-base tracking-widest select-none">❤️❤️❤️</span></div>
           <div class="flex items-center justify-center gap-1.5 border-r border-white/10"><i class="ph-bold ph-sword text-rose-400 text-sm"></i><span id="hudAtk" class="text-base font-black text-white">1</span></div>
           <div class="flex items-center justify-center gap-1.5 border-r border-white/10"><i class="ph-bold ph-shield text-sky-400 text-sm"></i><span id="hudDef" class="text-base font-black text-white">0</span></div>
@@ -437,11 +437,7 @@
     <div id="sacScreen" class="hidden absolute inset-0 z-40 deck-screen sac-screen" data-theme="def">
       <div class="deck-scene"><img src="wallpaper-clean.jpg" alt=""></div>
       <div class="relative z-10 flex flex-col h-full">
-        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
-          <span>Manche <span id="sacRound">1</span></span>
-          <span class="ally-chip deck-chip"><i class="ph-fill ph-backpack"></i> Sac</span>
-        </div>
-        <div class="px-4 mt-3 deck-head"><h2 class="font-anton deck-title">TON SAC</h2></div>
+        <div class="sac-head px-4 pt-3"><b><i class="ph-fill ph-backpack"></i> Ton Sac</b><span>Manche <span id="sacRound">1</span></span></div>
         <div class="px-4 mt-2 sac-money">
           <div><small>Sur toi</small><b id="hudPocketCash">0 €</b><em id="hudDrugs">🌿 0 kg</em></div>
           <div><small>Au QG</small><b id="hudSafeCash">0 €</b><em id="hudSafeDrugs">📦 0 kg</em></div>
