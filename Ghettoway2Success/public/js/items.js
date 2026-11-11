@@ -36,6 +36,26 @@ const itemEmoji = it => /arête|poisson/i.test(it.name || '') ? '🐟' : /rat cr
 const itemRow = (icon, label, after) => `<div class="police-row find-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${after}</span></div>`;
 
 // =========================================================================
+// CARTE JOUÉE : la carte grandit, tampon « JOUÉE » avec choc, puis les effets mis en évidence
+// rows : [[icône, libellé, valeur], ...] ; se résout quand le joueur touche « Continuer »
+// =========================================================================
+function showCardPlayed(it, rows, title) {
+  return msgQueue(done => {
+    const scr = document.getElementById('playedScreen');
+    const art = itemArt(it);
+    document.getElementById('playedCard').innerHTML = (art ? `<img src="${art}" alt="${escapeHtml(it.name || '')}">` : findFallback(it)) + '<b class="played-stamp"><i class="ph-bold ph-check"></i></b>';
+    document.getElementById('playedTitle').innerText = title || it.name || 'Objet';
+    document.getElementById('playedRows').innerHTML = rows.map(([icon, label, value], i) =>
+      `<div class="police-row played-row" style="animation-delay:${1.15 + i * 0.18}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${value}</span></div>`).join('');
+    document.getElementById('playedCta').onclick = () => { scr.classList.add('hidden'); scr.classList.remove('show'); done(); };
+    scr.classList.remove('hidden', 'show');
+    void scr.offsetWidth;
+    scr.classList.add('show');
+    if (navigator.vibrate) setTimeout(() => { try { navigator.vibrate(60); } catch (e) {} }, 850);
+  });
+}
+
+// =========================================================================
 // DÉCOUVERTE : on fouille la poubelle, puis la carte de l'objet apparaît
 // =========================================================================
 let findTimer = null;
@@ -385,12 +405,13 @@ function closeTalkie() {
 async function sendTalkieOrder() {
   const idx = localPlayer.inventory.indexOf(talkieItem);
   if (idx < 0) return closeTalkie();
+  const it = talkieItem;
   if (socket) socket.emit('rig_patrol', { roll: talkieRoll, left: talkieLeft });
   localPlayer.inventory.splice(idx, 1);
   talkieItem = null;
   closeTalkie();
   refreshHud();
-  await showAppAlert(`Ordre reçu : au prochain tour de patrouille, le dé fera ${talkieRoll} et la voiture partira vers la ${talkieLeft ? 'gauche' : 'droite'}.\n(Les bonus de la radio s'ajoutent toujours.)`, "📻 Talkie-walkie de flic");
+  await showCardPlayed(it, [['ph-dice-five', 'Dé de la prochaine patrouille', `${talkieRoll}`], ['ph-arrows-left-right', 'Direction', talkieLeft ? '⬅ Gauche' : 'Droite ➡'], ['ph-broadcast', 'Bonus de la radio', 'en plus']]);
 }
 
 // =========================================================================
@@ -412,8 +433,8 @@ async function offerPassportAtPolice() {
   scr.classList.add('hidden');
   scr.classList.remove('show');
   if (!use) return false;
-  localPlayer.inventory.splice(idx, 1);
+  const passport = localPlayer.inventory.splice(idx, 1)[0];
   refreshHud();
-  await showAppAlert("« Bonjour m'sieur l'agent… On ne va pas risquer un incident diplomatique, si ? »\n\nContrôle annulé !", "🛂 Contrôle annulé");
+  await showCardPlayed(passport, [['ph-siren', 'Contrôle de police', 'annulé'], ['ph-chat-teardrop-text', '« On ne va pas risquer un incident diplomatique, si ? »', '']]);
   return true;
 }

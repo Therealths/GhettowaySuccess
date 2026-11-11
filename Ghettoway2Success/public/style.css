@@ -161,6 +161,36 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .talkie-dice button.on, .talkie-dirs button.on { color: #fff; border-color: #60a5fa; background: rgba(96,165,250,0.18); }
 .talkie-pic { height: 100%; max-height: 260px; object-fit: contain; border-radius: 12px; filter: drop-shadow(0 18px 30px rgba(0,0,0,0.8)); }
 .police-screen.show .talkie-pic { animation: policeRise 0.7s ease-out 0.15s both; }
+/* Carte jouée : la carte arrive en grand, le tampon s'écrase (flash + secousse), puis les effets */
+.played-screen { background: radial-gradient(circle at 50% 38%, rgba(30,27,46,0.97), rgba(5,6,10,0.98) 70%); color: #fff; overflow: hidden; }
+.played-rays { position: absolute; left: 50%; top: 36%; width: 620px; height: 620px; margin: -310px 0 0 -310px; border-radius: 999px; background: repeating-conic-gradient(rgba(251,191,36,0.14) 0 8deg, transparent 8deg 22deg); -webkit-mask: radial-gradient(circle, #000 20%, transparent 66%); mask: radial-gradient(circle, #000 20%, transparent 66%); opacity: 0; }
+.played-content { position: relative; height: 100%; display: flex; flex-direction: column; padding: 18px 16px 16px; }
+.played-kicker { align-self: center; padding: 4px 11px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #111; background: #fbbf24; }
+.played-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+.played-card { position: relative; height: 100%; max-height: 430px; aspect-ratio: 768 / 1226; }
+.played-card img, .played-card .find-carton { width: 100%; height: 100%; object-fit: cover; border-radius: 18px; box-shadow: 0 0 0 3px rgba(251,191,36,0.9), 0 0 50px rgba(251,191,36,0.4), 0 24px 50px rgba(0,0,0,0.8); }
+.played-stamp { position: absolute; right: -14px; top: -14px; width: 76px; height: 76px; display: flex; align-items: center; justify-content: center; border-radius: 999px; border: 5px solid #10b981; outline: 2px dashed rgba(16,185,129,0.7); outline-offset: -11px; font-size: 38px; color: #10b981; background: rgba(255,255,255,0.92); transform: rotate(-14deg); opacity: 0; box-shadow: 0 8px 22px rgba(0,0,0,0.55); }
+.played-title { font-size: 34px; line-height: 1; text-align: center; text-shadow: 0 4px 18px #000; }
+.played-row { opacity: 0; }
+.played-row .aft { font-size: 18px; color: #fbbf24; }
+.played-row > i:first-child { color: #fbbf24; }
+.played-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.played-screen.show .played-card { animation: playedGrow 0.6s cubic-bezier(.2,1.3,.4,1) both; }
+.played-screen.show .played-stamp { animation: playedStamp 0.4s cubic-bezier(.2,1.6,.4,1) 0.7s both; }
+.played-screen.show .played-flash { animation: patrolTkFlash 0.35s ease-out 0.85s both; }
+.played-screen.show .played-content { animation: playedShake 0.35s ease-in-out 0.85s; }
+.played-screen.show .played-rays { animation: findRays 12s linear infinite, allyFade 0.5s ease-out 0.85s both; opacity: 1; }
+.played-screen.show .played-title { animation: allyUp 0.4s ease-out 0.95s both; }
+.played-screen.show .played-row { animation: playedRow 0.45s cubic-bezier(.2,1.5,.4,1) both; }
+.played-screen.show .played-row .aft { animation: playedPulse 1.4s ease-in-out 1.7s 2; }
+.played-screen.show #playedCta { animation: allyUp 0.4s ease-out 1.5s both; }
+@keyframes playedGrow { 0% { opacity: 0; transform: translateY(160px) scale(0.35) rotate(8deg); } 100% { opacity: 1; transform: none; } }
+@keyframes playedStamp { 0% { opacity: 0; transform: rotate(-14deg) scale(2.6); } 100% { opacity: 1; transform: rotate(-14deg) scale(1); } }
+@keyframes playedShake { 0%, 100% { transform: none; } 20% { transform: translate(-4px, 2px) rotate(-0.3deg); } 45% { transform: translate(3px, -2px) rotate(0.25deg); } 70% { transform: translate(-2px, 1px); } }
+@keyframes playedRow { 0% { opacity: 0; transform: translateY(16px) scale(0.92); } 100% { opacity: 1; transform: none; } }
+@keyframes playedPulse { 0%, 100% { transform: none; text-shadow: none; } 50% { transform: scale(1.12); text-shadow: 0 0 14px rgba(251,191,36,0.8); } }
+@media (max-height: 700px) { .played-title { font-size: 28px; } .played-stamp { width: 62px; height: 62px; font-size: 30px; } }
+@media (prefers-reduced-motion: reduce) { .played-screen * { animation: none !important; } .played-stamp, .played-row, .played-screen .played-card { opacity: 1; } }
 /* Passeport diplomatique au contrôle : la carte au centre */
 .pass-card-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 12px 0; }
 .pass-card { height: 100%; max-height: 330px; border-radius: 14px; transform: rotate(-3deg); box-shadow: 0 0 0 2px #38bdf8, 0 0 40px rgba(56,189,248,.45), 0 20px 40px rgba(0,0,0,.7); }
@@ -385,7 +415,7 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .patrol-screen.tk-card .patrol-tk-flash { animation: patrolTkFlash 0.35s ease-out 0.3s both; }
 .patrol-screen.tk-card .police-content { animation: patrolTkShake 0.45s ease-in-out 0.3s; }
 @keyframes patrolTkBurst { 0% { opacity: 0; transform: scale(0.3) rotate(0deg); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5) rotate(25deg); } }
-@keyframes patrolTkFlash { 0% { opacity: 0.55; } 100% { opacity: 0; } }
+@keyframes patrolTkFlash { 0% { opacity: 0; } 12% { opacity: 0.6; } 100% { opacity: 0; } }
 @keyframes patrolTkShake { 0%, 100% { transform: none; } 15% { transform: translate(-7px, 3px) rotate(-0.6deg); } 30% { transform: translate(6px, -4px) rotate(0.5deg); } 45% { transform: translate(-5px, 2px); } 60% { transform: translate(4px, -2px); } 80% { transform: translate(-2px, 1px); } }
 @keyframes patrolTkStamp { from { opacity: 0; transform: scale(1.6) rotate(-4deg); } to { opacity: 1; transform: rotate(8deg); } }
 .patrol-big { font-family: 'Anton', sans-serif; font-size: 52px; line-height: 1; color: #fff; }
@@ -917,7 +947,8 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .item-deck.sel .deck-cardbox { box-shadow: 0 0 0 3px var(--ac), 0 0 30px color-mix(in srgb, var(--ac) 50%, transparent); }
 .item-deck.sel .deck-cardbox::after { content: '✓ JOUÉE'; position: absolute; top: 10px; right: 10px; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 900; color: #111; background: var(--ac); }
 .item-deck.off .deck-face { filter: grayscale(1) brightness(0.6); }
-.deck-under { display: flex; align-items: center; gap: 6px; }
+.deck-under { display: flex; align-items: center; gap: 6px; transition: opacity .25s; }
+.deck-card-item.item-deck:not(.deck-front) .deck-under { opacity: 0; pointer-events: none; }
 .deck-under .item-badge { flex: none; font-size: 11px; padding: 4px 7px; }
 .deck-under > button { flex: 1; }
 @media (max-height: 760px) { .item-stage { --cw: 158px; } }
@@ -978,7 +1009,7 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 
 /* Message ouvert : les animations des écrans derrière attendent qu'il soit fermé
    (sauf le fondu du décor, pour ne pas laisser un fond noir derrière le message) */
-body.msg-open *:not(.msg-screen, .msg-screen *, .ally-scene > img, .amb, .end-banner img) { animation-play-state: paused !important; }
+body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *, .ally-scene > img, .amb, .end-banner img) { animation-play-state: paused !important; }
 
 /* ===== FIN DE PARTIE ===== */
 .end-screen { position: relative; padding: 0 !important; overflow: hidden !important; background: #07080e; color: #fff; container-type: size; }

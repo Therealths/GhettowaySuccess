@@ -358,11 +358,11 @@ async function useItem(idx) {
   if (!it) return;
   if (it.eff === 'heal' || it.type === 'CONSUMABLE' || (it.name && it.name.includes('Kebab'))) {
     if (localPlayer.hearts >= 3) return showAppAlert("Tes Cœurs sont déjà au maximum !", "Santé Pleine");
+    const before = localPlayer.hearts;
     localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
     localPlayer.inventory.splice(idx, 1);
     refreshHud();
-    await showAppAlert("+1 Cœur de Vie restauré !", "🥙 Kebab");
-    return;
+    return showCardPlayed(it, [['ph-heart', 'Cœurs de vie', `${'❤️'.repeat(before)} → ${'❤️'.repeat(localPlayer.hearts)}`]]);
   }
   // Vieille canette, Pied de biche : on choisit le rival à viser (écran des capacités spéciales)
   if (it.eff === 'def_malus_round' || it.eff === 'crowbar') return openItemTargetPower(it);
@@ -373,7 +373,7 @@ async function useItem(idx) {
     const win = Math.random() < 1 / 3, prize = it.val || 5000;
     if (win) localPlayer.pocketCash += prize;
     refreshHud();
-    return showAppAlert(win ? `GAGNANT ! +${prize.toLocaleString()} € dans ta poche.` : "Perdu… Rien sous la pellicule. Tu feras mieux la prochaine fois.", "🎰 Ticket à gratter");
+    return showCardPlayed(it, [win ? ['ph-coins', 'Gagnant ! Dans ta poche', `+${prize.toLocaleString()} €`] : ['ph-smiley-sad', 'Rien sous la pellicule', 'Perdu…']], win ? 'GAGNANT !' : 'PERDU…');
   }
   if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");
   if (it.eff === 'none') return showAppAlert(/trognon/i.test(it.name || '') ? "Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !" : `${it.name} : ça ne sert à rien…`, `${itemEmoji(it)} ${it.name}`);
@@ -383,21 +383,22 @@ async function useItem(idx) {
     localPlayer.inventory.splice(idx, 1);
     pmBonusThisTurn += it.val || 3;
     refreshHud();
-    return showAppAlert(`+${it.val || 3} PM jusqu'à la fin du tour !`, "👟 Vieilles baskets");
+    return showCardPlayed(it, [['ph-sneaker-move', 'Jusqu’à la fin du tour', `+${it.val || 3} PM`]]);
   }
   if (it.eff === 'voucher') {
     if (hasVoucher(it.shop)) return showAppAlert(`Tu as déjà un bon actif pour : ${it.shop}. Utilise-le d'abord !`, "🎟️ Bon de réduction");
     localPlayer.inventory.splice(idx, 1);
     localPlayer.vouchers = [...(localPlayer.vouchers || []), it.shop];
     refreshHud();
-    return showAppAlert(`−50 % sur ton prochain achat : ${it.shop}.`, "🎟️ Bon activé");
+    return showCardPlayed(it, [['ph-ticket', `Prochain achat : ${escapeHtml(it.shop)}`, '−50 %']]);
   }
   if (it.eff === 'stray_dog') {
     const caid = getMyCaid();
     localPlayer.inventory.splice(idx, 1);
+    dogFromCard = true; // la carte jouée remplace le message « Chien rallié »
     if (socket) socket.emit('claim_stray_dog', { senderCaid: caid.name, playerToken: myPlayerToken });
     else { localPlayer.strayDogActive = true; refreshHud(); }
-    return;
+    return showCardPlayed(it, [['ph-dog', 'Le Chien Errant te rejoint', '+2 ATK / +2 DÉF'], ['ph-info', 'Jusqu’à ce qu’un rival le siffle', '']]);
   }
   if (it.dur === 'combat') {
     if (it.eff === 'double_weapon_atk') {
@@ -410,9 +411,11 @@ async function useItem(idx) {
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
     localPlayer.inventory.splice(idx, 1);
     refreshHud();
-    const lasts = (it.eff === 'double_weapon_atk' || it.eff === 'null_enemy_weapon') ? 'pour ton prochain combat de ce tour' : it.eff === 'double_muscles_atk' ? "jusqu'à la fin de la manche" : "jusqu'à la fin du tour en cours";
-    await showAppAlert(`${it.name} activé ${lasts} ! Tes statistiques de combat ont été mises à jour.`, "⚔️ Bonus de Combat Actif");
-    return;
+    const row = it.eff === 'double_weapon_atk' ? ['ph-crosshair', 'Arme à feu, prochain combat du tour', '×2']
+      : it.eff === 'null_enemy_weapon' ? ['ph-shield', 'Arme adverse, prochain combat du tour', '0']
+      : it.eff === 'double_muscles_atk' ? ['ph-barbell', 'Lascars jusqu’à la fin de la manche', '×2']
+      : ['ph-sword', 'Attaque jusqu’à la fin du tour', `+${it.val || 1}`];
+    return showCardPlayed(it, it.eff === 'null_enemy_weapon' ? [row] : [row, ['ph-sword', 'Ton attaque', `${getTotalAtk()}`]]);
   }
   localPlayer.inventory.splice(idx, 1);
   refreshHud();

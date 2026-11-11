@@ -85,6 +85,7 @@ function applyDeckStackPositions(prefix, totalCount, activeIndex) {
     const el = document.getElementById(`${prefix}_${i}`);
     if (!el) continue;
     const buyBtn = el.querySelector('.deck-buy-btn');
+    el.classList.toggle('deck-front', i === activeIndex); // les boutons sous les cartes de derrière sont masqués
 
     if (totalCount <= 2) {
       const diff = (i - activeIndex + totalCount) % totalCount;
@@ -391,8 +392,8 @@ async function buyNightclubItem(itemId) {
     return;
   }
   if ((item.lvl || 1) === 1 && macCoatIndex() >= 0) {
-    localPlayer.inventory.splice(macCoatIndex(), 1);
-    await showAppAlert("Ton Manteau de fourrure fait son effet : elle te suit gratuitement !", "🧥 Déguisement de Mac");
+    const coat = localPlayer.inventory.splice(macCoatIndex(), 1)[0];
+    await showCardPlayed(coat, [['ph-high-heel', 'Prostituée Niv. 1', 'GRATUITE'], ['ph-chat-teardrop-text', 'Déguisé en Mac, elle te suit sans discuter', '']]);
     await finalizePurchaseExecution({ type: 'pr', data: dataPayload, cost: 0, name: item.nom });
     refreshHud();
     return;

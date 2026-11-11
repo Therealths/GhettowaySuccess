@@ -994,6 +994,21 @@
     </div>
 
     <!-- MODALES SYSTÈME STYLISÉES -->
+    <!-- CARTE JOUÉE : la carte grandit, le tampon « JOUÉE » tombe (choc), puis ses effets s'affichent -->
+    <div id="playedScreen" class="hidden absolute inset-0 z-[60] played-screen">
+      <div class="played-rays"></div>
+      <div class="played-content">
+        <div class="played-kicker"><i class="ph-fill ph-cards"></i> Carte jouée</div>
+        <div class="played-stage"><div id="playedCard" class="played-card"></div></div>
+        <div class="played-bottom">
+          <h2 id="playedTitle" class="font-anton played-title"></h2>
+          <div id="playedRows" class="flex flex-col gap-1.5 mt-2"></div>
+          <button type="button" id="playedCta" class="find-cta mt-3">Continuer</button>
+        </div>
+      </div>
+      <i class="played-flash"></i>
+    </div>
+
     <div id="modalAppAlert" class="hidden absolute inset-0 z-[60] msg-screen" data-tone="info">
       <div class="msg-sheet">
         <div class="msg-badge"><span id="appAlertIcon" class="msg-ico"></span><span class="msg-fx"></span></div>

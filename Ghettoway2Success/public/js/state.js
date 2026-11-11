@@ -93,6 +93,7 @@ let grossisteUnitCost = 1000;
 let combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
 let currentDuelInfo = null;
 let isCombatReady = false;
+let dogFromCard = false; // Sifflet joué depuis le Sac : la carte jouée tient lieu de message
 let myWeaponNullified = false; // Couvercle de poubelle adverse : mon arme compte pour 0 dans ce combat
 
 // Pacte de non-agression encore valable entre deux Caïds

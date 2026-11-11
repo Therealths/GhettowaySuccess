@@ -97,6 +97,10 @@ function renderSac() {
   document.getElementById('sacCards').innerHTML = sacList.length ? sacList.map(sacCardHtml).join('')
     : `<div class="sac-empty"><i class="ph-bold ph-backpack"></i><b>${sacFilter === 'eq' ? 'Aucun équipement en réserve' : sacFilter === 'obj' ? 'Aucun objet' : 'Ton Sac est vide'}</b><small>Fouille les poubelles ou passe en boutique.</small></div>`;
   scr.querySelectorAll('.deck-arrow').forEach(b => b.classList.toggle('hidden', sacList.length < 2));
+  placeSacCards();
+}
+// Défilement : on déplace seulement les cartes (transition animée), sans les redessiner
+function placeSacCards() {
   document.getElementById('sacDots').innerHTML = sacList.length < 2 ? '' : sacList.map((_, i) => `<i class="${i === sacIndex ? 'on' : ''}"></i>`).join('');
   applyDeckStackPositions('sacCard', sacList.length, sacIndex);
 }
@@ -105,9 +109,9 @@ function stepSac(dir) {
   const next = sacIndex + dir;
   if (next < 0 || next >= sacList.length) return;
   sacIndex = next;
-  renderSac();
+  placeSacCards();
 }
-function pickSacCard(idx) { if (idx !== sacIndex) { sacIndex = idx; renderSac(); } }
+function pickSacCard(idx) { if (idx !== sacIndex) { sacIndex = idx; placeSacCards(); } }
 function sacUse(idx) {
   const it = localPlayer.inventory[idx];
   if (it && SAC_LEAVES.includes(it.eff) && isMyTurnToPlay) closeSac();

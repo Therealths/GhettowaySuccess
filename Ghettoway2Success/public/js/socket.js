@@ -448,6 +448,7 @@ if (socket) {
   socket.on('stray_dog_granted', async () => {
     localPlayer.strayDogActive = true;
     refreshHud();
+    if (dogFromCard) { dogFromCard = false; return; } // déjà montré par la carte jouée
     await showAppAlert("Le Chien Errant te rejoint (+2 Atk / +2 Def) !\nIl reste avec toi jusqu'à ce qu'un autre joueur le siffle.", "🐕 Chien Rallié");
   });
   socket.on('received_special_effect', async ({ effectType, senderCaid, senderSocketId, senderToken, late, round, turnToken, loot }) => {
