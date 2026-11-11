@@ -18,7 +18,8 @@ const ITEM_ART = [
   [/r[ée]duction armurerie/i, 'fouille-bon-armurerie'],
   [/r[ée]duction concessionnaire/i, 'fouille-bon-concessionnaire'],
   [/r[ée]duction nightclub/i, 'fouille-bon-nightclub'],
-  [/r[ée]duction sportclub/i, 'fouille-bon-sportclub']
+  [/r[ée]duction sportclub/i, 'fouille-bon-sportclub'],
+  [/perforante/i, 'fouille-balle']
 ];
 function itemArt(item, thumb) {
   const hit = ITEM_ART.find(([re]) => re.test(item && (item.name || item.n) || ''));
