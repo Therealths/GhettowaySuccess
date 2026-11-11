@@ -2,7 +2,7 @@
 
 // Image de la carte d'un objet (trouvée par son nom) ; null = carte en carton dessinée
 const ITEM_ART = [
-  [/kebab/i, 'obj-kebab'],
+  [/kebab/i, 'fouille-kebab'],
   [/passeport/i, 'obj-passeport'],
   [/couvercle/i, 'obj-couvercle'],
   // Cartes au cadre « Fouille »
