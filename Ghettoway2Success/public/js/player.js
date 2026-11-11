@@ -38,8 +38,8 @@ function spendActionPm() {
 }
 
 function getTotalPm() {
-  // Malus Burger Queen : démarrage poussif, 0 PM pendant la manche 1
-  if (localPlayer.caidId === 'caid_1' && currentSession.round === 1) return 0;
+  // Malus Burger Queen : démarrage poussif, 0 PM pendant la manche 1 (les Vieilles baskets comptent quand même)
+  if (localPlayer.caidId === 'caid_1' && currentSession.round === 1) return pmBonusThisTurn;
   const eqVeh = localPlayer.equipped.vehicle;
   let pm = 8 + (eqVeh ? eqVeh.bonusVal : 0);
   if (eqVeh) {
@@ -50,7 +50,7 @@ function getTotalPm() {
   } else if (isRadioEffectActive('FOOT_PM_MOD')) {
     pm += getRadioEffectValue('FOOT_PM_MOD', -2);
   }
-  return Math.max(1, pm);
+  return Math.max(1, pm) + pmBonusThisTurn;
 }
 
 async function clickMuscleSlot(idx) {
@@ -329,7 +329,8 @@ function refreshHud() {
       jloDoubledKgBought: localPlayer.jloDoubledKgBought || 0,
       freeItemsClaimed: localPlayer.freeItemsClaimed || [],
       roundSeen: localPlayer.roundSeen || 0,
-      proteinRound: localPlayer.proteinRound || 0
+      proteinRound: localPlayer.proteinRound || 0,
+      vouchers: localPlayer.vouchers || []
     });
   }
 }
@@ -349,10 +350,12 @@ function renderInventoryList() {
       primaryBtn = `<button onclick="equipItemFromInventory(${realIdx})" class="px-2.5 py-1 bg-gradient-to-r from-emerald-400 to-green-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Équiper</button>`;
     } else if (item.eff === 'def_malus_round') {
       primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-rose-500 text-white font-black rounded-lg font-mono text-[9px] uppercase">Lancer</button>`;
-    } else if (item.eff === 'cancel_police') {
+    } else if (item.eff === 'cancel_police' || item.eff === 'free_prostitute') {
       primaryBtn = `<span class="px-2 py-1 bg-sky-500/15 text-sky-300 border border-sky-500/30 rounded-lg font-mono text-[9px] uppercase font-bold">Auto</span>`;
     } else if (item.eff === 'none') {
       primaryBtn = '';
+    } else if (item.eff === 'voucher') {
+      primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-yellow-400 text-black font-black rounded-lg font-mono text-[9px] uppercase">Activer</button>`;
     } else if (item.eff === 'stray_dog') {
       primaryBtn = `<button onclick="useItem(${realIdx})" class="px-2.5 py-1 bg-purple-500 text-black font-black rounded-lg font-mono text-[9px] uppercase">Siffler</button>`;
     } else if (item.dur === 'combat') {
@@ -406,7 +409,21 @@ async function useItem(idx) {
   // Vieille canette : on choisit le rival à viser (écran des capacités spéciales)
   if (it.eff === 'def_malus_round') return openCanetteThrow(it);
   if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");
-  if (it.eff === 'none') return showAppAlert("Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !", "🍎 Trognon de pomme");
+  if (it.eff === 'none') return showAppAlert(/trognon/i.test(it.name || '') ? "Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !" : `${it.name} : ça ne sert à rien…`, `${itemEmoji(it)} ${it.name}`);
+  if (it.eff === 'free_prostitute') return showAppAlert("Ton Manteau de fourrure sera utilisé tout seul au Nightclub : ta prochaine Prostituée Niv. 1 est gratuite.", "🧥 Manteau de fourrure");
+  if (it.eff === 'pm_turn') {
+    localPlayer.inventory.splice(idx, 1);
+    pmBonusThisTurn += it.val || 3;
+    refreshHud();
+    return showAppAlert(`+${it.val || 3} PM jusqu'à la fin du tour !`, "👟 Vieilles baskets");
+  }
+  if (it.eff === 'voucher') {
+    if (hasVoucher(it.shop)) return showAppAlert(`Tu as déjà un bon actif pour : ${it.shop}. Utilise-le d'abord !`, "🎟️ Bon de réduction");
+    localPlayer.inventory.splice(idx, 1);
+    localPlayer.vouchers = [...(localPlayer.vouchers || []), it.shop];
+    refreshHud();
+    return showAppAlert(`−50 % sur ton prochain achat : ${it.shop}.`, "🎟️ Bon activé");
+  }
   if (it.eff === 'stray_dog') {
     const caid = getMyCaid();
     localPlayer.inventory.splice(idx, 1);

@@ -61,6 +61,22 @@ function getArmoryItemEffectivePrice(item) {
   return price;
 }
 
+// Bon de réduction activé depuis le Sac : −50 % sur le prochain achat payant de la boutique
+const hasVoucher = shop => (localPlayer.vouchers || []).includes(shop);
+const voucherCost = (shop, cost) => cost > 0 && hasVoucher(shop) ? Math.round(cost / 2) : cost;
+function useVoucher(shop) {
+  const v = [...(localPlayer.vouchers || [])];
+  const i = v.indexOf(shop);
+  if (i >= 0) v.splice(i, 1);
+  localPlayer.vouchers = v;
+}
+// Prix affiché : barré quand il est réduit
+const priceTagHtml = (full, cost) => cost < full
+  ? `<span class="line-through text-[9px] text-slate-500 mr-1">${full.toLocaleString()}€</span><span class="text-emerald-400">${cost.toLocaleString()} €</span>`
+  : `${cost.toLocaleString()} €`;
+// Manteau de fourrure (déguisement de Mac) : une Prostituée Niv. 1 gratuite, pris tout seul dans le Sac
+const macCoatIndex = () => localPlayer.inventory.findIndex(it => it && it.eff === 'free_prostitute');
+
 // =========================================================================
 // MOTEUR D'ANIMATION 3D POUR LES PILES DE CARTES
 // =========================================================================
@@ -199,13 +215,8 @@ function buildArmoryStackDOM() {
     const badgeColor = isWeapon ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40';
     const displayBonus = isWeapon ? `+${item.bonusVal} Attaque` : `+${item.bonusVal} Défense`;
     const firearmBadge = item.isFirearm ? `<span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[8px] font-bold">🔥 Feu</span>` : '';
-    const effectivePrice = getArmoryItemEffectivePrice(item);
-    const hasDiscount = effectivePrice < (item.prix || 0);
-    const priceHtml = item.prix === 0
-      ? 'GRATUIT'
-      : (hasDiscount
-          ? `<span class="line-through text-[9px] text-slate-500 mr-1">${item.prix.toLocaleString()}€</span><span class="text-emerald-400">${effectivePrice.toLocaleString()} €</span>`
-          : `${effectivePrice.toLocaleString()} €`);
+    const effectivePrice = voucherCost('Armurerie', getArmoryItemEffectivePrice(item));
+    const priceHtml = item.prix === 0 ? 'GRATUIT' : priceTagHtml(item.prix, effectivePrice);
 
     return `
       <div id="armoryDeckCard_${idx}" onclick="onArmoryCardClick(${idx})" class="deck-card-item border ${borderColor}">
@@ -271,6 +282,8 @@ async function buyArmoryCatalogItem(itemId) {
     cost *= 2;
     await showAppAlert(`Malus Tonteushi Kitano : ton premier achat d'arme à l'Armurerie coûte le double (${cost.toLocaleString()} €) !`, "🥋 Malus Kitano");
   }
+  const fullCost = cost;
+  cost = voucherCost('Armurerie', cost);
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
@@ -290,6 +303,7 @@ async function buyArmoryCatalogItem(itemId) {
     }
   };
   pPayload.shop = 'Armurerie';
+  if (cost < fullCost) pPayload.voucher = 'Armurerie';
   closeModal('modalArmoryShop');
   if (cost === 0) {
     if (!item.prix) localPlayer.freeItemsClaimed = [...(localPlayer.freeItemsClaimed || []), item.id];
@@ -315,8 +329,10 @@ function openNightclubShopModal() {
 function buildNightclubStackDOM() {
   const container = document.getElementById('nightclubStackContainer');
   const isMaryFree = (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed);
+  const hasCoat = macCoatIndex() >= 0;
   container.innerHTML = NIGHTCLUB_CATALOG.map((item, idx) => {
-    const displayPrice = (item.lvl === 1 && isMaryFree) ? 'GRATUIT (Bonus)' : `${item.prix.toLocaleString()} €`;
+    const displayPrice = (item.lvl === 1 && isMaryFree) ? 'GRATUIT (Bonus)'
+      : (item.lvl === 1 && hasCoat) ? 'GRATUIT (Manteau)' : priceTagHtml(item.prix, voucherCost('Nightclub', item.prix));
     return `
       <div id="nightclubDeckCard_${idx}" onclick="onNightclubCardClick(${idx})" class="deck-card-item border border-pink-500/45">
         <div>
@@ -364,7 +380,7 @@ async function buyNightclubItem(itemId) {
   if (localPlayer.prostituteInTransit) {
     return showAppAlert("Tu as déjà 1 prostituée en transit ! Dépose-la d'abord au QG.", "Limite Atteinte");
   }
-  let cost = item.prix;
+  const cost = voucherCost('Nightclub', item.prix);
   const rev = item.rev || item.bonusVal || (item.lvl === 2 ? 2500 : 1000);
   const dataPayload = { t: 'pr', lvl: item.lvl || 1, p: item.prix, rev: rev, n: item.nom };
   closeModal('modalNightclubShop');
@@ -374,10 +390,17 @@ async function buyNightclubItem(itemId) {
     refreshHud();
     return;
   }
+  if ((item.lvl || 1) === 1 && macCoatIndex() >= 0) {
+    localPlayer.inventory.splice(macCoatIndex(), 1);
+    await showAppAlert("Ton Manteau de fourrure fait son effet : elle te suit gratuitement !", "🧥 Déguisement de Mac");
+    await finalizePurchaseExecution({ type: 'pr', data: dataPayload, cost: 0, name: item.nom });
+    refreshHud();
+    return;
+  }
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
   }
-  openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom, shop: 'Nightclub' });
+  openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom, shop: 'Nightclub', voucher: cost < item.prix ? 'Nightclub' : null });
 }
 
 // --- 3. SPORTCLUB ---
@@ -414,7 +437,7 @@ function buildSportclubStackDOM() {
       <div class="pt-1.5 border-t border-white/10">
         <div class="flex items-center justify-between font-mono mb-1">
           <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-          <span class="text-xs font-black text-ghetto-gold">${item.prix.toLocaleString()} €</span>
+          <span class="text-xs font-black text-ghetto-gold">${priceTagHtml(item.prix, voucherCost('Sportclub', item.prix))}</span>
         </div>
         <button onclick="event.stopPropagation(); buySportclubItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
           <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
@@ -440,14 +463,14 @@ async function buySportclubItem(itemId) {
   if (localPlayer.musclesOnPerson.length >= 3) {
     return showAppAlert("Tu as déjà 3 Lascars, le maximum !", "Limite Atteinte");
   }
-  const cost = item.prix;
+  const cost = voucherCost('Sportclub', item.prix);
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
   }
   const atkVal = item.atk || item.bonusVal || (item.lvl === 2 ? 2 : 1);
   const dataPayload = { t: 'gb', lvl: item.lvl || 1, p: item.prix, atk: atkVal, def: atkVal, n: item.nom };
   closeModal('modalSportclubShop');
-  openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom, shop: 'Sportclub' });
+  openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom, shop: 'Sportclub', voucher: cost < item.prix ? 'Sportclub' : null });
 }
 
 // --- 4. CONCESSIONNAIRE ---
@@ -486,7 +509,7 @@ function buildDealerStackDOM() {
       <div class="pt-1.5 border-t border-white/10">
         <div class="flex items-center justify-between font-mono mb-1">
           <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-          <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : item.prix.toLocaleString() + ' €'}</span>
+          <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : priceTagHtml(item.prix, voucherCost('Concessionnaire', item.prix))}</span>
         </div>
         <button onclick="event.stopPropagation(); buyDealerCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
           <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
@@ -516,7 +539,7 @@ function onDealerCardClick(idx) {
 async function buyDealerCatalogItem(itemId) {
   const item = DEALER_CATALOG.find(i => i.id === itemId);
   if (!item) return;
-  const cost = item.prix || 0;
+  const cost = voucherCost('Concessionnaire', item.prix || 0);
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
@@ -534,6 +557,7 @@ async function buyDealerCatalogItem(itemId) {
     }
   };
   pPayload.shop = 'Concessionnaire';
+  if (cost < (item.prix || 0)) pPayload.voucher = 'Concessionnaire';
   closeModal('modalDealerShop');
   if (cost === 0) {
     await finalizePurchaseExecution(pPayload);
@@ -721,6 +745,7 @@ async function finalizePurchaseExecution(pData) {
   if (pData.markKitanoWeapon) {
     localPlayer.firstWeaponDoubled = true;
   }
+  if (pData.voucher) useVoucher(pData.voucher);
   spendActionPm();
   if (type === 'eq') {
     const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');

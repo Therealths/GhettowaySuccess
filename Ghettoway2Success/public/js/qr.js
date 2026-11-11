@@ -241,6 +241,13 @@ async function processQrPayload(payload) {
       refreshHud();
       return;
     }
+    if (type === 'pr' && (data.lvl || 1) === 1 && macCoatIndex() >= 0) {
+      localPlayer.inventory.splice(macCoatIndex(), 1);
+      await showAppAlert("Ton Manteau de fourrure fait son effet : elle te suit gratuitement !", "🧥 Déguisement de Mac");
+      await finalizePurchaseExecution({ type, data, cost: 0, name: itemName });
+      refreshHud();
+      return;
+    }
     if (localPlayer.pocketCash + localPlayer.safeCash < cost) return showBrokeScreen(cost, itemName);
     return openPaymentChoiceModal({ type, data, cost, name: itemName });
   }

@@ -10,7 +10,7 @@ let powItem = null;
 function powCaid() {
   const me = getMyCaid();
   if (!powItem) return me;
-  return { id: 'canette', name: 'Objet du sac', skillName: 'Vieille canette', skillDesc: '−1 Défense à un rival jusqu’à la fin de la manche.', bannerFile: 'obj-canette-vignette.webp', hex: '#f87171', imageFile: me.imageFile };
+  return { id: 'canette', name: 'Objet du sac', skillName: 'Vieille canette', skillDesc: '−1 Défense à un rival jusqu’à la fin de la manche.', bannerFile: 'fouille-canette-vignette.webp', hex: '#f87171', imageFile: me.imageFile };
 }
 let powResolve = null;
 

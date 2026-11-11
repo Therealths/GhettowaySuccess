@@ -210,7 +210,7 @@ if (socket) {
     if (activePlayerToken === myPlayerToken && newTurn) notifyMyTurn(round);
     // Balle perforante, Couvercle... : effets valables jusqu'à la fin du tour en cours (le Pot de Protéine dure la manche)
     if (newTurn && !currentDuelInfo) { resetCombatModifiers(); myWeaponNullified = false; refreshHud(); }
-    if (newTurn && activePlayerToken === myPlayerToken && lastActivePlayerToken === myPlayerToken) { pmSpentThisTurn = 0; refreshHud(); }
+    if (newTurn && activePlayerToken === myPlayerToken && lastActivePlayerToken === myPlayerToken) { pmSpentThisTurn = 0; pmBonusThisTurn = 0; refreshHud(); }
     lastActivePlayerToken = activePlayerToken;
     activeTurnPlayerToken = activePlayerToken;
     const isAlliedNow = !!(alliedTokens && alliedTokens.includes(myPlayerToken));
@@ -223,9 +223,10 @@ if (socket) {
     }
     const wasMyTurn = isMyTurnToPlay;
     isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
-    if (isMyTurnToPlay && !wasMyTurn) { pmSpentThisTurn = 0; refreshHud(); }
+    if (isMyTurnToPlay && !wasMyTurn) { pmSpentThisTurn = 0; pmBonusThisTurn = 0; refreshHud(); }
     // Fin du tour (ou de sa participation d'allié) : boutiques, coffre et paiement se ferment
     if (wasMyTurn && !isMyTurnToPlay) {
+      pmBonusThisTurn = 0;
       ['modalArmoryShop', 'modalDealerShop', 'modalNightclubShop', 'modalSportclubShop', 'modalPaymentChoice', 'modalTransfer', 'grossisteScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
     }
     // Sortie d'hôpital au début de son tour, ou quand il rejoint le tour d'un allié

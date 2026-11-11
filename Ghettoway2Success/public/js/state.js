@@ -58,6 +58,7 @@ let localPlayer = {
   prostituteInTransit: null,
   prostitutesAtSafeList: [],
   freeProstituteClaimed: false,
+  vouchers: [], // bons de réduction activés (nom de la boutique)
   inventory: [],
   specialUsedThisTurn: false,
   allianceActive: false,
@@ -86,6 +87,7 @@ let pendingAllianceRequest = null;
 let isMyTurnToPlay = true;
 let activeTurnPlayerToken = null;
 let pmSpentThisTurn = 0; // aide-mémoire : 2 PM décomptés par attaque lancée
+let pmBonusThisTurn = 0; // Vieilles baskets : PM en plus jusqu'à la fin du tour
 let pendingPurchaseData = null;
 let grossisteUnitCost = 1000;
 let combatModifiers = { flatAtkBonus: 0, doubleMuscles: false, doubleWeapon: false, nullEnemyWeapon: false };
@@ -108,7 +110,7 @@ function isRivalProtectedByPact(rivalToken) {
 // Objets de départ du Caïd (Jamel : 1 objet de Fouilles tiré au hasard)
 function caidStartItems(caid) {
   const items = JSON.parse(JSON.stringify(caid.startItems));
-  if (caid.startRandomFouille) items.push(drawFouilleItem());
+  if (caid.startRandomFouille) items.push(drawFouilleItem(true));
   return items;
 }
 
@@ -131,6 +133,7 @@ function applyCaidToLocalPlayer(chosenCaid) {
   localPlayer.prostituteInTransit = null;
   localPlayer.prostitutesAtSafeList = [];
   localPlayer.freeProstituteClaimed = false;
+  localPlayer.vouchers = [];
 }
 
 function updateRivalsList(players) {
