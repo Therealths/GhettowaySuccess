@@ -190,7 +190,7 @@ function buildRoundOrder(room) {
 // Partie de test permanente : 3 joueurs déjà lancés, pilotables depuis un seul téléphone
 const TEST_ROOM_ID = 'TEST';
 const TEST_PLAYERS = [
-  { playerToken: 'tok_test_1', caidId: 'caid_1', caidName: 'Burger Queen', inventory: [{ id: 'kebab_1', type: 'CONSUMABLE', name: 'Kebab', desc: 'Restaure 1 Cœur de Vie' }] },
+  { playerToken: 'tok_test_1', caidId: 'caid_1', caidName: 'Burger Queen', inventory: [{ id: 'kebab_1', type: 'ITEM_CARD', name: 'Kebab', eff: 'heal', val: 1, desc: 'Restaure 1 Cœur de Vie' }] },
   { playerToken: 'tok_test_2', caidId: 'caid_7', caidName: 'Jamel Pépouze', inventory: [{ id: 'obj_jamel', type: 'ITEM_CARD', name: 'Vieille canette', eff: 'def_malus_round', val: 1, dur: 'instant', desc: '−1 Défense à un rival jusqu’à la fin de la manche' }] },
   { playerToken: 'tok_test_3', caidId: 'caid_5', caidName: 'J-Lo Gramme', inventory: [] }
 ];

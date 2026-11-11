@@ -121,25 +121,28 @@ let deckIndex = 0;
 let deckPicked = new Set();
 
 // Cartes jouables pendant un combat (Kebab et Sifflet aussi : se soigner ou rallier le chien juste avant de cogner)
-const isCombatItem = it => it.dur === 'combat' || ['def_malus_round', 'heal', 'stray_dog'].includes(it.eff);
+// (un vieux Kebab sans « eff » se reconnaît à son nom)
+const isHealItem = it => it.eff === 'heal' || it.type === 'CONSUMABLE' || /kebab/i.test(it.name || '');
+const isCombatItem = it => it.dur === 'combat' || isHealItem(it) || ['def_malus_round', 'stray_dog'].includes(it.eff);
 const deckAttacking = () => !!currentDuelInfo && currentDuelInfo.role === 'attacker';
 // Ce que la carte rapporte, et pourquoi elle est injouable
 function deckGain(it) {
-  const lascars = localPlayer.musclesOnPerson.reduce((s, m) => s + (m.bonusVal || 1), 0);
-  const w = localPlayer.equipped.weapon;
-  if (it.eff === 'double_muscles_atk') return musclesDoubled() ? 'Déjà actif' : `+${lascars} ${deckAttacking() ? 'ATK' : 'DÉF'}`;
-  if (it.eff === 'double_weapon_atk') return `+${w && !myWeaponNullified ? w.bonusVal : 0} ATK`;
-  if (it.eff === 'bonus_combat_atk') return `+${it.val || 1} ATK`;
+  if (deckBlocked(it)) return '';
+  // Gain réel calculé comme la stat (bonus de la radio, arme neutralisée...)
+  if (['double_muscles_atk', 'double_weapon_atk', 'bonus_combat_atk', 'stray_dog'].includes(it.eff)) {
+    const now = deckAttacking() ? getTotalAtk() : getTotalDef();
+    return `+${deckPreview([it]) - now} ${deckAttacking() ? 'ATK' : 'DÉF'}`;
+  }
   if (it.eff === 'null_enemy_weapon') return 'Arme 0';
   if (it.eff === 'def_malus_round') return '−1 DÉF';
-  if (it.eff === 'heal') return `+${it.val || 1} ❤️`;
-  if (it.eff === 'stray_dog') return `+2 ${deckAttacking() ? 'ATK' : 'DÉF'}`;
+  if (isHealItem(it)) return `+${it.val || 1} ❤️`;
   return '';
 }
 function deckBlocked(it) {
   if (!isCombatItem(it)) return 'Pas en combat';
-  if (it.eff === 'heal' && localPlayer.hearts >= 3) return 'Cœurs au max';
+  if (isHealItem(it) && localPlayer.hearts >= 3) return 'Cœurs au max';
   if (it.eff === 'stray_dog' && localPlayer.strayDogActive) return 'Chien déjà avec toi';
+  if (it.eff === 'double_muscles_atk' && musclesDoubled()) return 'Déjà actif';
   if (it.eff === 'double_weapon_atk' && !isFirearm(localPlayer.equipped.weapon)) return 'Arme à feu requise';
   if (['double_weapon_atk', 'bonus_combat_atk'].includes(it.eff) && !deckAttacking()) return 'Sert quand tu attaques';
   return '';
@@ -154,10 +157,10 @@ const DECK_DESC = {
   stray_dog: 'Le Chien Errant te rejoint : +2 Attaque / +2 Défense.'
 };
 
-// Ma stat si je joue les cartes choisies (sans rien modifier)
-function deckPreview() {
+// Ma stat si je joue ces cartes (par défaut celles choisies), sans rien modifier
+function deckPreview(items = deckItems.filter(it => deckPicked.has(it.id))) {
   const saved = Object.assign({}, combatModifiers), dog = localPlayer.strayDogActive;
-  deckItems.filter(it => deckPicked.has(it.id)).forEach(it => {
+  items.forEach(it => {
     if (it.eff === 'bonus_combat_atk') combatModifiers.flatAtkBonus += (it.val || 1);
     else if (it.eff === 'double_muscles_atk') combatModifiers.doubleMuscles = true;
     else if (it.eff === 'double_weapon_atk') combatModifiers.doubleWeapon = true;
@@ -267,7 +270,7 @@ function confirmCombatItems() {
     else if (it.eff === 'double_muscles_atk') localPlayer.proteinRound = currentSession.round || 1;
     else if (it.eff === 'double_weapon_atk') combatModifiers.doubleWeapon = true;
     else if (it.eff === 'null_enemy_weapon') combatModifiers.nullEnemyWeapon = true;
-    else if (it.eff === 'heal') localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
+    else if (isHealItem(it)) localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
     else if (it.eff === 'stray_dog') {
       localPlayer.strayDogActive = true;
       if (socket) socket.emit('claim_stray_dog', { senderCaid: getMyCaid().name, playerToken: myPlayerToken });
