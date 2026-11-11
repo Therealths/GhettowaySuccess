@@ -462,6 +462,7 @@ function showPatrolScreen() {
   let baseRoll, finalMove, left, rigged = false;
   const talkieFx = document.getElementById('patrolTalkie');
   talkieFx.classList.add('hidden');
+  scr.classList.remove('talkie', 'tk-bubble', 'tk-card');
 
   document.getElementById('patrolRound').innerText = currentSession.round || 1;
   document.getElementById('patrolHeadline').innerHTML = 'LA PATROUILLE<br>TOURNE…';
@@ -481,8 +482,6 @@ function showPatrolScreen() {
   const land = () => {
     cta.disabled = false;
     scr.classList.add('result');
-    talkieFx.classList.toggle('hidden', !rigged); // bulle « message au talkie » + carte tamponnée
-    scr.classList.toggle('talkie', rigged); // choc à l'arrivée du tampon (secousse + flash)
     if (greve) {
       scr.dataset.state = 'greve';
       setPatrolDie(0);
@@ -506,13 +505,25 @@ function showPatrolScreen() {
     baseRoll = rig ? rig.roll : Math.floor(Math.random() * 6) + 1;
     finalMove = baseRoll + radioExtra;
     left = rig ? !!rig.left : Math.random() < 0.5;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return land();
+    // Talkie-walkie : pendant que le dé roule, la bulle « message au talkie » arrive, puis la carte tamponnée (choc) ;
+    // le dé ne tombe qu'après, sur le résultat commandé
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    talkieFx.classList.toggle('hidden', !rigged);
+    scr.classList.toggle('talkie', rigged);
+    if (rigged) {
+      setTimeout(() => scr.classList.add('tk-bubble'), reduce ? 0 : 1000);
+      setTimeout(() => scr.classList.add('tk-card'), reduce ? 0 : 2300);
+    }
+    if (reduce) return land();
+    const t0 = Date.now(), hold = rigged ? 3700 : 0;
     let k = 0;
     const tick = () => {
-      if (k >= 10) return land();
+      const t = Date.now() - t0;
+      if (k >= 10 && t >= hold) return land();
       setPatrolDie(1 + Math.floor(Math.random() * 6));
       k++;
-      setTimeout(tick, 70 + k * 12);
+      // Le dé roule vite tant qu'on attend le talkie, puis ralentit avant de tomber
+      setTimeout(tick, t < hold - 700 ? 90 : 70 + Math.min(k, 10) * 12);
     };
     setTimeout(tick, 300);
   };

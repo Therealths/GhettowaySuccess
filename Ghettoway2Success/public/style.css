@@ -372,16 +372,18 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .patrol-tk-card { position: absolute; right: 16px; top: 4%; width: 76px; transform: rotate(8deg); }
 .patrol-tk-card img { display: block; width: 100%; border-radius: 7px; box-shadow: 0 8px 20px rgba(0,0,0,0.7); }
 .patrol-tk-card b { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%) rotate(-18deg); padding: 1px 6px; border: 3px solid #ef4444; border-radius: 6px; font-family: 'Anton', sans-serif; font-size: 17px; letter-spacing: 0.06em; color: #ef4444; background: rgba(255,255,255,0.85); }
-.patrol-screen.result .patrol-bubble { animation: allyPop 0.4s cubic-bezier(.2,1.6,.4,1) 0.2s both; }
-.patrol-screen.result .patrol-tk-card { animation: patrolTkStamp 0.45s cubic-bezier(.2,1.6,.4,1) 0.45s both; }
+.patrol-talkie .patrol-bubble, .patrol-talkie .patrol-tk-card { opacity: 0; }
+.patrol-screen.tk-bubble .patrol-bubble { animation: allyPop 0.4s cubic-bezier(.2,1.6,.4,1) both; }
+.patrol-screen.tk-card .patrol-tk-card { animation: patrolTkStamp 0.45s cubic-bezier(.2,1.6,.4,1) both; }
+@media (prefers-reduced-motion: reduce) { .patrol-screen.tk-bubble .patrol-bubble, .patrol-screen.tk-card .patrol-tk-card { opacity: 1; } }
 /* Choc du tampon : éclat BD derrière la carte, flash blanc, l'écran tremble */
 .patrol-tk-burst { position: absolute; left: 50%; top: 50%; width: 190px; height: 190px; margin: -95px 0 0 -95px; z-index: -1; opacity: 0;
   background: repeating-conic-gradient(#fde047 0 9deg, transparent 9deg 22deg);
   -webkit-mask: radial-gradient(circle, transparent 22%, #000 24%, #000 52%, transparent 70%); mask: radial-gradient(circle, transparent 22%, #000 24%, #000 52%, transparent 70%); }
 .patrol-tk-flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
-.patrol-screen.result.talkie .patrol-tk-burst { animation: patrolTkBurst 0.7s ease-out 0.8s both; }
-.patrol-screen.result.talkie .patrol-tk-flash { animation: patrolTkFlash 0.35s ease-out 0.8s both; }
-.patrol-screen.result.talkie .police-content { animation: patrolTkShake 0.45s ease-in-out 0.8s; }
+.patrol-screen.tk-card .patrol-tk-burst { animation: patrolTkBurst 0.7s ease-out 0.3s both; }
+.patrol-screen.tk-card .patrol-tk-flash { animation: patrolTkFlash 0.35s ease-out 0.3s both; }
+.patrol-screen.tk-card .police-content { animation: patrolTkShake 0.45s ease-in-out 0.3s; }
 @keyframes patrolTkBurst { 0% { opacity: 0; transform: scale(0.3) rotate(0deg); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5) rotate(25deg); } }
 @keyframes patrolTkFlash { 0% { opacity: 0.55; } 100% { opacity: 0; } }
 @keyframes patrolTkShake { 0%, 100% { transform: none; } 15% { transform: translate(-7px, 3px) rotate(-0.6deg); } 30% { transform: translate(6px, -4px) rotate(0.5deg); } 45% { transform: translate(-5px, 2px); } 60% { transform: translate(4px, -2px); } 80% { transform: translate(-2px, 1px); } }
@@ -895,7 +897,13 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .find-screen[data-state="carte"] .find-card { animation: findReveal 0.6s cubic-bezier(.2,1.5,.4,1) both; }
 .find-screen[data-state="carte"] .find-rays { animation: findRays 12s linear infinite, allyFade 0.6s ease-out both; opacity: 1; }
 .find-screen[data-state="carte"] .find-bottom { animation: allyUp 0.45s ease-out 0.35s both; opacity: 1; pointer-events: auto; }
-@keyframes findShake { 0%, 100% { transform: scale(1.03); } 20% { transform: scale(1.03) translate(-8px, 3px) rotate(-1.1deg); } 45% { transform: scale(1.03) translate(6px, -3px) rotate(0.9deg); } 70% { transform: scale(1.03) translate(-5px, -2px) rotate(-0.6deg); } 85% { transform: scale(1.03) translate(4px, 2px) rotate(0.5deg); } }
+/* Particules de la fouille : détritus qui volent hors de la poubelle, poussière */
+.find-debris { position: absolute; z-index: 4; left: 42%; top: 55%; width: 0; height: 0; pointer-events: none; }
+.find-debris i { position: absolute; left: -15px; top: -15px; font-size: 30px; font-style: normal; line-height: 1; opacity: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
+.find-debris i.dust { width: 12px; height: 12px; left: -6px; top: -6px; border-radius: 99px; background: rgba(214,180,120,0.75); filter: blur(1.5px); }
+.find-screen.show[data-state="fouille"] .find-debris i { animation-name: findJunk; animation-timing-function: cubic-bezier(.2,.75,.45,1); animation-iteration-count: infinite; }
+@keyframes findJunk { 0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.5); } 12% { opacity: 1; } 55% { transform: translate(calc(var(--dx) * 0.7), calc(var(--up) * -1)) rotate(calc(var(--rot) * 0.6)) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), calc(var(--up) * -0.35)) rotate(var(--rot)) scale(0.9); } }
+@keyframes findShake { 0%, 100% { transform: scale(1.02); } 20% { transform: scale(1.02) translate(-5px, 2px) rotate(-0.7deg); } 45% { transform: scale(1.02) translate(4px, -2px) rotate(0.6deg); } 70% { transform: scale(1.02) translate(-3px, -1px) rotate(-0.4deg); } 85% { transform: scale(1.02) translate(3px, 1px) rotate(0.3deg); } }
 @keyframes findReveal { 0% { opacity: 0; transform: translateX(-50%) translateY(120px) rotate(8deg) scale(0.6); } 100% { opacity: 1; transform: translateX(-50%) rotate(-3deg); } }
 @keyframes findRays { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 /* Lunettes de soleil : 2 cartes côte à côte */

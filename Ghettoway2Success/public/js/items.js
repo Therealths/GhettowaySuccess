@@ -96,7 +96,17 @@ function pickFouilleChoice(i) {
   findInstant = true; // déjà fouillée : la carte choisie s'affiche tout de suite
   claimFouille(it);
 }
-// La fouille dure le temps de charger la carte (et au moins 1 s)
+// Particules : détritus qui jaillissent de la poubelle pendant la fouille
+const FIND_JUNK = ['📄', '🥫', '🍌', '🦴', '🧦', '📰', '🍕', '🥡', '🧻', '🍾'];
+const rnd = (a, b) => a + Math.random() * (b - a);
+function spawnFindParticles() {
+  document.getElementById('findDebris').innerHTML = Array.from({ length: 32 }, (_, i) => {
+    const dust = i % 3 === 0;
+    const style = `--dx:${rnd(-170, 170) | 0}px;--up:${rnd(140, 360) | 0}px;--rot:${rnd(-540, 540) | 0}deg;animation-delay:${rnd(0, 1).toFixed(2)}s;animation-duration:${rnd(0.8, 1.3).toFixed(2)}s`;
+    return dust ? `<i class="dust" style="${style}"></i>` : `<i style="${style}">${FIND_JUNK[Math.floor(Math.random() * FIND_JUNK.length)]}</i>`;
+  }).join('');
+}
+// La fouille dure le temps de charger la carte (et au moins 2 s)
 let findInstant = false;
 function revealFindScreen() {
   const scr = document.getElementById('modalLootDiscovery');
@@ -108,13 +118,14 @@ function revealFindScreen() {
     scr.dataset.state = 'carte';
     return;
   }
+  spawnFindParticles();
   scr.dataset.state = 'fouille';
   scr.classList.remove('hidden', 'show');
   void scr.offsetWidth;
   scr.classList.add('show');
   clearTimeout(findTimer);
   const t0 = Date.now();
-  const reveal = () => { findTimer = setTimeout(() => { if (!scr.classList.contains('hidden')) scr.dataset.state = 'carte'; }, Math.max(0, 1100 - (Date.now() - t0))); };
+  const reveal = () => { findTimer = setTimeout(() => { if (!scr.classList.contains('hidden')) scr.dataset.state = 'carte'; }, Math.max(0, 2000 - (Date.now() - t0))); };
   const img = scr.querySelector('.find-img');
   if (img && !img.complete) { img.onload = reveal; img.onerror = reveal; } else reveal();
 }
