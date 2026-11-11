@@ -473,13 +473,13 @@ if (socket) {
       if (currentDuelInfo) { fightLog(`🥫 <b>${escapeHtml(senderCaid)}</b> t'a lancé une vieille canette : −1 Défense jusqu'à la fin de la manche !`); updateArenaLiveStats(); }
     }
     else if (effectType === 'crowbar') {
-      // Pied de biche : le voleur a choisi argent et/ou drogue, on prend ce qu'il y a dans mon coffre
-      const cash = Math.min((loot && loot.cash) || 0, localPlayer.safeCash || 0);
-      const kg = Math.min((loot && loot.kg) || 0, localPlayer.safeDrugs || 0);
-      localPlayer.safeCash -= cash;
-      localPlayer.safeDrugs -= kg;
-      stolen = { cash, kg };
-      socket.emit('crowbar_loot_transferred', { targetSocketId: senderSocketId, targetToken: senderToken, cash, kg });
+      // Pied de biche : le serveur a déjà pris le butin dans mon coffre
+      // (hors ligne, l'état rendu à la reconnexion en tient déjà compte : on ne retire rien une 2e fois)
+      stolen = { cash: (loot && loot.cash) || 0, kg: (loot && loot.kg) || 0 };
+      if (!late) {
+        localPlayer.safeCash = Math.max(0, localPlayer.safeCash - stolen.cash);
+        localPlayer.safeDrugs = Math.max(0, localPlayer.safeDrugs - stolen.kg);
+      }
     }
     else if (effectType === 'steal_item' && localPlayer.inventory.length > 0) {
       stolen = localPlayer.inventory.pop();
@@ -491,11 +491,16 @@ if (socket) {
     if (effectType === 'siphon') await checkHospitalStatus(`Siphon Vital de ${senderCaid}`);
     refreshHud();
   });
-  socket.on('gain_crowbar_loot', async ({ cash, kg }) => {
+  socket.on('crowbar_opened', safe => {
+    if (!showCrowbarSafe(safe)) socket.emit('crowbar_take', { kg: 0 }); // écran fermé entre-temps : on prend l'argent
+  });
+  socket.on('gain_crowbar_loot', async ({ cash, kg, targetCaid }) => {
     localPlayer.pocketCash += cash || 0;
     localPlayer.drugs += kg || 0;
     refreshHud();
-    await showAppAlert(cash || kg ? `${crowbarLabel({ cash, kg })} pris dans son coffre, direct sur toi !` : "Son coffre était vide… Rien à prendre.", "🛠️ Pied de biche");
+    // Résultat affiché sur l'écran du Pied de biche s'il est ouvert, sinon en message
+    if (showCrowbarResult({ cash, kg })) return;
+    await showAppAlert(cash || kg ? `${crowbarLabel({ cash, kg })} pris dans le coffre de ${targetCaid}, direct sur toi !` : `Le coffre de ${targetCaid} était vide… Rien à prendre.`, "🛠️ Pied de biche");
   });
   socket.on('gain_stolen_item', async ({ item }) => {
     localPlayer.inventory.push(item);

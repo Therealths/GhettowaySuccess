@@ -725,11 +725,13 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .pow-chip { color: #111; background: var(--ac); }
 .pow-screen[data-state="touche"] .pow-chip { color: #fff; background: #e11d48; }
 .pow-head { padding: 0 16px; margin-top: max(40px, calc(30cqh - 96px)); }
-.pow-loot { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
-.pow-loot b { display: block; font-size: 20px; font-weight: 900; color: #fff; }
-.pow-loot small { display: block; font-size: 10px; font-weight: 700; color: #94a3b8; }
-.pow-loot button { width: 44px; height: 44px; border-radius: 12px; font-size: 20px; color: var(--ac); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
-.pow-loot button:disabled { opacity: 0.3; }
+.pow-safe { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.pow-safe img { max-height: 190px; max-width: 70%; object-fit: contain; filter: drop-shadow(0 0 30px rgba(251,191,36,0.45)) drop-shadow(0 18px 24px rgba(0,0,0,0.7)); animation: powSafeOpen 0.6s cubic-bezier(.2,1.5,.4,1) both; }
+.pow-safe span { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ac); }
+@keyframes powSafeOpen { 0% { opacity: 0; transform: scale(0.5) rotate(-6deg); } 60% { opacity: 1; transform: scale(1.08) rotate(2deg); } 100% { transform: none; } }
+.pow-slide { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 900; text-transform: uppercase; color: #cbd5e1; }
+.pow-slide span { flex: none; display: flex; align-items: center; gap: 4px; }
+.pow-slide input { flex: 1; min-width: 0; height: 32px; accent-color: var(--ac); }
 .pow-kicker, .pow-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ac); }
 .pow-title { font-size: 40px; line-height: 0.95; text-transform: uppercase; text-shadow: 0 4px 18px #000; }
 .pow-desc { margin-top: 4px; font-size: 13px; font-weight: 700; color: #e2e8f0; text-shadow: 0 2px 8px #000; }

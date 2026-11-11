@@ -1575,7 +1575,7 @@ io.on('connection', (socket) => {
   // =========================================================================
   // CAPACITÉS SPÉCIALES & ALLIANCES (AVEC IMMUNITÉ 2 TOURS)
   // =========================================================================
-  socket.on('apply_special_to_target', ({ targetPlayerToken, targetSocketId, effectType, senderCaid, loot }) => {
+  socket.on('apply_special_to_target', ({ targetPlayerToken, targetSocketId, effectType, senderCaid }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
 
@@ -1596,18 +1596,46 @@ io.on('connection', (socket) => {
     }
     // Siphon : le cœur est retiré ici, aussi quand la cible est hors ligne (son téléphone le retrouve à la reconnexion)
     if (effectType === 'siphon') targetP.hearts = Math.max(0, (typeof targetP.hearts === 'number' ? targetP.hearts : 1) - 1);
+    // Pied de biche : le coffre est forcé, le voleur voit ce qu'il contient (coffre connu du serveur, même victime hors ligne)
+    // et choisit ensuite ce qu'il prend (crowbar_take) ; la victime n'est prévenue qu'à ce moment-là
+    if (effectType === 'crowbar') {
+      room.pendingCrowbar = { thiefToken: sender.playerToken, targetToken: targetP.playerToken, senderCaid };
+      return socket.emit('crowbar_opened', { targetCaid: targetP.caidName || 'Ce Caïd', cash: Math.max(0, targetP.safeCash || 0), kg: Math.max(0, targetP.safeDrugs || 0) });
+    }
 
+    sendToPlayer(targetP, 'received_special_effect', specialPayload(room, effectType, senderCaid, socket, sender));
+  });
+
+  function specialPayload(room, effectType, senderCaid, socket, sender, loot) {
     const activeNow = getActivePlayer(room);
-    sendToPlayer(targetP, 'received_special_effect', {
+    return {
       effectType,
       round: room.round,
       turnToken: activeNow ? activeNow.playerToken : null,
       senderCaid,
       senderSocketId: socket.id,
       senderToken: sender.playerToken,
-      // Pied de biche : 5 parts au total (1 000 € ou 1 kg chacune)
-      loot: effectType === 'crowbar' ? crowbarLootOf(loot) : undefined
-    });
+      loot
+    };
+  }
+
+  // Pied de biche : le voleur a choisi sa part (kg de drogue, le reste en argent, 5 parts au plus)
+  socket.on('crowbar_take', ({ kg } = {}) => {
+    const room = rooms[socket.roomId];
+    const pc = room && room.pendingCrowbar;
+    const sender = room && room.players.find(p => p.socketId === socket.id);
+    if (!pc || !sender || sender.playerToken !== pc.thiefToken) return;
+    room.pendingCrowbar = null;
+    const targetP = room.players.find(p => p.playerToken === pc.targetToken);
+    if (!targetP) return;
+    const want = crowbarLootOf({ kg, cash: 5000 });
+    const taken = { kg: Math.min(want.kg, Math.max(0, targetP.safeDrugs || 0)) };
+    taken.cash = Math.min((5 - taken.kg) * 1000, Math.max(0, targetP.safeCash || 0));
+    targetP.safeCash = (targetP.safeCash || 0) - taken.cash;
+    targetP.safeDrugs = (targetP.safeDrugs || 0) - taken.kg;
+    socket.emit('gain_crowbar_loot', Object.assign({ targetCaid: targetP.caidName || 'Ce Caïd' }, taken));
+    sendToPlayer(targetP, 'received_special_effect', specialPayload(room, 'crowbar', pc.senderCaid, socket, sender, taken));
+    saveRooms();
   });
 
   // Talkie-walkie de flic : dé et direction choisis à l'avance, pris par le prochain lancer de patrouille
@@ -1621,15 +1649,6 @@ io.on('connection', (socket) => {
     const rig = room && room.patrolRig || null;
     if (room) room.patrolRig = null;
     if (typeof ack === 'function') ack(rig);
-  });
-
-  // Pied de biche : la victime renvoie au voleur ce qu'elle a perdu dans son coffre
-  socket.on('crowbar_loot_transferred', ({ targetSocketId, targetToken, cash, kg }) => {
-    const room = rooms[socket.roomId];
-    const thief = room && targetToken ? room.players.find(p => p.playerToken === targetToken) : null;
-    const loot = crowbarLootOf({ cash, kg });
-    if (thief) sendToPlayer(thief, 'gain_crowbar_loot', loot);
-    else io.to(targetSocketId).emit('gain_crowbar_loot', loot);
   });
 
   socket.on('stolen_item_transferred', ({ targetSocketId, targetToken, item }) => {

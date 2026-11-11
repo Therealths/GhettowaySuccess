@@ -9,7 +9,7 @@ let powTargetToken = null;
 let powItem = null;
 const POW_ITEMS = {
   def_malus_round: { id: 'canette', skillName: 'Vieille canette', skillDesc: '−1 Défense à un rival jusqu’à la fin de la manche.', hex: '#f87171' },
-  crowbar: { id: 'crowbar', skillName: 'Pied de biche', skillDesc: 'Force le coffre du QG d’un rival : jusqu’à 5 000 €, 5 kg, ou un partage des deux.', hex: '#fbbf24' }
+  crowbar: { id: 'crowbar', skillName: 'Pied de biche', skillDesc: 'Force le coffre du QG d’un rival, regarde dedans et prends jusqu’à 5 000 €, 5 kg, ou un partage des deux.', hex: '#fbbf24' }
 };
 function powCaid() {
   const me = getMyCaid();
@@ -17,12 +17,11 @@ function powCaid() {
   return Object.assign({ name: 'Objet du sac', bannerFile: itemArt(powItem, true) || 'wallpaper-clean.jpg', imageFile: me.imageFile }, POW_ITEMS[powItem.eff] || POW_ITEMS.def_malus_round);
 }
 let powResolve = null;
-// Pied de biche : 5 parts à prendre dans le coffre, chaque part = 1 000 € ou 1 kg
-let powLootKg = 0;
+// Pied de biche : 5 parts à prendre dans le coffre forcé, chaque part = 1 000 € ou 1 kg (selon ce qu'il contient)
 const CROWBAR_PARTS = 5;
-const crowbarLoot = () => ({ cash: (CROWBAR_PARTS - powLootKg) * 1000, kg: powLootKg });
-const crowbarLabel = l => [l.cash ? `${l.cash.toLocaleString()} €` : '', l.kg ? `${l.kg} kg` : ''].filter(Boolean).join(' + ');
-function stepCrowbarLoot(d) { powLootKg = Math.max(0, Math.min(CROWBAR_PARTS, powLootKg + d)); powChoice(); }
+let crowbarSafe = null; // contenu du coffre forcé : { cash, kg, targetCaid }
+const crowbarLabel = l => [l.cash ? `${l.cash.toLocaleString()} €` : '', l.kg ? `${l.kg} kg` : ''].filter(Boolean).join(' + ') || 'rien';
+const crowbarPick = kg => ({ kg, cash: Math.min((CROWBAR_PARTS - kg) * 1000, crowbarSafe.cash) });
 
 function powState() {
   const scr = document.getElementById('powerScreen');
@@ -104,13 +103,7 @@ function powChoice() {
     const on = r.playerToken === powTargetToken;
     return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickPowerTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)} • Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'} • Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
   };
-  const loot = caid.id === 'crowbar' ? crowbarLoot() : null;
-  const lootBox = loot ? `<div class="pow-label">Ce que tu prends dans son coffre</div>
-    <div class="pow-loot mt-2"><button type="button" onclick="stepCrowbarLoot(-1)" ${powLootKg ? '' : 'disabled'} aria-label="Plus d'argent"><i class="ph-bold ph-coins"></i></button>
-      <div class="flex-1 text-center"><b>${crowbarLabel(loot)}</b><small>au maximum, selon ce qu’il y a dedans</small></div>
-      <button type="button" onclick="stepCrowbarLoot(1)" ${powLootKg < CROWBAR_PARTS ? '' : 'disabled'} aria-label="Plus de drogue"><i class="ph-bold ph-plant"></i></button></div>
-    <div class="mt-3"></div>` : '';
-  const bottom = `${lootBox}<div class="pow-label">Choisis ta cible</div>
+  const bottom = `<div class="pow-label">Choisis ta cible</div>
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible possible cette manche</div>' : ''}
     <div class="flex flex-col gap-2 mt-2">${rivals.map(pick).join('')}</div>
@@ -174,7 +167,7 @@ function launchSelfPower() {
 // LANCEMENT ciblé : envoi au serveur, animation de l'effet vers la cible, puis le résultat
 function openItemTargetPower(item) {
   powItem = item;
-  powLootKg = 0;
+  crowbarSafe = null;
   powTargetToken = null;
   syncMultiplayerTargets();
   return powChoice();
@@ -193,8 +186,7 @@ async function launchTargetedPower() {
       targetSocketId: target.socketId,
       targetPlayerToken: target.playerToken,
       effectType: effect,
-      senderCaid: getMyCaid().name,
-      loot: effect === 'crowbar' ? crowbarLoot() : undefined
+      senderCaid: getMyCaid().name
     });
   }
   // Siphon déjà à 3 Cœurs : la cible perd son cœur, mais le lanceur ne gagne rien
@@ -210,11 +202,56 @@ async function launchTargetedPower() {
   refreshHud();
   const name = allyRivalName(target);
   const stage = powDuo(powAv(caid.imageFile, 'Toi', 'me'), powAv(allyCaidImg(target.caidId, name), name, 'hit'), powFx(effect), `fx-${effect}`);
-  const [icon, label, after] = effect === 'siphon' && !siphonGain ? ['ph-heart-break', 'Cœur détruit', 'déjà au max'] : effect === 'crowbar' ? ['ph-vault', 'Tu vises', crowbarLabel(crowbarLoot())] : POW_OUT[effect];
-  const bottom = `<div class="pow-result">${powRow(icon, `${label}`, `<span class="pow-ac">${after}</span>`)}
-    <div class="text-center text-[11px] font-bold text-slate-400 mt-2">${effect === 'crowbar' ? `Dans le coffre du QG de ${escapeHtml(name)}.` : effect === 'canette' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'shuriken' || effect === 'danse' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'swap_pos' ? `Échange ton pion avec celui de ${escapeHtml(name)}.` : `Sur ${escapeHtml(name)}.`}</div>
+  const [icon, label, after] = effect === 'siphon' && !siphonGain ? ['ph-heart-break', 'Cœur détruit', 'déjà au max'] : effect === 'crowbar' ? ['ph-vault', 'Butin', 'forçage…'] : POW_OUT[effect];
+  const bottom = `<div class="pow-result">${powRow(icon, `<span id="powOutLabel">${label}</span>`, `<span id="powOutAfter" class="pow-ac">${after}</span>`)}
+    <div id="powOutNote" class="text-center text-[11px] font-bold text-slate-400 mt-2">${effect === 'crowbar' ? `Tu forces le coffre du QG de ${escapeHtml(name)}…` : effect === 'canette' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'shuriken' || effect === 'danse' ? `Pour ${escapeHtml(name)}, jusqu’à la fin de la manche.` : effect === 'swap_pos' ? `Échange ton pion avec celui de ${escapeHtml(name)}.` : `Sur ${escapeHtml(name)}.`}</div>
     <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">Continuer</button></div>`;
   powRender('fx', caid, fromBag ? powChipHtml('ph-backpack', effect === 'canette' ? 'Objet lancé' : 'Objet utilisé') : powChipHtml('ph-lightning', 'Capacité lancée'), powHeadHtml(caid.name, caid.skillName, ''), stage, bottom);
+}
+
+// Pied de biche, coffre forcé : on voit ce qu'il contient et on choisit sa part avec le curseur (argent ⇄ drogue)
+function showCrowbarSafe(safe) {
+  crowbarSafe = safe;
+  const box = document.getElementById('powOutNote');
+  if (!box || powState() !== 'fx') return false;
+  const maxKg = Math.min(CROWBAR_PARTS, safe.kg);
+  // Le coffre-fort du QG s'ouvre à la place des deux Caïds
+  document.getElementById('powStage').innerHTML = `<div class="pow-safe"><img src="qg-coffre.webp" alt="Coffre-fort du QG"><span>QG de ${escapeHtml(safe.targetCaid)}</span></div>`;
+  document.getElementById('powOutLabel').innerText = 'Dans son coffre';
+  document.getElementById('powOutAfter').innerText = crowbarLabel(safe);
+  const cta = document.querySelector('#powBottom .pow-cta');
+  if (!safe.cash && !safe.kg) { // coffre vide : rien à choisir
+    box.innerText = 'Le coffre est vide…';
+    socket.emit('crowbar_take', { kg: 0 });
+    return true;
+  }
+  if (cta) cta.classList.add('hidden');
+  box.outerHTML = `<div id="powOutNote" class="mt-3">
+    <div class="pow-label">Ce que tu prends (5 parts au plus)</div>
+    <div class="pow-slide mt-2"><span><i class="ph-bold ph-coins"></i> Argent</span><input id="crowbarRange" type="range" min="0" max="${maxKg}" step="1" value="0" ${maxKg ? '' : 'disabled'} oninput="updateCrowbarPick()"><span>Drogue <i class="ph-bold ph-plant"></i></span></div>
+    <div id="crowbarPick" class="text-center font-black text-2xl text-white mt-2"></div>
+    <button type="button" class="ally-cta pow-cta mt-3" onclick="takeCrowbarLoot(this)">Prendre</button></div>`;
+  updateCrowbarPick();
+  return true;
+}
+function updateCrowbarPick() {
+  document.getElementById('crowbarPick').innerText = crowbarLabel(crowbarPick(+document.getElementById('crowbarRange').value));
+}
+function takeCrowbarLoot(btn) {
+  btn.disabled = true;
+  socket.emit('crowbar_take', { kg: +document.getElementById('crowbarRange').value });
+}
+// Pied de biche : le serveur renvoie ce qui a vraiment été volé ; affiché sur l'écran du lancement s'il est encore ouvert
+function showCrowbarResult(l) {
+  const after = document.getElementById('powOutAfter');
+  if (!after || powState() !== 'fx') return false;
+  const ok = l.cash || l.kg;
+  document.getElementById('powOutLabel').innerText = ok ? 'Coffre forcé !' : 'Coffre vide';
+  after.innerText = ok ? `+${crowbarLabel(l)}` : 'raté';
+  document.getElementById('powOutNote').outerHTML = `<div id="powOutNote" class="text-center text-[11px] font-bold text-slate-400 mt-2">${ok ? 'C’est sur toi maintenant (dans tes poches).' : 'Il n’y avait rien à prendre.'}</div>`;
+  const cta = document.querySelector('#powBottom .pow-cta.hidden');
+  if (cta) cta.classList.remove('hidden');
+  return true;
 }
 
 // VICTIME : « Touché ! » avec l'effet subi ; se résout quand le joueur encaisse
