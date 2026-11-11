@@ -1603,7 +1603,17 @@ io.on('connection', (socket) => {
       return socket.emit('crowbar_opened', { targetCaid: targetP.caidName || 'Ce Caïd', cash: Math.max(0, targetP.safeCash || 0), kg: Math.max(0, targetP.safeDrugs || 0) });
     }
 
-    sendToPlayer(targetP, 'received_special_effect', specialPayload(room, effectType, senderCaid, socket, sender));
+    // Faire les poches (Jamel) : l'objet est pris ici, dans le Sac connu du serveur (même victime hors ligne),
+    // et le voleur sait tout de suite s'il a eu quelque chose
+    let stolen;
+    if (effectType === 'steal_item') {
+      const inv = Array.isArray(targetP.inventory) ? targetP.inventory : [];
+      stolen = inv.length ? inv.pop() : null;
+      socket.emit('steal_result', { item: stolen, targetCaid: targetP.caidName || 'Ce Caïd' });
+      saveRooms();
+    }
+
+    sendToPlayer(targetP, 'received_special_effect', specialPayload(room, effectType, senderCaid, socket, sender, stolen === undefined ? undefined : { item: stolen }));
   });
 
   function specialPayload(room, effectType, senderCaid, socket, sender, loot) {
@@ -1649,13 +1659,6 @@ io.on('connection', (socket) => {
     const rig = room && room.patrolRig || null;
     if (room) room.patrolRig = null;
     if (typeof ack === 'function') ack(rig);
-  });
-
-  socket.on('stolen_item_transferred', ({ targetSocketId, targetToken, item }) => {
-    const room = rooms[socket.roomId];
-    const thief = room && targetToken ? room.players.find(p => p.playerToken === targetToken) : null;
-    if (thief) sendToPlayer(thief, 'gain_stolen_item', { item });
-    else io.to(targetSocketId).emit('gain_stolen_item', { item });
   });
 
   // Le joueur actif invite 1 à 3 Caïds ; chacun répond de son côté

@@ -79,7 +79,7 @@ const POW_OUT = {
   shuriken: ['ph-shield', 'Sa défense cette manche', '−3'],
   danse: ['ph-sword', 'Son attaque cette manche', '−3'],
   siphon: ['ph-heart', 'Cœur volé', '+1 ❤️'],
-  steal_item: ['ph-backpack', 'Objet dérobé', 'si son sac n’est pas vide'],
+  steal_item: ['ph-backpack', 'Tu fouilles son Sac', '…'],
   swap_pos: ['ph-arrows-left-right', 'Échangez vos pions', 'sur le plateau'],
   canette: ['ph-shield', 'Sa défense', '−1'],
   crowbar: ['ph-vault', 'Son coffre forcé', 'en cours…']
@@ -242,6 +242,15 @@ function takeCrowbarLoot(btn) {
   socket.emit('crowbar_take', { kg: +document.getElementById('crowbarRange').value });
 }
 // Pied de biche : le serveur renvoie ce qui a vraiment été volé ; affiché sur l'écran du lancement s'il est encore ouvert
+// Faire les poches : son Sac était vide
+function showStealMissed(targetCaid) {
+  const after = document.getElementById('powOutAfter');
+  if (!after || powState() !== 'fx') return false;
+  document.getElementById('powOutLabel').innerText = 'Son Sac était vide';
+  after.innerText = 'RATÉ';
+  document.getElementById('powOutNote').innerText = `Rien à prendre chez ${targetCaid}.`;
+  return true;
+}
 function showCrowbarResult(l) {
   const after = document.getElementById('powOutAfter');
   if (!after || powState() !== 'fx') return false;

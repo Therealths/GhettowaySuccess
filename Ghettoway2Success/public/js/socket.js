@@ -482,9 +482,11 @@ if (socket) {
         localPlayer.safeDrugs = Math.max(0, localPlayer.safeDrugs - stolen.kg);
       }
     }
-    else if (effectType === 'steal_item' && localPlayer.inventory.length > 0) {
-      stolen = localPlayer.inventory.pop();
-      socket.emit('stolen_item_transferred', { targetSocketId: senderSocketId, targetToken: senderToken, item: stolen });
+    else if (effectType === 'steal_item') {
+      // Le serveur a déjà pris l'objet dans mon Sac (hors ligne, l'état rendu à la reconnexion en tient compte)
+      stolen = (loot && loot.item) || null;
+      const i = stolen && !late ? localPlayer.inventory.findIndex(it => it && it.id === stolen.id) : -1;
+      if (i >= 0) localPlayer.inventory.splice(i, 1);
     }
     refreshHud();
     await msgIdle(); // « Touché ! » après les messages déjà ouverts
@@ -503,10 +505,17 @@ if (socket) {
     if (showCrowbarResult({ cash, kg })) return;
     await showAppAlert(cash || kg ? `${crowbarLabel({ cash, kg })} pris dans le coffre de ${targetCaid}, direct sur toi !` : `Le coffre de ${targetCaid} était vide… Rien à prendre.`, "🛠️ Pied de biche");
   });
-  socket.on('gain_stolen_item', async ({ item }) => {
+  // Faire les poches : « raté » sur l'écran du pouvoir si son Sac était vide, sinon la carte dérobée en grand
+  socket.on('steal_result', async ({ item, targetCaid }) => {
+    if (!item) {
+      if (showStealMissed(targetCaid)) return;
+      return showAppAlert(`Le Sac de ${targetCaid} était vide… Rien à prendre.`, "🫳 Raté");
+    }
     localPlayer.inventory.push(item);
     refreshHud();
-    await showAppAlert(`${item.name} a été ajouté à ton Sac !`, "🎁 Butin Dérobé");
+    await new Promise(r => setTimeout(r, 900)); // le temps de voir la main filer vers lui
+    closePowerScreen();
+    await showCardPlayed(item, [['ph-backpack', 'Rangée dans ton Sac', `volée à ${escapeHtml(targetCaid)}`]], item.name, { kicker: 'Carte dérobée', stamp: 'ph-hand-grabbing' });
   });
   // Alliance : écrans plein page (js/alliance.js)
   socket.on('alliance_request_received', (data) => { if (data) showAllianceRequest(data); });

@@ -373,7 +373,7 @@ async function useItem(idx) {
     const win = Math.random() < 1 / 3, prize = it.val || 5000;
     if (win) localPlayer.pocketCash += prize;
     refreshHud();
-    return showCardPlayed(it, [win ? ['ph-coins', 'Gagnant ! Dans ta poche', `+${prize.toLocaleString()} €`] : ['ph-smiley-sad', 'Rien sous la pellicule', 'Perdu…']], win ? 'GAGNANT !' : 'PERDU…');
+    return openScratch(win, prize);
   }
   if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");
   if (it.eff === 'none') return showAppAlert(/trognon/i.test(it.name || '') ? "Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !" : `${it.name} : ça ne sert à rien…`, `${itemEmoji(it)} ${it.name}`);

@@ -39,11 +39,13 @@ const itemRow = (icon, label, after) => `<div class="police-row find-row"><i cla
 // CARTE JOUÉE : la carte grandit, tampon « JOUÉE » avec choc, puis les effets mis en évidence
 // rows : [[icône, libellé, valeur], ...] ; se résout quand le joueur touche « Continuer »
 // =========================================================================
-function showCardPlayed(it, rows, title) {
+// opts : { kicker (bandeau du haut), stamp (icône du tampon rond) } — par défaut « Carte jouée » et une coche
+function showCardPlayed(it, rows, title, opts = {}) {
   return msgQueue(done => {
     const scr = document.getElementById('playedScreen');
     const art = itemArt(it);
-    document.getElementById('playedCard').innerHTML = (art ? `<img src="${art}" alt="${escapeHtml(it.name || '')}">` : findFallback(it)) + '<b class="played-stamp"><i class="ph-bold ph-check"></i></b>';
+    document.getElementById('playedCard').innerHTML = (art ? `<img src="${art}" alt="${escapeHtml(it.name || '')}">` : findFallback(it)) + `<b class="played-stamp ${opts.stamp ? 'alt' : ''}"><i class="ph-bold ${opts.stamp || 'ph-check'}"></i></b>`;
+    document.getElementById('playedKicker').innerHTML = `<i class="ph-fill ph-cards"></i> ${escapeHtml(opts.kicker || 'Carte jouée')}`;
     document.getElementById('playedTitle').innerText = title || it.name || 'Objet';
     document.getElementById('playedRows').innerHTML = rows.map(([icon, label, value], i) =>
       `<div class="police-row played-row" style="animation-delay:${1.15 + i * 0.18}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${value}</span></div>`).join('');
@@ -53,6 +55,89 @@ function showCardPlayed(it, rows, title) {
     scr.classList.add('show');
     if (navigator.vibrate) setTimeout(() => { try { navigator.vibrate(60); } catch (e) {} }, 850);
   });
+}
+
+// =========================================================================
+// TICKET À GRATTER : le résultat est tiré avant, on le découvre en grattant la zone argentée
+// =========================================================================
+let scratchDone = null;
+function openScratch(win, prize) {
+  const scr = document.getElementById('scratchScreen');
+  const symbols = win ? ['💰', '💰', '💰'] : [['🦆', '💰', '🍌'], ['💰', '🦆', '💰'], ['🍌', '🦆', '🦆']][Math.floor(Math.random() * 3)];
+  document.getElementById('scratchPrize').innerHTML = `<div class="sym">${symbols.map(s => `<span>${s}</span>`).join('')}</div><b class="${win ? 'win' : 'lose'}">${win ? `${prize.toLocaleString()} €` : 'PERDU'}</b>`;
+  document.getElementById('scratchTitle').innerText = 'GRATTE !';
+  document.getElementById('scratchSub').innerText = 'Frotte la zone argentée avec ton doigt.';
+  document.getElementById('scratchResult').classList.add('hidden');
+  document.getElementById('scratchCta').classList.add('hidden');
+  scr.classList.remove('hidden', 'show', 'revealed', 'won');
+  void scr.offsetWidth;
+  scr.classList.add('show');
+  return new Promise(resolve => {
+    scratchDone = () => {
+      scr.classList.add('revealed');
+      scr.classList.toggle('won', win);
+      document.getElementById('scratchTitle').innerText = win ? 'GAGNANT !' : 'PERDU…';
+      document.getElementById('scratchSub').innerText = win ? 'Trois sacs de billets !' : 'Pas les trois mêmes… La prochaine fois !';
+      const res = document.getElementById('scratchResult');
+      res.innerHTML = win ? `<i class="ph-bold ph-coins"></i><span class="lbl">Dans ta poche</span><span class="aft">+${prize.toLocaleString()} €</span>`
+        : `<i class="ph-bold ph-smiley-sad"></i><span class="lbl">Rien sous la pellicule</span><span class="aft">0 €</span>`;
+      res.classList.remove('hidden');
+      document.getElementById('scratchCta').classList.remove('hidden');
+      if (navigator.vibrate) try { navigator.vibrate(win ? [60, 60, 120] : 60); } catch (e) {}
+    };
+    document.getElementById('scratchCta').onclick = () => { scr.classList.add('hidden'); scr.classList.remove('show'); resolve(win); };
+    requestAnimationFrame(setupScratchCanvas);
+  });
+}
+// Couche argentée : on l'efface au doigt (ou à la souris) ; au-delà de 60 % grattés, tout se découvre
+function setupScratchCanvas() {
+  const cv = document.getElementById('scratchCanvas');
+  const box = cv.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.max(1, Math.round(box.width * dpr));
+  cv.height = Math.max(1, Math.round(box.height * dpr));
+  cv.classList.remove('gone');
+  const ctx = cv.getContext('2d');
+  ctx.globalCompositeOperation = 'source-over';
+  const g = ctx.createLinearGradient(0, 0, cv.width, cv.height);
+  g.addColorStop(0, '#9ca3af'); g.addColorStop(0.45, '#e5e7eb'); g.addColorStop(0.55, '#d1d5db'); g.addColorStop(1, '#6b7280');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  for (let i = 0; i < 160; i++) ctx.fillRect(Math.random() * cv.width, Math.random() * cv.height, 2 * dpr, 2 * dpr);
+  ctx.fillStyle = 'rgba(55,65,81,0.75)';
+  ctx.font = `900 ${Math.round(cv.height * 0.3)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('GRATTE ICI', cv.width / 2, cv.height / 2);
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineCap = ctx.lineJoin = 'round';
+  ctx.lineWidth = 24 * dpr;
+  let last = null, moves = 0, finished = false;
+  const at = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr]; };
+  const cleared = () => {
+    const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
+    let n = 0, t = 0;
+    for (let i = 3; i < d.length; i += 4 * 16) { t++; if (d[i] < 40) n++; }
+    return n / t;
+  };
+  const scratch = e => {
+    if (finished) return;
+    const p = at(e);
+    ctx.beginPath();
+    ctx.moveTo(...(last || p));
+    ctx.lineTo(...p);
+    ctx.stroke();
+    last = p;
+    if (++moves % 6 === 0 && cleared() > 0.6) {
+      finished = true;
+      cv.classList.add('gone');
+      if (scratchDone) scratchDone();
+    }
+  };
+  cv.onpointerdown = e => { cv.setPointerCapture(e.pointerId); last = null; scratch(e); };
+  cv.onpointermove = e => { if (e.buttons || e.pointerType === 'touch') scratch(e); };
+  cv.onpointerup = cv.onpointercancel = () => { last = null; };
 }
 
 // =========================================================================

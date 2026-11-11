@@ -841,6 +841,7 @@
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Trognon de pomme\",\"eff\":\"none\",\"desc\":\"Bon... Ben... Faut pas gâcher !\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🍎 Trognon de pomme</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Vieille canette\",\"eff\":\"def_malus_round\",\"val\":1,\"desc\":\"−1 Défense à un rival jusqu&apos;à la fin de la manche\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🥫 Vieille canette</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Passeport diplomatique\",\"eff\":\"cancel_police\",\"desc\":\"Annule un contrôle de police\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🛂 Passeport diplomatique</button>
+          <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Ticket à gratter\",\"eff\":\"scratch\",\"val\":5000,\"desc\":\"1 chance sur 3 de gagner 5 000 €\"}")' class="col-span-2 p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🎰 Ticket à gratter</button>
           <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":2}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M • 8000€ + 2kg)</button>
         </div>
         </div>
@@ -994,11 +995,27 @@
     </div>
 
     <!-- MODALES SYSTÈME STYLISÉES -->
+    <!-- TICKET À GRATTER : on gratte vraiment la zone argentée au doigt -->
+    <div id="scratchScreen" class="hidden absolute inset-0 z-[55] played-screen scratch-screen">
+      <div class="played-rays"></div>
+      <div class="played-content">
+        <div class="played-kicker"><i class="ph-fill ph-hand-pointing"></i> Ticket à gratter</div>
+        <h2 id="scratchTitle" class="font-anton played-title mt-3">GRATTE !</h2>
+        <div id="scratchSub" class="text-center text-sm font-bold text-slate-300 mt-1">Frotte la zone argentée avec ton doigt.</div>
+        <div class="played-stage"><div class="scratch-ticket"><img src="ticket-gratter.webp" alt="Ticket Le Casse du Coin" draggable="false">
+          <div class="scratch-zone"><div id="scratchPrize" class="scratch-prize"></div><canvas id="scratchCanvas"></canvas></div></div></div>
+        <div class="played-bottom">
+          <div id="scratchResult" class="police-row played-row scratch-result hidden"></div>
+          <button type="button" id="scratchCta" class="find-cta mt-3 hidden">Continuer</button>
+        </div>
+      </div>
+    </div>
+
     <!-- CARTE JOUÉE : la carte grandit, le tampon « JOUÉE » tombe (choc), puis ses effets s'affichent -->
     <div id="playedScreen" class="hidden absolute inset-0 z-[60] played-screen">
       <div class="played-rays"></div>
       <div class="played-content">
-        <div class="played-kicker"><i class="ph-fill ph-cards"></i> Carte jouée</div>
+        <div id="playedKicker" class="played-kicker"><i class="ph-fill ph-cards"></i> Carte jouée</div>
         <div class="played-stage"><div id="playedCard" class="played-card"></div></div>
         <div class="played-bottom">
           <h2 id="playedTitle" class="font-anton played-title"></h2>

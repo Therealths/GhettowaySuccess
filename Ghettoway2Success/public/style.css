@@ -185,12 +185,33 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .played-screen.show .played-row .aft { animation: playedPulse 1.4s ease-in-out 1.7s 2; }
 .played-screen.show #playedCta { animation: allyUp 0.4s ease-out 1.5s both; }
 @keyframes playedGrow { 0% { opacity: 0; transform: translateY(160px) scale(0.35) rotate(8deg); } 100% { opacity: 1; transform: none; } }
+.played-stamp.alt { border-color: #f59e0b; outline-color: rgba(245,158,11,0.7); color: #d97706; }
 @keyframes playedStamp { 0% { opacity: 0; transform: rotate(-14deg) scale(2.6); } 100% { opacity: 1; transform: rotate(-14deg) scale(1); } }
 @keyframes playedShake { 0%, 100% { transform: none; } 20% { transform: translate(-4px, 2px) rotate(-0.3deg); } 45% { transform: translate(3px, -2px) rotate(0.25deg); } 70% { transform: translate(-2px, 1px); } }
 @keyframes playedRow { 0% { opacity: 0; transform: translateY(16px) scale(0.92); } 100% { opacity: 1; transform: none; } }
 @keyframes playedPulse { 0%, 100% { transform: none; text-shadow: none; } 50% { transform: scale(1.12); text-shadow: 0 0 14px rgba(251,191,36,0.8); } }
 @media (max-height: 700px) { .played-title { font-size: 28px; } .played-stamp { width: 62px; height: 62px; font-size: 30px; } }
 @media (prefers-reduced-motion: reduce) { .played-screen * { animation: none !important; } .played-stamp, .played-row, .played-screen .played-card { opacity: 1; } }
+/* Ticket à gratter : le ticket à plat, la zone argentée (canvas) par-dessus le résultat */
+.scratch-ticket { position: relative; width: min(100%, 360px); aspect-ratio: 540 / 480; }
+.scratch-ticket > img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 18px 30px rgba(0,0,0,0.75)); -webkit-user-drag: none; user-select: none; }
+.scratch-zone { position: absolute; left: 7%; right: 4.5%; top: 68.5%; height: 24%; border-radius: 6px; overflow: hidden; background: linear-gradient(180deg, #f5e6c4, #e2c896); }
+.scratch-prize { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-around; padding: 0 8px; }
+.scratch-prize .sym { display: flex; gap: 6px; font-size: 26px; }
+.scratch-prize b { font-family: 'Anton', sans-serif; font-size: 24px; }
+.scratch-prize b.win { color: #15803d; } .scratch-prize b.lose { color: #b91c1c; }
+#scratchCanvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; transition: opacity .45s; }
+#scratchCanvas.gone { opacity: 0; pointer-events: none; }
+.scratch-screen .played-rays { opacity: 0.4; animation: findRays 12s linear infinite; }
+.scratch-screen.won .played-rays { opacity: 1; }
+.scratch-screen.revealed .played-title { animation: playedRow 0.45s cubic-bezier(.2,1.6,.4,1) both; }
+.scratch-screen.won .played-title { color: #fde047; }
+.scratch-screen.revealed .scratch-result { animation: playedRow 0.45s cubic-bezier(.2,1.5,.4,1) 0.15s both; }
+.scratch-screen.revealed .scratch-result .aft { animation: playedPulse 1.4s ease-in-out 0.6s 2; }
+.scratch-screen.won .scratch-ticket { animation: playedShake 0.35s ease-in-out; }
+.scratch-screen .scratch-result.hidden { display: none; }
+.scratch-screen.show .played-content { animation: none; }
+.scratch-screen.show .played-title { animation: none; }
 /* Passeport diplomatique au contrôle : la carte au centre */
 .pass-card-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 12px 0; }
 .pass-card { height: 100%; max-height: 330px; border-radius: 14px; transform: rotate(-3deg); box-shadow: 0 0 0 2px #38bdf8, 0 0 40px rgba(56,189,248,.45), 0 20px 40px rgba(0,0,0,.7); }
