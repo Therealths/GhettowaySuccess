@@ -194,8 +194,8 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .played-one img, .played-one .find-carton { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: 0 0 0 3px rgba(251,191,36,0.9), 0 18px 40px rgba(0,0,0,0.8); }
 .played-one .played-stamp { width: 54px; height: 54px; font-size: 26px; border-width: 4px; right: -10px; top: -10px; }
 .played-screen.show .played-card.multi { animation: none; }
-.played-screen.show .played-one { animation: playedPop 0.5s cubic-bezier(.2,1.3,.4,1) calc(var(--i) * 0.45s) both; }
-.played-screen.show .played-one .played-stamp { animation-delay: calc(0.7s + var(--i) * 0.45s); }
+.played-screen.show .played-one { animation: playedPop 0.5s cubic-bezier(.2,1.3,.4,1) calc(var(--i) * 1.2s) both; }
+.played-screen.show .played-one .played-stamp { animation-delay: calc(0.7s + var(--i) * 1.2s); }
 @keyframes playedPop { from { opacity: 0; scale: 0.3; } to { opacity: 1; scale: 1; } }
 .played-screen.show .played-title { animation-delay: calc(0.95s + var(--lag, 0s)); }
 .played-act { display: flex; align-items: center; justify-content: center; gap: 6px; }

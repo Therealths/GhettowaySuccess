@@ -39,7 +39,7 @@ const itemRow = (icon, label, after) => `<div class="police-row find-row"><i cla
 // CARTE JOUÉE : la carte grandit, tampon « JOUÉE » avec choc, puis les effets mis en évidence
 // rows : [[icône, libellé, valeur], ...] ; se résout quand le joueur touche « Continuer »
 // =========================================================================
-// it : une carte, ou plusieurs (pile du combat : elles tombent une à une, chacune avec son tampon)
+// it : une carte, ou plusieurs (pile du combat : elles tombent une à une, la suivante après le tampon de la précédente)
 // opts : { kicker (bandeau du haut), stamp (icône du tampon rond), face (HTML de la carte, ex. équipement de boutique),
 //          action: { icon, label, run } (bouton en plus de « Continuer »), flyToSac (la carte file vers le bouton Sac),
 //          autoClose (ms : se ferme toute seule, sans bouton ni effets — ex. avant le ticket à gratter) }
@@ -53,7 +53,7 @@ function showCardPlayed(it, rows, title, opts = {}) {
     const box = document.getElementById('playedCard');
     box.classList.toggle('multi', n > 1);
     box.innerHTML = n > 1 ? items.map((x, i) => `<div class="played-one" style="--i:${i};--n:${n}">${face(x)}${stamp}</div>`).join('') : face(items[0]) + stamp;
-    const lag = (n - 1) * 0.45; // chaque carte de plus arrive 0,45 s après la précédente
+    const lag = (n - 1) * 1.2; // la carte suivante n'arrive qu'une fois le tampon de la précédente posé
     scr.style.setProperty('--lag', `${lag}s`);
     document.getElementById('playedKicker').innerHTML = `<i class="ph-fill ph-cards"></i> ${escapeHtml(opts.kicker || (n > 1 ? 'Cartes jouées' : 'Carte jouée'))}`;
     document.getElementById('playedTitle').innerText = title || items[0].name || 'Objet';
@@ -77,7 +77,7 @@ function showCardPlayed(it, rows, title, opts = {}) {
     scr.classList.remove('hidden', 'show');
     void scr.offsetWidth;
     scr.classList.add('show');
-    items.forEach((_, i) => setTimeout(() => buzz(70), 850 + i * 450)); // chaque tampon se pose
+    items.forEach((_, i) => setTimeout(() => buzz(70), 1050 + i * 1200)); // chaque tampon se pose
   });
 }
 // Après un achat : une copie de la carte rapetisse et file vers le bouton Sac de l'écran principal
