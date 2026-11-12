@@ -53,7 +53,7 @@ function showCardPlayed(it, rows, title, opts = {}) {
     scr.classList.remove('hidden', 'show');
     void scr.offsetWidth;
     scr.classList.add('show');
-    if (navigator.vibrate) setTimeout(() => { try { navigator.vibrate(60); } catch (e) {} }, 850);
+    setTimeout(() => buzz(70), 850); // le tampon se pose
   });
 }
 
@@ -83,7 +83,7 @@ function openScratch(win, prize) {
         : `<i class="ph-bold ph-smiley-sad"></i><span class="lbl">Rien sous la pellicule</span><span class="aft">0 €</span>`;
       res.classList.remove('hidden');
       document.getElementById('scratchCta').classList.remove('hidden');
-      if (navigator.vibrate) try { navigator.vibrate(win ? [60, 60, 120] : 60); } catch (e) {}
+      buzz(win ? [60, 60, 120] : 60);
     };
     document.getElementById('scratchCta').onclick = () => { scr.classList.add('hidden'); scr.classList.remove('show'); resolve(win); };
     requestAnimationFrame(setupScratchCanvas);
@@ -523,3 +523,19 @@ async function offerPassportAtPolice() {
   await showCardPlayed(passport, [['ph-siren', 'Contrôle de police', 'annulé'], ['ph-chat-teardrop-text', '« On ne va pas risquer un incident diplomatique, si ? »', '']]);
   return true;
 }
+
+// Préchargement : toutes les cartes (grandes et vignettes) et les décors des écrans d'objets, une image à la fois
+// quelques secondes après l'ouverture ; le service worker les garde ensuite en cache (aucune n'arrive en retard)
+function preloadCardImages() {
+  const files = ITEM_ART.flatMap(([, f]) => [`${f}.webp`, `${f}-vignette.webp`])
+    .concat(['fouilles-ruelle.webp', 'ticket-gratter.webp', 'qg-coffre.webp', 'patrol-car.webp']);
+  let i = 0;
+  const next = () => {
+    if (i >= files.length) return;
+    const img = new Image();
+    img.onload = img.onerror = () => setTimeout(next, 40);
+    img.src = files[i++];
+  };
+  next();
+}
+window.addEventListener('load', () => setTimeout(preloadCardImages, 2500));

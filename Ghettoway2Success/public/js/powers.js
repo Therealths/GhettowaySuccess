@@ -277,6 +277,7 @@ function showPowerHit(effectType, senderCaid, item) {
   const sender = CAID_ROSTER.find(c => c.name === senderCaid) || getMyCaid();
   const me = getMyCaid();
   const missed = (effectType === 'steal_item' && !item) || (effectType === 'crowbar' && !(item && (item.cash || item.kg)));
+  buzz(missed ? 40 : [90, 50, 90]); // « TOUCHÉ ! »
   const [desc, icon, label, after] = (POW_HIT[effectType] || POW_HIT.shuriken)(escapeHtml(senderCaid || 'Un rival'), item);
   const stage = powDuo(powAv(sender.imageFile, senderCaid || 'Rival', 'foe'), powAv(me.imageFile, 'Toi', missed ? '' : 'hit'), powFx(effectType), `fx-${effectType} victim`);
   const extra = effectType === 'siphon' ? `<div class="mt-2">${powHearts(localPlayer.hearts)}</div>` : '';

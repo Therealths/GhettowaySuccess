@@ -501,6 +501,7 @@ if (socket) {
     localPlayer.pocketCash += cash || 0;
     localPlayer.drugs += kg || 0;
     refreshHud();
+    buzz(cash || kg ? [50, 40, 120] : 40); // vol réussi (ou coffre vide)
     // Résultat affiché sur l'écran du Pied de biche s'il est ouvert, sinon en message
     if (showCrowbarResult({ cash, kg })) return;
     await showAppAlert(cash || kg ? `${crowbarLabel({ cash, kg })} pris dans le coffre de ${targetCaid}, direct sur toi !` : `Le coffre de ${targetCaid} était vide… Rien à prendre.`, "🛠️ Pied de biche");

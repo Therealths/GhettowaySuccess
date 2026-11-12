@@ -1,5 +1,8 @@
 // Fenêtres système (alertes, confirmations), navigation entre écrans
 
+// Vibration du téléphone (sans effet là où ce n'est pas possible)
+function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {} }
+
 // Pas de copier / couper / coller dans l'appli, ni de menu au toucher long, ni d'image qu'on fait glisser
 ['copy', 'cut', 'paste'].forEach(type => document.addEventListener(type, e => e.preventDefault()));
 document.addEventListener('contextmenu', e => e.preventDefault());

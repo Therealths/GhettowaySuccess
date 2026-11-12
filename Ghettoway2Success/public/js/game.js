@@ -486,6 +486,7 @@ function showPatrolScreen() {
     if (rigged) {
       setTimeout(() => scr.classList.add('tk-bubble'), reduce ? 0 : 1000);
       setTimeout(() => scr.classList.add('tk-card'), reduce ? 0 : 2300);
+      setTimeout(() => buzz(80), reduce ? 0 : 2600); // le tampon s'écrase
     }
     if (reduce) return land();
     const t0 = Date.now(), hold = rigged ? 3700 : 0;
