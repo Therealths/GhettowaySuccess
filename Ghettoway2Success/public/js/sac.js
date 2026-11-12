@@ -169,7 +169,7 @@ function sacUse(idx) {
 function renderSacButton() {
   const n = sacItems().length;
   document.getElementById('hudItemCount').innerText = n;
-  document.getElementById('hudPocketMini').innerText = `${localPlayer.pocketCash.toLocaleString()} € · 🌿 ${localPlayer.drugs} kg sur toi`;
+  document.getElementById('hudPocketMini').innerText = `${localPlayer.pocketCash.toLocaleString()} € · ${localPlayer.drugs} kg sur toi`;
   document.getElementById('hudGearMini').innerHTML = SAC_SLOTS.map(s => {
     const it = localPlayer.equipped[s.key];
     return it ? `<img src="${gearInfo(it).img}" alt="${escapeHtml(it.name)}">` : `<span><i class="ph-bold ${s.icon}"></i></span>`;

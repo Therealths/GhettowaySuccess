@@ -273,22 +273,22 @@ function refreshHud() {
     if (localPlayer.musclesOnPerson[i]) {
       const mb = localPlayer.musclesOnPerson[i];
       const img = (mb.level === 2) ? 'gblvl2.jpg' : 'gblvl1.jpg';
-      slotEl.innerHTML = `<img src="${img}" class="w-full h-full object-cover rounded-xl" onerror="this.outerHTML='<span class=\\'text-[10px] font-black text-sky-300 font-mono\\'>L${mb.level||1}</span>';">`;
-      slotEl.className = "w-8 h-8 rounded-xl bg-sky-950/80 border border-sky-400 overflow-hidden flex items-center justify-center cursor-pointer";
+      slotEl.innerHTML = `<img src="${img}" alt="Lascar niveau ${mb.level || 1}">`;
+      slotEl.className = 'hud-slot l on';
     } else {
-      slotEl.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold">✕</span>`;
-      slotEl.className = "w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer";
+      slotEl.innerHTML = '✕';
+      slotEl.className = 'hud-slot l';
     }
   }
   const pSlot = document.getElementById('prostituteTransitSlot');
   if (localPlayer.prostituteInTransit) {
     const pr = localPlayer.prostituteInTransit;
     const imgPr = (pr.level === 2) ? 'plvl2.jpg' : 'plvl1.jpg';
-    pSlot.innerHTML = `<img src="${imgPr}" class="w-full h-full object-cover rounded-xl" onerror="this.outerHTML='<span class=\\'text-[10px] font-black text-rose-300 font-mono\\'>L${pr.level||1}</span>';">`;
-    pSlot.className = "w-8 h-8 rounded-xl bg-rose-950/80 border border-rose-400 overflow-hidden flex items-center justify-center cursor-pointer";
+    pSlot.innerHTML = `<img src="${imgPr}" alt="Escort niveau ${pr.level || 1}">`;
+    pSlot.className = 'hud-slot p on';
   } else {
-    pSlot.innerHTML = `<span class="text-xs text-slate-500 font-mono font-bold">✕</span>`;
-    pSlot.className = "w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer";
+    pSlot.innerHTML = '✕';
+    pSlot.className = 'hud-slot p';
   }
   document.getElementById('hudPocketCash').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
   document.getElementById('hudSafeCash').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
@@ -298,15 +298,9 @@ function refreshHud() {
   document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
   const btnSpec = document.getElementById('btnSpecialPower');
   const actionLabel = document.getElementById('hudSpecialActionBtnLabel');
-  if (localPlayer.specialUsedThisTurn) {
-    btnSpec.classList.add('opacity-30', 'pointer-events-none', 'grayscale');
-    actionLabel.innerText = "Épuisée";
-    actionLabel.className = "text-[9px] font-black uppercase px-2 py-1 bg-slate-800 text-slate-500 rounded-lg inline-block";
-  } else {
-    btnSpec.classList.remove('opacity-30', 'pointer-events-none', 'grayscale');
-    actionLabel.innerText = "Activer";
-    actionLabel.className = "text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block";
-  }
+  // Capacité déjà utilisée cette manche : bouton grisé (il reste touchable pour le rappeler)
+  btnSpec.classList.toggle('used', !!localPlayer.specialUsedThisTurn);
+  actionLabel.innerText = localPlayer.specialUsedThisTurn ? 'épuisée' : 'prête';
   renderInventoryList(); // bouton Sac et écran Sac (js/sac.js)
   updateArenaLiveStats();
   if (socket) {

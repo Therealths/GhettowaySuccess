@@ -91,7 +91,7 @@ function flyCardToSac(box) {
   Object.assign(ghost.style, { left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px` });
   document.body.appendChild(ghost);
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    ghost.style.transform = `translate(${to.left + 30 - from.left - from.width / 2}px, ${to.top + to.height / 2 - from.top - from.height / 2}px) scale(0.12)`;
+    ghost.style.transform = `translate(${to.left + to.width / 2 - from.left - from.width / 2}px, ${to.top + to.height / 2 - from.top - from.height / 2}px) scale(0.12)`;
     ghost.style.opacity = '0.2';
   }));
   setTimeout(() => ghost.remove(), 750);

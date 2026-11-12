@@ -147,6 +147,12 @@ Objets jouables en combat : `isCombatItem` (durée `combat`, Kebab, Sifflet, Can
 - Préchargement de toutes les cartes 2,5 s après l'ouverture (`preloadCardImages`).
 - Sélection de texte, copier, couper, coller et menu du toucher long bloqués (sauf la saisie dans les champs).
 
+### Écran principal (`page-6`)
+- Bandeau du Caïd (`hud-hero`) avec, en bas, `hudTurnBar` rempli par `renderHudTurnBar` (appelé par `renderTurnOrder`) : « Ton tour · Manche N » / « Tour de X » / « Allié de X », puis « puis » + portraits des Caïds qui jouent ensuite (pas encore joué, pas absents, pas alliés du tour). L'ancienne ligne « Ordre » n'existe plus (la liste `.turn-order-list` reste dans le voile « Tour de… »).
+- Stats (`hudStatsBar`, sert aussi à placer le Sac), Lascars et Escort en transit (`hud-slot`, plus de bouton QG), Flash radio.
+- `hud-pad` : **Scanner rond au centre** (`hud-scan`, taille `--scan` = clamp(108px, 18vh, 152px)) et 4 boutons dont le coin intérieur est creusé par un `mask` radial (`--notch`) : Combat en haut à gauche, Alliance en haut à droite, Capacité (`btnSpecialPower`, classe `used` si épuisée) en bas à gauche, Sac (`btnOpenSac`, cible de `flyCardToSac`) en bas à droite.
+- En bas : barre Contrôle de police (plus épaisse), puis Fin de tour. Tout tient de 375 × 667 à 390 × 844 sans défilement (media queries `max-height: 700px` et `max-width: 389px`).
+
 ## 6. Cartes des objets (images)
 
 Chaque objet a une carte au cadre « Fouille » : `public/fouille-<id>.webp` (768×1226, qualité 82) et `public/fouille-<id>-vignette.webp` (recadrage `(62,250,706,710)`, qualité 80). Le lien nom → image est `ITEM_ART` dans `items.js`.

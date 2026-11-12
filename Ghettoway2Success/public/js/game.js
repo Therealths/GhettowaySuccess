@@ -615,6 +615,23 @@ function renderTurnOrder(turnOrder, activeToken, alliedTokens = []) {
     return `<span class="px-2 py-0.5 rounded-lg border text-[9px] font-mono font-bold whitespace-nowrap ${cls}">${icon}${name}${isMe ? ' (toi)' : ''}${dog}${away}</span>`;
   }).join('');
   document.querySelectorAll('.turn-order-list').forEach(el => { el.innerHTML = html; });
+  renderHudTurnBar(turnOrder || [], activeToken, alliedTokens);
+}
+// Bas du bandeau de l'écran principal : « Ton tour · Manche N » (ou « Tour de … »), puis les Caïds qui jouent ensuite
+function renderHudTurnBar(turnOrder, activeToken, alliedTokens) {
+  const bar = document.getElementById('hudTurnBar');
+  if (!bar) return;
+  const active = turnOrder.find(p => p.token === activeToken);
+  const mine = activeToken === myPlayerToken || alliedTokens.includes(myPlayerToken);
+  const label = activeToken === myPlayerToken ? 'Ton tour'
+    : mine ? `Allié de ${allyShort(active && active.caidName)}`
+    : `Tour de ${allyShort(active && active.caidName)}`;
+  const i = turnOrder.findIndex(p => p.token === activeToken);
+  const next = turnOrder.slice(i + 1).filter(p => !p.played && !p.away && !alliedTokens.includes(p.token));
+  const avatars = next.map(p => `<span class="hud-turn-av" title="${escapeHtml(p.caidName || 'Caïd')}"><img src="${allyCaidImg(null, p.caidName)}" alt=""></span>`)
+    .join('<i class="ph-bold ph-caret-right"></i>');
+  bar.innerHTML = `<span class="hud-turn-chip ${mine ? '' : 'other'}"><i class="ph-fill ph-play"></i>${escapeHtml(label)} · Manche ${currentSession.round || 1}</span>`
+    + (next.length ? `<span class="hud-turn-next">puis</span>${avatars}` : '<span class="hud-turn-next">dernier de la manche</span>');
 }
 
 function notifyMyTurn(round) {

@@ -345,93 +345,56 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-col h-full justify-between space-y-2">
-        <!-- BANDEAU VISUEL -->
-        <div class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
-          <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
+      <div class="hud-main">
+        <!-- BANDEAU DU CAÏD : à qui le tour, puis les Caïds qui jouent ensuite -->
+        <div class="hud-hero">
+          <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd">
           <!-- Quitter la partie : au-dessus du voile « Tour de… » pour rester accessible à tout moment -->
-          <button onclick="confirmLeaveGame()" class="btn-close absolute top-2 right-2 w-8 h-8 rounded-xl flex items-center justify-center z-[45] shadow-md" aria-label="Quitter la partie"><i class="ph-bold ph-sign-out text-sm"></i></button>
+          <button onclick="confirmLeaveGame()" class="btn-close hud-quit" aria-label="Quitter la partie"><i class="ph-bold ph-sign-out"></i></button>
+          <div id="hudTurnBar" class="hud-turnbar"></div>
         </div>
         <!-- STATS -->
-        <div id="hudStatsBar" class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
-          <div class="flex items-center justify-center border-r border-white/10"><span id="hudHearts" class="text-base tracking-widest select-none">❤️❤️❤️</span></div>
-          <div class="flex items-center justify-center gap-1.5 border-r border-white/10"><i class="ph-bold ph-sword text-rose-400 text-sm"></i><span id="hudAtk" class="text-base font-black text-white">1</span></div>
-          <div class="flex items-center justify-center gap-1.5 border-r border-white/10"><i class="ph-bold ph-shield text-sky-400 text-sm"></i><span id="hudDef" class="text-base font-black text-white">0</span></div>
-          <div class="flex items-center justify-center gap-1.5"><span class="text-emerald-400 text-sm"><i class="ph-bold ph-person-simple-walk"></i></span><span id="hudCurrentPm" class="text-base font-black text-white">8</span><span id="hudPmNote" class="hidden text-[9px] font-mono font-bold text-rose-300" title="2 PM par action (attaque, Yencli, braquage, achat, objet ramassé)"></span></div>
+        <div id="hudStatsBar" class="hud-stats">
+          <div class="hud-stat"><span id="hudHearts" class="select-none">❤️❤️❤️</span></div>
+          <div class="hud-stat"><i class="ph-bold ph-sword text-rose-400"></i><b id="hudAtk">1</b></div>
+          <div class="hud-stat"><i class="ph-bold ph-shield text-sky-400"></i><b id="hudDef">0</b></div>
+          <div class="hud-stat"><i class="ph-bold ph-sneaker-move text-emerald-400"></i><b id="hudCurrentPm">8</b><small>PM</small><span id="hudPmNote" class="hidden text-[9px] font-mono font-bold text-rose-300" title="2 PM par action (attaque, Yencli, braquage, achat, objet ramassé)"></span></div>
         </div>
-        <!-- LASCARS & PROSTITUÉE -->
-        <div class="w-full grid grid-cols-12 gap-2 flex-shrink-0">
-          <div class="col-span-7 py-1.5 px-2.5 rounded-2xl bg-sky-950/25 border-2 border-sky-400/60 flex items-center justify-between gap-1">
-            <div class="w-8 h-8 flex items-center justify-center text-sky-400 text-xl"><i class="ph-bold ph-barbell"></i></div>
-            <span id="hudDogBadge" class="hidden text-lg leading-none" title="Chien Errant (+2 Atk / +2 Def)">🐕</span>
-            <div class="flex items-center gap-1.5">
-              <div onclick="clickMuscleSlot(0)" id="muscleSlot_0" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <div onclick="clickMuscleSlot(1)" id="muscleSlot_1" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <div onclick="clickMuscleSlot(2)" id="muscleSlot_2" class="w-8 h-8 rounded-xl bg-black/60 border border-sky-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
+        <!-- LASCARS & PROSTITUÉE EN TRANSIT -->
+        <div class="hud-crew">
+          <div class="hud-box l">
+            <span class="hud-lbl"><i class="ph-bold ph-barbell"></i> Lascars <span id="hudDogBadge" class="hidden" title="Chien Errant (+2 Atk / +2 Def)">🐕</span></span>
+            <div class="flex gap-1.5">
+              <div onclick="clickMuscleSlot(0)" id="muscleSlot_0" class="hud-slot l"></div>
+              <div onclick="clickMuscleSlot(1)" id="muscleSlot_1" class="hud-slot l"></div>
+              <div onclick="clickMuscleSlot(2)" id="muscleSlot_2" class="hud-slot l"></div>
             </div>
           </div>
-          <div class="col-span-5 py-1.5 px-2 rounded-2xl bg-rose-950/25 border-2 border-rose-400/60 flex items-center justify-between gap-1">
-            <div class="w-8 h-8 flex items-center justify-center text-rose-400">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="w-6 h-6"><path d="M4 6h16v1.5c-2.5 0-5 3.5-7 9.5a1.5 1.5 0 0 1-2 0C9 11 6.5 7.5 4 7.5V6z"/><path d="M4 6c0 4 3 8 7 11"/><path d="M20 6c0 4-3 8-7 11"/></svg>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="w-8 h-8 rounded-xl bg-black/60 border border-rose-400/40 flex items-center justify-center cursor-pointer"><span class="text-xs text-slate-500 font-mono font-bold">✕</span></div>
-              <button onclick="qgOnlyHint()" id="btnTransferProstituteQG" class="w-10 h-8 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-300 flex items-center justify-center"><span class="text-[9px] font-mono font-black uppercase">QG</span></button>
-            </div>
+          <div class="hud-box p">
+            <span class="hud-lbl">Escort</span>
+            <div onclick="clickProstituteTransitSlot()" id="prostituteTransitSlot" class="hud-slot p"></div>
           </div>
         </div>
-        <!-- FLASH RADIO MINI -->
-        <div class="w-full py-1.5 px-3 rounded-2xl bg-gradient-to-r from-rose-950/40 via-red-950/20 to-slate-900 border border-rose-500/30 flex items-center gap-2.5 flex-shrink-0">
-          <div class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 text-xs"><i class="ph-bold ph-radio animate-pulse"></i></div>
-          <div class="overflow-hidden flex-1">
-            <div class="flex items-center gap-1 leading-none mb-0.5"><span class="text-[8px] font-mono uppercase font-black text-rose-400">Flash Radio</span><span class="text-[8px] text-slate-500 font-mono">• Manche <span id="hudRadioRoundTag">1</span></span></div>
-            <div class="flex items-baseline gap-1 overflow-hidden text-xs truncate"><h4 id="hudRadioReminderTitle" class="font-black text-white truncate text-[11px]">Canicule Urbaine</h4><p id="hudRadioReminderDesc" class="text-[10px] text-slate-300 truncate">les véhicules motorisés perdent -2 PM</p></div>
-          </div>
+        <!-- FLASH RADIO DE LA MANCHE -->
+        <div class="hud-radio">
+          <span class="hud-radio-ic"><i class="ph-bold ph-radio"></i></span>
+          <div class="min-w-0"><b id="hudRadioReminderTitle">—</b><small id="hudRadioReminderDesc"></small></div>
+          <span class="hidden" id="hudRadioRoundTag">1</span>
         </div>
-        <!-- ORDRE DE PASSAGE DE LA MANCHE -->
-        <div class="w-full py-1.5 px-2.5 rounded-2xl glass-panel flex items-center gap-2 flex-shrink-0 overflow-hidden">
-          <span class="text-[8px] font-mono uppercase font-black text-slate-400 flex-shrink-0">Ordre</span>
-          <div class="turn-order-list flex items-center gap-1 overflow-x-auto"></div>
+        <!-- ACTIONS : Scanner rond au centre, 4 boutons creusés autour (le Sac s'ouvre en plein écran) -->
+        <div class="hud-pad">
+          <button type="button" onclick="openCombatModal()" class="hud-q tl combat"><i class="ph-fill ph-sword"></i><b>Combat</b><small>Attaque un rival</small></button>
+          <button type="button" onclick="openAllianceModal()" class="hud-q tr alliance"><i class="ph-fill ph-handshake"></i><b>Alliance</b><small>Jouer à plusieurs</small></button>
+          <button type="button" id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="hud-q bl power"><i class="ph-fill ph-lightning"></i><b>Capacité</b><small><span id="hudSpecialPowerName">—</span> · <span id="hudSpecialActionBtnLabel">prête</span></small><span id="hudSpecialPowerDesc" class="hidden"></span></button>
+          <button type="button" id="btnOpenSac" onclick="openSac()" class="hud-q br sac"><i class="ph-fill ph-backpack"></i><b><span id="hudItemCount" class="hud-count">0</span> Sac</b><small id="hudPocketMini"></small><span id="hudGearMini" class="hidden"></span></button>
+          <button type="button" onclick="openQrScannerModal()" class="hud-scan" aria-label="Scanner"><i class="ph-bold ph-qr-code"></i><b>Scanner</b></button>
         </div>
-        <!-- ACTIONS (le Sac s'ouvre en plein écran) -->
-        <div class="flex-1 flex flex-col min-h-0">
-          <div id="mainTabsContentContainer" class="flex-1 px-1 py-2 bg-gradient-to-b from-[#141622] via-[#0d0f17] to-[#090a10] border-t-2 border-b-2 border-amber-400 flex flex-col justify-center overflow-hidden">
-            <!-- VOLET ACTIONS -->
-            <div id="panelInteractions" class="flex-1 flex flex-col justify-center space-y-2.5 my-auto py-1 overflow-y-auto">
-              <button id="btnOpenSac" type="button" onclick="openSac()" class="sac-open">
-                <span class="sac-open-ic"><i class="ph-fill ph-backpack"></i></span>
-                <span class="flex-1 min-w-0 text-left"><b>Sac <span id="hudItemCount">0</span></b><small id="hudPocketMini"></small></span>
-                <span id="hudGearMini" class="sac-open-gear"></span>
-                <i class="ph-bold ph-caret-right text-slate-400"></i>
-              </button>
-              <button id="btnSpecialPower" onclick="openSpecialAbilityPrompt()" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 text-left flex items-start justify-between gap-2 active:scale-[0.99] transition">
-                <div class="flex items-start gap-2 flex-1 min-w-0">
-                  <div class="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 text-sm mt-0.5"><i class="ph-bold ph-sparkle animate-pulse"></i></div>
-                  <div class="flex-1 min-w-0">
-                    <span class="text-[9px] font-mono uppercase text-purple-300 font-black">Capacité Spéciale</span>
-                    <h4 id="hudSpecialPowerName" class="text-xs font-black text-white leading-tight">—</h4>
-                    <p id="hudSpecialPowerDesc" class="text-[10px] text-slate-300 mt-0.5 leading-snug">—</p>
-                  </div>
-                </div>
-                <div class="self-center"><span id="hudSpecialActionBtnLabel" class="text-[9px] font-black uppercase px-2.5 py-1 bg-purple-500 text-black rounded-lg inline-block">Activer</span></div>
-              </button>
-              <div class="w-full grid grid-cols-2 gap-2">
-                <button onclick="openQrScannerModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-yellow-500/10 to-yellow-950/20 border border-yellow-500/35 text-ghetto-gold flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-qr-code text-sm"></i><span class="text-xs font-black uppercase text-white">Scanner</span></button>
-                <button onclick="openCombatModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-rose-500/10 to-rose-950/20 border border-rose-500/35 text-rose-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-sword text-sm"></i><span class="text-xs font-black uppercase text-white">Combat</span></button>
-                <button onclick="openAllianceModal()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-purple-500/10 to-purple-950/20 border border-purple-500/35 text-purple-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-handshake text-sm"></i><span class="text-xs font-black uppercase text-white">Alliance</span></button>
-                <button onclick="triggerPoliceInspection()" class="rounded-xl py-3 px-3 bg-gradient-to-r from-sky-500/10 to-sky-950/20 border border-sky-500/35 text-sky-400 flex items-center justify-center gap-2 active:scale-95 transition"><i class="ph-bold ph-siren text-sm"></i><span class="text-xs font-black uppercase text-white">Contrôle</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex-shrink-0 pt-1 pb-1 border-t border-white/10">
-          <button onclick="endCurrentPlayerTurn()" class="w-full py-3 bg-gradient-to-r from-[#161822] via-[#24171d] to-[#450a0a] border border-rose-950/60 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 active:scale-95 transition">
-            <i class="ph-bold ph-check-circle text-rose-400 text-sm"></i><span class="uppercase font-black text-[11px]">Tour Terminé (Dé Patrouille)</span>
-          </button>
+        <div class="hud-bars">
+          <button type="button" onclick="triggerPoliceInspection()" class="hud-bar police"><i class="ph-fill ph-siren"></i>Contrôle de police</button>
+          <button type="button" onclick="endCurrentPlayerTurn()" class="hud-bar end"><i class="ph-bold ph-dice-five"></i>Fin de tour · dé de patrouille</button>
         </div>
       </div>
     </div>
-
     <!-- SAC : argent, ce que tu portes, pile de cartes des objets et de l'équipement en réserve -->
     <div id="sacScreen" class="hidden absolute inset-0 z-40 deck-screen sac-screen" data-theme="def">
       <div class="deck-scene"><img src="wallpaper-clean.jpg" alt=""></div>
