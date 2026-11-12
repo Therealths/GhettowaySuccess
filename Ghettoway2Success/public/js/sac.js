@@ -50,6 +50,7 @@ function openSac() {
 function closeSac() {
   const scr = document.getElementById('sacScreen');
   if (!scr) return;
+  closeSacZoom();
   scr.classList.add('hidden');
   scr.classList.remove('show');
 }
@@ -64,27 +65,33 @@ function sacSlotsHtml() {
   }).join('');
 }
 
-function sacCardHtml(it, idx) {
-  const real = localPlayer.inventory.indexOf(it);
-  const trash = `<button type="button" class="deck-buy-btn deck-btn off sac-trash" onclick="event.stopPropagation(); discardItem(${real})" aria-label="Jeter"><i class="ph-bold ph-trash"></i></button>`;
-  let face, under;
+// Face de la carte : carte Fouille de l'objet, ou carte de boutique de l'équipement
+function sacFace(it) {
   if (isGear(it)) {
     const g = gearInfo(it);
-    face = `<div class="sac-gear ${g.slot.cls}"><img src="${g.img}" alt=""><div class="b"><h4>${escapeHtml(it.name)}</h4><span>${g.bonus}${g.firearm ? ' · 🔥 Feu' : ''}</span><p>${escapeHtml(g.desc)}</p></div></div>`;
-    under = `<button type="button" class="deck-buy-btn deck-btn" onclick="event.stopPropagation(); equipItemFromInventory(${real})"><i class="ph-bold ph-arrow-fat-up"></i> Équiper</button>
-      <button type="button" class="deck-buy-btn deck-btn sac-sell" onclick="event.stopPropagation(); sellItem(${real})"><i class="ph-bold ph-coins"></i> ${sellPrice(it).toLocaleString()} €</button>`;
-  } else {
-    const art = itemArt(it);
-    face = art ? `<img class="deck-face" src="${art}" alt="${escapeHtml(it.name || '')}" draggable="false">`
-      : `<div class="deck-face deck-face-txt"><span>${itemEmoji(it)}</span><h4>${escapeHtml(it.name || 'Objet')}</h4><p>${escapeHtml(it.desc || '')}</p></div>`;
-    const eff = isHealItem(it) ? 'heal' : it.eff;
-    const use = SAC_USE[eff] || (it.dur === 'combat' ? ['ph-sword', 'Activer'] : null);
-    if (use) under = `<button type="button" class="deck-buy-btn deck-btn" onclick="event.stopPropagation(); sacUse(${real})"><i class="ph-bold ${use[0]}"></i> ${use[1]}</button>${trash}`;
-    else if (SAC_AUTO.includes(eff)) under = `<span class="sac-pill auto"><i class="ph-bold ph-magic-wand"></i> Automatique</span>${trash}`;
-    else under = `<span class="sac-pill"><i class="ph-bold ph-trash-simple"></i> Ne sert à rien</span>${trash}`;
+    return `<div class="sac-gear ${g.slot.cls}"><img src="${g.img}" alt=""><div class="b"><h4>${escapeHtml(it.name)}</h4><span>${g.bonus}${g.firearm ? ' · 🔥 Feu' : ''}</span><p>${escapeHtml(g.desc)}</p></div></div>`;
   }
-  if (isGear(it)) under += trash;
-  return `<div id="sacCard_${idx}" class="deck-card-item item-deck" onclick="pickSacCard(${idx})"><div class="deck-cardbox">${face}</div><div class="deck-under">${under}</div></div>`;
+  const art = itemArt(it);
+  return art ? `<img class="deck-face" src="${art}" alt="${escapeHtml(it.name || '')}" draggable="false">`
+    : `<div class="deck-face deck-face-txt"><span>${itemEmoji(it)}</span><h4>${escapeHtml(it.name || 'Objet')}</h4><p>${escapeHtml(it.desc || '')}</p></div>`;
+}
+// Boutons de la carte zoomée : action principale, puis vendre / jeter
+function sacActions(it) {
+  const real = localPlayer.inventory.indexOf(it);
+  const trash = `<button type="button" class="sac-zbtn ghost" onclick="sacDo('discard', ${real})"><i class="ph-bold ph-trash"></i> Jeter</button>`;
+  if (isGear(it)) {
+    return `<button type="button" class="find-cta" onclick="sacDo('equip', ${real})"><i class="ph-bold ph-arrow-fat-up"></i> Équiper</button>
+      <div class="sac-zrow"><button type="button" class="sac-zbtn sell" onclick="sacDo('sell', ${real})"><i class="ph-bold ph-coins"></i> Vendre ${sellPrice(it).toLocaleString()} €</button>${trash}</div>`;
+  }
+  const eff = isHealItem(it) ? 'heal' : it.eff;
+  const use = SAC_USE[eff] || (it.dur === 'combat' ? ['ph-sword', 'Activer'] : null);
+  if (use) return `<button type="button" class="find-cta" onclick="sacDo('use', ${real})"><i class="ph-bold ${use[0]}"></i> ${use[1]}</button><div class="sac-zrow">${trash}</div>`;
+  const pill = SAC_AUTO.includes(eff) ? `<span class="sac-pill auto"><i class="ph-bold ph-magic-wand"></i> Utilisée automatiquement</span>` : `<span class="sac-pill"><i class="ph-bold ph-trash-simple"></i> Ne sert à rien</span>`;
+  return `${pill}<div class="sac-zrow">${trash}</div>`;
+}
+// Carte du Sac : pas de boutons dessous ; toucher la carte du dessus l'ouvre en grand
+function sacCardHtml(it, idx) {
+  return `<div id="sacCard_${idx}" class="deck-card-item item-deck" onclick="pickSacCard(${idx})"><div class="deck-cardbox">${sacFace(it)}</div></div>`;
 }
 
 function renderSac() {
@@ -114,7 +121,28 @@ function stepSac(dir) {
   sacIndex = next;
   placeSacCards();
 }
-function pickSacCard(idx) { if (idx !== sacIndex) { sacIndex = idx; placeSacCards(); } }
+function pickSacCard(idx) {
+  if (idx !== sacIndex) { sacIndex = idx; placeSacCards(); return; }
+  openSacZoom(sacList[idx]);
+}
+// Carte zoomée : en grand au-dessus du Sac, avec ses boutons
+function openSacZoom(it) {
+  if (!it) return;
+  const z = document.getElementById('sacZoom');
+  document.getElementById('sacZoomCard').innerHTML = `<div class="deck-cardbox">${sacFace(it)}</div>`;
+  document.getElementById('sacZoomActions').innerHTML = sacActions(it);
+  z.classList.remove('hidden', 'show');
+  void z.offsetWidth;
+  z.classList.add('show');
+}
+function closeSacZoom() { document.getElementById('sacZoom').classList.add('hidden'); }
+function sacDo(action, idx) {
+  closeSacZoom();
+  if (action === 'use') sacUse(idx);
+  else if (action === 'equip') equipItemFromInventory(idx);
+  else if (action === 'sell') sellItem(idx);
+  else if (action === 'discard') discardItem(idx);
+}
 function sacUse(idx) {
   const it = localPlayer.inventory[idx];
   if (it && SAC_LEAVES.includes(it.eff) && isMyTurnToPlay) closeSac();

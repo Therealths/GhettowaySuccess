@@ -450,8 +450,15 @@
           <button type="button" onclick="stepSac(1)" class="deck-arrow right-2" aria-label="Carte suivante"><i class="ph-bold ph-caret-right"></i></button>
         </div>
         <div id="sacDots" class="deck-dots"></div>
+        <div class="sac-hint"><i class="ph-bold ph-hand-tap"></i> Touche la carte pour l’ouvrir</div>
         <div class="flex-1"></div>
         <div class="px-4 pb-4"><button type="button" class="ally-ghost" onclick="closeSac()">Fermer le sac</button></div>
+      </div>
+      <!-- Carte zoomée avec ses boutons -->
+      <div id="sacZoom" class="sac-zoom hidden" onclick="if (event.target === this) closeSacZoom()">
+        <div id="sacZoomCard" class="sac-zoom-card"></div>
+        <div id="sacZoomActions" class="sac-zoom-actions"></div>
+        <button type="button" class="ally-ghost sac-zoom-back" onclick="closeSacZoom()">Retour au sac</button>
       </div>
     </div>
 
