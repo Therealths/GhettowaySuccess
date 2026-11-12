@@ -107,7 +107,7 @@ function powChoice() {
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible possible cette manche</div>' : ''}
     <div class="flex flex-col gap-2 mt-2">${rivals.map(pick).join('')}</div>
-    <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchTargetedPower()" ${target ? '' : 'disabled'}>${POW_CTA[caid.id]}</button></div>`;
+    <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchTargetedPower()" ${target ? '' : 'disabled'}>${POW_CTA[caid.id]}</button></div>`;
   return powRender('choix', caid, powItem ? powChipHtml('ph-backpack', 'Objet du sac') : powChipHtml('ph-lightning', 'Capacité spéciale'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), '', bottom);
 }
 function pickPowerTarget(token) { powTargetToken = token; powChoice(); }
@@ -141,7 +141,7 @@ async function openSpecialAbilityPrompt() {
     ? `${powHearts(h)}<div class="text-center text-sm font-bold text-slate-300 mt-2">Cœurs de vie : ${h} / 3${h < 3 ? ` → <b class="pow-ac">${h + 1} / 3</b>` : ' (déjà au maximum)'}</div>`
     : powRow('ph-path', 'Déplacement', 'jusqu’à 5 cases');
   const bottom = `${info}<div class="text-center text-[11px] font-bold text-slate-500 mt-2">Utilisable 1 fois par manche</div>
-    <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchSelfPower()">${POW_CTA[caid.id] || 'Activer'}</button></div>`;
+    <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchSelfPower()">${POW_CTA[caid.id] || 'Activer'}</button></div>`;
   return powRender('self', caid, powChipHtml('ph-lightning', 'Capacité spéciale'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), stage, bottom);
 }
 

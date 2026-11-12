@@ -2,6 +2,10 @@
 html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 input, textarea { -webkit-user-select: text; user-select: text; }
 img { -webkit-user-drag: none; }
+/* Boutons qui ferment un écran (Fermer, Quitter, Retour, Annuler, croix) : rouge sombre discret */
+.btn-close, button.btn-close { color: #fca5a5 !important; background: rgba(127,29,29,0.32) !important; border: 1px solid rgba(248,113,113,0.28) !important; box-shadow: none !important; }
+.btn-close i { color: #fca5a5 !important; }
+.btn-close:active { background: rgba(153,27,27,0.5) !important; }
 body { background-color: #030407; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100dvh; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; touch-action: manipulation; }
 #app-container { width: 100%; max-width: 420px; height: 100dvh; max-height: 100dvh; background-color: #090a10; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,0,0,0.98), 0 0 0 1px rgba(255,255,255,0.08); border-radius: 28px; }
 @media (max-width: 480px) { #app-container { border-radius: 0; } }

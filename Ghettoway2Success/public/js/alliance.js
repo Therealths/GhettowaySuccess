@@ -175,7 +175,7 @@ function renderAllianceChoice() {
   const bottom = `<h2 class="font-anton ally-head sm">AVEC QUI TU T’ASSOCIES ?</h2>
     <div class="text-center text-[11px] font-bold text-slate-400 mt-1">${rivals.length ? hint : 'Aucun Caïd rival dans la partie'}</div>
     <div class="flex flex-col gap-2 mt-3">${rivals.map(pick).join('')}</div>
-    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="ally-ghost" onclick="closeAllianceScreen()">Annuler</button><button type="button" class="ally-cta" onclick="confirmAlliance()" ${n ? '' : 'disabled'}>${n ? `Proposer à ${n} Caïd${n > 1 ? 's' : ''}` : 'Choisis un Caïd'}</button></div>`;
+    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closeAllianceScreen()">Annuler</button><button type="button" class="ally-cta" onclick="confirmAlliance()" ${n ? '' : 'disabled'}>${n ? `Proposer à ${n} Caïd${n > 1 ? 's' : ''}` : 'Choisis un Caïd'}</button></div>`;
   return allyRender('choix', stage, bottom);
 }
 
@@ -226,7 +226,7 @@ function renderAllianceWaiting() {
     <div class="text-center mt-3 ally-dots" style="${waiting ? '' : 'visibility:hidden'}"><i></i><i></i><i></i></div>
     <div class="text-center text-[11px] text-slate-500 mt-2 mb-4">${note}</div>
     <div class="flex flex-col gap-1.5">${rows}</div>
-    <button type="button" class="ally-close" onclick="closeAllianceScreen()">Fermer</button>`;
+    <button type="button" class="btn-close ally-close" onclick="closeAllianceScreen()">Fermer</button>`;
   return allyRender('attente', stage, bottom);
 }
 

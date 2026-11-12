@@ -626,7 +626,7 @@ function renderGrossiste() {
     ${quick.length ? `<div class="flex gap-2 mt-4">${quick.map(v => `<button type="button" class="gros-quick ${v === kg ? 'on' : ''}" onclick="setGrossisteKg(${v})">${v === maxKg && quick.length > 1 ? `Max · ${v}` : `${v} kg`}</button>`).join('')}</div>` : ''}
     ${jloLeft > 0 ? `<div class="text-[11px] text-amber-300 font-bold text-center mt-3">Malus J-Lo : tes 5 premiers kg coûtent le double (encore ${jloLeft} kg)${doubled > 0 ? `, dont ${doubled} dans cet achat` : ''}</div>` : ''}
     <div class="flex items-center justify-between mt-4 px-1"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total (cash uniquement)</span><span class="font-anton text-2xl text-emerald-300 whitespace-nowrap">${getGrossisteCost(kg).toLocaleString()} €</span></div>
-    <div class="grid grid-cols-[1fr_1.8fr] gap-2 mt-3"><button type="button" class="gros-ghost" onclick="closeGrossiste()">Partir</button><button type="button" class="police-cta gros-cta" style="margin-top:0" onclick="confirmGrossistePurchase()" ${kg <= 0 ? 'disabled' : ''}>Acheter ${kg} kg</button></div>`;
+    <div class="grid grid-cols-[1fr_1.8fr] gap-2 mt-3"><button type="button" class="btn-close gros-ghost" onclick="closeGrossiste()">Partir</button><button type="button" class="police-cta gros-cta" style="margin-top:0" onclick="confirmGrossistePurchase()" ${kg <= 0 ? 'disabled' : ''}>Acheter ${kg} kg</button></div>`;
 }
 async function confirmGrossistePurchase() {
   if (!isMyTurnToPlay) { closeGrossiste(); return showAppAlert("Ce n'est plus ton tour !", "Tour Inactif"); }

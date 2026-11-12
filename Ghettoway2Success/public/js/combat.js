@@ -239,7 +239,7 @@ function renderFightChoice() {
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible attaquable cette manche</div>' : ''}
     <div class="flex flex-col gap-2 mt-3">${rivals.map(pick).join('')}</div>
-    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="ally-ghost" onclick="closeFightScreen()">Annuler</button><button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="initiateCombatEngagement()" ${target ? '' : 'disabled'}>Engager le combat</button></div>`;
+    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closeFightScreen()">Annuler</button><button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="initiateCombatEngagement()" ${target ? '' : 'disabled'}>Engager le combat</button></div>`;
   return fightRender('choix', 'atk', 'combat', stage, bottom);
 }
 

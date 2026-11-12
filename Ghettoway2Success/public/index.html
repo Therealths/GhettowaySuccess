@@ -349,9 +349,8 @@
         <!-- BANDEAU VISUEL -->
         <div class="w-full h-20 rounded-2xl overflow-hidden relative border border-white/10 shadow-xl flex-shrink-0 bg-slate-900">
           <img id="caidBannerImg" src="bandeau-bleu.jpg" alt="Bandeau Caïd" class="w-full h-full object-cover">
-          <button onclick="navTo('page-5')" class="absolute top-2 left-2 w-8 h-8 rounded-xl glass-panel text-white flex items-center justify-center z-10 shadow-md"><i class="ph-bold ph-caret-left text-sm"></i></button>
           <!-- Quitter la partie : au-dessus du voile « Tour de… » pour rester accessible à tout moment -->
-          <button onclick="confirmLeaveGame()" class="absolute top-2 right-2 h-8 px-2.5 rounded-xl bg-black/70 border border-rose-500/60 text-rose-300 flex items-center gap-1.5 z-[45] shadow-md text-[10px] font-black uppercase" aria-label="Quitter la partie"><i class="ph-bold ph-sign-out text-sm"></i> Quitter</button>
+          <button onclick="confirmLeaveGame()" class="btn-close absolute top-2 right-2 w-8 h-8 rounded-xl flex items-center justify-center z-[45] shadow-md" aria-label="Quitter la partie"><i class="ph-bold ph-sign-out text-sm"></i></button>
         </div>
         <!-- STATS -->
         <div id="hudStatsBar" class="w-full py-2.5 px-3 rounded-2xl glass-panel grid grid-cols-4 items-center text-center text-xs font-mono shadow-lg flex-shrink-0">
@@ -450,19 +449,19 @@
           <button type="button" onclick="stepSac(1)" class="deck-arrow right-2" aria-label="Carte suivante"><i class="ph-bold ph-caret-right"></i></button>
         </div>
         <div id="sacDots" class="deck-dots sac-dots"></div>
-        <div class="px-4 pb-3"><button type="button" class="ally-ghost" onclick="closeSac()">Fermer le sac</button></div>
+        <div class="px-4 pb-3"><button type="button" class="btn-close ally-ghost" onclick="closeSac()">Fermer le sac</button></div>
       </div>
       <!-- Carte zoomée avec ses boutons -->
       <div id="sacZoom" class="sac-zoom hidden" onclick="if (event.target === this) closeSacZoom()">
         <div id="sacZoomCard" class="sac-zoom-card"></div>
         <div id="sacZoomActions" class="sac-zoom-actions"></div>
-        <button type="button" class="ally-ghost sac-zoom-back" onclick="closeSacZoom()">Retour au sac</button>
+        <button type="button" class="btn-close ally-ghost sac-zoom-back" onclick="closeSacZoom()">Retour au sac</button>
       </div>
     </div>
 
     <!-- ================= 1. MODALE BOUTIQUE ARMURERIE ================= -->
     <div id="modalArmoryShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end armory-bg">
-      <button onclick="closeModal('modalArmoryShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
+      <button onclick="closeModal('modalArmoryShop')" class="btn-close absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="armoryPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
@@ -478,13 +477,13 @@
           <div id="armoryCardsContainer" class="deck-stage"></div>
           <button type="button" onclick="stepArmoryDeck(1)" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-        <button onclick="closeModal('modalArmoryShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter l'Armurerie</button>
+        <button onclick="closeModal('modalArmoryShop')" class="btn-close w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter l'Armurerie</button>
       </div>
     </div>
 
     <!-- ================= 2. MODALE NIGHTCLUB ================= -->
     <div id="modalNightclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end nightclub-bg">
-      <button onclick="closeModal('modalNightclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
+      <button onclick="closeModal('modalNightclubShop')" class="btn-close absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="nightclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
@@ -496,13 +495,13 @@
           <div id="nightclubStackContainer" class="deck-stage"></div>
           <button type="button" onclick="toggleNightclubStackCard()" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-        <button onclick="closeModal('modalNightclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Nightclub</button>
+        <button onclick="closeModal('modalNightclubShop')" class="btn-close w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Nightclub</button>
       </div>
     </div>
 
     <!-- ================= 3. MODALE SPORTCLUB ================= -->
     <div id="modalSportclubShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end sportclub-bg">
-      <button onclick="closeModal('modalSportclubShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
+      <button onclick="closeModal('modalSportclubShop')" class="btn-close absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="sportclubPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
@@ -514,13 +513,13 @@
           <div id="sportclubStackContainer" class="deck-stage"></div>
           <button type="button" onclick="toggleSportclubStackCard()" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-        <button onclick="closeModal('modalSportclubShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Sportclub</button>
+        <button onclick="closeModal('modalSportclubShop')" class="btn-close w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Sportclub</button>
       </div>
     </div>
 
     <!-- ================= 4. MODALE CONCESSIONNAIRE ================= -->
     <div id="modalDealerShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end dealer-bg">
-      <button onclick="closeModal('modalDealerShop')" class="absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
+      <button onclick="closeModal('modalDealerShop')" class="btn-close absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
       <div class="w-full flex flex-col gap-2.5">
         <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
           <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="dealerPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
@@ -532,7 +531,7 @@
           <div id="dealerCardsContainer" class="deck-stage"></div>
           <button type="button" onclick="stepDealerDeck(1)" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-        <button onclick="closeModal('modalDealerShop')" class="w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Concessionnaire</button>
+        <button onclick="closeModal('modalDealerShop')" class="btn-close w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Concessionnaire</button>
       </div>
     </div>
 
@@ -560,7 +559,7 @@
       <div class="ally-content">
         <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
           <span>Manche <span id="fightRound">1</span></span>
-          <span class="flex items-center gap-2"><span id="fightChip" class="ally-chip"></span><button type="button" id="fightAbort" onclick="abortCombat()" class="fight-x" aria-label="Fermer"><i class="ph-bold ph-x"></i></button></span>
+          <span class="flex items-center gap-2"><span id="fightChip" class="ally-chip"></span><button type="button" id="fightAbort" onclick="abortCombat()" class="btn-close fight-x" aria-label="Fermer"><i class="ph-bold ph-x"></i></button></span>
         </div>
         <div class="flex-1"></div>
         <div id="fightBottom" class="ally-bottom"></div>
@@ -643,7 +642,7 @@
         <div class="px-4 pb-4">
           <div class="flex items-center gap-2 flex-wrap min-h-[32px]"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Jouées :</span><span id="deckPicked" class="flex items-center gap-1.5 flex-wrap"></span></div>
           <div id="deckStat" class="deck-stat mt-2"></div>
-          <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="ally-ghost" onclick="closeItemDeck()">Retour</button><button type="button" id="btnConfirmCombatItems" class="ally-cta deck-cta" onclick="confirmCombatItems()">Choisis une carte</button></div>
+          <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="btn-close ally-ghost" onclick="closeItemDeck()">Retour</button><button type="button" id="btnConfirmCombatItems" class="ally-cta deck-cta" onclick="confirmCombatItems()">Choisis une carte</button></div>
         </div>
       </div>
     </div>
@@ -705,7 +704,7 @@
               <button type="button" id="btnPayWithCumul" onclick="confirmPaymentSource('split')" class="pay-cta mt-2">Payer</button>
             </div>
           </div>
-          <button type="button" onclick="closeModal('modalPaymentChoice')" class="pay-ghost mt-3">Annuler</button>
+          <button type="button" onclick="closeModal('modalPaymentChoice')" class="btn-close pay-ghost mt-3">Annuler</button>
         </div>
       </div>
     </div>
@@ -759,7 +758,7 @@
           <span>Manche <span id="qgRound">1</span></span>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-1 rounded-full bg-sky-600 text-white text-[10px] font-black"><i class="ph-fill ph-vault"></i> Coffre du QG</span>
-            <button onclick="closeModal('modalTransfer')" class="w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-slate-200" aria-label="Fermer"><i class="ph-bold ph-x text-xs"></i></button>
+            <button onclick="closeModal('modalTransfer')" class="btn-close w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-slate-200" aria-label="Fermer"><i class="ph-bold ph-x text-xs"></i></button>
           </div>
         </div>
         <h2 id="qgHeadline" class="font-anton qg-head px-4 mt-2">À L’ABRI.</h2>
@@ -813,7 +812,7 @@
           <span>Manche <span id="scanRound">1</span></span>
           <div class="flex items-center gap-2">
             <span onclick="tapScannerTitle()" class="px-2.5 py-1 rounded-full bg-amber-500 text-black text-[10px] font-black"><i class="ph-bold ph-qr-code"></i> Scanner</span>
-            <button onclick="closeQrScannerModal()" class="w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-slate-200" aria-label="Fermer"><i class="ph-bold ph-x text-xs"></i></button>
+            <button onclick="closeQrScannerModal()" class="btn-close w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-slate-200" aria-label="Fermer"><i class="ph-bold ph-x text-xs"></i></button>
           </div>
         </div>
         <div class="flex-1"></div>
@@ -824,7 +823,7 @@
             <label class="scan-btn cursor-pointer"><i class="ph-bold ph-image"></i><span>Photo</span>
               <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
             <button type="button" id="btnQrTorch" onclick="toggleQrTorch()" class="scan-btn" disabled><i class="ph-bold ph-flashlight"></i><span>Lampe</span></button>
-            <button type="button" onclick="closeQrScannerModal()" class="scan-btn"><i class="ph-bold ph-x"></i><span>Fermer</span></button>
+            <button type="button" onclick="closeQrScannerModal()" class="btn-close scan-btn"><i class="ph-bold ph-x"></i><span>Fermer</span></button>
           </div>
           <div id="qrTestButtons" class="hidden mt-3 grid grid-cols-2 gap-1.5 text-[10px] font-mono max-h-40 overflow-y-auto">
           <button onclick='processQrPayload("{\"t\":\"armurerie\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-400 font-bold border border-rose-500/40">🔫 Boutique Armurerie</button>
@@ -944,7 +943,7 @@
           <div id="talkieDice" class="talkie-dice"></div>
           <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mt-3 mb-2">Direction</div>
           <div id="talkieDirs" class="talkie-dirs"></div>
-          <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="ally-ghost" onclick="closeTalkie()">Annuler</button><button type="button" id="talkieGo" class="police-cta" style="margin-top:0" onclick="sendTalkieOrder()">Envoyer l’ordre</button></div>
+          <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="btn-close ally-ghost" onclick="closeTalkie()">Annuler</button><button type="button" id="talkieGo" class="police-cta" style="margin-top:0" onclick="sendTalkieOrder()">Envoyer l’ordre</button></div>
         </div>
       </div>
     </div>
