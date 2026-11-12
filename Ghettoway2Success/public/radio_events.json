@@ -459,6 +459,78 @@
       }
     },
     {
+      "id": "rad_informant_drugs",
+      "title": "Balance chez les dealers",
+      "impact": "Votez : contrôle de drogue pour le plus désigné",
+      "desc": "Chaque Caïd désigne en secret un rival sur la page Flash Radio. Le plus désigné subit tout de suite un contrôle de drogue : 50 % la police ne trouve rien, 50 % elle trouve (égalité au vote : tirage au sort).",
+      "effectType": "INFORMANT",
+      "effectVal": 0,
+      "policeTarget": "drugs",
+      "message": "Quelqu'un a balancé un dealer aux stups… votez pour celui qui va se faire retourner les poches !",
+      "rule": {
+        "big": "Vote",
+        "tone": "malus",
+        "label": "contrôle de drogue",
+        "sub": "pour le plus désigné, tout de suite : 50 % rien, 50 % saisie",
+        "rows": [
+          [
+            "ph-leaf",
+            "Contrôle de drogue",
+            "",
+            "50 / 50"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_informant_weapons",
+      "title": "Balance sur un trafic d'armes",
+      "impact": "Votez : contrôle d'armes pour le plus désigné",
+      "desc": "Chaque Caïd désigne en secret un rival sur la page Flash Radio. Le plus désigné subit tout de suite un contrôle d'armes : 50 % la police ne trouve rien, 50 % elle trouve (égalité au vote : tirage au sort).",
+      "effectType": "INFORMANT",
+      "effectVal": 0,
+      "policeTarget": "weapons",
+      "message": "Une balance parle d'armes qui circulent dans la cité… à vous de dire qui est chargé !",
+      "rule": {
+        "big": "Vote",
+        "tone": "malus",
+        "label": "contrôle d'armes",
+        "sub": "pour le plus désigné, tout de suite : 50 % rien, 50 % saisie",
+        "rows": [
+          [
+            "ph-knife",
+            "Contrôle d'armes",
+            "",
+            "50 / 50"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_informant_pimp",
+      "title": "Balance chez les macs",
+      "impact": "Votez : l’escort en transit du plus désigné est contrôlée",
+      "desc": "Chaque Caïd désigne en secret un rival sur la page Flash Radio. Le plus désigné subit tout de suite un contrôle des escorts : 50 % la police ne trouve rien, 50 % elle trouve (égalité au vote : tirage au sort).",
+      "effectType": "INFORMANT",
+      "effectVal": 0,
+      "policeTarget": "prostitute",
+      "message": "Une balance a vu des filles traverser le quartier… votez pour le mac qui va se faire serrer !",
+      "rule": {
+        "big": "Vote",
+        "tone": "malus",
+        "label": "contrôle des escorts",
+        "sub": "pour le plus désigné, tout de suite : 50 % rien, 50 % saisie",
+        "rows": [
+          [
+            "ph-high-heel",
+            "Contrôle des escorts",
+            "",
+            "50 / 50"
+          ]
+        ]
+      }
+    },
+    {
       "id": "rad_second_patrol",
       "title": "Trop de criminalité",
       "impact": "Une 2e voiture de patrouille, pour toute la partie",

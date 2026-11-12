@@ -213,7 +213,7 @@ if (socket) {
     await informantResultScreen(r);
     if (r.targetToken !== myPlayerToken) return;
     if (document.getElementById('page-5').classList.contains('active')) navTo('page-6');
-    await triggerPoliceInspection(true);
+    await triggerPoliceInspection(true, r.policeTarget);
   });
   socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId }) => {
     if (serverPacts) nonAggressionPacts = serverPacts;

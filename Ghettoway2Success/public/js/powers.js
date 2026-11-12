@@ -298,10 +298,11 @@ async function informantResultScreen(r) {
   const img = me ? getMyCaid().imageFile : allyCaidImg(rival && rival.caidId, r.targetCaid);
   const stage = `<div class="pow-solo">${powAv(img, me ? 'Toi' : r.targetCaid)}<div class="pow-stamp">BALANCÉ</div></div>`;
   const votes = n => `${n} vote${n > 1 ? 's' : ''}`;
+  const what = { drugs: 'de drogue', weapons: 'd’armes', prostitute: 'des escorts' }[r.policeTarget] || 'de police';
   const rows = r.tally.map(t => powRow('ph-hand-pointing', escapeHtml(t.token === myPlayerToken ? 'Toi' : t.caidName), votes(t.votes))).join('<div class="mt-2"></div>')
     + (r.tie ? `<div class="mt-2">${powRow('ph-shuffle', 'Égalité', 'tirage au sort')}</div>` : '');
   const bottom = `${rows}
-    <div class="text-center text-[11px] font-bold ${me ? 'text-rose-300' : 'text-slate-400'} mt-3">${me ? 'Les keufs débarquent : contrôle immédiat !' : `${escapeHtml(r.targetCaid)} se fait contrôler tout de suite.`}</div>
+    <div class="text-center text-[11px] font-bold ${me ? 'text-rose-300' : 'text-slate-400'} mt-3">${me ? `Les keufs débarquent : contrôle ${what} immédiat !` : `${escapeHtml(r.targetCaid)} subit un contrôle ${what} tout de suite.`}</div>
     <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">${me ? 'Subir le contrôle' : 'OK'}</button>`;
   buzz(me ? [80, 60, 120] : 60);
   return powRender('vote-result', INFORMANT_SCREEN, powChipHtml('ph-siren', 'Résultat du vote'), informantHead(''), stage, bottom);

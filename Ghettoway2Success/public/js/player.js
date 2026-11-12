@@ -80,9 +80,11 @@ async function depositProstituteToSafe() {
 }
 // Capacités spéciales : voir js/powers.js
 
-// informant : contrôle imposé par le Flash Radio « Une balance dans le quartier », sans confirmation, dès le résultat
-// du vote, même hors de son tour (pas de fin de tour forcée alors)
-async function triggerPoliceInspection(informant = false) {
+// informant : contrôle imposé par le Flash Radio « Une balance… », sans confirmation, dès le résultat du vote,
+// même hors de son tour (pas de fin de tour forcée alors). focus : ce que la balance a dénoncé (drogue, armes,
+// escort en transit) → contrôle ciblé à 50 % rien / 50 % trouvé.
+const POLICE_FOCUS = { drugs: 'DRUGS_FOUND', weapons: 'WEAPONS_FOUND', prostitute: 'PROSTITUTE_FOUND' };
+async function triggerPoliceInspection(informant = false, focus = null) {
   if (!informant && !isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   if (!informant && !await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
 
@@ -98,22 +100,24 @@ async function triggerPoliceInspection(informant = false) {
     }
   }
 
-  // 30 % rien, le reste partagé entre drogue et armes (Festival en ville : 15 % rien)
+  // Chances : 30 % rien, le reste partagé entre drogue et armes (Festival en ville : 15 % rien) ;
+  // contrôle ciblé par une balance : 50 % rien, 50 % ce qui a été dénoncé
+  const target = POLICE_FOCUS[focus];
   const clean = getRadioField('policeClean', 0.30);
-  const r = Math.random();
-  let pick = 'CLEAN';
-  if (r < clean) pick = 'CLEAN';
-  else if (r < clean + (1 - clean) / 2) pick = 'DRUGS_FOUND';
-  else pick = 'WEAPONS_FOUND';
+  const odds = target ? { CLEAN: 0.5, [target]: 0.5 } : { CLEAN: clean, DRUGS_FOUND: (1 - clean) / 2, WEAPONS_FOUND: (1 - clean) / 2 };
+  let r = Math.random(), pick = 'CLEAN';
+  for (const [k, p] of Object.entries(odds)) { pick = k; if ((r -= p) < 0) break; }
 
   const weapons = [localPlayer.equipped.weapon, ...localPlayer.inventory.filter(it => it && it.type === 'WEAPON')].filter(Boolean);
   const drugs = localPlayer.drugs;
+  const prostitute = localPlayer.prostituteInTransit;
   const arrests = localPlayer.arrests || 0;
-  const caught = (pick === 'DRUGS_FOUND' && drugs > 0) || (pick === 'WEAPONS_FOUND' && weapons.length > 0);
+  const caught = (pick === 'DRUGS_FOUND' && drugs > 0) || (pick === 'WEAPONS_FOUND' && weapons.length > 0) || (pick === 'PROSTITUTE_FOUND' && !!prostitute);
 
   // La saisie est appliquée tout de suite (un rechargement de page ne l'annule pas), l'écran raconte ensuite la scène
   if (caught) {
     if (pick === 'DRUGS_FOUND') localPlayer.drugs = 0;
+    else if (pick === 'PROSTITUTE_FOUND') localPlayer.prostituteInTransit = null;
     else {
       localPlayer.equipped.weapon = null;
       localPlayer.inventory = localPlayer.inventory.filter(it => !it || it.type !== 'WEAPON');
@@ -122,16 +126,25 @@ async function triggerPoliceInspection(informant = false) {
     refreshHud();
   }
 
-  await showPoliceScreen({ pick, caught, drugs, weapons, arrests });
+  await showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds });
   if (caught && isMyTurnToPlay) endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
 }
 
 // Écran plein écran du contrôle : la patrouille arrive, tire au sort ce qu'elle cherche, puis le verdict
-function showPoliceScreen({ pick, caught, drugs, weapons, arrests }) {
+function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds }) {
   const scr = document.getElementById('policeScreen');
   const caid = getMyCaid();
   const cta = document.getElementById('policeCta');
-  const cards = [...document.querySelectorAll('#policeDraw .police-card')];
+  // Seules les cartes possibles sont tirées, avec leurs vraies chances (Festival, contrôle ciblé d'une balance)
+  const allCards = [...document.querySelectorAll('#policeDraw .police-card')];
+  allCards.forEach(c => {
+    const p = odds[c.dataset.pick];
+    c.classList.toggle('hidden', p === undefined);
+    if (p !== undefined) c.querySelector('small').innerText = `${Math.round(p * 100)}%`;
+  });
+  const cards = allCards.filter(c => odds[c.dataset.pick] !== undefined);
+  document.getElementById('policeDraw').style.gridTemplateColumns = `repeat(${cards.length}, 1fr)`;
+  const prName = prostitute ? (prostitute.name || 'Escort') : '';
   const weaponNames = weapons.map(w => w.name).join(', ');
   const row = (icon, label, before, after, note) => `<div class="police-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}${note ? `<small>${escapeHtml(note)}</small>` : ''}</span>${before !== '' ? `<span class="bef">${before}</span><i class="ph-bold ph-arrow-right text-slate-500 text-xs"></i>` : ''}<span class="aft">${after}</span></div>`;
   const setRows = html => {
@@ -139,7 +152,11 @@ function showPoliceScreen({ pick, caught, drugs, weapons, arrests }) {
     box.innerHTML = html;
     [...box.children].forEach((el, i) => el.style.animationDelay = `${0.15 + i * 0.1}s`);
   };
-  const searched = pick === 'DRUGS_FOUND' ? 'de la drogue' : 'des armes';
+  const searched = { DRUGS_FOUND: 'de la drogue', WEAPONS_FOUND: 'des armes', PROSTITUTE_FOUND: 'ton escort' }[pick];
+  // Ce que tu as sur toi, pour chaque chose que la patrouille peut chercher
+  const onYou = () => (odds.DRUGS_FOUND !== undefined ? row('ph-leaf', 'Drogue sur toi', '', `${drugs} kg`) : '')
+    + (odds.WEAPONS_FOUND !== undefined ? row('ph-knife', 'Armes sur toi', '', weapons.length ? `${weapons.length}` : 'aucune', weaponNames) : '')
+    + (odds.PROSTITUTE_FOUND !== undefined ? row('ph-high-heel', 'Escort en transit', '', prostitute ? 'oui' : 'aucune', prName) : '');
 
   document.getElementById('policeRound').innerText = currentSession.round || 1;
   document.getElementById('policeCaidImg').src = caid.imageFile;
@@ -166,15 +183,12 @@ function showPoliceScreen({ pick, caught, drugs, weapons, arrests }) {
     const land = () => {
       cards.forEach((c, k) => c.classList.toggle('on', k === target));
       document.getElementById('policeDrawLabel').innerText = 'Ils cherchent :';
-      setRows(
-        row('ph-leaf', 'Drogue sur toi', '', `${drugs} kg`) +
-        row('ph-knife', 'Armes sur toi', '', weapons.length ? `${weapons.length}` : 'aucune', weaponNames)
-      );
+      setRows(onYou());
       cta.disabled = false;
     };
     const tick = () => {
       if (i >= steps) return land();
-      cards.forEach((c, k) => c.classList.toggle('on', k === i % 3));
+      cards.forEach((c, k) => c.classList.toggle('on', k === i % cards.length));
       i++;
       setTimeout(tick, 70 + i * 9);
     };
@@ -195,15 +209,15 @@ function showPoliceScreen({ pick, caught, drugs, weapons, arrests }) {
       if (!caught) {
         setRows(
           (pick === 'CLEAN' ? row('ph-magnifying-glass', 'Contrôle de routine', '', 'R.A.S.') : row('ph-magnifying-glass', `Ils cherchaient ${searched}`, '', 'rien trouvé')) +
-          row('ph-person-simple-walk', 'Ton tour', '', 'continue')
+          (isMyTurnToPlay ? row('ph-person-simple-walk', 'Ton tour', '', 'continue') : '')
         );
       } else {
         setRows(
-          (pick === 'DRUGS_FOUND'
-            ? row('ph-leaf', 'Drogue sur toi', `${drugs} kg`, '0 kg', 'saisie')
+          (pick === 'DRUGS_FOUND' ? row('ph-leaf', 'Drogue sur toi', `${drugs} kg`, '0 kg', 'saisie')
+            : pick === 'PROSTITUTE_FOUND' ? row('ph-high-heel', 'Escort en transit', '1', '0', `${prName} embarquée par la police`)
             : row('ph-knife', 'Armes sur toi', `${weapons.length}`, '0', `saisies : ${weaponNames}`)) +
           row('ph-lock-key', 'Arrestations', `${arrests}`, `${arrests + 1}`) +
-          row('ph-hourglass-simple', 'Ton tour', 'en cours', 'terminé')
+          (isMyTurnToPlay ? row('ph-hourglass-simple', 'Ton tour', 'en cours', 'terminé') : '')
         );
       }
       cta.innerText = caught ? 'Direction le poste' : 'Repartir';

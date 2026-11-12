@@ -383,6 +383,7 @@ function resolveInformantVote(room) {
     targetToken,
     targetCaid: nameOf(targetToken),
     tie: tied.length > 1,
+    policeTarget: room.currentRadio.policeTarget || null, // balance ciblée : drogue, armes ou escort
     tally: Object.keys(count).sort((a, b) => count[b] - count[a]).map(t => ({ token: t, caidName: nameOf(t), votes: count[t] }))
   };
   vote.result = result;
