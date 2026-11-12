@@ -1,5 +1,10 @@
 // Fenêtres système (alertes, confirmations), navigation entre écrans
 
+// Pas de copier / couper / coller dans l'appli, ni de menu au toucher long, ni d'image qu'on fait glisser
+['copy', 'cut', 'paste'].forEach(type => document.addEventListener(type, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+
 // PWA : active l'installation sur l'écran d'accueil (voir sw.js)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
