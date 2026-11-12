@@ -39,22 +39,62 @@ const itemRow = (icon, label, after) => `<div class="police-row find-row"><i cla
 // CARTE JOUÉE : la carte grandit, tampon « JOUÉE » avec choc, puis les effets mis en évidence
 // rows : [[icône, libellé, valeur], ...] ; se résout quand le joueur touche « Continuer »
 // =========================================================================
-// opts : { kicker (bandeau du haut), stamp (icône du tampon rond) } — par défaut « Carte jouée » et une coche
+// it : une carte, ou plusieurs (pile du combat : elles tombent une à une, chacune avec son tampon)
+// opts : { kicker (bandeau du haut), stamp (icône du tampon rond), face (HTML de la carte, ex. équipement de boutique),
+//          action: { icon, label, run } (bouton en plus de « Continuer »), flyToSac (la carte file vers le bouton Sac),
+//          autoClose (ms : se ferme toute seule, sans bouton ni effets — ex. avant le ticket à gratter) }
 function showCardPlayed(it, rows, title, opts = {}) {
+  const items = Array.isArray(it) ? it : [it];
+  const n = items.length;
   return msgQueue(done => {
     const scr = document.getElementById('playedScreen');
-    const art = itemArt(it);
-    document.getElementById('playedCard').innerHTML = (art ? `<img src="${art}" alt="${escapeHtml(it.name || '')}">` : findFallback(it)) + `<b class="played-stamp ${opts.stamp ? 'alt' : ''}"><i class="ph-bold ${opts.stamp || 'ph-check'}"></i></b>`;
-    document.getElementById('playedKicker').innerHTML = `<i class="ph-fill ph-cards"></i> ${escapeHtml(opts.kicker || 'Carte jouée')}`;
-    document.getElementById('playedTitle').innerText = title || it.name || 'Objet';
+    const face = x => opts.face || (itemArt(x) ? `<img src="${itemArt(x)}" alt="${escapeHtml(x.name || '')}">` : findFallback(x));
+    const stamp = `<b class="played-stamp ${opts.stamp ? 'alt' : ''}"><i class="ph-bold ${opts.stamp || 'ph-check'}"></i></b>`;
+    const box = document.getElementById('playedCard');
+    box.classList.toggle('multi', n > 1);
+    box.innerHTML = n > 1 ? items.map((x, i) => `<div class="played-one" style="--i:${i};--n:${n}">${face(x)}${stamp}</div>`).join('') : face(items[0]) + stamp;
+    const lag = (n - 1) * 0.45; // chaque carte de plus arrive 0,45 s après la précédente
+    scr.style.setProperty('--lag', `${lag}s`);
+    document.getElementById('playedKicker').innerHTML = `<i class="ph-fill ph-cards"></i> ${escapeHtml(opts.kicker || (n > 1 ? 'Cartes jouées' : 'Carte jouée'))}`;
+    document.getElementById('playedTitle').innerText = title || items[0].name || 'Objet';
     document.getElementById('playedRows').innerHTML = rows.map(([icon, label, value], i) =>
-      `<div class="police-row played-row" style="animation-delay:${1.15 + i * 0.18}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${value}</span></div>`).join('');
-    document.getElementById('playedCta').onclick = () => { scr.classList.add('hidden'); scr.classList.remove('show'); done(); };
+      `<div class="police-row played-row" style="animation-delay:${1.15 + lag + i * 0.18}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${value}</span></div>`).join('');
+    const act = document.getElementById('playedAct'), cta = document.getElementById('playedCta');
+    const close = () => {
+      if (opts.flyToSac) flyCardToSac(box);
+      scr.classList.add('hidden');
+      scr.classList.remove('show');
+    };
+    act.classList.toggle('hidden', !opts.action);
+    cta.className = opts.action ? 'ally-ghost mt-2' : 'find-cta mt-3';
+    if (opts.action) {
+      act.innerHTML = `<i class="ph-bold ${opts.action.icon}"></i> ${escapeHtml(opts.action.label)}`;
+      act.onclick = () => { close(); done(); opts.action.run(); };
+    }
+    cta.onclick = () => { close(); done(); };
+    scr.classList.toggle('auto', !!opts.autoClose);
+    if (opts.autoClose) setTimeout(() => { close(); done(); }, opts.autoClose);
     scr.classList.remove('hidden', 'show');
     void scr.offsetWidth;
     scr.classList.add('show');
-    setTimeout(() => buzz(70), 850); // le tampon se pose
+    items.forEach((_, i) => setTimeout(() => buzz(70), 850 + i * 450)); // chaque tampon se pose
   });
+}
+// Après un achat : une copie de la carte rapetisse et file vers le bouton Sac de l'écran principal
+function flyCardToSac(box) {
+  const target = document.getElementById('btnOpenSac');
+  const from = box.getBoundingClientRect(), to = target && target.getBoundingClientRect();
+  if (!to || !to.width) return;
+  const ghost = box.cloneNode(true);
+  ghost.removeAttribute('id');
+  ghost.className = 'played-card fly-to-sac';
+  Object.assign(ghost.style, { left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px` });
+  document.body.appendChild(ghost);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    ghost.style.transform = `translate(${to.left + 30 - from.left - from.width / 2}px, ${to.top + to.height / 2 - from.top - from.height / 2}px) scale(0.12)`;
+    ghost.style.opacity = '0.2';
+  }));
+  setTimeout(() => ghost.remove(), 750);
 }
 
 // =========================================================================
@@ -92,10 +132,10 @@ function openScratch(win, prize) {
 // Couche argentée : on l'efface au doigt (ou à la souris) ; au-delà de 60 % grattés, tout se découvre
 function setupScratchCanvas() {
   const cv = document.getElementById('scratchCanvas');
-  const box = cv.parentElement.getBoundingClientRect();
+  const box = cv.parentElement; // taille sans la rotation d'arrivée du ticket
   const dpr = window.devicePixelRatio || 1;
-  cv.width = Math.max(1, Math.round(box.width * dpr));
-  cv.height = Math.max(1, Math.round(box.height * dpr));
+  cv.width = Math.max(1, Math.round(box.offsetWidth * dpr));
+  cv.height = Math.max(1, Math.round(box.offsetHeight * dpr));
   cv.classList.remove('gone');
   const ctx = cv.getContext('2d');
   ctx.globalCompositeOperation = 'source-over';
@@ -114,7 +154,7 @@ function setupScratchCanvas() {
   ctx.lineCap = ctx.lineJoin = 'round';
   ctx.lineWidth = 24 * dpr;
   let last = null, moves = 0, finished = false;
-  const at = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr]; };
+  const at = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * cv.width / r.width, (e.clientY - r.top) * cv.height / r.height]; };
   const cleared = () => {
     const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
     let n = 0, t = 0;
@@ -431,9 +471,14 @@ function deckOpponent() {
   return (connectedRivals || []).find(r => (currentDuelInfo.opponentSocketId && r.socketId === currentDuelInfo.opponentSocketId) || allyRivalName(r) === name);
 }
 
+const DECK_ICON = { heal: 'ph-heart', stray_dog: 'ph-dog', def_malus_round: 'ph-shield-slash', null_enemy_weapon: 'ph-shield', double_weapon_atk: 'ph-crosshair', double_muscles_atk: 'ph-barbell', bonus_combat_atk: 'ph-sword' };
 function confirmCombatItems() {
   const picked = deckItems.filter(it => deckPicked.has(it.id) && !deckBlocked(it));
   if (!picked.length) return;
+  // Ce que chaque carte rapporte et la stat avant, pour l'écran des cartes jouées
+  const atk = deckAttacking();
+  const rows = picked.map(it => [DECK_ICON[isHealItem(it) ? 'heal' : it.eff] || 'ph-cards', escapeHtml(it.name), deckGain(it) || '✓']);
+  const before = atk ? getTotalAtk() : getTotalDef();
   const playedNames = [];
   picked.forEach(it => {
     const idx = localPlayer.inventory.indexOf(it);
@@ -462,6 +507,8 @@ function confirmCombatItems() {
   }
   fightLog(`✔️ Joué : ${escapeHtml(playedNames.join(', '))}`);
   updateArenaLiveStats();
+  const after = atk ? getTotalAtk() : getTotalDef();
+  showCardPlayed(picked, rows.concat([[atk ? 'ph-sword' : 'ph-shield', atk ? 'Ton attaque' : 'Ta défense', `${before} → ${after}`]]), picked.length > 1 ? `${picked.length} CARTES JOUÉES` : picked[0].name);
 }
 
 // =========================================================================

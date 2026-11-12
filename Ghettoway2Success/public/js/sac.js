@@ -74,11 +74,13 @@ function sacSlotsHtml() {
   }).join('');
 }
 
+// Carte de boutique : image en haut, nom, bonus, réplique (équipement, Lascar, Prostituée)
+const shopCardFace = ({ img, name, bonus, desc, cls }) => `<div class="sac-gear ${cls || ''}"><img src="${img}" alt=""><div class="b"><h4>${escapeHtml(name)}</h4><span>${bonus}</span><p>${escapeHtml(desc || '')}</p></div></div>`;
 // Face de la carte : carte Fouille de l'objet, ou carte de boutique de l'équipement
 function sacFace(it) {
   if (isGear(it)) {
     const g = gearInfo(it);
-    return `<div class="sac-gear ${g.slot.cls}"><img src="${g.img}" alt=""><div class="b"><h4>${escapeHtml(it.name)}</h4><span>${g.bonus}${g.firearm ? ' · 🔥 Feu' : ''}</span><p>${escapeHtml(g.desc)}</p></div></div>`;
+    return shopCardFace({ img: g.img, name: it.name, bonus: `${g.bonus}${g.firearm ? ' · 🔥 Feu' : ''}`, desc: g.desc, cls: g.slot.cls });
   }
   const art = itemArt(it);
   return art ? `<img class="deck-face" src="${art}" alt="${escapeHtml(it.name || '')}" draggable="false">`

@@ -373,6 +373,8 @@ async function useItem(idx) {
     const win = Math.random() < 1 / 3, prize = it.val || 5000;
     if (win) localPlayer.pocketCash += prize;
     refreshHud();
+    // La carte du ticket se fait tamponner, puis le ticket arrive en tournant depuis le bord droit
+    await showCardPlayed(it, [], 'Ticket à gratter', { autoClose: 1500 });
     return openScratch(win, prize);
   }
   if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");

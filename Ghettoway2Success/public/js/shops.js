@@ -766,7 +766,12 @@ async function finalizePurchaseExecution(pData) {
       desc: data.desc || `Confère ${bTxt}`
     });
     refreshHud(); // objet enregistré tout de suite, sans attendre la lecture du message
-    await showAppAlert(`Rangé dans ton Sac : ${data.n}`, "📦 Achat Confirmé");
+    // La carte achetée en grand (tampon panier), « Équiper maintenant » ou elle file vers le Sac
+    const bought = localPlayer.inventory[localPlayer.inventory.length - 1];
+    const g = gearInfo(bought);
+    await showCardPlayed(bought, [[slot === 'WEAPON' ? 'ph-sword' : slot === 'ARMOR' ? 'ph-shield' : 'ph-moped', 'Bonus', g.bonus], ['ph-coins', 'Payé', pData.cost ? `${pData.cost.toLocaleString()} €` : 'gratuit']], data.n,
+      { kicker: 'Achat', stamp: 'ph-shopping-cart-simple', face: sacFace(bought), flyToSac: true,
+        action: { icon: 'ph-arrow-fat-up', label: 'Équiper maintenant', run: () => { const i = localPlayer.inventory.indexOf(bought); if (i >= 0) equipItemFromInventory(i); } } });
   } else if (type === 'gb') {
     const bVal = data.atk || (data.lvl === 2 ? 2 : 1);
     localPlayer.musclesOnPerson.push({
@@ -778,10 +783,15 @@ async function finalizePurchaseExecution(pData) {
       bonusLabel: `+${bVal} Atk / +${bVal} Def`
     });
     refreshHud();
-    await showAppAlert(`Lascar recruté (+${bVal} Attaque et +${bVal} Défense) !`, "💪 Recrutement");
+    const gb = SPORTCLUB_CATALOG.find(i => (i.lvl || 1) === (data.lvl || 1)) || {};
+    await showCardPlayed({ name: `Lascar Niv. ${data.lvl || 1}` }, [['ph-sword', 'Attaque', `+${bVal}`], ['ph-shield', 'Défense', `+${bVal}`]], 'LASCAR RECRUTÉ',
+      { kicker: 'Recrutement', stamp: 'ph-handshake', face: shopCardFace({ img: gb.image || 'gblvl1.jpg', name: gb.nom || `Lascar Niv. ${data.lvl || 1}`, bonus: `+${bVal} ATK / +${bVal} DÉF`, desc: gb.desc, cls: 'def' }) });
   } else if (type === 'pr') {
     localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée Niv. ${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
     refreshHud();
-    await showAppAlert("Prostituée en transit. Dépose-la au QG !", "💃 Recrutement");
+    const pr = NIGHTCLUB_CATALOG.find(i => (i.lvl || 1) === (data.lvl || 1)) || {};
+    const rev = localPlayer.prostituteInTransit.revenue;
+    await showCardPlayed({ name: localPlayer.prostituteInTransit.name }, [['ph-high-heel', 'Rente au QG', `+${rev.toLocaleString()} € / manche`], ['ph-map-pin', 'En transit', 'dépose-la au QG']], 'PROSTITUÉE RECRUTÉE',
+      { kicker: 'Recrutement', stamp: 'ph-heart', face: shopCardFace({ img: pr.image || 'plvl1.jpg', name: pr.nom || localPlayer.prostituteInTransit.name, bonus: `+${rev.toLocaleString()} € / manche`, desc: pr.desc, cls: 'veh' }) });
   }
 }
