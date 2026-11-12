@@ -425,7 +425,7 @@ test('balance : les Caïds votent, tout le monde reçoit le résultat (même hor
   await waitFor(j1, 'test_room_reset');
   j1.disconnect();
   j1 = await testRoomAs('tok_test_1');
-  j1.emit('test_set_radio', { id: 'rad_informant' });
+  j1.emit('test_set_radio', { id: 'rad_informant_drugs' });
   await waitFor(j1, 'test_radio_set');
   j1.emit('informant_vote', { targetToken: 'tok_test_1' }); // contre soi-même : refusé
   j1.emit('informant_vote', { targetToken: 'tok_test_3' });

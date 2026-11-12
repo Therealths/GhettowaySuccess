@@ -424,41 +424,6 @@
       }
     },
     {
-      "id": "rad_informant",
-      "title": "Une balance dans le quartier",
-      "impact": "Votez : le Caïd le plus désigné est contrôlé tout de suite",
-      "desc": "Chaque Caïd désigne en secret un rival sur la page Flash Radio. Celui qui a le plus de votes contre lui est contrôlé tout de suite (égalité : tirage au sort).",
-      "effectType": "INFORMANT",
-      "effectVal": 0,
-      "message": "Une balance traîne dans le quartier… à vous de choisir qui va tomber !",
-      "rule": {
-        "big": "Vote",
-        "tone": "malus",
-        "label": "balance un rival aux keufs",
-        "sub": "contrôlé tout de suite (égalité : tirage au sort)",
-        "rows": [
-          [
-            "ph-hand-pointing",
-            "Chaque Caïd désigne un rival",
-            "",
-            "1 vote"
-          ],
-          [
-            "ph-siren",
-            "Le plus de votes contre lui",
-            "",
-            "contrôlé"
-          ],
-          [
-            "ph-shuffle",
-            "Égalité",
-            "",
-            "tirage au sort"
-          ]
-        ]
-      }
-    },
-    {
       "id": "rad_informant_drugs",
       "title": "Balance chez les dealers",
       "impact": "Votez : contrôle de drogue pour le plus désigné",
