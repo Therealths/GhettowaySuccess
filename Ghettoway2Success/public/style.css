@@ -611,14 +611,14 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @media (prefers-reduced-motion: reduce) { .hosp-daze > img { animation: none !important; } }
 /* Scanner plein écran : cadre de visée doré, ligne de balayage, bandeau de ce qui a été flashé */
 .scan-screen { background: #000; overflow: hidden; color: #fff; }
-.scan-screen { --sw: min(72vw, 290px); }
-.scan-frame { position: absolute; z-index: 1; left: 50%; top: 40%; width: var(--sw); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 18px; pointer-events: none; }
+.scan-screen { --sw: min(72vw, 290px); --sy: 40%; }
+.scan-frame { position: absolute; z-index: 1; left: 50%; top: var(--sy); width: var(--sw); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 18px; pointer-events: none; }
 /* Voile sombre autour du cadre (découpe en « trou » au centre) */
 .scan-dim { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: rgba(5,6,10,0.62);
   clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0,
-    calc(50% - var(--sw) / 2) calc(40% - var(--sw) / 2), calc(50% + var(--sw) / 2) calc(40% - var(--sw) / 2),
-    calc(50% + var(--sw) / 2) calc(40% + var(--sw) / 2), calc(50% - var(--sw) / 2) calc(40% + var(--sw) / 2),
-    calc(50% - var(--sw) / 2) calc(40% - var(--sw) / 2)); }
+    calc(50% - var(--sw) / 2) calc(var(--sy) - var(--sw) / 2), calc(50% + var(--sw) / 2) calc(var(--sy) - var(--sw) / 2),
+    calc(50% + var(--sw) / 2) calc(var(--sy) + var(--sw) / 2), calc(50% - var(--sw) / 2) calc(var(--sy) + var(--sw) / 2),
+    calc(50% - var(--sw) / 2) calc(var(--sy) - var(--sw) / 2)); }
 .scan-screen[data-state="ok"] .scan-dim { background: rgba(5,6,10,0.75); }
 .scan-c { position: absolute; width: 34px; height: 34px; border: 4px solid #fbbf24; filter: drop-shadow(0 0 6px rgba(251,191,36,0.6)); }
 .scan-c.tl { left: -3px; top: -3px; border-right: 0; border-bottom: 0; border-radius: 18px 0 0 0; }
@@ -631,11 +631,11 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .scan-screen[data-state="ok"] .scan-c { border-color: #34d399; filter: drop-shadow(0 0 10px rgba(52,211,153,0.9)); }
 .scan-screen[data-state="ok"] .scan-line, .scan-screen[data-state="nocam"] .scan-line { display: none; }
 .scan-screen[data-state="nocam"] .scan-c { border-color: #475569; filter: none; }
-.scan-tape { display: none; position: absolute; z-index: 3; left: -20px; right: -20px; top: 40%; padding: 6px 0; text-align: center; font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: 0.06em; color: #04120c; background: linear-gradient(90deg, #6ee7b7, #10b981); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transform: translateY(-50%) rotate(-7deg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scan-tape { display: none; position: absolute; z-index: 3; left: -20px; right: -20px; top: var(--sy); padding: 6px 0; text-align: center; font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: 0.06em; color: #04120c; background: linear-gradient(90deg, #6ee7b7, #10b981); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transform: translateY(-50%) rotate(-7deg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scan-screen[data-state="ok"] .scan-tape { display: block; animation: scanTape 0.35s cubic-bezier(.2,1.6,.4,1) both; }
 @keyframes scanTape { from { opacity: 0; transform: translateY(-50%) rotate(-7deg) scale(1.6); } to { opacity: 1; transform: translateY(-50%) rotate(-7deg); } }
 .scan-panel { margin-bottom: 14px; }
-.scan-head { font-size: 34px; line-height: 1; text-align: center; color: #fff; }
+.scan-head { font-size: 22px; line-height: 1; text-align: center; color: #fff; }
 .scan-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 10px 0; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e2e8f0; font-size: 11px; font-weight: 900; text-transform: uppercase; }
 .scan-btn i { font-size: 20px; color: #fbbf24; }
 .scan-btn:disabled { opacity: 0.3; }

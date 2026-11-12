@@ -809,21 +809,22 @@
       </div>
       <div id="scanTape" class="scan-tape"></div>
       <div class="relative z-[2] flex flex-col h-full pointer-events-none">
-        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200 pointer-events-auto">
+        <div id="scanTop" class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200 pointer-events-auto">
           <span>Manche <span id="scanRound">1</span></span>
           <div class="flex items-center gap-2">
-            <span onclick="tapScannerTitle()" class="select-none px-2.5 py-1 rounded-full bg-amber-500 text-black text-[10px] font-black"><i class="ph-bold ph-qr-code"></i> Scanner</span>
+            <span class="px-2.5 py-1 rounded-full bg-amber-500 text-black text-[10px] font-black"><i class="ph-bold ph-qr-code"></i> Scanner</span>
             <button onclick="closeQrScannerModal()" class="w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-slate-200" aria-label="Fermer"><i class="ph-bold ph-x text-xs"></i></button>
           </div>
         </div>
         <div class="flex-1"></div>
-        <div class="police-panel scan-panel pointer-events-auto">
+        <div id="scanPanel" class="police-panel scan-panel pointer-events-auto">
           <h2 class="font-anton scan-head">FLASH UN QR CODE</h2>
           <div id="qrScannerStatus" class="scan-status text-[11px] text-center font-bold text-amber-300 mt-1">Démarrage de la caméra…</div>
-          <div class="grid grid-cols-3 gap-2 mt-3">
+          <div class="grid grid-cols-4 gap-2 mt-3">
             <label class="scan-btn cursor-pointer"><i class="ph-bold ph-image"></i><span>Photo</span>
               <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
             <button type="button" id="btnQrTorch" onclick="toggleQrTorch()" class="scan-btn" disabled><i class="ph-bold ph-flashlight"></i><span>Lampe</span></button>
+            <button type="button" id="btnQrTests" onclick="toggleQrTestMode()" class="scan-btn"><i class="ph-bold ph-flask"></i><span>Tests</span></button>
             <button type="button" onclick="closeQrScannerModal()" class="scan-btn"><i class="ph-bold ph-x"></i><span>Fermer</span></button>
           </div>
           <div id="qrTestButtons" class="hidden mt-3 grid grid-cols-2 gap-1.5 text-[10px] font-mono max-h-40 overflow-y-auto">

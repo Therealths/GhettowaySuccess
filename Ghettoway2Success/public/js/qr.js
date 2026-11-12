@@ -109,23 +109,33 @@ async function openQrScannerModal() {
   scr.classList.remove('hidden');
   applyQrTestMode();
   await startLiveQrCamera();
+  placeScanFrame();
 }
 
-// Boutons de test cachés : 5 appuis rapides sur le titre « Scanner Tactique » les affichent (ou les recachent)
-let scannerTitleTaps = [];
+// Raccourcis de test (faux QR codes) : le bouton « Tests » les affiche ou les cache, le choix est retenu
+const qrTestOn = () => { try { return localStorage.getItem('g2s_test_mode') === '1'; } catch (e) { return false; } };
 function applyQrTestMode() {
-  document.getElementById('qrTestButtons').classList.toggle('hidden', localStorage.getItem('g2s_test_mode') !== '1');
+  document.getElementById('qrTestButtons').classList.toggle('hidden', !qrTestOn());
+  document.getElementById('btnQrTests').classList.toggle('on', qrTestOn());
+  placeScanFrame();
 }
-function tapScannerTitle() {
-  const now = Date.now();
-  scannerTitleTaps = scannerTitleTaps.filter(t => now - t < 2500).concat(now);
-  if (scannerTitleTaps.length < 5) return;
-  scannerTitleTaps = [];
-  const on = localStorage.getItem('g2s_test_mode') !== '1';
-  localStorage.setItem('g2s_test_mode', on ? '1' : '0');
+function toggleQrTestMode() {
+  try { localStorage.setItem('g2s_test_mode', qrTestOn() ? '0' : '1'); } catch (e) {}
   applyQrTestMode();
-  if (navigator.vibrate) navigator.vibrate(on ? [40, 60, 40] : 80);
+  buzz(40);
 }
+// Le cadre à flasher prend toute la place libre entre le haut de l'écran et le panneau du bas (toujours entier)
+function placeScanFrame() {
+  const scr = document.getElementById('modalQrScanner');
+  if (!scr || scr.classList.contains('hidden')) return;
+  const box = scr.getBoundingClientRect();
+  const top = document.getElementById('scanTop').getBoundingClientRect().bottom - box.top + 14;
+  const bottom = document.getElementById('scanPanel').getBoundingClientRect().top - box.top - 14;
+  const sw = Math.max(140, Math.min(box.width * 0.86, bottom - top, 380));
+  scr.style.setProperty('--sw', `${Math.round(sw)}px`);
+  scr.style.setProperty('--sy', `${Math.round((top + bottom) / 2)}px`);
+}
+window.addEventListener('resize', placeScanFrame);
 
 async function closeQrScannerModal() {
   qrTorchOn = false;
