@@ -300,7 +300,9 @@ async function informantResultScreen(r) {
   const votes = n => `${n} vote${n > 1 ? 's' : ''}`;
   const what = { drugs: 'de drogue', weapons: 'd’armes', prostitute: 'des escorts' }[r.policeTarget] || 'de police';
   const rows = r.tally.map(t => powRow('ph-hand-pointing', escapeHtml(t.token === myPlayerToken ? 'Toi' : t.caidName), votes(t.votes))).join('<div class="mt-2"></div>')
-    + (r.tie ? `<div class="mt-2">${powRow('ph-shuffle', 'Égalité', 'tirage au sort')}</div>` : '');
+    + (r.tie ? `<div class="mt-2">${powRow('ph-shuffle', 'Égalité', 'tirage au sort')}</div>` : '')
+    // Sur le plateau, le pion de la patrouille rejoint le Caïd balancé
+    + `<div class="mt-2">${powRow('ph-police-car', `Voiture de police déplacée sur la case ${me ? 'où tu es' : `de ${escapeHtml(allyShort(r.targetCaid))}`}`, '🚓')}</div>`;
   const bottom = `${rows}
     <div class="text-center text-[11px] font-bold ${me ? 'text-rose-300' : 'text-slate-400'} mt-3">${me ? `Les keufs débarquent : contrôle ${what} immédiat !` : `${escapeHtml(r.targetCaid)} subit un contrôle ${what} tout de suite.`}</div>
     <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">${me ? 'Subir le contrôle' : 'OK'}</button>`;

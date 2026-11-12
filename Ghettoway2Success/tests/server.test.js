@@ -446,3 +446,15 @@ test('balance : les Caïds votent, tout le monde reçoit le résultat (même hor
   assert.strictEqual((await waitFor(j1, 'informant_result')).targetToken, 'tok_test_3');
   j1.disconnect();
 });
+
+test('patrouille : le joueur actif indique un Caïd croisé, qui reçoit le contrôle ; un autre joueur ne peut pas', async () => {
+  const { players: [a, b] } = await startGame();
+  const turn = await waitFor(a, 'turn_state_updated');
+  const [active, other] = turn.activePlayerToken === a.token ? [a, b] : [b, a];
+  other.emit('patrol_control', { targetTokens: [active.token] });
+  await never(active, 'patrol_control');
+  active.emit('patrol_control', { targetTokens: [other.token, active.token] });
+  const got = await waitFor(other, 'patrol_control');
+  assert.ok(got.byCaid);
+  await never(active, 'patrol_control');
+});

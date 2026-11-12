@@ -147,6 +147,11 @@ Objets jouables en combat : `isCombatItem` (durée `combat`, Kebab, Sifflet, Can
 - Préchargement de toutes les cartes 2,5 s après l'ouverture (`preloadCardImages`).
 - Sélection de texte, copier, couper, coller et menu du toucher long bloqués (sauf la saisie dans les champs).
 
+### Patrouille croisée
+- Après le lancer de la patrouille (sauf grève ou neige, où elle ne bouge pas), le bouton « Passer la main » est remplacé par « La patrouille croise un Caïd ? Non / Oui » (`patrolAsk`). Oui → têtes de tous les Caïds présents, toi compris (`patrolPick`, plusieurs choix possibles), puis « Contrôler » (`sendPatrolControl`).
+- Les autres sont prévenus par le serveur (`patrol_control`, seulement du joueur actif, boîte aux lettres comprise) : alerte « La patrouille t'a croisé ! » puis `triggerPoliceInspection(true)`. Si le joueur actif se choisit lui-même, il est contrôlé sur place avec `endingTurn = true` (pas de seconde fin de tour), puis la main passe.
+- Balances au vote : l'écran du résultat ajoute « Voiture de police déplacée sur la case de X » (le pion de la patrouille rejoint le Caïd balancé sur le plateau).
+
 ### Écran principal (`page-6`)
 - Bandeau du Caïd (`hud-hero`) avec, en bas, `hudTurnBar` rempli par `renderHudTurnBar` (appelé par `renderTurnOrder`) : « Ton tour · Manche N » / « Tour de X » / « Allié de X », puis « puis » + portraits des Caïds qui jouent ensuite (pas encore joué, pas absents, pas alliés du tour). L'ancienne ligne « Ordre » n'existe plus (la liste `.turn-order-list` reste dans le voile « Tour de… »).
 - Stats (`hudStatsBar`, sert aussi à placer le Sac), Lascars et Escort en transit (`hud-slot`, plus de bouton QG), Flash radio.

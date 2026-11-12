@@ -205,6 +205,13 @@ if (socket) {
     startRoundPhase1();
   }
   let lastActivePlayerToken = null, lastTurnId = null;
+  // La patrouille lancée par un autre joueur t'a croisé : contrôle tout de suite (Passeport et Prière proposés)
+  socket.on('patrol_control', async ({ byCaid }) => {
+    await msgIdle();
+    await showAppAlert(`La patrouille de police t'a croisé${byCaid ? ` (lancée par ${byCaid})` : ''} !\nContrôle immédiat.`, '🚨 Patrouille');
+    if (document.getElementById('page-5').classList.contains('active')) navTo('page-6');
+    await triggerPoliceInspection(true);
+  });
   // Une balance dans le quartier : avancement du vote, puis résultat pour tous ; le Caïd désigné est contrôlé tout de suite
   socket.on('informant_vote_progress', informantProgress);
   socket.on('informant_result', async r => {

@@ -511,7 +511,11 @@ function showPatrolScreen() {
   let baseRoll, finalMove, left, rigged = false;
   const talkieFx = document.getElementById('patrolTalkie');
   talkieFx.classList.add('hidden');
-  scr.classList.remove('talkie', 'tk-bubble', 'tk-card');
+  scr.classList.remove('talkie', 'tk-bubble', 'tk-card', 'picking');
+  document.getElementById('patrolAsk').classList.add('hidden');
+  document.getElementById('patrolPick').classList.add('hidden');
+  cta.classList.remove('hidden');
+  patrolPicked = new Set();
 
   // Trop de criminalité : deux voitures, qui avancent du même lancer
   const two = (currentSession.policeCars || 1) > 1;
@@ -548,6 +552,9 @@ function showPatrolScreen() {
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
     dirBox.innerHTML = dirHtml(left ? '⬅ GAUCHE' : 'DROITE ➡', '', `Avance ${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau.`);
+    // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau
+    cta.classList.add('hidden');
+    document.getElementById('patrolAsk').classList.remove('hidden');
   };
 
   // Le dé change de face quelques fois avant de tomber
@@ -590,7 +597,44 @@ function showPatrolScreen() {
 function skipPatrolWait() {
   const scr = document.getElementById('patrolScreen');
   scr.classList.add('hidden');
-  scr.classList.remove('show', 'result');
+  scr.classList.remove('show', 'result', 'picking');
+  if (socket) socket.emit('next_player_turn');
+}
+
+// La patrouille croise un ou plusieurs Caïds (toi compris) : ils sont contrôlés tout de suite, puis la main passe
+let patrolPicked = new Set();
+function patrolPlayers() {
+  const me = getMyCaid();
+  return [{ token: myPlayerToken, name: 'Toi', img: me.imageFile }]
+    .concat((connectedRivals || []).filter(r => !r.away).map(r => ({ token: r.playerToken, name: allyShort(allyRivalName(r)), img: allyCaidImg(r.caidId, allyRivalName(r)) })));
+}
+function renderPatrolPick() {
+  document.getElementById('patrolPickList').innerHTML = patrolPlayers().map(p => `<button type="button" class="${patrolPicked.has(p.token) ? 'on' : ''}" data-token="${escapeHtml(p.token)}" onclick="togglePatrolPick(this.dataset.token)"><img src="${p.img}" alt=""><span>${escapeHtml(p.name)}</span></button>`).join('');
+  document.getElementById('patrolPickGo').disabled = !patrolPicked.size;
+}
+function openPatrolPick() {
+  document.getElementById('patrolScreen').classList.add('picking');
+  document.getElementById('patrolPick').classList.remove('hidden');
+  renderPatrolPick();
+}
+function closePatrolPick() {
+  document.getElementById('patrolScreen').classList.remove('picking');
+  document.getElementById('patrolPick').classList.add('hidden');
+}
+function togglePatrolPick(token) {
+  if (patrolPicked.has(token)) patrolPicked.delete(token); else patrolPicked.add(token);
+  buzz(20);
+  renderPatrolPick();
+}
+async function sendPatrolControl() {
+  const others = [...patrolPicked].filter(t => t !== myPlayerToken);
+  const me = patrolPicked.has(myPlayerToken);
+  if (others.length && socket) socket.emit('patrol_control', { targetTokens: others });
+  const scr = document.getElementById('patrolScreen');
+  scr.classList.add('hidden');
+  scr.classList.remove('show', 'result', 'picking');
+  // Toi aussi : contrôle tout de suite (ton tour se termine de toute façon), puis la main passe
+  if (me) await triggerPoliceInspection(true, null, true);
   if (socket) socket.emit('next_player_turn');
 }
 

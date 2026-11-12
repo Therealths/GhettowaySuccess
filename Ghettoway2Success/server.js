@@ -1901,6 +1901,16 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Patrouille de fin de tour : le joueur actif indique les Caïds croisés, chacun est contrôlé sur son téléphone
+  socket.on('patrol_control', ({ targetTokens } = {}) => {
+    const room = rooms[socket.roomId];
+    const active = room && getActivePlayer(room);
+    if (!active || active.socketId !== socket.id || !Array.isArray(targetTokens)) return;
+    [...new Set(targetTokens)].forEach(tok => {
+      const p = room.players.find(x => x.playerToken === tok && !x.away && tok !== active.playerToken);
+      if (p) sendToPlayer(p, 'patrol_control', { byCaid: active.caidName || 'un Caïd' });
+    });
+  });
   // Une balance dans le quartier : vote contre un rival, état du vote, contrôle fait
   socket.on('informant_vote', ({ targetToken } = {}) => {
     const room = rooms[socket.roomId];

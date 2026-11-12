@@ -827,12 +827,28 @@
           <div id="patrolTalkie" class="patrol-talkie hidden"><div class="ally-bubble l patrol-bubble">J'ai reçu un message au talkie !</div><div class="patrol-tk-card"><i class="patrol-tk-burst"></i><img src="fouille-talkie.webp" alt="Talkie-walkie de flic"><b>JOUÉE</b></div><i class="patrol-tk-flash"></i></div>
         </div>
         <div class="police-panel">
-          <div class="flex items-center gap-4">
+          <div class="patrol-main flex items-center gap-4">
             <div id="patrolDie" class="patrol-die"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div id="patrolInfo" class="flex-1 min-w-0"></div>
           </div>
           <div id="patrolDirection"></div>
           <button id="patrolCta" class="police-cta" onclick="skipPatrolWait()">Passer la main</button>
+          <!-- Après le lancer : la patrouille a-t-elle croisé un Caïd sur le plateau ? Si oui, on choisit qui est contrôlé -->
+          <div id="patrolAsk" class="patrol-ask hidden">
+            <div class="patrol-ask-q"><i class="ph-fill ph-siren"></i> La patrouille croise un Caïd ?</div>
+            <div class="grid grid-cols-2 gap-2 mt-2.5">
+              <button type="button" class="patrol-ask-no" onclick="skipPatrolWait()">Non</button>
+              <button type="button" class="patrol-ask-yes" onclick="openPatrolPick()">Oui</button>
+            </div>
+          </div>
+          <div id="patrolPick" class="patrol-pick hidden">
+            <div class="patrol-ask-q"><i class="ph-fill ph-siren"></i> Qui se fait contrôler ?</div>
+            <div id="patrolPickList" class="patrol-pick-list"></div>
+            <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-auto">
+              <button type="button" class="patrol-ask-no" onclick="closePatrolPick()">Retour</button>
+              <button type="button" id="patrolPickGo" class="patrol-ask-yes" onclick="sendPatrolControl()" disabled>Contrôler</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
