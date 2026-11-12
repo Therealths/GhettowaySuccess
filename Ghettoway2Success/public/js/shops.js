@@ -80,100 +80,93 @@ const macCoatIndex = () => localPlayer.inventory.findIndex(it => it && it.eff ==
 // =========================================================================
 // MOTEUR D'ANIMATION 3D POUR LES PILES DE CARTES
 // =========================================================================
+// Position d'une carte selon son écart d à la carte du dessus (d peut être fractionnaire pendant un glissé) :
+// 0 = devant, ±1 = juste derrière à gauche / à droite, ±2 et au-delà = cachée sur le côté
+const DECK_STOPS = [
+  { x: 0, y: 2, z: 0, s: 1, r: 0, o: 1 },
+  { x: 44, y: -8, z: -60, s: 0.86, r: 7, o: 0.52 },
+  { x: 75, y: 6, z: -120, s: 0.75, r: 12, o: 0 }
+];
+function placeDeckCard(el, d) {
+  const a = Math.min(Math.abs(d), 2), k = Math.min(1, Math.floor(a)), t = a - k;
+  const A = DECK_STOPS[k], B = DECK_STOPS[Math.min(2, k + 1)], m = (p, q) => p + (q - p) * t, sg = d < 0 ? -1 : 1;
+  el.style.transform = `translate3d(${sg * m(A.x, B.x)}px, ${m(A.y, B.y)}px, ${m(A.z, B.z)}px) scale(${m(A.s, B.s)}) rotate(${sg * m(A.r, B.r)}deg)`;
+  el.style.opacity = String(m(A.o, B.o));
+  el.style.zIndex = String(25 - Math.round(a * 10));
+  el.style.boxShadow = a < 0.5 ? '0 18px 36px rgba(0, 0, 0, 0.88)' : '0 8px 20px rgba(0, 0, 0, 0.5)';
+  el.style.pointerEvents = a < 1.5 ? 'auto' : 'none';
+  el.style.cursor = a < 0.5 ? 'default' : 'pointer';
+}
 function applyDeckStackPositions(prefix, totalCount, activeIndex) {
   for (let i = 0; i < totalCount; i++) {
     const el = document.getElementById(`${prefix}_${i}`);
     if (!el) continue;
-    const buyBtn = el.querySelector('.deck-buy-btn');
+    el.style.transition = ''; // transition douce vers la position calée
+    placeDeckCard(el, i - activeIndex);
     el.classList.toggle('deck-front', i === activeIndex); // les boutons sous les cartes de derrière sont masqués
-
-    if (totalCount <= 2) {
-      const diff = (i - activeIndex + totalCount) % totalCount;
-      if (diff === 0) {
-        el.style.zIndex = '25';
-        el.style.opacity = '1';
-        el.style.transform = 'translate3d(-10px, 2px, 0px) scale(1) rotate(0deg)';
-        el.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.88)';
-        el.style.pointerEvents = 'auto';
-        el.style.cursor = 'default';
-        if (buyBtn) buyBtn.style.pointerEvents = 'auto';
-      } else {
-        el.style.zIndex = '15';
-        el.style.opacity = '0.52';
-        el.style.transform = 'translate3d(38px, -8px, -60px) scale(0.86) rotate(7deg)';
-        el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
-        el.style.pointerEvents = 'auto';
-        el.style.cursor = 'pointer';
-        if (buyBtn) buyBtn.style.pointerEvents = 'none';
-      }
-    } else {
-      if (i === activeIndex) {
-        const xOffset = (activeIndex === 0) ? '-10px' : '0px';
-        el.style.zIndex = '25';
-        el.style.opacity = '1';
-        el.style.transform = `translate3d(${xOffset}, 2px, 0px) scale(1) rotate(0deg)`;
-        el.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.88)';
-        el.style.pointerEvents = 'auto';
-        el.style.cursor = 'default';
-        if (buyBtn) buyBtn.style.pointerEvents = 'auto';
-      } else if (i === activeIndex - 1) {
-        el.style.zIndex = '15';
-        el.style.opacity = '0.52';
-        el.style.transform = 'translate3d(-44px, -8px, -60px) scale(0.86) rotate(-7deg)';
-        el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
-        el.style.pointerEvents = 'auto';
-        el.style.cursor = 'pointer';
-        if (buyBtn) buyBtn.style.pointerEvents = 'none';
-      } else if (i === activeIndex + 1) {
-        el.style.zIndex = '16';
-        el.style.opacity = '0.52';
-        el.style.transform = 'translate3d(44px, -8px, -60px) scale(0.86) rotate(7deg)';
-        el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.5)';
-        el.style.pointerEvents = 'auto';
-        el.style.cursor = 'pointer';
-        if (buyBtn) buyBtn.style.pointerEvents = 'none';
-      } else if (i < activeIndex - 1) {
-        el.style.zIndex = '5';
-        el.style.opacity = '0';
-        el.style.transform = 'translate3d(-75px, 6px, -120px) scale(0.75) rotate(-12deg)';
-        el.style.pointerEvents = 'none';
-        if (buyBtn) buyBtn.style.pointerEvents = 'none';
-      } else {
-        el.style.zIndex = '5';
-        el.style.opacity = '0';
-        el.style.transform = 'translate3d(75px, 6px, -120px) scale(0.75) rotate(12deg)';
-        el.style.pointerEvents = 'none';
-        if (buyBtn) buyBtn.style.pointerEvents = 'none';
-      }
-    }
+    const buyBtn = el.querySelector('.deck-buy-btn');
+    if (buyBtn) buyBtn.style.pointerEvents = i === activeIndex ? 'auto' : 'none';
   }
 }
 
+// Défilement fluide : les cartes suivent le doigt (ou la souris), puis au lâcher l'élan peut faire passer
+// plusieurs cartes et la pile se cale sur la plus proche ; onStep(±1) est appelé une fois par carte passée
 function bindDeckSwipeAndDrag(containerId, onStep) {
   const el = document.getElementById(containerId);
   if (!el || el.dataset.swipeBound === '1') return;
   el.dataset.swipeBound = '1';
 
-  let startX = null;
-  el.addEventListener('touchstart', e => {
-    if (e.touches && e.touches[0]) startX = e.touches[0].clientX;
-  }, { passive: true });
-  el.addEventListener('touchend', e => {
-    if (startX === null || !e.changedTouches || !e.changedTouches[0]) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    startX = null;
-    if (dx < -22) onStep(1);
-    else if (dx > 22) onStep(-1);
-  }, { passive: true });
-
-  el.addEventListener('mousedown', e => { startX = e.clientX; });
-  el.addEventListener('mouseup', e => {
-    if (startX === null) return;
-    const dx = e.clientX - startX;
-    startX = null;
-    if (dx < -22) onStep(1);
-    else if (dx > 22) onStep(-1);
-  });
+  let drag = null, justDragged = false;
+  const cards = () => [...el.children].filter(c => /_\d+$/.test(c.id));
+  const start = x => {
+    const list = cards();
+    if (list.length < 2) return;
+    const active = Math.max(0, list.findIndex(c => c.classList.contains('deck-front')));
+    const step = Math.max(60, (list[0].offsetWidth || 180) * 0.55);
+    drag = { x0: x, list, active, step, pos: active, moved: false, hist: [[Date.now(), x]] };
+  };
+  const move = x => {
+    if (!drag) return;
+    const dx = x - drag.x0;
+    if (!drag.moved && Math.abs(dx) < 6) return;
+    drag.moved = true;
+    const max = drag.list.length - 1;
+    let pos = drag.active - dx / drag.step;
+    if (pos < 0) pos = -Math.min(0.35, -pos * 0.35); // résistance au bout de la pile
+    if (pos > max) pos = max + Math.min(0.35, (pos - max) * 0.35);
+    drag.pos = pos;
+    drag.hist.push([Date.now(), x]);
+    if (drag.hist.length > 6) drag.hist.shift();
+    drag.list.forEach((c, i) => { c.style.transition = 'none'; placeDeckCard(c, i - pos); });
+  };
+  const end = () => {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    d.list.forEach(c => { c.style.transition = ''; });
+    if (!d.moved) return;
+    justDragged = true;
+    setTimeout(() => { justDragged = false; }, 60);
+    // Élan : vitesse des derniers mouvements, projetée sur une courte distance
+    const [t0, x0] = d.hist[0], [t1, x1] = d.hist[d.hist.length - 1];
+    const v = t1 > t0 ? (x1 - x0) / (t1 - t0) : 0; // px par ms
+    const target = Math.max(0, Math.min(d.list.length - 1, Math.round(d.pos - (v * 160) / d.step)));
+    const delta = target - d.active;
+    if (!delta) {
+      d.list.forEach((c, i) => { placeDeckCard(c, i - d.active); });
+      return;
+    }
+    for (let k = 0; k < Math.abs(delta); k++) onStep(Math.sign(delta));
+  };
+  el.addEventListener('touchstart', e => { if (e.touches.length === 1) start(e.touches[0].clientX); }, { passive: true });
+  el.addEventListener('touchmove', e => { if (e.touches[0]) move(e.touches[0].clientX); }, { passive: true });
+  el.addEventListener('touchend', end, { passive: true });
+  el.addEventListener('touchcancel', end, { passive: true });
+  el.addEventListener('mousedown', e => start(e.clientX));
+  window.addEventListener('mousemove', e => { if (drag) move(e.clientX); });
+  window.addEventListener('mouseup', end);
+  // Un glissé ne doit pas compter comme un toucher sur la carte (ouvrir, acheter…)
+  el.addEventListener('click', e => { if (justDragged) { e.stopPropagation(); e.preventDefault(); } }, true);
 }
 
 // --- 1. ARMURERIE ---
