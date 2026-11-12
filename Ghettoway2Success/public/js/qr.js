@@ -112,17 +112,23 @@ async function openQrScannerModal() {
   placeScanFrame();
 }
 
-// Raccourcis de test (faux QR codes) : le bouton « Tests » les affiche ou les cache, le choix est retenu
+// Raccourcis de test (faux QR codes), cachés aux joueurs : 5 appuis rapides sur le titre « Flash un QR code »
+// (ou sur l'étiquette « Scanner ») les affichent ou les recachent ; le choix est retenu sur le téléphone
 const qrTestOn = () => { try { return localStorage.getItem('g2s_test_mode') === '1'; } catch (e) { return false; } };
 function applyQrTestMode() {
   document.getElementById('qrTestButtons').classList.toggle('hidden', !qrTestOn());
-  document.getElementById('btnQrTests').classList.toggle('on', qrTestOn());
   placeScanFrame();
 }
-function toggleQrTestMode() {
-  try { localStorage.setItem('g2s_test_mode', qrTestOn() ? '0' : '1'); } catch (e) {}
+let scannerTitleTaps = [];
+function tapScannerTitle() {
+  const now = Date.now();
+  scannerTitleTaps = scannerTitleTaps.filter(t => now - t < 2500).concat(now);
+  if (scannerTitleTaps.length < 5) return;
+  scannerTitleTaps = [];
+  const on = !qrTestOn();
+  try { localStorage.setItem('g2s_test_mode', on ? '1' : '0'); } catch (e) {}
   applyQrTestMode();
-  buzz(40);
+  buzz(on ? [40, 60, 40] : 80);
 }
 // Le cadre à flasher prend toute la place libre entre le haut de l'écran et le panneau du bas (toujours entier)
 function placeScanFrame() {
