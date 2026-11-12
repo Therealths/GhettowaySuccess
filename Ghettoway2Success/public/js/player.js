@@ -80,11 +80,11 @@ async function depositProstituteToSafe() {
 }
 // Capacités spéciales : voir js/powers.js
 
-// informant : contrôle imposé par le Flash Radio « Une balance dans le quartier » (pas de confirmation)
+// informant : contrôle imposé par le Flash Radio « Une balance dans le quartier », sans confirmation, dès le résultat
+// du vote, même hors de son tour (pas de fin de tour forcée alors)
 async function triggerPoliceInspection(informant = false) {
-  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
-  if (informant) await showAppAlert("Les autres Caïds t'ont balancé aux keufs !\nLa patrouille t'attend au coin de la rue…", "🐀 Balancé !");
-  else if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
+  if (!informant && !isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
+  if (!informant && !await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
 
   // Passeport diplomatique : proposé avant tout le reste, annule le contrôle
   if (await offerPassportAtPolice()) return;
@@ -123,7 +123,7 @@ async function triggerPoliceInspection(informant = false) {
   }
 
   await showPoliceScreen({ pick, caught, drugs, weapons, arrests });
-  if (caught) endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
+  if (caught && isMyTurnToPlay) endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
 }
 
 // Écran plein écran du contrôle : la patrouille arrive, tire au sort ce qu'elle cherche, puis le verdict

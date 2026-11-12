@@ -286,54 +286,10 @@ function showPowerHit(effectType, senderCaid, item) {
   return powRender('touche', sender, powChipHtml('ph-warning', 'Attaque spéciale'), powHeadHtml('', missed ? 'RATÉ !' : 'TOUCHÉ !', desc), stage, bottom);
 }
 
-// FLASH RADIO « Une balance dans le quartier » : vote secret contre un rival, puis le résultat pour tout le monde
-// (même écran plein page que les capacités). Le plus désigné est contrôlé au début de son tour (voir socket.js).
+// FLASH RADIO « Une balance dans le quartier » : le vote se fait sur la page Flash Radio (game.js) ;
+// ici, l'écran du résultat pour tout le monde (même écran plein page que les capacités)
 const INFORMANT_SCREEN = { id: 'informant', name: 'Flash Radio', skillName: 'Une balance dans le quartier', hex: '#fb7185', bannerFile: 'wallpaper-clean.jpg' };
-let informantPick = null;
-const informantRivals = () => (connectedRivals || []).filter(r => !r.away);
 const informantHead = desc => powHeadHtml('Flash Radio', 'Une balance dans le quartier', desc);
-// Après la page Flash Radio (ou au retour dans la partie) : vote proposé si pas encore fait
-function informantMaybeVote() {
-  if (!socket || !isRadioEffectActive('INFORMANT')) return;
-  socket.emit('informant_status', st => { if (st && !st.done && !st.voted && informantRivals().length) informantVoteScreen(); });
-}
-function informantVoteScreen() {
-  const rivals = informantRivals();
-  if (!rivals.some(r => r.playerToken === informantPick)) informantPick = null;
-  const pick = r => {
-    const on = r.playerToken === informantPick;
-    return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="informantChoose(this.dataset.token)"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>${escapeHtml(allyRivalName(r))}</b><span>${on ? 'Tu le balances aux keufs' : 'Le désigner'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-hand-pointing fight-aim"></i></button>`;
-  };
-  const bottom = `<div class="pow-label">Qui balances-tu ?</div>
-    <div class="flex flex-col gap-2 mt-2">${rivals.map(pick).join('')}</div>
-    <div class="text-center text-[11px] font-bold text-slate-400 mt-3">Vote secret. Le plus désigné est contrôlé au début de son tour (égalité : tirage au sort).</div>
-    <button type="button" class="ally-cta pow-cta mt-3" onclick="informantSend()" ${informantPick ? '' : 'disabled'}>Balancer</button>`;
-  return powRender('vote', INFORMANT_SCREEN, powChipHtml('ph-broadcast', 'Vote'), informantHead('Une balance traîne dans le quartier… à vous de choisir qui va tomber.'), '', bottom);
-}
-function informantChoose(token) { informantPick = token; informantVoteScreen(); }
-function informantSend() {
-  const target = informantRivals().find(r => r.playerToken === informantPick);
-  if (!target || !socket) return;
-  socket.emit('informant_vote', { targetToken: target.playerToken });
-  buzz(60);
-  socket.emit('informant_status', st => informantWaitScreen(st));
-}
-let informantWaitTarget = null;
-function informantWaitScreen(st) {
-  if (st && st.done) return; // tout le monde a voté : l'écran du résultat arrive
-  const target = informantRivals().find(r => r.playerToken === informantPick) || informantWaitTarget;
-  if (!target) return;
-  informantWaitTarget = target;
-  const stage = `<div class="pow-solo">${powAv(allyCaidImg(target.caidId, allyRivalName(target)), allyRivalName(target), 'halo')}</div>`;
-  const bottom = `${powRow('ph-hand-pointing', 'Ton vote', escapeHtml(allyRivalName(target)))}
-    <div class="mt-2">${powRow('ph-users', 'Votes', st ? `${st.votedCount} / ${st.expected}` : '…')}</div>
-    <div class="text-center text-[11px] font-bold text-slate-400 mt-3">Le résultat s’affichera dès que tout le monde aura voté.</div>
-    <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">OK</button>`;
-  return powRender('vote-wait', INFORMANT_SCREEN, powChipHtml('ph-broadcast', 'Vote envoyé'), informantHead(''), stage, bottom);
-}
-function informantProgress({ voted, expected }) {
-  if (powState() === 'vote-wait') informantWaitScreen({ votedCount: voted, expected });
-}
 // Résultat : le Caïd balancé, tamponné, et le décompte des votes
 async function informantResultScreen(r) {
   await msgIdle();
@@ -345,8 +301,8 @@ async function informantResultScreen(r) {
   const rows = r.tally.map(t => powRow('ph-hand-pointing', escapeHtml(t.token === myPlayerToken ? 'Toi' : t.caidName), votes(t.votes))).join('<div class="mt-2"></div>')
     + (r.tie ? `<div class="mt-2">${powRow('ph-shuffle', 'Égalité', 'tirage au sort')}</div>` : '');
   const bottom = `${rows}
-    <div class="text-center text-[11px] font-bold ${me ? 'text-rose-300' : 'text-slate-400'} mt-3">${me ? 'Les keufs t’attendent : contrôle au début de ton tour !' : `${escapeHtml(r.targetCaid)} sera contrôlé au début de son tour.`}</div>
-    <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">OK</button>`;
+    <div class="text-center text-[11px] font-bold ${me ? 'text-rose-300' : 'text-slate-400'} mt-3">${me ? 'Les keufs débarquent : contrôle immédiat !' : `${escapeHtml(r.targetCaid)} se fait contrôler tout de suite.`}</div>
+    <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">${me ? 'Subir le contrôle' : 'OK'}</button>`;
   buzz(me ? [80, 60, 120] : 60);
   return powRender('vote-result', INFORMANT_SCREEN, powChipHtml('ph-siren', 'Résultat du vote'), informantHead(''), stage, bottom);
 }

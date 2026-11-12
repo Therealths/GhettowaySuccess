@@ -400,7 +400,7 @@ test('attaque en alliance : l’allié lié à la cible par un pacte ne particip
   await never(c, 'combat_duel_opened');
 });
 
-test('Flash radio : « Trop de criminalité » ne sort qu’une fois et laisse 2 voitures ; sans vote, personne n’est balancé', async () => {
+test('Flash radio : « Trop de criminalité » ne sort qu’une fois et laisse 2 voitures', async () => {
   const { players: [a, b] } = await startGame();
   let cars = 1, extra = 0, first = a;
   for (let round = 2; round <= 120; round++) {
@@ -414,13 +414,12 @@ test('Flash radio : « Trop de criminalité » ne sort qu’une fois et laisse 2
     if (extra) cars = 2;
     assert.strictEqual(nr.policeCars, cars);
     const ts = await waitFor(a, 'turn_state_updated', t => t.round === round);
-    assert.strictEqual(ts.informantToken, null); // personne n'a voté : personne n'est balancé
     first = ts.activePlayerToken === a.token ? a : b;
   }
   assert.ok(extra <= 1, `« Trop de criminalité » tiré ${extra} fois`);
 });
 
-test('balance : les Caïds votent, le plus désigné est contrôlé au début de son tour', async () => {
+test('balance : les Caïds votent, tout le monde reçoit le résultat (même hors ligne)', async () => {
   let j1 = await testRoomAs('tok_test_1');
   j1.emit('reset_test_room');
   await waitFor(j1, 'test_room_reset');
@@ -442,22 +441,8 @@ test('balance : les Caïds votent, le plus désigné est contrôlé au début de
   assert.strictEqual(r.targetToken, 'tok_test_3');
   assert.deepStrictEqual(r.tally.map(t => t.votes), [2, 1]);
   j3.disconnect();
-  // J1, hors ligne au dépouillement, reçoit le résultat à son retour ; puis les tours passent jusqu'à J3
+  // J1, hors ligne au dépouillement, reçoit le résultat à son retour (son téléphone lance alors le contrôle s'il est désigné)
   j1 = await testRoomAs('tok_test_1');
   assert.strictEqual((await waitFor(j1, 'informant_result')).targetToken, 'tok_test_3');
-  for (const tok of ['tok_test_1', 'tok_test_2']) {
-    const s = tok === 'tok_test_1' ? j1 : await testRoomAs(tok);
-    s.emit('next_player_turn');
-    await new Promise(res => setTimeout(res, 100));
-    s.disconnect();
-  }
-  j3 = await testRoomAs('tok_test_3');
-  const ts = await waitFor(j3, 'turn_state_updated', t => t.activePlayerToken === 'tok_test_3');
-  assert.strictEqual(ts.informantToken, 'tok_test_3');
-  j3.emit('informant_control_done');
-  await new Promise(res => setTimeout(res, 100));
-  j3.disconnect();
-  j3 = await testRoomAs('tok_test_3');
-  assert.strictEqual((await waitFor(j3, 'turn_state_updated', t => t.activePlayerToken === 'tok_test_3')).informantToken, null);
-  j3.disconnect();
+  j1.disconnect();
 });

@@ -204,10 +204,18 @@ if (socket) {
     localPlayer.activeAllies = [];
     startRoundPhase1();
   }
-  let lastActivePlayerToken = null, lastTurnId = null, informantControlRunning = false;
+  let lastActivePlayerToken = null, lastTurnId = null;
+  // Une balance dans le quartier : avancement du vote, puis résultat pour tous ; le Caïd désigné est contrôlé tout de suite
   socket.on('informant_vote_progress', informantProgress);
-  socket.on('informant_result', r => informantResultScreen(r));
-  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId, informantToken }) => {
+  socket.on('informant_result', async r => {
+    informantVote = { phase: 'done' };
+    if (document.getElementById('page-5').classList.contains('active') && isRadioEffectActive('INFORMANT')) renderInformantVote();
+    await informantResultScreen(r);
+    if (r.targetToken !== myPlayerToken) return;
+    if (document.getElementById('page-5').classList.contains('active')) navTo('page-6');
+    await triggerPoliceInspection(true);
+  });
+  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId }) => {
     if (serverPacts) nonAggressionPacts = serverPacts;
     renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
     // Nouveau tour, même si c'est encore le même joueur (à 2 : A B puis B A, B joue deux tours d'affilée)
@@ -244,17 +252,6 @@ if (socket) {
       document.getElementById('blockerCaidName').innerText = activeCaidName || "Caïd Adverse";
     }
     syncMultiplayerTargets();
-    // Une balance dans le quartier : le plus désigné par le vote est contrôlé pendant son tour
-    // (après la page Flash Radio et l'écran du vote) ; le serveur l'oublie une fois le contrôle fait
-    if (informantToken === myPlayerToken && activePlayerToken === myPlayerToken && !informantControlRunning) {
-      informantControlRunning = true;
-      const busy = () => document.getElementById('page-5').classList.contains('active') || !document.getElementById('powerScreen').classList.contains('hidden');
-      const whenFree = () => busy() ? setTimeout(whenFree, 500) : msgIdle()
-        .then(() => triggerPoliceInspection(true))
-        .then(() => { if (socket) socket.emit('informant_control_done'); })
-        .finally(() => { informantControlRunning = false; });
-      whenFree();
-    }
   });
 
   // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---

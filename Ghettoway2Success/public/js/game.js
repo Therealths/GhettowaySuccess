@@ -376,6 +376,69 @@ function renderRadioCard(ev) {
   const chip = document.getElementById('radioRuleTone');
   chip.className = `radio-chip ${tone.chip}`;
   chip.innerText = tone.label;
+  setRadioCta('ph-play', "Passer à l'action", false);
+  if (ev.effectType === 'INFORMANT') informantRadioVote();
+}
+function setRadioCta(icon, label, disabled) {
+  document.getElementById('radioCtaIcon').className = `ph-fill ${icon}`;
+  document.getElementById('radioCtaLabel').innerText = label;
+  const cta = document.getElementById('radioCta');
+  cta.disabled = disabled;
+}
+
+// Une balance dans le quartier : chaque Caïd désigne un rival directement sur la page Flash Radio ;
+// le plus désigné est contrôlé dès le résultat (powers.js : écran du résultat, socket.js : contrôle)
+let informantPick = null;
+let informantVote = { phase: 'pick' }; // pick → voted ({ votedCount, expected }) → done
+const informantRivals = () => (connectedRivals || []).filter(r => !r.away);
+function informantRadioVote() {
+  informantVote = { phase: 'pick' };
+  renderInformantVote();
+  if (socket) socket.emit('informant_status', st => {
+    if (!st) return;
+    informantVote = st.done ? { phase: 'done' } : st.voted ? { phase: 'voted', votedCount: st.votedCount, expected: st.expected } : informantVote;
+    renderInformantVote();
+  });
+}
+function renderInformantVote() {
+  const rows = document.getElementById('radioRuleRows');
+  const rivals = informantRivals();
+  if (informantVote.phase !== 'pick' || !rivals.length) {
+    const txt = informantVote.phase === 'voted'
+      ? `<i class="ph-fill ph-check-circle text-emerald-400"></i> Vote envoyé · ${informantVote.votedCount || '…'} / ${informantVote.expected || '…'} votes`
+      : informantVote.phase === 'done' ? '<i class="ph-bold ph-siren"></i> Vote terminé' : 'Aucun rival à balancer';
+    rows.innerHTML = `<div class="radio-vote-status">${txt}</div>`;
+    return setRadioCta('ph-play', "Passer à l'action", false);
+  }
+  if (!rivals.some(r => r.playerToken === informantPick)) informantPick = null;
+  rows.innerHTML = `<div class="radio-vote-q">Qui balances-tu ? <span>vote secret</span></div>
+    <div class="radio-vote">${rivals.map(r => `<button type="button" class="${r.playerToken === informantPick ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="informantChoose(this.dataset.token)"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><b>${escapeHtml(allyRivalName(r))}</b></button>`).join('')}</div>`;
+  const target = rivals.find(r => r.playerToken === informantPick);
+  setRadioCta('ph-hand-pointing', target ? `Balancer ${allyShort(allyRivalName(target))}` : 'Choisis un rival', !target);
+}
+function informantChoose(token) { informantPick = token; buzz(20); renderInformantVote(); }
+function informantSendVote() {
+  const target = informantRivals().find(r => r.playerToken === informantPick);
+  if (!target || !socket) return;
+  socket.emit('informant_vote', { targetToken: target.playerToken });
+  buzz(60);
+  informantVote = { phase: 'voted' };
+  renderInformantVote();
+  socket.emit('informant_status', st => { if (st && !st.done && informantVote.phase === 'voted') { informantVote = { phase: 'voted', votedCount: st.votedCount, expected: st.expected }; renderInformantVote(); } });
+}
+function informantProgress({ voted, expected }) {
+  if (informantVote.phase !== 'voted') return;
+  informantVote = { phase: 'voted', votedCount: voted, expected };
+  if (isRadioEffectActive('INFORMANT')) renderInformantVote();
+}
+// Retour dans la partie en pleine manche : la page Flash Radio revient si le vote n'est pas fait
+function informantMaybeVote() {
+  if (!socket || !isRadioEffectActive('INFORMANT')) return;
+  socket.emit('informant_status', st => {
+    if (!st || st.done || st.voted || !informantRivals().length) return;
+    renderRadioCard(currentSession.currentRadioEvent);
+    navTo('page-5');
+  });
 }
 
 async function startRoundPhase1() {
@@ -403,7 +466,10 @@ async function startRoundPhase1() {
   refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');
 }
-function acknowledgeRadioCard() { navTo('page-6'); informantMaybeVote(); }
+function acknowledgeRadioCard() {
+  if (isRadioEffectActive('INFORMANT') && informantVote.phase === 'pick' && informantRivals().length) return informantSendVote();
+  navTo('page-6');
+}
 
 async function endCurrentPlayerTurn(forced = false) {
   if (!isMyTurnToPlay) return;
