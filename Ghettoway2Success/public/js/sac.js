@@ -141,6 +141,11 @@ function openSacZoom(it) {
   document.getElementById('sacZoomCard').innerHTML = `<div class="deck-cardbox">${sacFace(it)}</div>`;
   document.getElementById('sacZoomActions').innerHTML = sacActions(it);
   z.classList.remove('hidden', 'show');
+  // La carte prend toute la hauteur laissée par les boutons (sans dépasser en largeur)
+  const card = document.getElementById('sacZoomCard');
+  const used = document.getElementById('sacZoomActions').offsetHeight + z.querySelector('.sac-zoom-back').offsetHeight + 24 + 2 * 10;
+  const cw = Math.floor(Math.min((z.clientHeight - used) * 768 / 1226, z.clientWidth * 0.86));
+  card.style.width = `${Math.max(120, cw)}px`;
   void z.offsetWidth;
   z.classList.add('show');
 }
