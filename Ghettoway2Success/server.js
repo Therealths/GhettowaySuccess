@@ -195,6 +195,17 @@ const TEST_PLAYERS = [
   { playerToken: 'tok_test_3', caidId: 'caid_5', caidName: 'J-Lo Gramme', inventory: [] }
 ];
 
+// Flash Radio de la manche ; un événement « once » (Trop de criminalité) ne sort qu'une fois par partie
+function drawRadio(room) {
+  const used = room.usedOnceRadio || [];
+  const pool = RADIO_EVENTS.filter(e => !(e.once && used.includes(e.id)));
+  const ev = pool[Math.floor(Math.random() * pool.length)] || RADIO_EVENTS[0];
+  if (ev.once) room.usedOnceRadio = [...used, ev.id];
+  // Trop de criminalité : une deuxième voiture de patrouille jusqu'à la fin de la partie
+  if (ev.effectType === 'EXTRA_PATROL_CAR') room.policeCars = 2;
+  return ev;
+}
+
 function createTestRoom() {
   const room = {
     id: TEST_ROOM_ID,
@@ -213,7 +224,9 @@ function createTestRoom() {
     pendingAlliance: null,
     pendingPillage: null,
     gameStarted: true,
-    currentRadio: RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)],
+    currentRadio: null,
+    policeCars: 1,
+    usedOnceRadio: [],
     isTestRoom: true,
     players: TEST_PLAYERS.map((t, i) => ({
       socketId: null,
@@ -238,6 +251,7 @@ function createTestRoom() {
       equipped: { weapon: null, armor: null, vehicle: null }
     }))
   };
+  room.currentRadio = drawRadio(room);
   room.roundOrder = buildRoundOrder(room);
   room.turnPos = 0;
   room.playedThisRoundTokens = [];
@@ -283,10 +297,11 @@ function advanceTurn(room, roomId, activePlayer) {
       room.nonAggressionPacts = (room.nonAggressionPacts || []).filter(p => p.untilRound >= room.round);
       room.roundOrder = buildRoundOrder(room);
       room.turnPos = 0;
-      room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
+      room.currentRadio = drawRadio(room);
       io.to(roomId).emit('new_round_started', {
         round: room.round,
         radio: room.currentRadio,
+        policeCars: room.policeCars || 1,
         players: room.players
       });
     }
@@ -338,8 +353,16 @@ function broadcastTurnState(roomId) {
     nonAggressionPacts: room.nonAggressionPacts || [],
     round: room.round,
     turnId: `${room.round}:${room.turnPos || 0}`,
-    turnOrder
+    turnOrder,
+    informantToken: informantTargetOf(room, activePlayer)
   });
+}
+
+// Flash Radio « Une balance dans le quartier » : le joueur actif est balancé s'il a le plus de drogue sur lui (au moins 1 kg)
+function informantTargetOf(room, activePlayer) {
+  if (!activePlayer || !room.currentRadio || room.currentRadio.effectType !== 'INFORMANT') return null;
+  const max = Math.max(0, ...room.players.filter(p => !p.away).map(p => p.drugs || 0));
+  return max > 0 && (activePlayer.drugs || 0) >= max ? activePlayer.playerToken : null;
 }
 
 // Couvercle de poubelle : l'arme d'un combattant compte pour 0 si un de ses adversaires a l'effet actif
@@ -467,6 +490,7 @@ io.on('connection', (socket) => {
       gameStarted: room.gameStarted || false,
       round: room.round,
       radio: room.currentRadio,
+      policeCars: room.policeCars || 1,
       isReady: checkRoomReady(room),
       selectionMode: room.selectionMode || 'random'
     });
@@ -741,6 +765,7 @@ io.on('connection', (socket) => {
         gameStarted: room.gameStarted || false,
         round: room.round,
         radio: room.currentRadio,
+        policeCars: room.policeCars || 1,
         isReady: checkRoomReady(room),
         selectionMode: room.selectionMode || 'random'
       });
@@ -859,12 +884,15 @@ io.on('connection', (socket) => {
     room.pendingSplits = [];
     room.pendingAlliance = null;
     room.pendingPillage = null;
-    room.currentRadio = RADIO_EVENTS[Math.floor(Math.random() * RADIO_EVENTS.length)];
+    room.policeCars = 1;
+    room.usedOnceRadio = [];
+    room.currentRadio = drawRadio(room);
 
     io.emit('rooms_list', getAvailableRooms());
     io.to(socket.roomId).emit('game_started', {
       round: room.round,
       radio: room.currentRadio,
+      policeCars: room.policeCars,
       players: room.players
     });
 
@@ -1213,15 +1241,18 @@ io.on('connection', (socket) => {
     });
 
     const primaryWinnerToken = winnerTokens[0];
+    const winBonus = room.currentRadio && room.currentRadio.effectType === 'COMBAT_WIN_CASH' ? Number(room.currentRadio.effectVal) || 0 : 0;
     winnerTokens.forEach(tok => {
       const wP = room.players.find(p => p.playerToken === tok);
       if (!wP) return;
+      if (winBonus) wP.pocketCash = (wP.pocketCash || 0) + winBonus;
       sendToPlayer(wP, 'combat_finished_result', {
         outcome: 'winner',
         dmgNet,
         opponentCaid: loserP.caidName,
         isPrimaryPicker: (tok === primaryWinnerToken),
-        pillageInfo: room.pendingPillage
+        pillageInfo: room.pendingPillage,
+        winBonus
       });
     });
 

@@ -58,7 +58,13 @@ function getArmoryItemEffectivePrice(item) {
   } else if (item.categorie === 'equipement' && isRadioEffectActive('ARMOR_PRICE_MULT')) {
     price = Math.round(price * getRadioEffectValue('ARMOR_PRICE_MULT', 0.5));
   }
+  if (isRadioEffectActive('ARMORY_PRICE_MULT')) price = Math.round(price * getRadioEffectValue('ARMORY_PRICE_MULT', 0.7));
   return price;
+}
+// Soldes chez le Concessionnaire (Flash Radio)
+function getDealerItemEffectivePrice(item) {
+  const price = item.prix || 0;
+  return isRadioEffectActive('VEHICLE_PRICE_MULT') ? Math.round(price * getRadioEffectValue('VEHICLE_PRICE_MULT', 0.7)) : price;
 }
 
 // Bon de réduction activé depuis le Sac : −50 % sur le prochain achat payant de la boutique
@@ -503,7 +509,7 @@ function buildDealerStackDOM() {
       <div class="pt-1.5 border-t border-white/10">
         <div class="flex items-center justify-between font-mono mb-1">
           <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-          <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : priceTagHtml(item.prix, voucherCost('Concessionnaire', item.prix))}</span>
+          <span class="text-xs font-black text-ghetto-gold">${item.prix === 0 ? 'GRATUIT' : priceTagHtml(item.prix, voucherCost('Concessionnaire', getDealerItemEffectivePrice(item)))}</span>
         </div>
         <button onclick="event.stopPropagation(); buyDealerCatalogItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
           <i class="ph-bold ph-shopping-cart-simple"></i> Acheter
@@ -533,7 +539,7 @@ function onDealerCardClick(idx) {
 async function buyDealerCatalogItem(itemId) {
   const item = DEALER_CATALOG.find(i => i.id === itemId);
   if (!item) return;
-  const cost = voucherCost('Concessionnaire', item.prix || 0);
+  const cost = voucherCost('Concessionnaire', getDealerItemEffectivePrice(item));
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
@@ -551,7 +557,7 @@ async function buyDealerCatalogItem(itemId) {
     }
   };
   pPayload.shop = 'Concessionnaire';
-  if (cost < (item.prix || 0)) pPayload.voucher = 'Concessionnaire';
+  if (cost < getDealerItemEffectivePrice(item)) pPayload.voucher = 'Concessionnaire';
   closeModal('modalDealerShop');
   if (cost === 0) {
     await finalizePurchaseExecution(pPayload);

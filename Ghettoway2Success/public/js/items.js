@@ -191,7 +191,7 @@ function findRows(it) {
   if (e === 'heal' || /kebab/i.test(it.name || '')) return itemRow('ph-heart', 'Effet', '+1 Cœur de vie') + itemRow('ph-backpack', 'Quand ?', 'ton tour ou en combat');
   if (e === 'cancel_police') return itemRow('ph-siren', 'Effet', 'annule un contrôle') + itemRow('ph-backpack', 'Quand ?', 'proposé au prochain contrôle');
   if (e === 'none') return itemRow('ph-trash', 'Effet', 'aucun…') + itemRow('ph-backpack', 'Quand ?', 'faut pas gâcher');
-  if (e === 'pm_turn') return itemRow('ph-sneaker-move', 'Effet', `+${it.val || 3} PM jusqu’à la fin du tour`) + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
+  if (e === 'pm_turn') return itemRow('ph-sneaker-move', 'Effet', `+${isRadioEffectActive('BASKETS_PM_SET') ? getRadioEffectValue('BASKETS_PM_SET', 5) : (it.val || 3)} PM jusqu’à la fin du tour`) + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'free_prostitute') return itemRow('ph-high-heel', 'Effet', '1 Prostituée Niv. 1 gratuite') + itemRow('ph-backpack', 'Quand ?', 'utilisé tout seul au Nightclub');
   if (e === 'scratch') return itemRow('ph-ticket', 'Effet', `1 chance sur 3 : +${(it.val || 5000).toLocaleString()} €`) + itemRow('ph-backpack', 'Quand ?', 'à gratter pendant ton tour');
   if (e === 'crowbar') return itemRow('ph-vault', 'Effet', 'coffre d’un rival : 5 000 € ou 5 kg') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
@@ -353,6 +353,7 @@ function deckGain(it) {
 }
 function deckBlocked(it) {
   if (!isCombatItem(it)) return 'Pas en combat';
+  if (isHealItem(it) && isRadioEffectActive('NO_HEAL')) return 'Hôpital débordé';
   if (isHealItem(it) && localPlayer.hearts >= 3) return 'Cœurs au max';
   if (it.eff === 'stray_dog' && localPlayer.strayDogActive) return 'Chien déjà avec toi';
   if (it.eff === 'double_muscles_atk' && musclesDoubled()) return 'Déjà actif';

@@ -79,9 +79,11 @@ async function depositProstituteToSafe() {
 }
 // Capacités spéciales : voir js/powers.js
 
-async function triggerPoliceInspection() {
+// informant : contrôle imposé par le Flash Radio « Une balance dans le quartier » (pas de confirmation)
+async function triggerPoliceInspection(informant = false) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
-  if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
+  if (informant) await showAppAlert(`Une balance t'a donné aux keufs : tu te promènes avec ${localPlayer.drugs} kg sur toi, le plus gros stock du quartier.\nLa patrouille t'attend au coin de la rue !`, "🐀 Balancé !");
+  else if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
 
   // Passeport diplomatique : proposé avant tout le reste, annule le contrôle
   if (await offerPassportAtPolice()) return;
@@ -95,10 +97,12 @@ async function triggerPoliceInspection() {
     }
   }
 
+  // 30 % rien, le reste partagé entre drogue et armes (Festival en ville : 15 % rien)
+  const clean = getRadioField('policeClean', 0.30);
   const r = Math.random();
   let pick = 'CLEAN';
-  if (r < 0.30) pick = 'CLEAN';
-  else if (r < 0.65) pick = 'DRUGS_FOUND';
+  if (r < clean) pick = 'CLEAN';
+  else if (r < clean + (1 - clean) / 2) pick = 'DRUGS_FOUND';
   else pick = 'WEAPONS_FOUND';
 
   const weapons = [localPlayer.equipped.weapon, ...localPlayer.inventory.filter(it => it && it.type === 'WEAPON')].filter(Boolean);
@@ -357,6 +361,7 @@ async function useItem(idx) {
   const it = localPlayer.inventory[idx];
   if (!it) return;
   if (it.eff === 'heal' || it.type === 'CONSUMABLE' || (it.name && it.name.includes('Kebab'))) {
+    if (isRadioEffectActive('NO_HEAL')) return showAppAlert("Les urgences sont saturées : ton Kebab ne soigne pas cette manche. Garde-le pour plus tard !", "🏥 Hôpital débordé");
     if (localPlayer.hearts >= 3) return showAppAlert("Tes Cœurs sont déjà au maximum !", "Santé Pleine");
     const before = localPlayer.hearts;
     localPlayer.hearts = Math.min(3, localPlayer.hearts + (it.val || 1));
@@ -383,9 +388,10 @@ async function useItem(idx) {
   if (it.eff === 'botox') return showAppAlert("Ta Seringue de botox sera utilisée toute seule au début d'une manche où tu as des prostituées au QG : leur rente sera doublée.", "💉 Seringue de botox");
   if (it.eff === 'pm_turn') {
     localPlayer.inventory.splice(idx, 1);
-    pmBonusThisTurn += it.val || 3;
+    const pm = isRadioEffectActive('BASKETS_PM_SET') ? getRadioEffectValue('BASKETS_PM_SET', 5) : (it.val || 3);
+    pmBonusThisTurn += pm;
     refreshHud();
-    return showCardPlayed(it, [['ph-sneaker-move', 'Jusqu’à la fin du tour', `+${it.val || 3} PM`]]);
+    return showCardPlayed(it, [['ph-sneaker-move', 'Jusqu’à la fin du tour', `+${pm} PM`]].concat(pm !== (it.val || 3) ? [['ph-train', 'Grève des transports', 'bonus radio']] : []));
   }
   if (it.eff === 'voucher') {
     if (hasVoucher(it.shop)) return showAppAlert(`Tu as déjà un bon actif pour : ${it.shop}. Utilise-le d'abord !`, "🎟️ Bon de réduction");

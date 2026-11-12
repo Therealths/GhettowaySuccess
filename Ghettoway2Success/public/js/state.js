@@ -15,6 +15,11 @@ function getRadioEffectValue(type, fallbackVal = 0) {
   }
   return fallbackVal;
 }
+// Champ en plus d'un événement radio (ex. policeClean du Festival en ville)
+function getRadioField(name, fallbackVal) {
+  const ev = currentSession.currentRadioEvent;
+  return ev && ev[name] !== undefined ? ev[name] : fallbackVal;
+}
 const myPlayerToken = (() => {
   let t = localStorage.getItem('g2s_player_token');
   // Joueur de la partie « test » mais plus dans cette partie : on reprend sa vraie identité
@@ -68,7 +73,7 @@ function getMyCaid() {
   const id = localPlayer.caidId || localStorage.getItem('g2s_saved_caid_id');
   return CAID_ROSTER.find(c => c.id === id) || CAID_ROSTER[0];
 }
-let currentSession = { round: 1, currentRadioEvent: null };
+let currentSession = { round: 1, currentRadioEvent: null, policeCars: 1 };
 let selectedPlayerCount = 4;
 let selectedCaidMode = 'random';
 let roomSelectionMode = 'random';

@@ -89,8 +89,18 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 - **Fin de tour** : le joueur lance le **dé de patrouille** (1 à 6 + bonus radio, direction au hasard), sauf « Grève au Commissariat ».
 - **Combat** : attaque contre défense ; le perdant perd 1 cœur, le gagnant choisit un butin (cash, drogue ou prostituée en transit). Phase 2 de riposte possible. Alliances : attaques et braquages coordonnés, pactes de non-agression.
 
-### Flash radio (`public/radio_events.json`, 12 événements, un tiré par manche)
-Descente de police (patrouille +2), Pénurie (Yencli +1 500 €), Canicule (véhicules à moteur −2 PM), Guerre des gangs (−30 % armes), Brouillard (Lac infranchissable), Grève au commissariat (patrouille immobile), Saisie aux douanes (Grossiste 1 500 €/kg), Soirée VIP (rente ×2), Tournoi au Sportclub (Lascars +1 ATK), Panne de fourgon (braquages +2 000 €), Couvre-feu (−2 PM à pied), Cargaison tombée du camion (−50 % protections).
+### Flash radio (`public/radio_events.json`, 23 événements, un tiré par manche par `drawRadio` dans `server.js`)
+Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` / `getRadioEffectValue`), champ libre éventuel (`getRadioField`), `message` de l'animateur et `rule` (grand chiffre, ton bonus/malus/plateau, lignes avant → après) pour la page Flash Radio.
+- Descente de police (patrouille +2), Pénurie (Yencli +1 500 €), Canicule (véhicules à moteur −2 PM), Guerre des gangs (−30 % armes), Brouillard (Lac infranchissable), Grève au commissariat (patrouille immobile), Saisie aux douanes (Grossiste 1 500 €/kg), Soirée VIP (rente ×2), Tournoi au Sportclub (Lascars +1 ATK), Panne de fourgon (braquages +2 000 €), Couvre-feu (−2 PM à pied), Cargaison tombée du camion (−50 % protections).
+- Krach du shit (`YENCLI_CASH_MULT` 0,5) et Festival en ville (`YENCLI_CASH_MULT` 2 + `policeClean: 0.15` : au contrôle, « rien » passe de 30 % à 15 %, le reste partagé drogue/armes).
+- Soldes à l'Armurerie (`ARMORY_PRICE_MULT` 0,7, armes et protections), Soldes chez le Concessionnaire (`VEHICLE_PRICE_MULT` 0,7, `getDealerItemEffectivePrice`).
+- Une balance dans le quartier (`INFORMANT`) : le serveur envoie `informantToken` dans `turn_state_updated` si le joueur actif a le plus de drogue **sur lui** (≥ 1 kg, égalités comprises) ; son téléphone lance `triggerPoliceInspection(true)` (sans confirmation, après la page Flash Radio), une fois par manche (`localPlayer.informantRound`). Passeport et Prière restent proposés.
+- Trop de criminalité (`EXTRA_PATROL_CAR`, `once: true`) : `room.policeCars = 2` **jusqu'à la fin de la partie**, l'événement sort de la pioche (`room.usedOnceRadio`). `policeCars` est envoyé avec `game_started`, `new_round_started`, `reconnect_success` → `currentSession.policeCars`. Les deux voitures avancent **du même lancer** (même nombre de cases, même sens) : l'écran de patrouille passe en `two-cars` (titre au pluriel, pastille ×2). La puce de durée de la page radio affiche « Toute la partie » pour un événement `once`.
+- Nuit sans lune (`ATTACKER_ATK_BONUS` 2) : `nightAtkBonus()` ajouté à la stat envoyée et affichée par chaque attaquant (riposte comprise).
+- Hôpital débordé (`NO_HEAL`) : Kebab refusé au Sac et « Hôpital débordé » dans la pile de combat ; la carte reste.
+- Règlement de comptes (`COMBAT_WIN_CASH` 2000) : le serveur ajoute le bonus à chaque vainqueur et l'envoie (`winBonus`) ; le téléphone l'ajoute s'il n'est pas `late` et l'affiche sur l'écran VICTOIRE.
+- Grève des transports (`BASKETS_PM_SET` 5) : métro fermé (règle du plateau seulement) et Vieilles baskets +5 PM.
+- Flics en planque (`PROSTITUTE_REV_MULT` 0) : pas de rente ; la Seringue de botox n'est pas consommée.
 
 ### Objets de Fouille (`FOUILLE_TABLE` dans `items.js`, même chance pour chacun)
 | Objet | `eff` | Effet | Utilisation |

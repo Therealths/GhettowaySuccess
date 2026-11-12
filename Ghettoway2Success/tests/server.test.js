@@ -399,3 +399,25 @@ test('attaque en alliance : l’allié lié à la cible par un pacte ne particip
   assert.strictEqual(duel.opponentCaid, 'Jamel Pépouze');
   await never(c, 'combat_duel_opened');
 });
+
+test('Flash radio : « Trop de criminalité » ne sort qu’une fois et laisse 2 voitures ; la balance vise le plus gros stock', async () => {
+  const { players: [a, b] } = await startGame();
+  let cars = 1, extra = 0, first = a;
+  for (let round = 2; round <= 120; round++) {
+    const second = first === a ? b : a;
+    for (const s of [a, b]) s.events.length = 0;
+    first.emit('next_player_turn');
+    await waitFor(second, 'turn_state_updated', t => t.activePlayerToken === second.token);
+    second.emit('next_player_turn');
+    const nr = await waitFor(a, 'new_round_started', d => d.round === round);
+    if (nr.radio.effectType === 'EXTRA_PATROL_CAR') extra++;
+    if (extra) cars = 2;
+    assert.strictEqual(nr.policeCars, cars);
+    const ts = await waitFor(a, 'turn_state_updated', t => t.round === round);
+    // 5 kg chacun au départ : à égalité, le joueur actif est balancé
+    if (nr.radio.effectType === 'INFORMANT') assert.strictEqual(ts.informantToken, ts.activePlayerToken);
+    else assert.strictEqual(ts.informantToken, null);
+    first = ts.activePlayerToken === a.token ? a : b;
+  }
+  assert.ok(extra <= 1, `« Trop de criminalité » tiré ${extra} fois`);
+});

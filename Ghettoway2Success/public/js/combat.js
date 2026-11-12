@@ -368,13 +368,14 @@ function fightResultSides(last) {
 }
 
 // VICTOIRE : bouton Racketter (pillage) pour le premier vainqueur, sinon OK
-function showFightVictory({ dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }, last) {
+function showFightVictory({ dmgNet, opponentCaid, isPrimaryPicker, pillageInfo, winBonus }, last) {
   const mine = fightResultSides(last);
   const losers = fightNames(opponentCaid).map(n => ({ img: fightImg(n), label: n }));
   const stage = fightSide('l', mine) + fightSide('r', losers, true) + `<div class="ally-tape fight-tape" style="top:80%">K.O. !</div>`;
   const pick = !!(isPrimaryPicker && pillageInfo);
   const rows = fightRow('ph-sword', mine.length > 1 ? 'Votre assaut' : 'Ton attaque', `passe de ${fightPts(dmgNet || 0)}`)
     + fightRow('ph-heart-break', escapeHtml(opponentCaid || 'Le perdant'), '−1 cœur')
+    + (winBonus ? fightRow('ph-broadcast', 'Règlement de comptes', `+${winBonus.toLocaleString()} €`) : '')
     + fightRow('ph-coins', 'Butin', pick ? 'à toi de choisir' : 'ton allié choisit');
   const bottom = `<h2 class="font-anton ally-head">VICTOIRE.</h2>
     <div class="flex flex-col gap-1.5 mt-3">${rows}</div>
@@ -434,7 +435,7 @@ async function toggleCombatReadyState() {
   if (!currentDuelInfo) return;
   isCombatReady = !isCombatReady;
   if (socket) {
-    const stat = (currentDuelInfo.role === 'attacker') ? getTotalAtk() : getTotalDef();
+    const stat = (currentDuelInfo.role === 'attacker') ? getTotalAtk() + nightAtkBonus() : getTotalDef();
     socket.emit('combat_set_ready', { currentStat: stat, ready: isCombatReady });
   }
   fightLog(isCombatReady ? `⏳ Tu es prêt ! En attente…` : `Non prêt.`);

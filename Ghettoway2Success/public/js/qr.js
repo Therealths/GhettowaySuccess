@@ -271,11 +271,13 @@ async function processQrPayload(payload) {
   if (type === 'yen') {
     if (localPlayer.drugs < data.d) return showAppAlert(`Drogue insuffisante (${data.d} kg requis).`, "Deal Refusé");
     const radioBonus = isRadioEffectActive('YENCLI_CASH_BONUS') ? getRadioEffectValue('YENCLI_CASH_BONUS', 1500) : 0;
-    const totalGain = (data.c || 0) + radioBonus;
+    const radioMult = isRadioEffectActive('YENCLI_CASH_MULT') ? getRadioEffectValue('YENCLI_CASH_MULT', 1) : 1;
+    const totalGain = Math.round((data.c || 0) * radioMult) + radioBonus;
     localPlayer.drugs -= data.d;
     localPlayer.pocketCash += totalGain;
     spendActionPm();
-    const bonusTxt = radioBonus > 0 ? ` (dont +${radioBonus.toLocaleString()} € Bonus Radio !)` : '';
+    const bonusTxt = radioBonus > 0 ? ` (dont +${radioBonus.toLocaleString()} € Bonus Radio !)`
+      : radioMult !== 1 ? ` (Flash Radio : ${radioMult > 1 ? `×${radioMult}` : `−${Math.round((1 - radioMult) * 100)} %`})` : '';
     await showAppAlert(`+${totalGain.toLocaleString()} € en poche !${bonusTxt}`, "🤝 Deal Yencli");
     refreshHud();
     return;

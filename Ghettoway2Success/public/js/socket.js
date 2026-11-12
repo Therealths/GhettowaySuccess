@@ -12,7 +12,8 @@ if (socket) {
     const savedRoomId = localStorage.getItem('g2s_room_id');
     if (savedRoomId) socket.emit('reconnect_player', { roomId: savedRoomId, playerToken: myPlayerToken });
   });
-  socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, players, selectionMode }) => {
+  socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, policeCars, players, selectionMode }) => {
+    currentSession.policeCars = policeCars || 1;
     resumeRequested = false;
     localStorage.setItem('g2s_room_id', roomId);
     if (selectionMode) roomSelectionMode = selectionMode;
@@ -174,15 +175,17 @@ if (socket) {
     const withWho = names.length ? ` avec ${allyListNames(names)}` : (allyCaid && !Array.isArray(allyCaid) ? ` avec ${allyCaid}` : ' en alliance');
     await showAppAlert(`Ton tour est passé : tu as déjà joué cette manche${withWho}.\n\nTu rejoueras à la manche suivante.`, "⏭️ Tour déjà joué");
   });
-  socket.on('game_started', ({ round, radio, players }) => {
+  socket.on('game_started', ({ round, radio, policeCars, players }) => {
+    currentSession.policeCars = policeCars || 1;
     updateRivalsList(players);
     currentSession.round = round;
     currentSession.currentRadioEvent = radio;
     localPlayer.roundSeen = round;
     startRoundPhase1();
   });
-  socket.on('new_round_started', ({ round, radio, players }) => {
+  socket.on('new_round_started', ({ round, radio, policeCars, players }) => {
     if (document.getElementById('page-end').classList.contains('active')) return; // partie terminée
+    currentSession.policeCars = policeCars || 1;
     if (players) updateRivalsList(players);
     enterNewRound(round, radio);
   });
@@ -201,7 +204,7 @@ if (socket) {
     startRoundPhase1();
   }
   let lastActivePlayerToken = null, lastTurnId = null;
-  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId }) => {
+  socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId, informantToken }) => {
     if (serverPacts) nonAggressionPacts = serverPacts;
     renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
     // Nouveau tour, même si c'est encore le même joueur (à 2 : A B puis B A, B joue deux tours d'affilée)
@@ -238,6 +241,12 @@ if (socket) {
       document.getElementById('blockerCaidName').innerText = activeCaidName || "Caïd Adverse";
     }
     syncMultiplayerTargets();
+    // Une balance dans le quartier : contrôle imposé au début du tour, une fois par manche
+    if (newTurn && informantToken === myPlayerToken && localPlayer.informantRound !== round) {
+      localPlayer.informantRound = round;
+      const whenFree = () => document.getElementById('page-5').classList.contains('active') ? setTimeout(whenFree, 500) : msgIdle().then(() => triggerPoliceInspection(true));
+      whenFree();
+    }
   });
 
   // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---
@@ -355,7 +364,7 @@ if (socket) {
   });
 
   // late : message gardé par le serveur pendant qu'on était hors ligne (le Cœur perdu, le butin… sont déjà dans nos stats)
-  socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo, late }) => {
+  socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo, winBonus, late }) => {
     const last = fightLast;
     endSingleCombatEffects();
     closeModal('modalCombatItemSelector');
@@ -371,8 +380,9 @@ if (socket) {
       await checkHospitalStatus(`Combat perdu contre ${opponentCaid}`);
       refreshHud();
     } else {
+      if (winBonus && !late) localPlayer.pocketCash += winBonus; // Règlement de comptes (Flash Radio)
       refreshHud();
-      await showFightVictory({ dmgNet, opponentCaid, isPrimaryPicker, pillageInfo }, last);
+      await showFightVictory({ dmgNet, opponentCaid, isPrimaryPicker, pillageInfo, winBonus }, last);
     }
   });
 

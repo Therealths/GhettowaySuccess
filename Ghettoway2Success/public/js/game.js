@@ -120,12 +120,16 @@ function syncMultiplayerTargets() {
   if (typeof refreshPowerChoice === 'function') refreshPowerChoice();
 }
 
+// Nuit sans lune (Flash Radio) : +2 ATK pour chaque Caïd qui attaque en combat
+function nightAtkBonus() {
+  return isRadioEffectActive('ATTACKER_ATK_BONUS') ? getRadioEffectValue('ATTACKER_ATK_BONUS', 2) : 0;
+}
 // Écran de combat : ma stat en direct (attaque, cumulée avec mes alliés, ou défense) ; celle de l'adversaire reste secrète
 function updateArenaLiveStats() {
   const stat = document.getElementById('fightMyStat');
   const lbl = document.getElementById('arenaAtkLabel');
   if (!stat || !currentDuelInfo) return;
-  const myAtk = getTotalAtk();
+  const myAtk = getTotalAtk() + nightAtkBonus();
   const allyExtra = currentDuelInfo.isAlliedAttack ? (currentDuelInfo.allyAtk || 0) : 0;
   if (currentDuelInfo.role === 'attacker') {
     const nbAllies = (currentDuelInfo.allies || []).length;
@@ -367,6 +371,7 @@ function renderRadioCard(ev) {
       <span class="flex items-center gap-1.5 min-w-0"><i class="ph-bold ${icon} text-base flex-shrink-0"></i><span>${escapeHtml(label)}</span></span>
       <span class="flex items-center gap-1.5 flex-shrink-0">${before ? `<span class="text-slate-500 line-through">${escapeHtml(before)}</span><i class="ph-bold ph-arrow-right text-slate-500"></i>` : ''}<b style="color:${tone.color}">${escapeHtml(after)}</b></span>
     </div>`).join('');
+  document.getElementById('radioRuleDuration').innerText = ev.once ? 'Toute la partie' : 'Cette manche';
   const chip = document.getElementById('radioRuleTone');
   chip.className = `radio-chip ${tone.chip}`;
   chip.innerText = tone.label;
@@ -379,8 +384,11 @@ async function startRoundPhase1() {
   document.getElementById('hudRadioReminderTitle').innerText = ev.title;
   document.getElementById('hudRadioReminderDesc').innerText = ev.impact || ev.desc;
 
-  if (localPlayer.prostitutesAtSafeList.length > 0) {
-    const revMult = isRadioEffectActive('PROSTITUTE_REV_MULT') ? getRadioEffectValue('PROSTITUTE_REV_MULT', 2) : 1;
+  const revMult = isRadioEffectActive('PROSTITUTE_REV_MULT') ? getRadioEffectValue('PROSTITUTE_REV_MULT', 2) : 1;
+  // Flics en planque : pas de rente, la Seringue de botox reste dans le Sac pour une autre manche
+  if (localPlayer.prostitutesAtSafeList.length > 0 && revMult === 0) {
+    await showAppAlert("Des flics en planque surveillent les clients : tes prostituées ne rapportent rien cette manche.", "🚔 Flics en planque");
+  } else if (localPlayer.prostitutesAtSafeList.length > 0) {
     const baseIncome = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || (p.level === 2 ? 2500 : 1000)), 0);
     // Seringue de botox : prise toute seule dans le Sac, double cette rente une fois
     const botoxIdx = localPlayer.inventory.findIndex(it => it && it.eff === 'botox');
@@ -437,8 +445,11 @@ function showPatrolScreen() {
   talkieFx.classList.add('hidden');
   scr.classList.remove('talkie', 'tk-bubble', 'tk-card');
 
+  // Trop de criminalité : deux voitures, qui avancent du même lancer
+  const two = (currentSession.policeCars || 1) > 1;
+  scr.classList.toggle('two-cars', two);
   document.getElementById('patrolRound').innerText = currentSession.round || 1;
-  document.getElementById('patrolHeadline').innerHTML = 'LA PATROUILLE<br>TOURNE…';
+  document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>TOURNENT…' : 'LA PATROUILLE<br>TOURNE…';
   info.innerHTML = '<div class="text-xs font-black uppercase tracking-widest text-sky-300">Le dé roule…</div><div class="patrol-big text-slate-500">?</div>';
   cta.innerText = nextPlayerLabel();
   cta.disabled = true;
@@ -450,7 +461,7 @@ function showPatrolScreen() {
   // Bloc direction toujours présent, panneau de hauteur fixe : la voiture ne bouge pas quand le résultat arrive
   const dirHtml = (label, labelCls, note) => `<div class="mt-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</span><span class="patrol-dir ${labelCls}">${label}</span></div>
       <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
-  dirBox.innerHTML = dirHtml('…', 'text-slate-500', 'Le dé décide de combien de cases et dans quel sens avance la patrouille.');
+  dirBox.innerHTML = dirHtml('…', 'text-slate-500', two ? 'Un seul dé pour les 2 voitures : même nombre de cases, même sens.' : 'Le dé décide de combien de cases et dans quel sens avance la patrouille.');
 
   const land = () => {
     cta.disabled = false;
@@ -460,15 +471,15 @@ function showPatrolScreen() {
       setPatrolDie(0);
       document.getElementById('patrolHeadline').innerHTML = 'GRÈVE AU<br>COMMISSARIAT.';
       info.innerHTML = '<div class="text-[10px] font-black uppercase tracking-widest text-amber-300">Flash Radio</div><div class="patrol-big">0 <span>case</span></div>';
-      dirBox.innerHTML = dirHtml('SUR PLACE', 'text-amber-300', 'Grève au commissariat : la patrouille ne bouge pas ce tour.');
+      dirBox.innerHTML = dirHtml('SUR PLACE', 'text-amber-300', `Grève au commissariat : ${two ? 'les 2 voitures ne bougent' : 'la patrouille ne bouge'} pas ce tour.`);
       return;
     }
     scr.dataset.state = 'resultat';
     setPatrolDie(baseRoll);
-    document.getElementById('patrolHeadline').innerHTML = 'LA PATROUILLE<br>BOUGE.';
+    document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>BOUGENT.' : 'LA PATROUILLE<br>BOUGE.';
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
-    dirBox.innerHTML = dirHtml(left ? '⬅ GAUCHE' : 'DROITE ➡', '', `Avance le pion de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau.`);
+    dirBox.innerHTML = dirHtml(left ? '⬅ GAUCHE' : 'DROITE ➡', '', `Avance ${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau.`);
   };
 
   // Le dé change de face quelques fois avant de tomber

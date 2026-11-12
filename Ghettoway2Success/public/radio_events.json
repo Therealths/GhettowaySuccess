@@ -311,6 +311,303 @@
           ]
         ]
       }
+    },
+    {
+      "id": "rad_weed_crash",
+      "title": "Krach du shit",
+      "impact": "Deals Yencli -50 % cette manche",
+      "desc": "Le marché est inondé : tous les contrats Yencli rapportent moitié moins cette manche.",
+      "effectType": "YENCLI_CASH_MULT",
+      "effectVal": 0.5,
+      "message": "Le marché est inondé, tout le monde a de la beuh… les clients font la loi ce soir !",
+      "rule": {
+        "big": "-50 %",
+        "tone": "malus",
+        "label": "sur les deals Yencli",
+        "sub": "cette manche",
+        "rows": [
+          [
+            "ph-handshake",
+            "Deal à 5 000 €",
+            "5 000 €",
+            "2 500 €"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_festival",
+      "title": "Festival en ville",
+      "impact": "Deals Yencli x2, plus de contrôles",
+      "desc": "Festival géant : les contrats Yencli rapportent le double, mais la police trouve plus souvent quelque chose au contrôle.",
+      "effectType": "YENCLI_CASH_MULT",
+      "effectVal": 2,
+      "policeClean": 0.15,
+      "message": "Festival géant en centre-ville ! Les clients se bousculent… mais les keufs sont partout.",
+      "rule": {
+        "big": "x2",
+        "tone": "bonus",
+        "label": "sur les deals Yencli",
+        "sub": "mais la police fouille mieux",
+        "rows": [
+          [
+            "ph-handshake",
+            "Deal à 5 000 €",
+            "5 000 €",
+            "10 000 €"
+          ],
+          [
+            "ph-siren",
+            "Contrôle où on ne trouve rien",
+            "30 %",
+            "15 %"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_armory_sale",
+      "title": "Soldes à l'Armurerie",
+      "impact": "-30 % sur les armes et les protections",
+      "desc": "Liquidation à l'Armurerie : -30 % sur toutes les armes et toutes les protections cette manche.",
+      "effectType": "ARMORY_PRICE_MULT",
+      "effectVal": 0.7,
+      "message": "Liquidation totale à l'Armurerie ! Tout doit disparaître, servez-vous !",
+      "rule": {
+        "big": "-30 %",
+        "tone": "bonus",
+        "label": "sur les armes et les protections",
+        "sub": "à l'Armurerie",
+        "rows": [
+          [
+            "ph-crosshair",
+            "Revolver",
+            "8 000 €",
+            "5 600 €"
+          ],
+          [
+            "ph-shield-check",
+            "Gilet pare-balles",
+            "8 000 €",
+            "5 600 €"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_dealer_sale",
+      "title": "Soldes chez le Concessionnaire",
+      "impact": "-30 % sur tous les véhicules",
+      "desc": "Le Concessionnaire brade son stock : -30 % sur tous les véhicules cette manche.",
+      "effectType": "VEHICLE_PRICE_MULT",
+      "effectVal": 0.7,
+      "message": "Le Concessionnaire brade ses bécanes, y'a des affaires à faire !",
+      "rule": {
+        "big": "-30 %",
+        "tone": "bonus",
+        "label": "sur tous les véhicules",
+        "sub": "chez le Concessionnaire",
+        "rows": [
+          [
+            "ph-moped",
+            "Scooter",
+            "6 000 €",
+            "4 200 €"
+          ],
+          [
+            "ph-motorcycle",
+            "Grosse cylindrée",
+            "10 000 €",
+            "7 000 €"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_informant",
+      "title": "Une balance dans le quartier",
+      "impact": "Le plus gros stock de drogue est contrôlé",
+      "desc": "Quelqu'un a parlé : au début de son tour, le Caïd qui a le plus de drogue sur lui subit un contrôle de police.",
+      "effectType": "INFORMANT",
+      "effectVal": 0,
+      "message": "Quelqu'un a parlé aux keufs… celui qui se balade avec le plus de marchandise va se faire cueillir !",
+      "rule": {
+        "big": "Balancé",
+        "tone": "malus",
+        "label": "contrôle pour le plus gros stock",
+        "sub": "au début de son tour, drogue sur soi",
+        "rows": [
+          [
+            "ph-siren",
+            "Le Caïd qui a le plus de drogue sur lui",
+            "",
+            "contrôlé"
+          ],
+          [
+            "ph-identification-card",
+            "Passeport et Prière de J-Lo",
+            "",
+            "marchent"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_second_patrol",
+      "title": "Trop de criminalité",
+      "impact": "Une 2e voiture de patrouille, pour toute la partie",
+      "desc": "La préfecture envoie une deuxième voiture de patrouille, qui reste jusqu'à la fin de la partie. Les deux voitures avancent du même lancer de dé en fin de tour.",
+      "effectType": "EXTRA_PATROL_CAR",
+      "effectVal": 1,
+      "once": true,
+      "message": "Trop de criminalité dans la ville ! La préfecture envoie une deuxième voiture de patrouille… et elle reste !",
+      "rule": {
+        "big": "2",
+        "tone": "malus",
+        "label": "voitures de patrouille",
+        "sub": "jusqu'à la fin de la partie",
+        "rows": [
+          [
+            "ph-police-car",
+            "Voitures de police",
+            "1",
+            "2"
+          ],
+          [
+            "ph-dice-five",
+            "Un seul dé pour les deux",
+            "",
+            "même lancer"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_moonless",
+      "title": "Nuit sans lune",
+      "impact": "+2 ATK pour l'attaquant cette manche",
+      "desc": "Pas une lumière dans la cité : celui qui attaque gagne +2 Attaque en combat cette manche.",
+      "effectType": "ATTACKER_ATK_BONUS",
+      "effectVal": 2,
+      "message": "Pas une lumière dans la cité ce soir… parfait pour une embuscade.",
+      "rule": {
+        "big": "+2 ATK",
+        "tone": "bonus",
+        "label": "pour celui qui attaque",
+        "sub": "en combat, cette manche",
+        "rows": [
+          [
+            "ph-sword",
+            "Attaque de 10",
+            "10",
+            "12"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_hospital_full",
+      "title": "Hôpital débordé",
+      "impact": "Le Kebab ne soigne plus cette manche",
+      "desc": "Les urgences sont saturées : le Kebab ne rend plus de Cœur cette manche.",
+      "effectType": "NO_HEAL",
+      "effectVal": 0,
+      "message": "Les urgences sont saturées, plus personne pour vous recoudre !",
+      "rule": {
+        "big": "Kebab",
+        "tone": "malus",
+        "label": "sans effet",
+        "sub": "cette manche",
+        "rows": [
+          [
+            "ph-heart",
+            "Kebab",
+            "+1 cœur",
+            "rien"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_score_settling",
+      "title": "Règlement de comptes",
+      "impact": "+2 000 € par combat gagné",
+      "desc": "Ça règle ses comptes dans toute la ville : chaque combat gagné rapporte 2 000 € en plus du butin cette manche.",
+      "effectType": "COMBAT_WIN_CASH",
+      "effectVal": 2000,
+      "message": "Ça règle ses comptes dans toute la ville… chaque victoire vaut de l'or !",
+      "rule": {
+        "big": "+2 000 €",
+        "tone": "bonus",
+        "label": "par combat gagné",
+        "sub": "en plus du butin",
+        "rows": [
+          [
+            "ph-trophy",
+            "Combat gagné",
+            "butin",
+            "butin + 2 000 €"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_transport_strike",
+      "title": "Grève des transports",
+      "impact": "Métro fermé, Vieilles baskets +5 PM",
+      "desc": "Grève générale : le métro est inaccessible sur le plateau cette manche, et les Vieilles baskets donnent +5 PM.",
+      "effectType": "BASKETS_PM_SET",
+      "effectVal": 5,
+      "message": "Grève générale dans les transports ! Le métro est fermé, sortez vos baskets…",
+      "rule": {
+        "big": "Métro fermé",
+        "tone": "plateau",
+        "label": "inaccessible",
+        "sub": "cette manche, sur le plateau",
+        "rows": [
+          [
+            "ph-train",
+            "Métro",
+            "ouvert",
+            "fermé"
+          ],
+          [
+            "ph-sneaker-move",
+            "Vieilles baskets",
+            "+3 PM",
+            "+5 PM"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_stakeout",
+      "title": "Flics en planque",
+      "impact": "Aucune rente des prostituées cette manche",
+      "desc": "Des policiers en planque surveillent les clients : aucune prostituée ne rapporte de rente cette manche.",
+      "effectType": "PROSTITUTE_REV_MULT",
+      "effectVal": 0,
+      "message": "Des flics en planque surveillent les clients… les filles ne rapportent rien ce soir !",
+      "rule": {
+        "big": "0 €",
+        "tone": "malus",
+        "label": "de rente des prostituées",
+        "sub": "pour tout le monde, cette manche",
+        "rows": [
+          [
+            "ph-sparkle",
+            "Niveau 1",
+            "1 000 €",
+            "0 €"
+          ],
+          [
+            "ph-crown",
+            "Niveau 2",
+            "2 500 €",
+            "0 €"
+          ]
+        ]
+      }
     }
   ]
 }

@@ -444,6 +444,10 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .patrol-screen[data-state="greve"] .patrol-die { opacity: 0.45; filter: grayscale(1); }
 .patrol-screen.result .patrol-die { animation: policeStamp 0.4s cubic-bezier(.2,1.6,.4,1) both; }
 .patrol-wrap { position: relative; }
+/* Trop de criminalité : pastille ×2 sur la voiture (les 2 voitures suivent le même dé) */
+.patrol-x2 { display: none; position: absolute; left: 16px; bottom: 10%; padding: 2px 12px; border-radius: 12px; font-family: 'Anton', sans-serif; font-size: 34px; line-height: 1.1; color: #fff; background: #2563eb; border: 3px solid #fff; transform: rotate(-8deg); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+.patrol-screen.two-cars .patrol-x2 { display: block; }
+.patrol-screen.two-cars.show .patrol-x2 { animation: patrolTkStamp 0.45s cubic-bezier(.2,1.6,.4,1) 0.8s both; }
 .patrol-talkie { position: absolute; inset: 0; pointer-events: none; }
 .patrol-bubble { top: 8%; white-space: normal; max-width: 62%; }
 .patrol-tk-card { position: absolute; right: 16px; top: 4%; width: 76px; transform: rotate(8deg); }
