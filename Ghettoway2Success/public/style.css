@@ -962,7 +962,7 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .sac-pill.auto { color: #7dd3fc; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.35); }
 .item-stage.sac-stage { --cw: 182px; height: calc(var(--cw) * 1226 / 768 + 6px); }
 .sac-stage .deck-card-item.item-deck.deck-front { cursor: zoom-in; }
-.sac-hint { margin-top: 2px; text-align: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; }
+.sac-dots { margin: 4px 0 6px; }
 .sac-zoom { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 14px 18px 16px; background: rgba(5,6,10,0.88); backdrop-filter: blur(3px); }
 .sac-zoom-card { width: min(250px, 68%); }
 .sac-zoom-card .deck-cardbox { box-shadow: 0 0 0 3px rgba(251,191,36,0.9), 0 0 40px rgba(251,191,36,0.35), 0 24px 50px rgba(0,0,0,0.85); border-radius: 16px; }
@@ -978,8 +978,8 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .sac-zoom.show .sac-zoom-actions, .sac-zoom.show .sac-zoom-back { animation: allyUp 0.35s ease-out 0.15s both; }
 .sac-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; text-align: center; color: #64748b; }
 .sac-empty i { font-size: 44px; } .sac-empty b { font-size: 14px; color: #cbd5e1; } .sac-empty small { font-size: 11px; }
-@media (max-height: 760px) { .item-stage.sac-stage { --cw: 156px; } .sac-zoom-card { width: min(210px, 60%); } .sac-slot { height: 62px; } }
-@media (max-height: 700px) { .item-stage.sac-stage { --cw: 114px; } .sac-zoom-card { width: min(170px, 50%); } .sac-slot { height: 52px; } .sac-money > div { padding: 4px 10px; } .sac-gear h4 { font-size: 15px; } .sac-gear p { display: none; } }
+@media (max-height: 760px) { .sac-zoom-card { width: min(210px, 60%); } .sac-slot { height: 62px; } }
+@media (max-height: 700px) { .sac-zoom-card { width: min(170px, 50%); } .sac-slot { height: 52px; } .sac-money > div { padding: 4px 10px; } .sac-gear h4 { font-size: 15px; } .sac-gear p { display: none; } }
 .item-stage { --cw: 178px; height: calc(var(--cw) * 1226 / 768 + 52px); }
 .deck-card-item.item-deck { width: var(--cw); height: auto; padding: 0; background: transparent; border-radius: 14px; gap: 8px; justify-content: flex-start; }
 .deck-cardbox { position: relative; width: 100%; aspect-ratio: 768 / 1226; border-radius: 14px; overflow: hidden; background: #10121b; }

@@ -444,15 +444,13 @@
         </div>
         <div class="px-4 mt-2"><div class="sac-label">Équipé <span>· touche pour ranger dans le sac</span></div><div id="sacSlots" class="sac-eq"></div></div>
         <div id="sacTabs" class="px-4 mt-3 sac-tabs"></div>
-        <div class="relative w-full flex items-center justify-center mt-2">
+        <div id="sacStageWrap" class="relative w-full flex-1 min-h-0 flex items-center justify-center mt-2">
           <button type="button" onclick="stepSac(-1)" class="deck-arrow left-2" aria-label="Carte précédente"><i class="ph-bold ph-caret-left"></i></button>
           <div id="sacCards" class="deck-stage item-stage sac-stage"></div>
           <button type="button" onclick="stepSac(1)" class="deck-arrow right-2" aria-label="Carte suivante"><i class="ph-bold ph-caret-right"></i></button>
         </div>
-        <div id="sacDots" class="deck-dots"></div>
-        <div class="sac-hint"><i class="ph-bold ph-hand-tap"></i> Touche la carte pour l’ouvrir</div>
-        <div class="flex-1"></div>
-        <div class="px-4 pb-4"><button type="button" class="ally-ghost" onclick="closeSac()">Fermer le sac</button></div>
+        <div id="sacDots" class="deck-dots sac-dots"></div>
+        <div class="px-4 pb-3"><button type="button" class="ally-ghost" onclick="closeSac()">Fermer le sac</button></div>
       </div>
       <!-- Carte zoomée avec ses boutons -->
       <div id="sacZoom" class="sac-zoom hidden" onclick="if (event.target === this) closeSacZoom()">

@@ -45,8 +45,17 @@ function openSac() {
   scr.classList.remove('hidden', 'show');
   void scr.offsetWidth;
   scr.classList.add('show');
+  fitSacCards();
   bindDeckSwipeAndDrag('sacCards', stepSac);
 }
+// Les cartes prennent toute la hauteur libre entre les filtres et les points (sans dépasser en largeur)
+function fitSacCards() {
+  const wrap = document.getElementById('sacStageWrap');
+  if (!wrap || !wrap.clientHeight) return;
+  const cw = Math.floor(Math.min((wrap.clientHeight - 8) * 768 / 1226, wrap.clientWidth * 0.66));
+  document.getElementById('sacCards').style.setProperty('--cw', `${Math.max(90, cw)}px`);
+}
+window.addEventListener('resize', () => { if (sacIsOpen()) fitSacCards(); });
 function closeSac() {
   const scr = document.getElementById('sacScreen');
   if (!scr) return;
