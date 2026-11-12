@@ -400,7 +400,7 @@ test('attaque en alliance : l’allié lié à la cible par un pacte ne particip
   await never(c, 'combat_duel_opened');
 });
 
-test('Flash radio : « Trop de criminalité » ne sort qu’une fois et laisse 2 voitures ; la balance vise le plus gros stock', async () => {
+test('Flash radio : « Trop de criminalité » ne sort qu’une fois et laisse 2 voitures ; sans vote, personne n’est balancé', async () => {
   const { players: [a, b] } = await startGame();
   let cars = 1, extra = 0, first = a;
   for (let round = 2; round <= 120; round++) {
@@ -414,10 +414,50 @@ test('Flash radio : « Trop de criminalité » ne sort qu’une fois et laisse 2
     if (extra) cars = 2;
     assert.strictEqual(nr.policeCars, cars);
     const ts = await waitFor(a, 'turn_state_updated', t => t.round === round);
-    // 5 kg chacun au départ : à égalité, le joueur actif est balancé
-    if (nr.radio.effectType === 'INFORMANT') assert.strictEqual(ts.informantToken, ts.activePlayerToken);
-    else assert.strictEqual(ts.informantToken, null);
+    assert.strictEqual(ts.informantToken, null); // personne n'a voté : personne n'est balancé
     first = ts.activePlayerToken === a.token ? a : b;
   }
   assert.ok(extra <= 1, `« Trop de criminalité » tiré ${extra} fois`);
+});
+
+test('balance : les Caïds votent, le plus désigné est contrôlé au début de son tour', async () => {
+  let j1 = await testRoomAs('tok_test_1');
+  j1.emit('reset_test_room');
+  await waitFor(j1, 'test_room_reset');
+  j1.disconnect();
+  j1 = await testRoomAs('tok_test_1');
+  j1.emit('test_set_radio', { id: 'rad_informant' });
+  await waitFor(j1, 'test_radio_set');
+  j1.emit('informant_vote', { targetToken: 'tok_test_1' }); // contre soi-même : refusé
+  j1.emit('informant_vote', { targetToken: 'tok_test_3' });
+  assert.deepStrictEqual(await waitFor(j1, 'informant_vote_progress'), { voted: 1, expected: 3 });
+  j1.disconnect();
+  const j2 = await testRoomAs('tok_test_2');
+  j2.emit('informant_vote', { targetToken: 'tok_test_3' });
+  await waitFor(j2, 'informant_vote_progress');
+  j2.disconnect();
+  let j3 = await testRoomAs('tok_test_3');
+  j3.emit('informant_vote', { targetToken: 'tok_test_1' });
+  const r = await waitFor(j3, 'informant_result');
+  assert.strictEqual(r.targetToken, 'tok_test_3');
+  assert.deepStrictEqual(r.tally.map(t => t.votes), [2, 1]);
+  j3.disconnect();
+  // J1, hors ligne au dépouillement, reçoit le résultat à son retour ; puis les tours passent jusqu'à J3
+  j1 = await testRoomAs('tok_test_1');
+  assert.strictEqual((await waitFor(j1, 'informant_result')).targetToken, 'tok_test_3');
+  for (const tok of ['tok_test_1', 'tok_test_2']) {
+    const s = tok === 'tok_test_1' ? j1 : await testRoomAs(tok);
+    s.emit('next_player_turn');
+    await new Promise(res => setTimeout(res, 100));
+    s.disconnect();
+  }
+  j3 = await testRoomAs('tok_test_3');
+  const ts = await waitFor(j3, 'turn_state_updated', t => t.activePlayerToken === 'tok_test_3');
+  assert.strictEqual(ts.informantToken, 'tok_test_3');
+  j3.emit('informant_control_done');
+  await new Promise(res => setTimeout(res, 100));
+  j3.disconnect();
+  j3 = await testRoomAs('tok_test_3');
+  assert.strictEqual((await waitFor(j3, 'turn_state_updated', t => t.activePlayerToken === 'tok_test_3')).informantToken, null);
+  j3.disconnect();
 });

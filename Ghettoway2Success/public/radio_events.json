@@ -426,28 +426,34 @@
     {
       "id": "rad_informant",
       "title": "Une balance dans le quartier",
-      "impact": "Le plus gros stock de drogue est contrôlé",
-      "desc": "Quelqu'un a parlé : au début de son tour, le Caïd qui a le plus de drogue sur lui subit un contrôle de police.",
+      "impact": "Votez : le Caïd le plus désigné est contrôlé",
+      "desc": "Chaque Caïd désigne en secret un rival. Celui qui a le plus de votes contre lui subit un contrôle de police au début de son tour (égalité : tirage au sort).",
       "effectType": "INFORMANT",
       "effectVal": 0,
-      "message": "Quelqu'un a parlé aux keufs… celui qui se balade avec le plus de marchandise va se faire cueillir !",
+      "message": "Une balance traîne dans le quartier… à vous de choisir qui va tomber !",
       "rule": {
-        "big": "Balancé",
+        "big": "Vote",
         "tone": "malus",
-        "label": "contrôle pour le plus gros stock",
-        "sub": "au début de son tour, drogue sur soi",
+        "label": "pour balancer un rival",
+        "sub": "le plus désigné est contrôlé à son tour",
         "rows": [
           [
+            "ph-hand-pointing",
+            "Chaque Caïd désigne un rival",
+            "",
+            "1 vote"
+          ],
+          [
             "ph-siren",
-            "Le Caïd qui a le plus de drogue sur lui",
+            "Le plus de votes contre lui",
             "",
             "contrôlé"
           ],
           [
-            "ph-identification-card",
-            "Passeport et Prière de J-Lo",
+            "ph-shuffle",
+            "Égalité",
             "",
-            "marchent"
+            "tirage au sort"
           ]
         ]
       }
@@ -605,6 +611,110 @@
             "Niveau 2",
             "2 500 €",
             "0 €"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_snow",
+      "title": "Chutes de neige exceptionnelles",
+      "impact": "Aucun véhicule ne roule, patrouille bloquée",
+      "desc": "La ville est sous la neige : aucun véhicule ne roule cette manche, tout le monde se déplace à pied et la patrouille reste bloquée.",
+      "effectType": "SNOW",
+      "effectVal": 0,
+      "message": "Chutes de neige exceptionnelles ! Les routes sont bloquées, plus rien ne roule… même pas les keufs !",
+      "rule": {
+        "big": "Neige",
+        "tone": "plateau",
+        "label": "aucun véhicule ne roule",
+        "sub": "tout le monde à pied, la patrouille aussi",
+        "rows": [
+          [
+            "ph-moped",
+            "Véhicules",
+            "+2 à +8 PM",
+            "0"
+          ],
+          [
+            "ph-person-simple-walk",
+            "Tout le monde à pied",
+            "",
+            "8 PM"
+          ],
+          [
+            "ph-police-car",
+            "Patrouille",
+            "dé 1 à 6",
+            "bloquée"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_calm_sun",
+      "title": "Grand soleil sur la cité",
+      "impact": "Rien de spécial cette manche",
+      "desc": "Une manche tranquille : aucune règle ne change.",
+      "effectType": "NONE",
+      "effectVal": 0,
+      "message": "Grand soleil sur la cité ! Les darons font des barbecues, les petits jouent au foot… rien à signaler.",
+      "rule": {
+        "big": "Calme plat",
+        "tone": "calme",
+        "label": "rien ne change",
+        "sub": "les règles normales s’appliquent",
+        "rows": [
+          [
+            "ph-sun",
+            "Il fait beau",
+            "",
+            "rien ne change"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_calm_sunday",
+      "title": "Dimanche tranquille",
+      "impact": "Rien de spécial cette manche",
+      "desc": "Une manche tranquille : aucune règle ne change.",
+      "effectType": "NONE",
+      "effectVal": 0,
+      "message": "C'est dimanche, tout le monde fait la grasse mat'… même les keufs. Rien à signaler !",
+      "rule": {
+        "big": "Calme plat",
+        "tone": "calme",
+        "label": "rien ne change",
+        "sub": "les règles normales s’appliquent",
+        "rows": [
+          [
+            "ph-coffee",
+            "Grasse matinée générale",
+            "",
+            "rien ne change"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_calm_sky",
+      "title": "Ciel bleu sur le périph",
+      "impact": "Rien de spécial cette manche",
+      "desc": "Une manche tranquille : aucune règle ne change.",
+      "effectType": "NONE",
+      "effectVal": 0,
+      "message": "Pas un nuage, pas une sirène… une belle journée comme on les aime. Profitez-en !",
+      "rule": {
+        "big": "Calme plat",
+        "tone": "calme",
+        "label": "rien ne change",
+        "sub": "les règles normales s’appliquent",
+        "rows": [
+          [
+            "ph-cloud-sun",
+            "Belle journée",
+            "",
+            "rien ne change"
           ]
         ]
       }

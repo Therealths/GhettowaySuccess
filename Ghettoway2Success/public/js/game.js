@@ -347,7 +347,8 @@ function finalizeCaidSelection(chosenCaid) {
 const RADIO_TONES = {
   bonus: { color: '#34d399', chip: 'bg-emerald-400/15 text-emerald-400', label: 'Bonus' },
   malus: { color: '#fb7185', chip: 'bg-rose-500/15 text-rose-400', label: 'Malus' },
-  plateau: { color: '#fbbf24', chip: 'bg-amber-400/15 text-amber-400', label: 'Plateau' }
+  plateau: { color: '#fbbf24', chip: 'bg-amber-400/15 text-amber-400', label: 'Plateau' },
+  calme: { color: '#7dd3fc', chip: 'bg-sky-400/15 text-sky-300', label: 'Calme' }
 };
 function renderRadioCard(ev) {
   const rule = ev.rule || { big: '', tone: 'plateau', label: ev.impact || ev.title, sub: ev.desc, rows: [] };
@@ -402,7 +403,7 @@ async function startRoundPhase1() {
   refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');
 }
-function acknowledgeRadioCard() { navTo('page-6'); }
+function acknowledgeRadioCard() { navTo('page-6'); informantMaybeVote(); }
 
 async function endCurrentPlayerTurn(forced = false) {
   if (!isMyTurnToPlay) return;
@@ -438,7 +439,8 @@ function showPatrolScreen() {
   const cta = document.getElementById('patrolCta');
   const info = document.getElementById('patrolInfo');
   const dirBox = document.getElementById('patrolDirection');
-  const greve = isRadioEffectActive('PATROL_FREEZE');
+  const snow = isRadioEffectActive('SNOW');
+  const greve = isRadioEffectActive('PATROL_FREEZE') || snow;
   const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
   let baseRoll, finalMove, left, rigged = false;
   const talkieFx = document.getElementById('patrolTalkie');
@@ -469,9 +471,9 @@ function showPatrolScreen() {
     if (greve) {
       scr.dataset.state = 'greve';
       setPatrolDie(0);
-      document.getElementById('patrolHeadline').innerHTML = 'GRÈVE AU<br>COMMISSARIAT.';
+      document.getElementById('patrolHeadline').innerHTML = snow ? 'BLOQUÉE PAR<br>LA NEIGE.' : 'GRÈVE AU<br>COMMISSARIAT.';
       info.innerHTML = '<div class="text-[10px] font-black uppercase tracking-widest text-amber-300">Flash Radio</div><div class="patrol-big">0 <span>case</span></div>';
-      dirBox.innerHTML = dirHtml('SUR PLACE', 'text-amber-300', `Grève au commissariat : ${two ? 'les 2 voitures ne bougent' : 'la patrouille ne bouge'} pas ce tour.`);
+      dirBox.innerHTML = dirHtml('SUR PLACE', 'text-amber-300', `${snow ? 'Routes enneigées' : 'Grève au commissariat'} : ${two ? 'les 2 voitures ne bougent' : 'la patrouille ne bouge'} pas ce tour.`);
       return;
     }
     scr.dataset.state = 'resultat';

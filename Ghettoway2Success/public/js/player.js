@@ -40,7 +40,8 @@ function spendActionPm() {
 function getTotalPm() {
   // Malus Burger Queen : démarrage poussif, 0 PM pendant la manche 1 (les Vieilles baskets comptent quand même)
   if (localPlayer.caidId === 'caid_1' && currentSession.round === 1) return pmBonusThisTurn;
-  const eqVeh = localPlayer.equipped.vehicle;
+  // Chutes de neige : aucun véhicule ne roule, tout le monde à pied
+  const eqVeh = isRadioEffectActive('SNOW') ? null : localPlayer.equipped.vehicle;
   let pm = 8 + (eqVeh ? eqVeh.bonusVal : 0);
   if (eqVeh) {
     const isMotor = eqVeh.isMotorized !== undefined ? eqVeh.isMotorized : (eqVeh.bonusVal >= 6);
@@ -82,7 +83,7 @@ async function depositProstituteToSafe() {
 // informant : contrôle imposé par le Flash Radio « Une balance dans le quartier » (pas de confirmation)
 async function triggerPoliceInspection(informant = false) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
-  if (informant) await showAppAlert(`Une balance t'a donné aux keufs : tu te promènes avec ${localPlayer.drugs} kg sur toi, le plus gros stock du quartier.\nLa patrouille t'attend au coin de la rue !`, "🐀 Balancé !");
+  if (informant) await showAppAlert("Les autres Caïds t'ont balancé aux keufs !\nLa patrouille t'attend au coin de la rue…", "🐀 Balancé !");
   else if (!await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;
 
   // Passeport diplomatique : proposé avant tout le reste, annule le contrôle

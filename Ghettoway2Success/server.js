@@ -264,6 +264,8 @@ if (!REDIRECT_TO && !rooms[TEST_ROOM_ID]) createTestRoom();
 // Passe la main au joueur suivant de la manche (fin de tour, ou joueur actif qui quitte la partie)
 function advanceTurn(room, roomId, activePlayer) {
   if (room.gameOver) return; // partie terminée : plus de tour ni de manche
+  const vote = informantVoteOf(room);
+  if (vote && !vote.done && Object.keys(vote.votes).length) resolveInformantVote(room, roomId);
   // Le joueur actif et ses alliés du tour ont joué leur tour de la manche
   room.playedThisRoundTokens = [...new Set([
     ...(room.playedThisRoundTokens || []),
@@ -358,11 +360,39 @@ function broadcastTurnState(roomId) {
   });
 }
 
-// Flash Radio « Une balance dans le quartier » : le joueur actif est balancé s'il a le plus de drogue sur lui (au moins 1 kg)
+// Flash Radio « Une balance dans le quartier » : les Caïds votent, le plus désigné est contrôlé au début de son tour.
+// room.informantTarget reste posé jusqu'au contrôle (informant_control_done), même si la manche change.
 function informantTargetOf(room, activePlayer) {
-  if (!activePlayer || !room.currentRadio || room.currentRadio.effectType !== 'INFORMANT') return null;
-  const max = Math.max(0, ...room.players.filter(p => !p.away).map(p => p.drugs || 0));
-  return max > 0 && (activePlayer.drugs || 0) >= max ? activePlayer.playerToken : null;
+  return activePlayer && room.informantTarget === activePlayer.playerToken ? activePlayer.playerToken : null;
+}
+function informantVoteOf(room) {
+  if (!room.currentRadio || room.currentRadio.effectType !== 'INFORMANT') return null;
+  if (!room.informantVote || room.informantVote.round !== room.round) room.informantVote = { round: room.round, votes: {}, done: false };
+  return room.informantVote;
+}
+// Dépouillement : le plus de votes contre lui ; égalité tirée au sort. Tout le monde voit le résultat (même hors ligne).
+function resolveInformantVote(room, roomId) {
+  const vote = informantVoteOf(room);
+  if (!vote || vote.done) return;
+  vote.done = true;
+  const count = {};
+  Object.values(vote.votes).forEach(t => { count[t] = (count[t] || 0) + 1; });
+  const max = Math.max(0, ...Object.values(count));
+  if (!max) return;
+  const tied = Object.keys(count).filter(t => count[t] === max);
+  const targetToken = tied[Math.floor(Math.random() * tied.length)];
+  room.informantTarget = targetToken;
+  const nameOf = t => room.players.find(p => p.playerToken === t)?.caidName || 'Caïd';
+  const result = {
+    round: room.round,
+    targetToken,
+    targetCaid: nameOf(targetToken),
+    tie: tied.length > 1,
+    tally: Object.keys(count).sort((a, b) => count[b] - count[a]).map(t => ({ token: t, caidName: nameOf(t), votes: count[t] }))
+  };
+  vote.result = result;
+  room.players.filter(p => !p.away).forEach(p => sendToPlayer(p, 'informant_result', result));
+  broadcastTurnState(roomId);
 }
 
 // Couvercle de poubelle : l'arme d'un combattant compte pour 0 si un de ses adversaires a l'effet actif
@@ -886,6 +916,8 @@ io.on('connection', (socket) => {
     room.pendingPillage = null;
     room.policeCars = 1;
     room.usedOnceRadio = [];
+    room.informantVote = null;
+    room.informantTarget = null;
     room.currentRadio = drawRadio(room);
 
     io.emit('rooms_list', getAvailableRooms());
@@ -1873,6 +1905,41 @@ io.on('connection', (socket) => {
       socket.to(socket.roomId).emit('player_updated', p);
       checkVictory(room, socket.roomId);
     }
+  });
+
+  // Une balance dans le quartier : vote contre un rival, état du vote, contrôle fait
+  socket.on('informant_vote', ({ targetToken } = {}) => {
+    const room = rooms[socket.roomId];
+    const me = room && room.players.find(p => p.socketId === socket.id);
+    const vote = room && informantVoteOf(room);
+    if (!me || !vote || vote.done || targetToken === me.playerToken) return;
+    if (!room.players.some(p => p.playerToken === targetToken && !p.away)) return;
+    vote.votes[me.playerToken] = targetToken;
+    const voters = room.players.filter(p => !p.away);
+    io.to(socket.roomId).emit('informant_vote_progress', { voted: Object.keys(vote.votes).length, expected: voters.length });
+    if (voters.every(p => vote.votes[p.playerToken])) resolveInformantVote(room, socket.roomId);
+  });
+  socket.on('informant_status', (ack) => {
+    if (typeof ack !== 'function') return;
+    const room = rooms[socket.roomId];
+    const me = room && room.players.find(p => p.socketId === socket.id);
+    const vote = room && informantVoteOf(room);
+    if (!me || !vote) return ack(null);
+    ack({ voted: !!vote.votes[me.playerToken], done: vote.done, votedCount: Object.keys(vote.votes).length, expected: room.players.filter(p => !p.away).length, result: vote.result || null });
+  });
+  socket.on('informant_control_done', () => {
+    const room = rooms[socket.roomId];
+    const me = room && room.players.find(p => p.socketId === socket.id);
+    if (me && room.informantTarget === me.playerToken) room.informantTarget = null;
+  });
+  // Partie test seulement : impose le Flash Radio de la manche (tests du serveur)
+  socket.on('test_set_radio', ({ id } = {}) => {
+    const room = rooms[socket.roomId];
+    const ev = RADIO_EVENTS.find(e => e.id === id);
+    if (!room || !room.isTestRoom || !ev) return;
+    room.currentRadio = ev;
+    room.informantVote = null;
+    socket.emit('test_radio_set', { radio: ev });
   });
 
   socket.on('reset_test_room', ({ roomId } = {}) => {

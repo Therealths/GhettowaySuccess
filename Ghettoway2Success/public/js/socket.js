@@ -36,6 +36,7 @@ if (socket) {
       navTo('page-6');
       refreshHud();
       if (player && player.roundSeen && round > player.roundSeen) enterNewRound(round, radio);
+      else informantMaybeVote();
     } else if (localPlayer.caidId) navTo('page-lobby');
     else navTo('page-4');
   });
@@ -203,7 +204,9 @@ if (socket) {
     localPlayer.activeAllies = [];
     startRoundPhase1();
   }
-  let lastActivePlayerToken = null, lastTurnId = null;
+  let lastActivePlayerToken = null, lastTurnId = null, informantControlRunning = false;
+  socket.on('informant_vote_progress', informantProgress);
+  socket.on('informant_result', r => informantResultScreen(r));
   socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId, informantToken }) => {
     if (serverPacts) nonAggressionPacts = serverPacts;
     renderTurnOrder(turnOrder, activePlayerToken, alliedTokens || []);
@@ -241,10 +244,15 @@ if (socket) {
       document.getElementById('blockerCaidName').innerText = activeCaidName || "Caïd Adverse";
     }
     syncMultiplayerTargets();
-    // Une balance dans le quartier : contrôle imposé au début du tour, une fois par manche
-    if (newTurn && informantToken === myPlayerToken && localPlayer.informantRound !== round) {
-      localPlayer.informantRound = round;
-      const whenFree = () => document.getElementById('page-5').classList.contains('active') ? setTimeout(whenFree, 500) : msgIdle().then(() => triggerPoliceInspection(true));
+    // Une balance dans le quartier : le plus désigné par le vote est contrôlé pendant son tour
+    // (après la page Flash Radio et l'écran du vote) ; le serveur l'oublie une fois le contrôle fait
+    if (informantToken === myPlayerToken && activePlayerToken === myPlayerToken && !informantControlRunning) {
+      informantControlRunning = true;
+      const busy = () => document.getElementById('page-5').classList.contains('active') || !document.getElementById('powerScreen').classList.contains('hidden');
+      const whenFree = () => busy() ? setTimeout(whenFree, 500) : msgIdle()
+        .then(() => triggerPoliceInspection(true))
+        .then(() => { if (socket) socket.emit('informant_control_done'); })
+        .finally(() => { informantControlRunning = false; });
       whenFree();
     }
   });
