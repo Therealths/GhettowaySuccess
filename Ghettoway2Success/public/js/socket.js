@@ -398,6 +398,9 @@ if (socket) {
     }
   });
 
+  // Braquage en alliance avec des prostituées au butin : chaque allié en récupère une
+  socket.on('heist_prostitute', ({ lvl }) => claimHeistProstitute(lvl));
+
   socket.on('you_were_pillaged', async ({ category, amount, thiefCaid }) => {
     if (category === 'cash') {
       localPlayer.pocketCash = 0;

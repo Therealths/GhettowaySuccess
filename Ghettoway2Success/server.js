@@ -1445,7 +1445,7 @@ io.on('connection', (socket) => {
   // =========================================================================
   // BARRE DE PARTAGE DU BUTIN EN ALLIANCE (BRAQUAGES & PILLAGES)
   // =========================================================================
-  socket.on('initiate_allied_heist_split', ({ heistName, totalCash, totalDrugs, allyToken, allyTokens }) => {
+  socket.on('initiate_allied_heist_split', ({ heistName, totalCash, totalDrugs, allyToken, allyTokens, prostituteLvl }) => {
     const room = rooms[socket.roomId];
     if (!room) return;
     const initiator = room.players.find(p => p.socketId === socket.id);
@@ -1457,6 +1457,8 @@ io.on('connection', (socket) => {
       .map(t => room.players.find(p => p.playerToken === t))
       .filter(Boolean);
     if (!allies.length) return;
+    const lvl = [1, 2].includes(prostituteLvl) ? prostituteLvl : 0;
+    if (lvl) allies.forEach(p => sendToPlayer(p, 'heist_prostitute', { lvl, heistName: heistName || 'Braquage', byCaid: initiator.caidName || 'ton allié' }));
 
     if (allies.length > 1) {
       return openGroupSplit(room, {

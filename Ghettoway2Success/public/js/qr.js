@@ -204,6 +204,17 @@ async function cancelSelectedQrPhoto() {
 
 // Découverte d'objet : voir js/items.js
 
+async function claimHeistProstitute(lvl) {
+  const pr = NIGHTCLUB_CATALOG.find(i => (i.lvl || 1) === lvl) || {};
+  const girl = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: lvl, name: pr.nom || `Prostituée Niv. ${lvl}`, revenue: pr.rev || (lvl === 2 ? 2500 : 1000) };
+  const old = localPlayer.prostituteInTransit;
+  if (old && !(await showAppConfirm(`Une ${girl.name} veut te suivre, mais tu as déjà une ${old.name || 'Prostituée'} en transit (une seule à la fois).\n\nRemplacer l'actuelle par la ${girl.name} ?`, "👠 Prostituée libérée", "Remplacer", "Garder l'actuelle"))) return;
+  localPlayer.prostituteInTransit = girl;
+  refreshHud();
+  await showCardPlayed({ name: girl.name }, [['ph-high-heel', 'Rente au QG', `+${girl.revenue.toLocaleString()} € / manche`], ['ph-map-pin', 'En transit', 'dépose-la au QG']], 'PROSTITUÉE LIBÉRÉE',
+    { kicker: 'Butin du braquage', stamp: 'ph-heart', face: shopCardFace({ img: pr.image || `plvl${lvl}.jpg`, name: girl.name, bonus: `+${girl.revenue.toLocaleString()} € / manche`, desc: pr.desc, cls: 'veh' }) });
+}
+
 async function processQrPayload(payload) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   closeQrScannerModal();
@@ -320,6 +331,7 @@ async function processQrPayload(payload) {
         heistName: data.n || 'Braquage',
         totalCash,
         totalDrugs,
+        prostituteLvl: data.p || 0,
         allyTokens: heistAllies.map(a => a.allyToken)
       });
     } else {
@@ -329,6 +341,8 @@ async function processQrPayload(payload) {
       const bonusTxt = radioHeistBonus > 0 ? ` (dont +${radioHeistBonus.toLocaleString()} € Bonus Radio !)` : '';
       await showAppAlert(`+${totalCash.toLocaleString()} € et +${totalDrugs} kg gagnés en solo !${bonusTxt}`, "🏆 Braquage Réussi");
     }
+    // "p" : niveau des prostituées libérées pendant le braquage, une pour chaque braqueur (les alliés la reçoivent par le serveur)
+    if (data.p) await claimHeistProstitute(data.p);
     return;
   }
   // QR lisible mais d'un type inconnu (faute à l'impression…)

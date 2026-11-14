@@ -458,3 +458,14 @@ test('patrouille : le joueur actif indique un Caïd croisé, qui reçoit le cont
   assert.ok(got.byCaid);
   await never(active, 'patrol_control');
 });
+
+test('braquage en alliance avec une prostituée au butin : chaque allié en reçoit une', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('propose_alliance', { targetPlayerTokens: [b.token], senderName: 'Burger Queen' });
+  const req = await waitFor(b, 'alliance_request_received');
+  b.emit('respond_alliance', { requestId: req.requestId, accepted: true });
+  await waitFor(a, 'alliance_confirmed');
+  a.emit('initiate_allied_heist_split', { heistName: 'Nightclub', totalCash: 27000, totalDrugs: 0, prostituteLvl: 2, allyTokens: [b.token] });
+  assert.strictEqual((await waitFor(b, 'heist_prostitute')).lvl, 2);
+  await never(a, 'heist_prostitute');
+});
