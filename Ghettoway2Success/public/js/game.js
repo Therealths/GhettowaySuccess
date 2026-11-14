@@ -500,9 +500,9 @@ function nextPlayerLabel() {
   const next = order.slice(i + 1).find(p => !p.played && !p.away && !(lastAlliedTokens || []).includes(p.token));
   return next ? `Passer la main à ${next.token === myPlayerToken ? 'toi' : next.caidName}` : 'Passer à la manche suivante';
 }
-// Sens de la patrouille, tiré au hasard (ou commandé au Talkie-walkie) : gauche, droite ou demi-tour
-const PATROL_DIRS = { left: ['⬅ GAUCHE', 'vers la gauche'], right: ['DROITE ➡', 'vers la droite'], uturn: ['🔄 DEMI-TOUR', 'dans le sens inverse de son dernier déplacement'] };
-const rigDir = rig => PATROL_DIRS[rig.dir] ? rig.dir : rig.left ? 'left' : 'right';
+// Demi-tour : une option tirée en plus (20 %), qui n'annule pas la direction. Gauche ou droite (50/50) sert
+// toujours : sur le plateau, la voiture doit savoir de quel côté tourner au prochain croisement.
+const PATROL_UTURN_CHANCE = 0.2;
 function showPatrolScreen() {
   const scr = document.getElementById('patrolScreen');
   const cta = document.getElementById('patrolCta');
@@ -511,7 +511,7 @@ function showPatrolScreen() {
   const snow = isRadioEffectActive('SNOW');
   const greve = isRadioEffectActive('PATROL_FREEZE') || snow;
   const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
-  let baseRoll, finalMove, dir, rigged = false;
+  let baseRoll, finalMove, left, uturn, rigged = false;
   const talkieFx = document.getElementById('patrolTalkie');
   talkieFx.classList.add('hidden');
   scr.classList.remove('talkie', 'tk-bubble', 'tk-card', 'picking');
@@ -534,7 +534,7 @@ function showPatrolScreen() {
   scr.classList.add('show');
 
   // Bloc direction toujours présent, panneau de hauteur fixe : la voiture ne bouge pas quand le résultat arrive
-  const dirHtml = (label, labelCls, note) => `<div class="mt-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</span><span class="patrol-dir ${labelCls}">${label}</span></div>
+  const dirHtml = (label, labelCls, note, uturn) => `<div class="mt-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</span><span class="flex items-center gap-2">${uturn ? '<span class="patrol-uturn">🔄 Demi-tour</span>' : ''}<span class="patrol-dir ${labelCls}">${label}</span></span></div>
       <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
   dirBox.innerHTML = dirHtml('…', 'text-slate-500', two ? 'Un seul dé pour les 2 voitures : même nombre de cases, même sens.' : 'Le dé décide de combien de cases et dans quel sens avance la patrouille.');
 
@@ -554,9 +554,8 @@ function showPatrolScreen() {
     document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>BOUGENT.' : 'LA PATROUILLE<br>BOUGE.';
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
-    const [dirLabel, dirWay] = PATROL_DIRS[dir];
-    const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} ${dirWay}`;
-    dirBox.innerHTML = dirHtml(dirLabel, '', dir === 'uturn' ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} demi-tour : avance ${moveTxt}.` : `Avance ${moveTxt} sur le plateau.`);
+    const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau`;
+    dirBox.innerHTML = dirHtml(left ? '⬅ GAUCHE' : 'DROITE ➡', '', uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`, uturn);
     // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau
     cta.classList.add('hidden');
     document.getElementById('patrolAsk').classList.remove('hidden');
@@ -568,7 +567,8 @@ function showPatrolScreen() {
     rigged = !!rig;
     baseRoll = rig ? rig.roll : Math.floor(Math.random() * 6) + 1;
     finalMove = baseRoll + radioExtra;
-    dir = rig ? rigDir(rig) : Object.keys(PATROL_DIRS)[Math.floor(Math.random() * 3)];
+    left = rig ? !!rig.left : Math.random() < 0.5;
+    uturn = rig ? !!rig.uturn : Math.random() < PATROL_UTURN_CHANCE;
     // Talkie-walkie : pendant que le dé roule, la bulle « message au talkie » arrive, puis la carte tamponnée (choc) ;
     // le dé ne tombe qu'après, sur le résultat commandé
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

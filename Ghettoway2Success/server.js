@@ -1708,12 +1708,11 @@ io.on('connection', (socket) => {
   });
 
   // Talkie-walkie de flic : dé et direction choisis à l'avance, pris par le prochain lancer de patrouille
-  socket.on('rig_patrol', ({ roll, left, dir } = {}) => {
+  socket.on('rig_patrol', ({ roll, left, uturn } = {}) => {
     const room = rooms[socket.roomId];
     if (!room) return;
-    // Direction : gauche, droite ou demi-tour (ancien client : left vrai/faux)
-    const d = ['left', 'right', 'uturn'].includes(dir) ? dir : left ? 'left' : 'right';
-    room.patrolRig = { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), dir: d, left: d === 'left' };
+    // Gauche ou droite, et le demi-tour en option (il n'annule pas la direction)
+    room.patrolRig = { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), left: !!left, uturn: !!uturn };
   });
   socket.on('take_patrol_rig', (ack) => {
     const room = rooms[socket.roomId];

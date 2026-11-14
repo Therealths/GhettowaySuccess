@@ -87,7 +87,7 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 - **Lascars** (Sportclub, 3 au plus) : +ATK et +DÉF.
 - **QR des cartes** (JSON, champ `t`) : Yencli `{"t":"yen","d":kg demandés,"c":gain}` ; Braquage `{"t":"brq","n":nom,"req":ATK requise,"m":membres requis,"c":cash,"d":kg (facultatif),"p":niveau de prostituée (facultatif)}`. Avec `p`, chaque braqueur récupère une prostituée de ce niveau (`claimHeistProstitute` dans `qr.js`) ; en alliance, le serveur l'envoie aux alliés (`heist_prostitute`). S'il en a déjà une en transit, on lui propose de remplacer l'actuelle.
 - **Contrôle de police** : 30 % rien, 35 % drogue, 35 % armes ; saisie immédiate, +1 arrestation, fin de tour forcée. Le Passeport est proposé avant (écran plein page), puis la Prière de J-Lo.
-- **Fin de tour** : le joueur lance le **dé de patrouille** (1 à 6 + bonus radio, direction au hasard parmi **gauche, droite ou 🔄 demi-tour** — `PATROL_DIRS`, game.js), sauf « Grève au Commissariat ».
+- **Fin de tour** : le joueur lance le **dé de patrouille** (1 à 6 + bonus radio, direction gauche/droite 50/50, plus l'**option 🔄 demi-tour** (20 %, `PATROL_UTURN_CHANCE`) qui **n'annule pas** la direction : sur le plateau, la voiture doit savoir de quel côté tourner au croisement), sauf « Grève au Commissariat ».
 - **Combat** : attaque contre défense ; le perdant perd 1 cœur, le gagnant choisit un butin (cash, drogue ou prostituée en transit). Phase 2 de riposte possible. Alliances : attaques et braquages coordonnés, pactes de non-agression.
 
 ### Flash radio (`public/radio_events.json`, 29 événements, un tiré par manche par `drawRadio` dans `server.js`)
@@ -124,7 +124,7 @@ Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` /
 | Seringue de botox | `botox` | prochaine rente des prostituées ×2 (une fois) | **à injecter** depuis le Sac (« Injecter », `botoxActive`, une seule à la fois) ; doublé à la rente suivante (début de manche, prostituées au QG) |
 | Ticket à gratter | `scratch` | 1 chance sur 3 de gagner 5 000 € | Sac (« Gratter ») |
 | Pied de biche | `crowbar` | coffre du QG d'un rival : jusqu'à **5 parts** (1 000 € ou 1 kg chacune) | Sac ; demande d'abord « es-tu devant son QG ? » |
-| Talkie-walkie de flic | `patrol_reroll` | choisir en secret le dé et la direction (gauche, droite ou demi-tour : `rig_patrol { roll, dir }`) de la **prochaine** patrouille (de n'importe quel joueur) | Sac |
+| Talkie-walkie de flic | `patrol_reroll` | choisir en secret le dé, la direction et l'option demi-tour (`rig_patrol { roll, left, uturn }`) de la **prochaine** patrouille (de n'importe quel joueur) | Sac |
 | Lunettes de soleil | `double_fouille` | à la prochaine Fouille, 2 objets différents, on en garde un | **automatique** |
 
 Objets jouables en combat : `isCombatItem` (durée `combat`, Kebab, Sifflet, Canette). Les autres sont visibles dans la pile mais grisés « Pas en combat ».
