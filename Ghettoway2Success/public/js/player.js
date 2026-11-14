@@ -452,6 +452,8 @@ async function useItem(idx) {
 // Coffre du QG : sur toi ⇄ au QG pour l'argent et la drogue, installation d'une escort (aller simple)
 let transferAmount = 0;
 const escortRent = pr => pr.revenue || (pr.level === 2 ? 2500 : 1000);
+const QG_ESCORT_SLOTS = 5; // emplacements d'escorts au QG
+const escortImg = pr => pr.level === 2 ? 'plvl2.jpg' : 'plvl1.jpg';
 // Le coffre ne s'ouvre qu'en flashant le QR de la case QG du plateau
 async function qgOnlyHint() {
   await showAppAlert("Le coffre s'ouvre au QG : rends-toi sur la case QG du plateau et flashe son QR code.", "🏦 Coffre du QG");
@@ -521,14 +523,23 @@ function updateTransferUI(amountOnly) {
     document.getElementById('qgMeVal').innerText = pr ? `L${pr.level || 1}` : 'personne';
     document.getElementById('qgMeAfter').innerText = pr ? '→ personne' : '';
     document.getElementById('qgSafeVal').innerText = `${list.length} escort${list.length > 1 ? 's' : ''}`;
-    document.getElementById('qgSafeAfter').innerText = pr ? `→ ${(rent + escortRent(pr)).toLocaleString()} €/manche` : `${rent.toLocaleString()} €/manche`;
-    document.getElementById('qgEscortBox').innerHTML = pr
-      ? `<div class="font-anton text-2xl text-white">${escapeHtml(pr.name || `Prostituée L${pr.level || 1}`)}</div><div class="text-sm font-bold text-pink-300">Rente : ${escortRent(pr).toLocaleString()} € à chaque manche</div>`
-      : `<div class="text-sm font-bold text-slate-300">Aucune escort sur toi</div><div class="text-[11px] text-slate-500">Recrute-en une au Nightclub.</div>`;
+    // Escort sur toi en une ligne, puis les 5 emplacements du QG : celles déjà installées, et la place qu'elle prendrait
+    const full = list.length >= QG_ESCORT_SLOTS;
+    document.getElementById('qgSafeAfter').innerText = pr && !full ? `→ ${(rent + escortRent(pr)).toLocaleString()} €/manche` : `${rent.toLocaleString()} €/manche`;
+    const slots = Array.from({ length: QG_ESCORT_SLOTS }, (_, i) => {
+      const p = list[i];
+      if (p) return `<div class="qg-slot on"><img src="${escortImg(p)}" alt=""><b>L${p.level || 1}</b></div>`;
+      if (pr && i === list.length) return `<div class="qg-slot next"><img src="${escortImg(pr)}" alt=""><b>+</b></div>`;
+      return `<div class="qg-slot"><span>${i + 1}</span></div>`;
+    }).join('');
+    document.getElementById('qgEscortBox').innerHTML = `<div class="qg-escort-head">${pr
+      ? `<b>${escapeHtml(pr.name || `Prostituée L${pr.level || 1}`)}</b><span>+${escortRent(pr).toLocaleString()} € / manche</span>`
+      : '<b>Aucune escort sur toi</b><span>Recrute-en une au Nightclub</span>'}</div>
+      <div class="qg-slots">${slots}</div><div class="qg-slots-cap">${list.length} / ${QG_ESCORT_SLOTS} emplacements au QG</div>`;
     document.getElementById('qgHeadline').innerHTML = 'AU CHAUD.';
-    hint.innerHTML = '<i class="ph-fill ph-shield-check"></i> Au QG, elle rapporte sa rente à chaque manche et ne peut plus être rackettée';
-    cta.innerText = 'Installer au QG';
-    cta.disabled = !pr;
+    hint.innerHTML = full && pr ? '<i class="ph-fill ph-warning"></i> QG complet : 5 escorts au maximum' : '<i class="ph-fill ph-shield-check"></i> Au QG, elle rapporte sa rente à chaque manche et ne peut plus être rackettée';
+    cta.innerText = full && pr ? 'QG complet' : 'Installer au QG';
+    cta.disabled = !pr || full;
     return;
   }
   const cash = res === 'cash';
@@ -566,7 +577,7 @@ async function confirmTransferAction() {
   if (!isMyTurnToPlay) return;
   const res = currentTransferResource, dep = currentTransferMode === 'deposit';
   if (res === 'escort') {
-    if (!localPlayer.prostituteInTransit) return;
+    if (!localPlayer.prostituteInTransit || localPlayer.prostitutesAtSafeList.length >= QG_ESCORT_SLOTS) return;
     playTransferFly('💃', true);
     localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
     localPlayer.prostituteInTransit = null;

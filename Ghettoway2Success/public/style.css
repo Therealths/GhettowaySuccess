@@ -749,7 +749,20 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .qg-arrow em { font-style: normal; font-size: 9px; font-weight: 900; text-transform: uppercase; color: var(--c); }
 .qg-arrow small { font-size: 9px; font-weight: 700; color: #64748b; line-height: 1.1; }
 .qg-amount { font-family: 'Anton', sans-serif; font-size: 50px; line-height: 1; color: var(--c); }
-.qg-escort { margin-top: 12px; height: 139.3px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; border-radius: 16px; background: rgba(244,114,182,0.07); border: 1px solid rgba(244,114,182,0.3); }
+.qg-escort { margin-top: 12px; height: 139.3px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 7px; padding: 8px 10px; border-radius: 16px; background: rgba(244,114,182,0.07); border: 1px solid rgba(244,114,182,0.3); }
+.qg-escort-head { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 2px 8px; line-height: 1.1; }
+.qg-escort-head b { font-family: 'Anton', sans-serif; font-weight: 400; font-size: 19px; color: #fff; }
+.qg-escort-head span { font-size: 12px; font-weight: 800; color: #f9a8d4; }
+.qg-slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 300px; }
+.qg-slot { position: relative; aspect-ratio: 4 / 5; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(244,114,182,0.3); color: rgba(244,114,182,0.45); font-size: 13px; font-weight: 900; }
+.qg-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.qg-slot b { position: absolute; left: 0; right: 0; bottom: 0; padding: 6px 0 2px; font-size: 10px; font-weight: 900; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,0.75)); }
+.qg-slot.on { border: 2px solid #f472b6; }
+.qg-slot.next { border: 2px dashed #f472b6; animation: qgSlotPulse 1.2s ease-in-out infinite; }
+.qg-slot.next img { opacity: 0.4; }
+.qg-slot.next b { font-size: 16px; background: none; top: 0; display: flex; align-items: center; justify-content: center; padding: 0; }
+@keyframes qgSlotPulse { 50% { box-shadow: 0 0 14px rgba(244,114,182,0.6); } }
+.qg-slots-cap { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
 .qg-hint { font-size: 11px; font-weight: 700; color: #7dd3fc; display: flex; align-items: center; gap: 6px; justify-content: center; text-align: center; min-height: 2.8em; }
 .qg-cta { width: 100%; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 14px; text-transform: uppercase; color: #111; background: var(--c); }
 .qg-cta:disabled { opacity: 0.35; }
@@ -758,7 +771,7 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .qg-fly.left { left: 70%; animation: qgFlyLeft 0.7s ease-in-out both; }
 @keyframes qgFlyRight { 0% { opacity: 0; transform: translate(0, 0) scale(0.8); } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(180px, -10px) scale(1.1); } }
 @keyframes qgFlyLeft { 0% { opacity: 0; transform: translate(0, 0) scale(0.8); } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-180px, -10px) scale(1.1); } }
-@media (max-height: 700px) { .qg-ill { height: 76px; } .qg-amount { font-size: 40px; } .qg-head { font-size: 32px; } .qg-escort { height: 129.3px; } }
+@media (max-height: 700px) { .qg-ill { height: 76px; } .qg-amount { font-size: 40px; } .qg-head { font-size: 32px; } .qg-escort { height: 129.3px; gap: 5px; } .qg-slot { aspect-ratio: 1; } }
 @media (prefers-reduced-motion: reduce) { .qg-fly { display: none; } }
 /* Fiche du Caïd : ses couches (voile « Tour de… », bouton Quitter) restent sous les écrans plein page (grossiste, combat…) */
 #page-6 { isolation: isolate; }
