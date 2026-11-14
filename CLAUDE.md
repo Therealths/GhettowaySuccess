@@ -61,7 +61,7 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 - `rooms` en mémoire, sauvegardées dans `parties.json` (`saveRooms`), rechargées au démarrage.
 - L'état d'un joueur est **envoyé par son téléphone** (`sync_player`, appelé par `refreshHud`) et gardé dans `room.players[]`. À la reconnexion, le serveur renvoie cet état et la **boîte aux lettres** (`mailbox`) des événements manqués, avec `late: true`.
 - `sendToPlayer(p, event, data)` : envoie au joueur s'il est connecté, sinon met en boîte aux lettres.
-- Effets **résolus par le serveur** (pour marcher même si la victime est hors ligne) : Siphon (cœur), **Pied de biche** (`crowbar_opened` → `crowbar_take`, `room.pendingCrowbar`), **Faire les poches** de Jamel (`steal_result`), **Talkie** (`rig_patrol` / `take_patrol_rig`, `room.patrolRig`), chien errant (`claim_stray_dog`), combats et pillage. Côté victime, quand `late` est vrai, ne **pas** retirer une seconde fois ce que le serveur a déjà retiré.
+- Effets **résolus par le serveur** (pour marcher même si la victime est hors ligne) : Siphon (cœur), **Pied de biche** (`crowbar_opened` → `crowbar_take`, `room.pendingCrowbar`), **Faire les poches** de Jamel (`steal_result`), **Talkie** (`rig_patrol` / `take_patrol_rig`, `room.patrolRig`), chien errant (`claim_stray_dog`), combats et pillage (racket au choix : 100 % du cash, 100 % de la drogue, **3 objets de Fouille au hasard** — `isFouilleItem`, jamais l'équipement, nombre dispo dans `pendingPillage.availableItems` —, ou la prostituée en transit). Côté victime, quand `late` est vrai, ne **pas** retirer une seconde fois ce que le serveur a déjà retiré.
 - Victoire : `pocketCash + safeCash >= 100 000 €` (`WIN_CASH`, `checkVictory`).
 - Partie de test permanente `TEST` (3 joueurs `tok_test_1/2/3` : Burger Queen, Jamel Pépouze, J-Lo Gramme), remise à zéro par `reset_test_room`.
 
@@ -172,7 +172,7 @@ Outils (hors dépôt) dans `~/.cache/ghettoway-tools/` :
 
 ## 7. Tester
 
-- `cd Ghettoway2Success && npm test` (27 tests du serveur, socket.io réel sur un port aléatoire).
+- `cd Ghettoway2Success && npm test` (28 tests du serveur, socket.io réel sur un port aléatoire).
 - Serveur de test : `PORT=3100 GAME_DATA_DIR=<dossier jetable> nice -n 10 node server.js`.
 - Dans le navigateur : `enterTestGame(1)` (J1 Burger Queen), `enterTestGame(2)` (J2 Jamel)… Pour **deux joueurs en même temps**, ouvrir l'un sur `http://localhost:3100` et l'autre sur `http://127.0.0.1:3100` (stockages séparés).
 - Raccourcis de test (faux QR : boutiques, objets, Fouille, Ticket…) : **5 appuis rapides** sur le titre « FLASH UN QR CODE » (ou l'étiquette « Scanner ») de la page Scanner ; le choix est retenu sur le téléphone (`g2s_test_mode`).

@@ -114,6 +114,24 @@ test('combat gagné : les deux joueurs voient le duel, le perdant perd un cœur,
   assert.strictEqual((await waitFor(a, 'pillage_gain_applied')).amount, 5000);
 });
 
+test('racket : le vainqueur prend jusqu’à 3 objets de Fouille au hasard, jamais l’équipement', async () => {
+  const { players: [a, b] } = await startGame();
+  const objets = ['Kebab', 'Sifflet', 'Botox', 'Canette'].map((name, i) => ({ id: `o${i}`, type: 'ITEM_CARD', name }));
+  b.emit('sync_player', { inventory: [...objets, { id: 'w1', type: 'WEAPON', name: 'Couteau' }] });
+  await new Promise(r => setTimeout(r, 100));
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  a.emit('combat_set_ready', { currentStat: 3 });
+  b.emit('combat_set_ready', { currentStat: 1 });
+  assert.strictEqual((await waitFor(a, 'combat_finished_result')).pillageInfo.availableItems, 4);
+  a.emit('execute_pillage_choice', { category: 'items' });
+  const lost = await waitFor(b, 'you_were_pillaged');
+  const got = await waitFor(a, 'pillage_gain_applied');
+  assert.strictEqual(got.items.length, 3);
+  assert.deepStrictEqual(lost.items.map(i => i.id), got.items.map(i => i.id));
+  assert.ok(got.items.every(i => i.type === 'ITEM_CARD'));
+});
+
 test('assaut bloqué : riposte du défenseur en phase 2, puis match nul', async () => {
   const { players: [a, b] } = await startGame();
   a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });

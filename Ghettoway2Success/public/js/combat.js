@@ -33,6 +33,18 @@ function openPillageModalUI(pillageInfo) {
     </button>
   `);
 
+  // Objets de Fouille : jusqu'à 3, pris au hasard dans sa main (son Sac, sans l'équipement)
+  const nItems = pillageInfo.availableItems || 0;
+  btns.push(`
+    <button onclick="choosePillageReward('items')" class="w-full p-3 glass-panel rounded-2xl border border-sky-500/40 flex items-center justify-between text-left ${nItems <= 0 ? 'opacity-40 pointer-events-none' : ''}">
+      <div>
+        <span class="text-xs font-black text-sky-300 uppercase block">🎒 ${Math.min(3, nItems) || 3} objet${Math.min(3, nItems) > 1 || !nItems ? 's' : ''} de Fouille au hasard</span>
+        <span class="text-[10px] font-mono text-white">${nItems} objet${nItems > 1 ? 's' : ''} de Fouille dans sa main</span>
+      </div>
+      <i class="ph-bold ph-arrow-right text-sky-400"></i>
+    </button>
+  `);
+
   if (pillageInfo.hasProstitute) {
     // Alliés gagnants (si le serveur précise winnerTokens, on s'y limite)
     const winningAllies = (localPlayer.activeAllies || []).filter(a => !Array.isArray(pillageInfo.winnerTokens) || pillageInfo.winnerTokens.includes(a.allyToken));

@@ -1252,6 +1252,7 @@ io.on('connection', (socket) => {
       isAlliedVictory: !!isAlliedVictory,
       availableCash: loserP.pocketCash || 0,
       availableDrugs: loserP.drugs || 0,
+      availableItems: (loserP.inventory || []).filter(isFouilleItem).length,
       hasProstitute: !!loserP.hasProstituteInTransit,
       prostituteObj: loserP.prostituteObj || { level: 1, name: 'Prostituée Niv. 1', revenue: 1000 }
     };
@@ -1379,6 +1380,16 @@ io.on('connection', (socket) => {
           loserCaid: loserP.caidName
         });
       }
+    } else if (category === 'items') {
+      // Jusqu'à 3 objets de Fouille pris au hasard dans le Sac du perdant ; ils vont au vainqueur qui choisit
+      const inv = Array.isArray(loserP.inventory) ? loserP.inventory : [];
+      const pool = inv.filter(isFouilleItem);
+      const stolenItems = [];
+      while (stolenItems.length < PILLAGE_ITEMS && pool.length) stolenItems.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+      loserP.inventory = inv.filter(it => !stolenItems.includes(it));
+      primaryWinner.inventory = [...(primaryWinner.inventory || []), ...stolenItems];
+      sendToPlayer(loserP, 'you_were_pillaged', { category: 'items', amount: stolenItems.length, items: stolenItems, thiefCaid: primaryWinner.caidName });
+      sendToPlayer(primaryWinner, 'pillage_gain_applied', { category: 'items', amount: stolenItems.length, items: stolenItems, loserCaid: loserP.caidName });
     } else if (category === 'prostitute') {
       if (!pillage.hasProstitute) return socket.emit('error_msg', "Le perdant n'a pas de prostituée.");
       const targetWinnerToken = pillage.winnerTokens.includes(recipientToken) ? recipientToken : primaryWinner.playerToken;
@@ -1985,6 +1996,10 @@ io.on('connection', (socket) => {
 
 // Joueur hors ligne (partie test pilotée depuis un seul téléphone, réseau coupé…) :
 // le message est gardé et lui est remis à sa reconnexion (marqué « late »)
+// Objets de Fouille (cartes du Sac, hors équipement) : le racket peut en prendre jusqu'à 3
+const PILLAGE_ITEMS = 3;
+const isFouilleItem = it => !!it && !['WEAPON', 'ARMOR', 'VEHICLE', 'PROSTITUTE'].includes(it.type);
+
 function sendToPlayer(p, event, data) {
   if (!p) return;
   if (p.socketId && io.sockets.sockets.get(p.socketId)) io.to(p.socketId).emit(event, data);

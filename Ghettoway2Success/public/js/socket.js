@@ -401,7 +401,7 @@ if (socket) {
   // Braquage en alliance avec des prostituées au butin : chaque allié en récupère une
   socket.on('heist_prostitute', ({ lvl }) => claimHeistProstitute(lvl));
 
-  socket.on('you_were_pillaged', async ({ category, amount, thiefCaid }) => {
+  socket.on('you_were_pillaged', async ({ category, amount, items, thiefCaid }) => {
     if (category === 'cash') {
       localPlayer.pocketCash = 0;
       refreshHud();
@@ -414,10 +414,16 @@ if (socket) {
       localPlayer.prostituteInTransit = null;
       refreshHud();
       await showAppAlert(`${thiefCaid} a capturé ta Prostituée en transit !`, "👠 Pillage Subi");
+    } else if (category === 'items') {
+      // Le serveur a déjà retiré les objets de mon Sac : on enlève les mêmes (par id) de mon côté
+      const ids = (items || []).map(it => it && it.id);
+      localPlayer.inventory = localPlayer.inventory.filter(it => !ids.includes(it && it.id));
+      refreshHud();
+      await showAppAlert(amount ? `${thiefCaid} t'a pris ${amount} objet${amount > 1 ? 's' : ''} de Fouille : ${(items || []).map(it => it.name).join(', ')}.` : `${thiefCaid} a fouillé ton Sac… vide !`, "🎒 Pillage Subi");
     }
   });
 
-  socket.on('pillage_gain_applied', async ({ category, amount, prostituteObj, loserCaid, late }) => {
+  socket.on('pillage_gain_applied', async ({ category, amount, items, prostituteObj, loserCaid, late }) => {
     if (category === 'cash') {
       if (!late) localPlayer.pocketCash += (amount || 0);
       refreshHud();
@@ -430,6 +436,12 @@ if (socket) {
       localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée Niv. 1', revenue: 1000 };
       refreshHud();
       await showAppAlert(`Tu as récupéré la Prostituée de ${loserCaid} en transit !`, "👠 Escort Capturée");
+    } else if (category === 'items') {
+      const got = items || [];
+      if (!late) localPlayer.inventory.push(...got);
+      refreshHud();
+      if (!got.length) return showAppAlert(`Le Sac de ${loserCaid} était vide.`, "🎒 Butin");
+      await showCardPlayed(got, [['ph-backpack', `Pris dans le Sac de ${escapeHtml(loserCaid)}`, `${got.length} objet${got.length > 1 ? 's' : ''}`]], 'BUTIN DU RACKET', { kicker: 'Racket', stamp: 'ph-hand-grabbing', flyToSac: true });
     }
   });
 
