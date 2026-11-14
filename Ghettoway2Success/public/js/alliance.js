@@ -126,6 +126,7 @@ function allyRender(state, stage, bottom) {
   }
   document.getElementById('allyStage').innerHTML = stage;
   document.getElementById('allyBottom').innerHTML = bottom;
+  setSheet(scr, state === 'choix');
   if (same) { scr.classList.add('static'); return; }
   scr.classList.remove('hidden', 'show', 'static');
   void scr.offsetWidth; // relance les animations d'arrivée
@@ -168,13 +169,13 @@ function renderAllianceChoice() {
     if (allyInHospital(r)) return `<div class="ally-pick off"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>🏥 ${escapeHtml(allyRivalName(r))}</b><span>À l’hôpital : pas d’alliance cette manche</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     if (allyPlayed(r)) return `<div class="ally-pick off"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>✔️ ${escapeHtml(allyRivalName(r))}</b><span>A déjà joué : pas d’alliance cette manche</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     const on = allySelected.includes(r.playerToken);
-    return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="toggleAllyPick(this.dataset.token)"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>${escapeHtml(allyRivalName(r))}</b><span>${lascars(r.musclesCount || 0)} • Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'} • Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><span class="ally-chk"><i class="ph-bold ph-check"></i></span></button>`;
+    return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="toggleAllyPick(this.dataset.token)"><img src="${allyCaidImg(r.caidId, allyRivalName(r))}" alt=""><div class="n"><b>${escapeHtml(allyRivalName(r))}</b><span>${lascars(r.musclesCount || 0)}<br>Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'}<br>Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><span class="ally-chk"><i class="ph-bold ph-check"></i></span></button>`;
   };
   const n = allySelected.length;
   const hint = free > 1 ? `Choisis ${free > 2 ? '1, 2 ou 3' : '1 ou 2'} Caïds` : 'Choisis ton partenaire';
   const bottom = `<h2 class="font-anton ally-head sm">AVEC QUI TU T’ASSOCIES ?</h2>
     <div class="text-center text-[11px] font-bold text-slate-400 mt-1">${rivals.length ? hint : 'Aucun Caïd rival dans la partie'}</div>
-    <div class="flex flex-col gap-2 mt-3">${rivals.map(pick).join('')}</div>
+    <div class="ally-picks mt-3">${rivals.map(pick).join('')}</div>
     <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closeAllianceScreen()">Annuler</button><button type="button" class="ally-cta" onclick="confirmAlliance()" ${n ? '' : 'disabled'}>${n ? `Proposer à ${n} Caïd${n > 1 ? 's' : ''}` : 'Choisis un Caïd'}</button></div>`;
   return allyRender('choix', stage, bottom);
 }

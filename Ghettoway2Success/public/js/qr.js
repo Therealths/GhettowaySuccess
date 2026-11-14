@@ -106,7 +106,16 @@ async function openQrScannerModal() {
   scr.dataset.state = 'scan';
   qrDetectedLock = false;
   document.getElementById('scanRound').innerText = currentSession.round || 1;
+  setSheet(scr, true);
   scr.classList.remove('hidden');
+  // La page se déploie en cercle depuis le bouton rond du scanner
+  const btn = document.querySelector('.hud-scan'), b = btn && btn.getBoundingClientRect(), s = scr.getBoundingClientRect();
+  if (b && b.width) {
+    const cx = b.left + b.width / 2 - s.left, cy = b.top + b.height / 2 - s.top;
+    scr.style.setProperty('--cx', `${Math.round(cx)}px`);
+    scr.style.setProperty('--cy', `${Math.round(cy)}px`);
+    scr.style.setProperty('--cr', `${Math.ceil(Math.hypot(Math.max(cx, s.width - cx), Math.max(cy, s.height - cy)))}px`);
+  }
   applyQrTestMode();
   await startLiveQrCamera();
   placeScanFrame();

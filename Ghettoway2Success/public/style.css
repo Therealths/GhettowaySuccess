@@ -981,6 +981,23 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .sac-screen { background: #07080e; border-radius: 22px 22px 0 0; border-top: 2px solid rgba(16,185,129,0.55); box-shadow: 0 -12px 30px rgba(0,0,0,0.6); overflow: hidden; }
 .sac-screen.show { animation: sacUp 0.4s cubic-bezier(.2,1,.3,1) both; }
 @keyframes sacUp { from { transform: translateY(60%); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Fenêtre du bas (setSheet) : Combat, Alliance, Capacité, Scanner ; s'agrandit en plein écran pour la suite */
+.ally-screen, .pow-screen, .scan-screen { transition: top 0.35s cubic-bezier(.2,1,.3,1), border-radius 0.35s; }
+.sheet { border-radius: 22px 22px 0 0; border-top: 2px solid color-mix(in srgb, var(--ac, #10b981) 60%, transparent); box-shadow: 0 -12px 30px rgba(0,0,0,0.6); overflow: hidden; animation: sacUp 0.4s cubic-bezier(.2,1,.3,1) both; }
+.pow-screen.sheet .pow-banner { height: 18cqh; }
+.pow-screen.sheet .pow-stage { min-height: 0; }
+.scan-screen.sheet { animation: scanOpen 0.55s cubic-bezier(.45,0,.25,1) both; }
+@keyframes scanOpen { from { clip-path: circle(30px at var(--cx, 50%) var(--cy, 50%)); } to { clip-path: circle(var(--cr, 75%) at var(--cx, 50%) var(--cy, 50%)); } }
+/* Cibles (Combat, Alliance, Capacité, Riposte) : 3 petites cartes verticales côte à côte */
+.ally-picks { display: flex; justify-content: center; gap: 8px; }
+.ally-picks .ally-pick { position: relative; flex: 0 1 calc((100% - 16px) / 3); min-width: 0; flex-direction: column; justify-content: flex-start; gap: 5px; padding: 9px 5px 8px; text-align: center; }
+.ally-picks .ally-pick img { width: 48px; height: 48px; }
+.ally-picks .ally-pick .n { flex: none; width: 100%; }
+.ally-picks .ally-pick .n b { font-size: 11.5px; line-height: 1.15; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ally-picks .ally-pick .n span { font-size: 9.5px; line-height: 1.35; margin-top: 3px; }
+.ally-picks .ally-pick > i, .ally-picks .ally-pick .ally-chk { position: absolute; top: 5px; right: 5px; font-size: 15px; }
+.ally-picks .ally-pick .ally-chk { width: 18px; height: 18px; font-size: 11px; }
+@media (max-height: 700px) { .ally-picks .ally-pick img { width: 40px; height: 40px; } .ally-picks .ally-pick { padding: 7px 4px 6px; } }
 .sac-head { display: flex; align-items: center; justify-content: space-between; }
 .sac-head b { font-family: 'Anton', sans-serif; font-size: 22px; font-weight: 400; text-transform: uppercase; color: #fff; display: flex; align-items: center; gap: 6px; }
 .sac-head b i { color: #34d399; font-size: 20px; }

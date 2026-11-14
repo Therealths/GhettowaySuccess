@@ -174,6 +174,7 @@ function fightRender(state, theme, chip, stage, bottom, replay) {
   document.getElementById('fightAbort').classList.toggle('hidden', !fightCanAbort(state));
   document.getElementById('fightStage').innerHTML = stage;
   document.getElementById('fightBottom').innerHTML = bottom;
+  setSheet(scr, state === 'choix');
   if (same) { scr.classList.add('static'); return; }
   scr.classList.remove('hidden', 'show', 'static');
   void scr.offsetWidth; // relance les animations d'arrivée
@@ -233,12 +234,12 @@ function renderFightChoice() {
     if (r.away) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>💤 ${name}</b><span>A quitté la partie : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     if (r.inHospital) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🏥 ${name}</b><span>À l’hôpital : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     const on = r.playerToken === fightTargetToken;
-    return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickFightTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)} • Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'} • Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
+    return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickFightTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)}<br>Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'}<br>Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
   };
   const bottom = `<h2 class="font-anton ally-head sm">QUI TU ATTAQUES ?</h2>
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible attaquable cette manche</div>' : ''}
-    <div class="flex flex-col gap-2 mt-3">${rivals.map(pick).join('')}</div>
+    <div class="ally-picks mt-3">${rivals.map(pick).join('')}</div>
     <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closeFightScreen()">Annuler</button><button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="initiateCombatEngagement()" ${target ? '' : 'disabled'}>Engager le combat</button></div>`;
   return fightRender('choix', 'atk', 'combat', stage, bottom);
 }
@@ -353,7 +354,7 @@ function renderFightRiposte() {
   const bottom = `<div class="fight-phase">Phase 2 · Assaut repoussé</div>
     <h2 class="font-anton ally-head fight-title">À TOI DE FRAPPER</h2>
     <div class="text-center text-sm font-bold text-slate-300 mt-1 mb-3">Choisis qui reçoit ta contre-attaque</div>
-    <div class="flex flex-col gap-2">${fightRiposteTargets.map(pick).join('')}</div>
+    <div class="ally-picks">${fightRiposteTargets.map(pick).join('')}</div>
     <button type="button" id="fightRiposteCta" class="ally-cta mt-4" onclick="selectRiposteTarget(fightRipostePick)" ${fightRipostePick ? '' : 'disabled'}>Contre-attaquer</button>`;
   return fightRender('riposte', 'def', 'riposte', stage, bottom);
 }

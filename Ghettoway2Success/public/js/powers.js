@@ -41,6 +41,7 @@ function powRender(state, caid, chip, head, stage, bottom) {
   document.getElementById('powHead').innerHTML = head;
   document.getElementById('powStage').innerHTML = stage;
   document.getElementById('powBottom').innerHTML = bottom;
+  setSheet(scr, ['choix', 'self', 'info'].includes(state));
   if (same) { scr.classList.add('static'); return; }
   scr.classList.remove('hidden', 'show', 'static');
   void scr.offsetWidth; // relance les animations d'arrivée
@@ -101,12 +102,12 @@ function powChoice() {
     if (r.away) return off(img, `💤 ${name}`, 'A quitté la partie : intouchable');
     if (r.inHospital) return off(img, `🏥 ${name}`, 'À l’hôpital : intouchable');
     const on = r.playerToken === powTargetToken;
-    return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickPowerTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)} • Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'} • Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
+    return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickPowerTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)}<br>Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'}<br>Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
   };
   const bottom = `<div class="pow-label">Choisis ta cible</div>
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible possible cette manche</div>' : ''}
-    <div class="flex flex-col gap-2 mt-2">${rivals.map(pick).join('')}</div>
+    <div class="ally-picks mt-2">${rivals.map(pick).join('')}</div>
     <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchTargetedPower()" ${target ? '' : 'disabled'}>${POW_CTA[caid.id]}</button></div>`;
   return powRender('choix', caid, powItem ? powChipHtml('ph-backpack', 'Objet du sac') : powChipHtml('ph-lightning', 'Capacité spéciale'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), '', bottom);
 }
