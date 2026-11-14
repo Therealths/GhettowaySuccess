@@ -500,6 +500,9 @@ function nextPlayerLabel() {
   const next = order.slice(i + 1).find(p => !p.played && !p.away && !(lastAlliedTokens || []).includes(p.token));
   return next ? `Passer la main à ${next.token === myPlayerToken ? 'toi' : next.caidName}` : 'Passer à la manche suivante';
 }
+// Sens de la patrouille, tiré au hasard (ou commandé au Talkie-walkie) : gauche, droite ou demi-tour
+const PATROL_DIRS = { left: ['⬅ GAUCHE', 'vers la gauche'], right: ['DROITE ➡', 'vers la droite'], uturn: ['🔄 DEMI-TOUR', 'dans le sens inverse de son dernier déplacement'] };
+const rigDir = rig => PATROL_DIRS[rig.dir] ? rig.dir : rig.left ? 'left' : 'right';
 function showPatrolScreen() {
   const scr = document.getElementById('patrolScreen');
   const cta = document.getElementById('patrolCta');
@@ -508,7 +511,7 @@ function showPatrolScreen() {
   const snow = isRadioEffectActive('SNOW');
   const greve = isRadioEffectActive('PATROL_FREEZE') || snow;
   const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
-  let baseRoll, finalMove, left, rigged = false;
+  let baseRoll, finalMove, dir, rigged = false;
   const talkieFx = document.getElementById('patrolTalkie');
   talkieFx.classList.add('hidden');
   scr.classList.remove('talkie', 'tk-bubble', 'tk-card', 'picking');
@@ -551,7 +554,9 @@ function showPatrolScreen() {
     document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>BOUGENT.' : 'LA PATROUILLE<br>BOUGE.';
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
-    dirBox.innerHTML = dirHtml(left ? '⬅ GAUCHE' : 'DROITE ➡', '', `Avance ${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau.`);
+    const [dirLabel, dirWay] = PATROL_DIRS[dir];
+    const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} ${dirWay}`;
+    dirBox.innerHTML = dirHtml(dirLabel, '', dir === 'uturn' ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} demi-tour : avance ${moveTxt}.` : `Avance ${moveTxt} sur le plateau.`);
     // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau
     cta.classList.add('hidden');
     document.getElementById('patrolAsk').classList.remove('hidden');
@@ -563,7 +568,7 @@ function showPatrolScreen() {
     rigged = !!rig;
     baseRoll = rig ? rig.roll : Math.floor(Math.random() * 6) + 1;
     finalMove = baseRoll + radioExtra;
-    left = rig ? !!rig.left : Math.random() < 0.5;
+    dir = rig ? rigDir(rig) : Object.keys(PATROL_DIRS)[Math.floor(Math.random() * 3)];
     // Talkie-walkie : pendant que le dé roule, la bulle « message au talkie » arrive, puis la carte tamponnée (choc) ;
     // le dé ne tombe qu'après, sur le résultat commandé
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

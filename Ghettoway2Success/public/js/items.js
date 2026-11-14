@@ -515,7 +515,7 @@ function confirmCombatItems() {
 // =========================================================================
 // TALKIE-WALKIE DE FLIC : on choisit en secret le dé et la direction de la prochaine patrouille
 // =========================================================================
-let talkieItem = null, talkieRoll = 3, talkieLeft = true;
+let talkieItem = null, talkieRoll = 3, talkieDir = 'left';
 function openTalkie(it) {
   talkieItem = it;
   const scr = document.getElementById('talkieScreen');
@@ -528,7 +528,7 @@ function openTalkie(it) {
 }
 function renderTalkie() {
   document.getElementById('talkieDice').innerHTML = [1, 2, 3, 4, 5, 6].map(n => `<button type="button" class="${n === talkieRoll ? 'on' : ''}" onclick="talkieRoll=${n};renderTalkie()">${n}</button>`).join('');
-  document.getElementById('talkieDirs').innerHTML = [[true, '⬅ Gauche'], [false, 'Droite ➡']].map(([l, t]) => `<button type="button" class="${l === talkieLeft ? 'on' : ''}" onclick="talkieLeft=${l};renderTalkie()">${t}</button>`).join('');
+  document.getElementById('talkieDirs').innerHTML = [['left', '⬅ Gauche'], ['uturn', '🔄 Demi-tour'], ['right', 'Droite ➡']].map(([d, t]) => `<button type="button" class="${d === talkieDir ? 'on' : ''}" onclick="talkieDir='${d}';renderTalkie()">${t}</button>`).join('');
 }
 function closeTalkie() {
   const scr = document.getElementById('talkieScreen');
@@ -539,12 +539,12 @@ async function sendTalkieOrder() {
   const idx = localPlayer.inventory.indexOf(talkieItem);
   if (idx < 0) return closeTalkie();
   const it = talkieItem;
-  if (socket) socket.emit('rig_patrol', { roll: talkieRoll, left: talkieLeft });
+  if (socket) socket.emit('rig_patrol', { roll: talkieRoll, dir: talkieDir });
   localPlayer.inventory.splice(idx, 1);
   talkieItem = null;
   closeTalkie();
   refreshHud();
-  await showCardPlayed(it, [['ph-dice-five', 'Dé de la prochaine patrouille', `${talkieRoll}`], ['ph-arrows-left-right', 'Direction', talkieLeft ? '⬅ Gauche' : 'Droite ➡'], ['ph-broadcast', 'Bonus de la radio', 'en plus']]);
+  await showCardPlayed(it, [['ph-dice-five', 'Dé de la prochaine patrouille', `${talkieRoll}`], ['ph-arrows-left-right', 'Direction', { left: '⬅ Gauche', right: 'Droite ➡', uturn: '🔄 Demi-tour' }[talkieDir]], ['ph-broadcast', 'Bonus de la radio', 'en plus']]);
 }
 
 // =========================================================================

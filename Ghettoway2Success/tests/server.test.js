@@ -459,6 +459,16 @@ test('patrouille : le joueur actif indique un Caïd croisé, qui reçoit le cont
   await never(active, 'patrol_control');
 });
 
+test('Talkie-walkie : la direction commandée (demi-tour compris) est remise une seule fois au lancer suivant', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('rig_patrol', { roll: 4, dir: 'uturn' });
+  const rig = await new Promise(r => b.emit('take_patrol_rig', r));
+  assert.deepStrictEqual([rig.roll, rig.dir], [4, 'uturn']);
+  assert.strictEqual(await new Promise(r => b.emit('take_patrol_rig', r)), null);
+  a.emit('rig_patrol', { roll: 2, left: true }); // ancien client
+  assert.strictEqual((await new Promise(r => a.emit('take_patrol_rig', r))).dir, 'left');
+});
+
 test('braquage en alliance avec une prostituée au butin : chaque allié en reçoit une', async () => {
   const { players: [a, b] } = await startGame();
   a.emit('propose_alliance', { targetPlayerTokens: [b.token], senderName: 'Burger Queen' });

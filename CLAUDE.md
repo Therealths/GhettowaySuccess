@@ -87,7 +87,7 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 - **Lascars** (Sportclub, 3 au plus) : +ATK et +DÉF.
 - **QR des cartes** (JSON, champ `t`) : Yencli `{"t":"yen","d":kg demandés,"c":gain}` ; Braquage `{"t":"brq","n":nom,"req":ATK requise,"m":membres requis,"c":cash,"d":kg (facultatif),"p":niveau de prostituée (facultatif)}`. Avec `p`, chaque braqueur récupère une prostituée de ce niveau (`claimHeistProstitute` dans `qr.js`) ; en alliance, le serveur l'envoie aux alliés (`heist_prostitute`). S'il en a déjà une en transit, on lui propose de remplacer l'actuelle.
 - **Contrôle de police** : 30 % rien, 35 % drogue, 35 % armes ; saisie immédiate, +1 arrestation, fin de tour forcée. Le Passeport est proposé avant (écran plein page), puis la Prière de J-Lo.
-- **Fin de tour** : le joueur lance le **dé de patrouille** (1 à 6 + bonus radio, direction au hasard), sauf « Grève au Commissariat ».
+- **Fin de tour** : le joueur lance le **dé de patrouille** (1 à 6 + bonus radio, direction au hasard parmi **gauche, droite ou 🔄 demi-tour** — `PATROL_DIRS`, game.js), sauf « Grève au Commissariat ».
 - **Combat** : attaque contre défense ; le perdant perd 1 cœur, le gagnant choisit un butin (cash, drogue ou prostituée en transit). Phase 2 de riposte possible. Alliances : attaques et braquages coordonnés, pactes de non-agression.
 
 ### Flash radio (`public/radio_events.json`, 29 événements, un tiré par manche par `drawRadio` dans `server.js`)
@@ -124,7 +124,7 @@ Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` /
 | Seringue de botox | `botox` | prochaine rente des prostituées ×2 (une fois) | **à injecter** depuis le Sac (« Injecter », `botoxActive`, une seule à la fois) ; doublé à la rente suivante (début de manche, prostituées au QG) |
 | Ticket à gratter | `scratch` | 1 chance sur 3 de gagner 5 000 € | Sac (« Gratter ») |
 | Pied de biche | `crowbar` | coffre du QG d'un rival : jusqu'à **5 parts** (1 000 € ou 1 kg chacune) | Sac ; demande d'abord « es-tu devant son QG ? » |
-| Talkie-walkie de flic | `patrol_reroll` | choisir en secret le dé et la direction de la **prochaine** patrouille (de n'importe quel joueur) | Sac |
+| Talkie-walkie de flic | `patrol_reroll` | choisir en secret le dé et la direction (gauche, droite ou demi-tour : `rig_patrol { roll, dir }`) de la **prochaine** patrouille (de n'importe quel joueur) | Sac |
 | Lunettes de soleil | `double_fouille` | à la prochaine Fouille, 2 objets différents, on en garde un | **automatique** |
 
 Objets jouables en combat : `isCombatItem` (durée `combat`, Kebab, Sifflet, Canette). Les autres sont visibles dans la pile mais grisés « Pas en combat ».
@@ -172,7 +172,7 @@ Outils (hors dépôt) dans `~/.cache/ghettoway-tools/` :
 
 ## 7. Tester
 
-- `cd Ghettoway2Success && npm test` (26 tests du serveur, socket.io réel sur un port aléatoire).
+- `cd Ghettoway2Success && npm test` (27 tests du serveur, socket.io réel sur un port aléatoire).
 - Serveur de test : `PORT=3100 GAME_DATA_DIR=<dossier jetable> nice -n 10 node server.js`.
 - Dans le navigateur : `enterTestGame(1)` (J1 Burger Queen), `enterTestGame(2)` (J2 Jamel)… Pour **deux joueurs en même temps**, ouvrir l'un sur `http://localhost:3100` et l'autre sur `http://127.0.0.1:3100` (stockages séparés).
 - Raccourcis de test (faux QR : boutiques, objets, Fouille, Ticket…) : **5 appuis rapides** sur le titre « FLASH UN QR CODE » (ou l'étiquette « Scanner ») de la page Scanner ; le choix est retenu sur le téléphone (`g2s_test_mode`).
