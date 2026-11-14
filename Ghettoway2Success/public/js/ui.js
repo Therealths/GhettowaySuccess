@@ -160,15 +160,21 @@ function navTo(pageId) {
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-// Bouton retour du téléphone : on garde toujours une entrée d'historique en réserve, pour que le retour
-// agisse dans l'appli et ne la ferme jamais. Il ferme la fenêtre du dessus avec son propre bouton
-// (Fermer, Annuler, Retour, Quitter…) ; sans bouton de ce genre (validation en attente), sur l'écran
-// principal ou sur l'accueil, il ne fait rien.
-let backTrapArmed = false;
+// Bouton retour du téléphone : il agit dans l'appli et ne la ferme jamais. Il ferme la fenêtre du dessus
+// avec son propre bouton (Fermer, Annuler, Retour, Quitter…) ; sans bouton de ce genre (validation en
+// attente), sur l'écran principal ou sur l'accueil, il ne fait rien.
+// Chrome saute au retour les entrées d'historique ajoutées sans toucher de l'utilisateur. On n'en ajoute
+// donc pas après chaque retour : on pose une entrée « du dessus » pendant un vrai toucher, et à chaque
+// retour on traite l'action puis on revient sur cette entrée avec history.forward().
+const BACK_SID = `${Date.now()}_${Math.random()}`;
+let backTopN = 0, backTrapOk = false;
+function pushBackTop() { history.pushState({ g: BACK_SID, n: ++backTopN }, ''); }
 function armBackTrap() {
-  if (backTrapArmed) return;
-  history.pushState({ ghettoway: true }, '');
-  backTrapArmed = true;
+  if (backTrapOk) return;
+  const ua = navigator.userActivation;
+  if (ua && !ua.isActive) return; // hors toucher, l'entrée ne compterait pas
+  pushBackTop();
+  backTrapOk = true;
 }
 // Boutons qui ne sont pas un simple « retour » : quitter la partie, annuler un combat engagé
 const BACK_NEVER = ['confirmLeaveGame', 'abortCombat'];
@@ -197,9 +203,10 @@ function backCloseButton(win) {
     return b.classList.contains('btn-close') || /^\s*(close|cancel)\w*\(/.test(a);
   });
 }
-window.addEventListener('popstate', () => {
-  backTrapArmed = false;
-  armBackTrap();
+window.addEventListener('popstate', e => {
+  const st = e.state;
+  if (st && st.g === BACK_SID && st.n === backTopN) return; // retour sur notre entrée du dessus
+  history.forward();
   if (document.body.classList.contains('msg-open')) return; // message à valider
   const win = topOverlay();
   if (win) {
@@ -210,7 +217,6 @@ window.addEventListener('popstate', () => {
   const page = document.querySelector('.screen-view.active:not(.slide-out-down)');
   if (page && SLIDE_PAGES.includes(page.id)) navTo('page-1');
 });
-// Un toucher redonne au navigateur le droit de garder notre entrée d'historique (Chrome ignore celles
-// ajoutées sans geste de l'utilisateur) : on la remet si besoin
-document.addEventListener('pointerdown', armBackTrap, true);
-armBackTrap();
+// Entrée provisoire au chargement (avant tout toucher), puis la vraie au premier toucher
+pushBackTop();
+['pointerup', 'click', 'keydown'].forEach(t => document.addEventListener(t, armBackTrap, true));
