@@ -98,7 +98,7 @@ function allyPerks(n) {
 
 function allyState() {
   const scr = document.getElementById('allianceScreen');
-  return scr && !scr.classList.contains('hidden') ? scr.dataset.state : null;
+  return scr && !isClosed(scr) ? scr.dataset.state : null;
 }
 
 // Affiche un état ; si l'écran montre déjà cet état, simple mise à jour sans rejouer les animations
@@ -137,7 +137,7 @@ function allyRender(state, stage, bottom) {
 
 function closeAllianceScreen() {
   const scr = document.getElementById('allianceScreen');
-  if (scr) { scr.classList.add('hidden'); scr.classList.remove('show', 'static'); }
+  if (scr) hideSheet(scr, 'show', 'static');
   const r = allyResolve;
   allyResolve = null;
   if (r) r();

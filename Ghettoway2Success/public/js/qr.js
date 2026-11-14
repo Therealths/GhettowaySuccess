@@ -168,7 +168,7 @@ async function closeQrScannerModal() {
   if (previewBox) previewBox.classList.add('hidden');
   if (cancelBtn) cancelBtn.classList.add('hidden');
   if (fileInput) fileInput.value = '';
-  closeModal('modalQrScanner');
+  hideSheet(document.getElementById('modalQrScanner'));
 }
 
 async function scanFromImageFile(input) {

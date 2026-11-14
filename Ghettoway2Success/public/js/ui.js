@@ -162,10 +162,19 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 // Fenêtre du bas (comme le Sac) : elle monte sous le bandeau du Caïd et ses stats, qui restent visibles.
 // Utilisée pour la première page ouverte par un bouton ; la suite repasse en plein écran.
 function setSheet(scr, on) {
+  if (scr.classList.contains('closing')) { clearTimeout(scr.closeTimer); scr.classList.remove('closing'); scr.classList.add('hidden'); }
   const bar = on && document.getElementById('hudStatsBar').getBoundingClientRect();
   on = !!(bar && bar.height);
   scr.classList.toggle('sheet', on);
   scr.style.top = on ? `${Math.round(bar.bottom - document.getElementById('app-container').getBoundingClientRect().top + 6)}px` : '';
+}
+// Fermeture : une fenêtre du bas rejoue son ouverture à l'envers avant d'être cachée (pendant ce temps elle compte comme fermée)
+const isClosed = scr => scr.classList.contains('hidden') || scr.classList.contains('closing');
+function hideSheet(scr, ...cls) {
+  clearTimeout(scr.closeTimer);
+  if (!scr.classList.contains('sheet') || scr.classList.contains('hidden')) { scr.classList.add('hidden'); scr.classList.remove('closing', ...cls); return; }
+  scr.classList.add('closing');
+  scr.closeTimer = setTimeout(() => { scr.classList.remove('closing', ...cls); scr.classList.add('hidden'); }, 340);
 }
 
 // Bouton retour du téléphone : il agit dans l'appli et ne la ferme jamais. Il ferme la fenêtre du dessus

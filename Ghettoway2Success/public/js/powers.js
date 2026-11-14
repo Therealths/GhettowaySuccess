@@ -25,7 +25,7 @@ const crowbarPick = kg => ({ kg, cash: Math.min((CROWBAR_PARTS - kg) * 1000, cro
 
 function powState() {
   const scr = document.getElementById('powerScreen');
-  return scr && !scr.classList.contains('hidden') ? scr.dataset.state : null;
+  return scr && !isClosed(scr) ? scr.dataset.state : null;
 }
 
 // Affiche un état ; même état déjà à l'écran : simple mise à jour sans rejouer les animations
@@ -41,7 +41,8 @@ function powRender(state, caid, chip, head, stage, bottom) {
   document.getElementById('powHead').innerHTML = head;
   document.getElementById('powStage').innerHTML = stage;
   document.getElementById('powBottom').innerHTML = bottom;
-  setSheet(scr, ['choix', 'self', 'info'].includes(state));
+  setSheet(scr, !['touche', 'vote-result'].includes(state));
+  scr.classList.toggle('no-banner', caid.bannerFile === getMyCaid().bannerFile);
   if (same) { scr.classList.add('static'); return; }
   scr.classList.remove('hidden', 'show', 'static');
   void scr.offsetWidth; // relance les animations d'arrivée
@@ -52,7 +53,7 @@ function powRender(state, caid, chip, head, stage, bottom) {
 
 function closePowerScreen() {
   const scr = document.getElementById('powerScreen');
-  if (scr) { scr.classList.add('hidden'); scr.classList.remove('show', 'static'); }
+  if (scr) hideSheet(scr, 'show', 'static');
   const r = powResolve;
   powResolve = null;
   if (r) r();

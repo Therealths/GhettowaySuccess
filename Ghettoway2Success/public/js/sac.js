@@ -38,8 +38,7 @@ function openSac() {
   sacIndex = 0;
   const scr = document.getElementById('sacScreen');
   // Le Sac monte sous le bandeau du Caïd et le cadre de ses stats, qui restent visibles
-  const bar = document.getElementById('hudStatsBar').getBoundingClientRect();
-  scr.style.top = `${Math.round(bar.bottom - document.getElementById('app-container').getBoundingClientRect().top + 6)}px`;
+  setSheet(scr, true);
   document.getElementById('sacRound').innerText = currentSession.round || 1;
   renderSac();
   scr.classList.remove('hidden', 'show');
@@ -60,10 +59,9 @@ function closeSac() {
   const scr = document.getElementById('sacScreen');
   if (!scr) return;
   closeSacZoom();
-  scr.classList.add('hidden');
-  scr.classList.remove('show');
+  hideSheet(scr, 'show');
 }
-const sacIsOpen = () => !document.getElementById('sacScreen').classList.contains('hidden');
+const sacIsOpen = () => !isClosed(document.getElementById('sacScreen'));
 
 function sacSlotsHtml() {
   return SAC_SLOTS.map(s => {

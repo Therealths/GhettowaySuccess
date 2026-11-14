@@ -986,6 +986,12 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .sheet { border-radius: 22px 22px 0 0; border-top: 2px solid color-mix(in srgb, var(--ac, #10b981) 60%, transparent); box-shadow: 0 -12px 30px rgba(0,0,0,0.6); overflow: hidden; animation: sacUp 0.4s cubic-bezier(.2,1,.3,1) both; }
 .pow-screen.sheet .pow-banner { height: 18cqh; }
 .pow-screen.sheet .pow-stage { min-height: 0; }
+.pow-screen.sheet.no-banner .pow-banner { display: none; }
+.pow-screen.sheet.no-banner .pow-head { margin-top: 10px; }
+.sheet.closing { animation: sheetDown 0.34s cubic-bezier(.5,0,.75,0) both; pointer-events: none; }
+.scan-screen.sheet.closing { animation: scanClose 0.34s cubic-bezier(.55,0,.75,.2) both; }
+@keyframes sheetDown { from { transform: none; opacity: 1; } to { transform: translateY(60%); opacity: 0; } }
+@keyframes scanClose { from { clip-path: circle(var(--cr, 75%) at var(--cx, 50%) var(--cy, 50%)); } to { clip-path: circle(30px at var(--cx, 50%) var(--cy, 50%)); opacity: 0.6; } }
 .scan-screen.sheet { animation: scanOpen 0.55s cubic-bezier(.45,0,.25,1) both; }
 @keyframes scanOpen { from { clip-path: circle(30px at var(--cx, 50%) var(--cy, 50%)); } to { clip-path: circle(var(--cr, 75%) at var(--cx, 50%) var(--cy, 50%)); } }
 /* Cibles (Combat, Alliance, Capacité, Riposte) : 3 petites cartes verticales côte à côte */

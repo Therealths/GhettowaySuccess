@@ -160,7 +160,7 @@ const fightRow = (icon, label, after) => `<div class="police-row"><i class="ph-b
 
 function fightState() {
   const scr = document.getElementById('fightScreen');
-  return scr && !scr.classList.contains('hidden') ? scr.dataset.state : null;
+  return scr && !isClosed(scr) ? scr.dataset.state : null;
 }
 
 // Affiche un état ; même état déjà à l'écran : simple mise à jour sans rejouer les animations (sauf replay)
@@ -185,7 +185,7 @@ function fightRender(state, theme, chip, stage, bottom, replay) {
 
 function closeFightScreen() {
   const scr = document.getElementById('fightScreen');
-  if (scr) { scr.classList.add('hidden'); scr.classList.remove('show', 'static'); }
+  if (scr) hideSheet(scr, 'show', 'static');
   const r = fightResolve;
   fightResolve = null;
   if (r) r();
