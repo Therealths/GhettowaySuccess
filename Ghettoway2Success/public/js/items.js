@@ -528,9 +528,11 @@ function openTalkie(it) {
 }
 function renderTalkie() {
   document.getElementById('talkieDice').innerHTML = [1, 2, 3, 4, 5, 6].map(n => `<button type="button" class="${n === talkieRoll ? 'on' : ''}" onclick="talkieRoll=${n};renderTalkie()">${n}</button>`).join('');
-  // Gauche ou droite (au prochain croisement), et le demi-tour en option, qui s'ajoute
-  document.getElementById('talkieDirs').innerHTML = [[true, '⬅ Gauche'], [false, 'Droite ➡']].map(([l, t]) => `<button type="button" class="${l === talkieLeft ? 'on' : ''}" onclick="talkieLeft=${l};renderTalkie()">${t}</button>`).join('')
-    + `<button type="button" class="opt ${talkieUturn ? 'on' : ''}" onclick="talkieUturn=!talkieUturn;renderTalkie()">${talkieUturn ? '☑' : '☐'} 🔄 Demi-tour</button>`;
+  // Gauche à gauche, droite à droite (au prochain croisement) ; au milieu, le demi-tour en option : Oui / Non d'un toucher
+  const dir = (l, t) => `<button type="button" class="${l === talkieLeft ? 'on' : ''}" onclick="talkieLeft=${l};renderTalkie()">${t}</button>`;
+  document.getElementById('talkieDirs').innerHTML = dir(true, '⬅ Gauche')
+    + `<button type="button" class="opt ${talkieUturn ? 'on' : ''}" onclick="talkieUturn=!talkieUturn;renderTalkie()">🔄 Demi-tour<small>${talkieUturn ? 'Oui' : 'Non'}</small></button>`
+    + dir(false, 'Droite ➡');
 }
 function closeTalkie() {
   const scr = document.getElementById('talkieScreen');

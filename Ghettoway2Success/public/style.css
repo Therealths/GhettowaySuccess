@@ -175,7 +175,10 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 /* Talkie-walkie de flic : on choisit le dé et la direction de la prochaine patrouille */
 .talkie-dice { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .talkie-dice button, .talkie-dirs button { padding: 10px 0; border-radius: 12px; font-family: 'Anton', sans-serif; font-size: 22px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); }
-.talkie-dirs { display: grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 6px; }
+.talkie-dirs { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; }
+.talkie-dirs button.opt { padding: 5px 0; line-height: 1.15; }
+.talkie-dirs button.opt small { display: block; font-size: 11px; color: #64748b; }
+.talkie-dirs button.opt.on small { color: #fbbf24; }
 .talkie-dirs button.opt.on { border-color: #fbbf24; background: rgba(251,191,36,0.16); }
 .patrol-uturn { font-size: 11px; font-weight: 900; text-transform: uppercase; color: #fbbf24; padding: 3px 7px; border-radius: 999px; border: 1px solid rgba(251,191,36,0.5); background: rgba(251,191,36,0.12); white-space: nowrap; }
 .talkie-dirs button { font-family: inherit; font-size: 13px; font-weight: 900; text-transform: uppercase; }
