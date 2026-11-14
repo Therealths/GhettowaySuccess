@@ -215,3 +215,65 @@ window.addEventListener('popstate', () => {
   armBackTrap();
 });
 armBackTrap();
+
+// Écran principal : les fenêtres des 4 tuiles s'ouvrent depuis leur tuile (coin) et celle du Scanner
+// en cercle depuis le centre ; à la fermeture par un bouton, elles se replient vers leur point de départ.
+const HUD_OPENERS = [['.hud-q.combat', 'fightScreen'], ['.hud-q.alliance', 'allianceScreen'], ['.hud-q.power', 'powerScreen'], ['.hud-q.sac', 'sacScreen'], ['.hud-scan', 'modalQrScanner']];
+const HUD_CLOSERS = { fightScreen: 'closeFightScreen', allianceScreen: 'closeAllianceScreen', powerScreen: 'closePowerScreen', sacScreen: 'closeSac', modalQrScanner: 'closeQrScannerModal' };
+const hudMotionOff = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function hudClip(btn, scr) {
+  const s = scr.getBoundingClientRect(), b = btn.getBoundingClientRect();
+  if (btn.classList.contains('hud-scan')) {
+    const x = b.left + b.width / 2 - s.left, y = b.top + b.height / 2 - s.top;
+    const r = Math.hypot(Math.max(x, s.width - x), Math.max(y, s.height - y));
+    return [`circle(${b.width / 2}px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`];
+  }
+  const t = Math.max(0, b.top - s.top), l = Math.max(0, b.left - s.left), r = Math.max(0, s.right - b.right), bt = Math.max(0, s.bottom - b.bottom);
+  return [`inset(${t}px ${r}px ${bt}px ${l}px round 18px)`, 'inset(0px 0px 0px 0px round 0px)'];
+}
+function hudReveal(btn, id) {
+  const scr = document.getElementById(id);
+  if (!scr || scr.classList.contains('hidden')) return;
+  scr._hudFrom = btn;
+  if (hudMotionOff()) return;
+  if (id === 'sacScreen') scr.getAnimations().forEach(a => a.animationName === 'sacUp' && a.finish());
+  const [from, to] = hudClip(btn, scr);
+  scr.animate([{ clipPath: from, opacity: 0.6 }, { clipPath: to, opacity: 1 }], { duration: 480, easing: 'cubic-bezier(.2,.9,.25,1)' });
+}
+// Repli : une copie figée de la fenêtre se referme pendant que la vraie est déjà fermée (aucun retard sur le jeu)
+function hudConceal(scr) {
+  const btn = scr._hudFrom;
+  scr._hudFrom = null;
+  if (!btn || hudMotionOff() || !document.getElementById('page-6').classList.contains('active')) return null;
+  // La copie garde les id (leurs styles en dépendent) : posée après la vraie, getElementById trouve toujours la vraie
+  const ghost = scr.cloneNode(true);
+  ghost.style.pointerEvents = 'none';
+  const [open, shut] = hudClip(btn, scr);
+  return () => {
+    ghost.classList.remove('hidden');
+    scr.after(ghost);
+    ghost.getAnimations().forEach(a => a.cancel());
+    ghost.animate([{ clipPath: shut, opacity: 1 }, { opacity: 1, offset: 0.7 }, { clipPath: open, opacity: 0.3 }], { duration: 420, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' }).onfinish = () => ghost.remove();
+  };
+}
+document.addEventListener('DOMContentLoaded', () => {
+  HUD_OPENERS.forEach(([sel, id]) => {
+    const btn = document.querySelector(sel);
+    if (btn) btn.addEventListener('click', () => hudReveal(btn, id));
+  });
+  Object.entries(HUD_CLOSERS).forEach(([id, name]) => {
+    const orig = window[name];
+    if (typeof orig !== 'function') return;
+    window[name] = function (...args) {
+      const scr = document.getElementById(id);
+      // Seulement quand le joueur ferme lui-même (bouton de la fenêtre), pas quand le jeu enchaîne sur un autre écran
+      const ev = window.event;
+      const byTap = ev && ev.type === 'click' && scr && scr.contains(ev.target) && !scr.classList.contains('hidden');
+      const play = byTap ? hudConceal(scr) : null;
+      if (!byTap && scr && scr.classList.contains('hidden')) scr._hudFrom = null;
+      const res = orig.apply(this, args);
+      if (play) Promise.resolve(res).then(() => { if (scr.classList.contains('hidden')) play(); });
+      return res;
+    };
+  });
+});
