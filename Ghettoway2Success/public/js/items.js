@@ -297,7 +297,7 @@ const FOUILLE_TABLE = [
   [1, { name: 'Seringue de botox', eff: 'botox', desc: 'La prochaine rente de tes prostituées au QG est doublée (une seule fois)' }],
   [1, { name: 'Ticket à gratter', eff: 'scratch', val: 5000, desc: '1 chance sur 3 de gagner 5 000 €' }],
   [1, { name: 'Pied de biche', eff: 'crowbar', desc: 'Vole dans le coffre du QG d’un rival : jusqu’à 5 000 €, 5 kg, ou un partage des deux' }],
-  [1, { name: 'Talkie-walkie de flic', eff: 'patrol_reroll', desc: 'Choisis à l’avance le nombre de cases et la direction du prochain déplacement de la patrouille' }],
+  [1, { name: 'Talkie-walkie de flic', eff: 'patrol_reroll', desc: 'Choisis la valeur de déplacement et la direction de la prochaine patrouille' }],
   [1, { name: 'Lunettes de soleil', eff: 'double_fouille', desc: 'À ta prochaine Fouille, tu vois 2 objets et tu gardes le meilleur' }],
   [1, { name: 'Rat crevé', eff: 'none', desc: 'Il a eu une vie plus dure que toi.' }]
 ];
