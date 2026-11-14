@@ -284,7 +284,7 @@ function showPowerHit(effectType, senderCaid, item) {
   const stage = powDuo(powAv(sender.imageFile, senderCaid || 'Rival', 'foe'), powAv(me.imageFile, 'Toi', missed ? '' : 'hit'), powFx(effectType), `fx-${effectType} victim`);
   const extra = effectType === 'siphon' ? `<div class="mt-2">${powHearts(localPlayer.hearts)}</div>` : '';
   const bottom = `<div class="pow-result">${powRow(icon, label, `<span class="pow-ac">${after}</span>`)}${extra}
-    <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">${missed ? 'Ouf' : 'Encaisser'}</button></div>`;
+    <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">${missed ? 'Ouf' : 'Je m’en souviendrai'}</button></div>`;
   return powRender('touche', sender, powChipHtml('ph-warning', 'Attaque spéciale'), powHeadHtml('', missed ? 'RATÉ !' : 'TOUCHÉ !', desc), stage, bottom);
 }
 

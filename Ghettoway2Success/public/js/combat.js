@@ -424,7 +424,7 @@ function showFightDefeat({ dmgNet, opponentCaid, heartsBefore }, last) {
     + fightRow('ph-hand-grabbing', `${who} ${plural ? 'choisissent leur' : 'choisit son'} butin`, 'cash, drogue…');
   const bottom = `<h2 class="font-anton ally-head">DÉFAITE.</h2>
     <div class="flex flex-col gap-1.5 mt-3">${rows}</div>
-    <button type="button" class="ally-cta mt-4" onclick="closeFightScreen()">Encaisser</button>`;
+    <button type="button" class="ally-cta mt-4" onclick="closeFightScreen()">Je m’en souviendrai</button>`;
   return fightRender('defaite', 'lose', 'defaite', stage, bottom);
 }
 
