@@ -488,10 +488,28 @@ async function endCurrentPlayerTurn(forced = false) {
   showPatrolScreen();
 }
 
-// Patrouille de fin de tour : le dé roule, puis on indique de combien de cases et dans quel sens avancer le pion
-const PATROL_PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
-function setPatrolDie(n) {
-  document.querySelectorAll('#patrolDie i').forEach((pip, i) => pip.classList.toggle('on', (PATROL_PIPS[n] || []).includes(i)));
+// Patrouille de fin de tour : le dé roule, puis on indique de combien de cases et dans quel sens avancer le pion.
+// Le résultat s'affiche sur un compteur de vitesse (0 à 8, repères 0, 4 et 8) : graduations du dé en bleu,
+// bonus radio en orange, le 0 toujours en rouge, aiguille sur le nombre de cases
+const GAUGE = { max: 8, cx: 66, cy: 72, r: 50 };
+const gaugeAt = (n, r) => { const a = Math.PI * (1 - n / GAUGE.max); return [GAUGE.cx + Math.cos(a) * r, GAUGE.cy - Math.sin(a) * r].map(v => v.toFixed(1)); };
+function buildPatrolGauge() {
+  const el = document.getElementById('patrolGauge');
+  if (el.firstChild) return;
+  const { max, cx, cy, r } = GAUGE;
+  let ticks = '', labels = '';
+  for (let i = 0; i <= max; i++) {
+    const [x1, y1] = gaugeAt(i, r - 9), [x2, y2] = gaugeAt(i, r);
+    ticks += `<line data-i="${i}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+  }
+  [0, 4, 8].forEach(i => { const [x, y] = gaugeAt(i, r + 11); labels += `<text x="${x}" y="${+y + 4}">${i}</text>`; });
+  el.innerHTML = `<svg viewBox="0 0 132 84">${ticks}${labels}<line class="needle" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r + 13}"/><circle cx="${cx}" cy="${cy}" r="6"/></svg>`;
+}
+function setPatrolGauge(n, dice = n) {
+  buildPatrolGauge();
+  const el = document.getElementById('patrolGauge');
+  el.querySelectorAll('line[data-i]').forEach(t => { const i = +t.dataset.i; t.setAttribute('class', !i ? 'zero' : i <= dice ? 'dice' : i <= n ? 'radio' : ''); });
+  el.querySelector('.needle').style.transform = `rotate(${(Math.min(n, GAUGE.max) / GAUGE.max) * 180 - 90}deg)`;
 }
 // Prochain joueur de la manche (celui qui n'a pas encore joué et n'est pas allié ce tour)
 function nextPlayerLabel() {
@@ -548,14 +566,14 @@ function showPatrolScreen() {
     scr.classList.add('result');
     if (greve) {
       scr.dataset.state = 'greve';
-      setPatrolDie(0);
+      setPatrolGauge(0);
       document.getElementById('patrolHeadline').innerHTML = snow ? 'BLOQUÉE PAR<br>LA NEIGE.' : 'GRÈVE AU<br>COMMISSARIAT.';
       info.innerHTML = '<div class="text-[10px] font-black uppercase tracking-widest text-amber-300">Flash Radio</div><div class="patrol-big">0 <span>case</span></div>';
       dirBox.innerHTML = dirHtml('SUR PLACE', 'text-amber-300', `${snow ? 'Routes enneigées' : 'Grève au commissariat'} : ${two ? 'les 2 voitures ne bougent' : 'la patrouille ne bouge'} pas ce tour.`);
       return;
     }
     scr.dataset.state = 'resultat';
-    setPatrolDie(baseRoll);
+    setPatrolGauge(finalMove, baseRoll);
     document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>BOUGENT.' : 'LA PATROUILLE<br>BOUGE.';
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
@@ -590,7 +608,7 @@ function showPatrolScreen() {
     const tick = () => {
       const t = Date.now() - t0;
       if (k >= 10 && t >= hold) return land();
-      setPatrolDie(1 + Math.floor(Math.random() * 6));
+      setPatrolGauge(1 + Math.floor(Math.random() * 6));
       k++;
       // Le dé roule vite tant qu'on attend le talkie, puis ralentit avant de tomber
       setTimeout(tick, t < hold - 700 ? 90 : 70 + Math.min(k, 10) * 12);

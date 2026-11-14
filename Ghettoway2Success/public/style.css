@@ -452,12 +452,17 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 @media (prefers-reduced-motion: reduce) { .fight-screen *, .fight-screen.show * { animation: none !important; } }
 /* Patrouille de fin de tour : voiture de police, dé, déplacement et direction du pion */
 .patrol-screen .patrol-car { max-width: 360px; }
-.patrol-die { flex: none; width: 88px; height: 88px; padding: 13px; border-radius: 22px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); background: linear-gradient(145deg, #fff, #d4d4d8); box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 -6px 0 rgba(0,0,0,0.12); }
-.patrol-die i { width: 15px; height: 15px; border-radius: 99px; background: #e11d48; place-self: center; visibility: hidden; }
-.patrol-die i.on { visibility: visible; }
-.patrol-screen[data-state="roule"] .patrol-die { animation: patrolRoll 0.35s ease-in-out infinite alternate; }
-.patrol-screen[data-state="greve"] .patrol-die { opacity: 0.45; filter: grayscale(1); }
-.patrol-screen.result .patrol-die { animation: policeStamp 0.4s cubic-bezier(.2,1.6,.4,1) both; }
+.patrol-gauge { flex: none; width: 124px; }
+.patrol-gauge svg { display: block; width: 100%; height: auto; overflow: visible; }
+.patrol-gauge line { stroke: #334155; stroke-width: 4; stroke-linecap: round; transition: stroke .15s; }
+.patrol-gauge line.dice { stroke: #60a5fa; }
+.patrol-gauge line.radio { stroke: #fbbf24; }
+.patrol-gauge line.zero { stroke: #ef4444; }
+.patrol-gauge text { font-family: 'Anton', sans-serif; font-size: 12px; fill: #94a3b8; text-anchor: middle; }
+.patrol-gauge .needle { stroke: #ef4444; stroke-width: 4; transform-origin: 66px 72px; transform: rotate(-90deg); transition: transform .12s ease-out; filter: drop-shadow(0 0 4px rgba(239,68,68,0.7)); }
+.patrol-gauge circle { fill: #e2e8f0; }
+.patrol-screen.result .patrol-gauge .needle { transition: transform .6s cubic-bezier(.3,1.6,.5,1); }
+.patrol-screen[data-state="greve"] .patrol-gauge { opacity: 0.6; }
 .patrol-wrap { position: relative; }
 /* Trop de criminalité : pastille ×2 sur la voiture (les 2 voitures suivent le même dé) */
 .patrol-x2 { display: none; position: absolute; left: 16px; bottom: 10%; padding: 2px 12px; border-radius: 12px; font-family: 'Anton', sans-serif; font-size: 34px; line-height: 1.1; color: #fff; background: #2563eb; border: 3px solid #fff; transform: rotate(-8deg); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
@@ -521,8 +526,8 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .patrol-dirs span.opt.on small { color: #fbbf24; }
 .patrol-screen.result .patrol-dirs span.on { animation: policeRowIn 0.35s ease-out both; }
 @keyframes patrolRoll { from { transform: rotate(-14deg) translateY(-4px); } to { transform: rotate(12deg) translateY(2px); } }
-@media (max-height: 700px) { .patrol-die { width: 70px; height: 70px; padding: 10px; } .patrol-big { font-size: 40px; } .patrol-screen .police-panel { height: 256px; } }
-@media (prefers-reduced-motion: reduce) { .patrol-screen .patrol-die { animation: none !important; } }
+@media (max-height: 700px) { .patrol-gauge { width: 104px; } .patrol-big { font-size: 40px; } .patrol-screen .police-panel { height: 256px; } }
+@media (prefers-reduced-motion: reduce) { .patrol-gauge .needle { transition: none !important; } }
 /* La voiture de patrouille arrive par la droite et freine en se posant */
 .patrol-screen .police-team-wrap { overflow: hidden; }
 .patrol-screen.show .patrol-car { animation: patrolDriveIn 0.9s cubic-bezier(.2,.8,.25,1) both; }
