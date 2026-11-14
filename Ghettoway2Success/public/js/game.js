@@ -534,9 +534,14 @@ function showPatrolScreen() {
   scr.classList.add('show');
 
   // Bloc direction toujours présent, panneau de hauteur fixe : la voiture ne bouge pas quand le résultat arrive
-  const dirHtml = (label, labelCls, note, uturn) => `<div class="mt-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</span><span class="flex items-center gap-2">${uturn ? '<span class="patrol-uturn">🔄 Demi-tour</span>' : ''}<span class="patrol-dir ${labelCls}">${label}</span></span></div>
+  const dirHtml = (label, labelCls, note) => `<div class="mt-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</span><span class="patrol-dir ${labelCls}">${label}</span></div>
       <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
-  dirBox.innerHTML = dirHtml('…', 'text-slate-500', two ? 'Un seul dé pour les 2 voitures : même nombre de cases, même sens.' : 'Le dé décide de combien de cases et dans quel sens avance la patrouille.');
+  // Même disposition que le Talkie : Gauche à gauche, Droite à droite, Demi-tour (Oui / Non) au milieu ;
+  // ce qui n'est pas sorti est grisé (tout est grisé tant que le dé roule)
+  const dirCells = (left, uturn, note) => `<div class="mt-3 text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</div>
+      <div class="patrol-dirs mt-1.5"><span class="${left === true ? 'on' : ''}">⬅ Gauche</span><span class="opt ${uturn ? 'on' : ''}">🔄 Demi-tour<small>${uturn == null ? '…' : uturn ? 'Oui' : 'Non'}</small></span><span class="${left === false ? 'on' : ''}">Droite ➡</span></div>
+      <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
+  dirBox.innerHTML = dirCells(null, null, two ? 'Un seul dé pour les 2 voitures : même nombre de cases, même sens.' : 'Le dé décide de combien de cases et dans quel sens avance la patrouille.');
 
   const land = () => {
     cta.disabled = false;
@@ -555,7 +560,7 @@ function showPatrolScreen() {
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
     const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau`;
-    dirBox.innerHTML = dirHtml(left ? '⬅ GAUCHE' : 'DROITE ➡', '', uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`, uturn);
+    dirBox.innerHTML = dirCells(left, uturn, uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`);
     // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau
     cta.classList.add('hidden');
     document.getElementById('patrolAsk').classList.remove('hidden');
