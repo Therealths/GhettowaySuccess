@@ -416,6 +416,8 @@
       <!-- Carte zoomée avec ses boutons -->
       <div id="sacZoom" class="sac-zoom hidden" onclick="if (event.target === this) closeSacZoom()">
         <div id="sacZoomCard" class="sac-zoom-card"></div>
+        <button type="button" onclick="stepSacZoom(-1)" class="deck-arrow sac-zoom-arrow left-2" aria-label="Carte précédente"><i class="ph-bold ph-caret-left"></i></button>
+        <button type="button" onclick="stepSacZoom(1)" class="deck-arrow sac-zoom-arrow right-2" aria-label="Carte suivante"><i class="ph-bold ph-caret-right"></i></button>
         <div id="sacZoomActions" class="sac-zoom-actions"></div>
         <button type="button" class="btn-close ally-ghost sac-zoom-back" onclick="closeSacZoom()">Retour au sac</button>
       </div>

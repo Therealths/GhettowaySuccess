@@ -134,20 +134,68 @@ function pickSacCard(idx) {
   if (idx !== sacIndex) { sacIndex = idx; placeSacCards(); return; }
   openSacZoom(sacList[idx]);
 }
-// Carte zoomée : en grand au-dessus du Sac, avec ses boutons
+// Carte zoomée : en grand au-dessus du Sac, avec ses boutons ; on y fait défiler les cartes (glisser ou flèches)
 function openSacZoom(it) {
   if (!it) return;
   const z = document.getElementById('sacZoom');
+  fillSacZoom(it);
+  document.getElementById('sacZoomCard').classList.remove('slide-l', 'slide-r');
+  z.classList.remove('hidden', 'show');
+  sizeSacZoom();
+  void z.offsetWidth;
+  z.classList.add('show');
+  bindSacZoomSwipe();
+}
+function fillSacZoom(it) {
   document.getElementById('sacZoomCard').innerHTML = `<div class="deck-cardbox">${sacFace(it)}</div>`;
   document.getElementById('sacZoomActions').innerHTML = sacActions(it);
-  z.classList.remove('hidden', 'show');
-  // La carte prend toute la hauteur laissée par les boutons (sans dépasser en largeur)
-  const card = document.getElementById('sacZoomCard');
+  const [prev, next] = document.querySelectorAll('#sacZoom .deck-arrow');
+  prev.classList.toggle('hidden', sacIndex <= 0);
+  next.classList.toggle('hidden', sacIndex >= sacList.length - 1);
+}
+// La carte prend toute la hauteur laissée par les boutons (sans dépasser en largeur) ; les flèches se calent sur elle
+function sizeSacZoom() {
+  const z = document.getElementById('sacZoom'), card = document.getElementById('sacZoomCard');
   const used = document.getElementById('sacZoomActions').offsetHeight + z.querySelector('.sac-zoom-back').offsetHeight + 24 + 2 * 10;
   const cw = Math.floor(Math.min((z.clientHeight - used) * 768 / 1226, z.clientWidth * 0.86));
   card.style.width = `${Math.max(120, cw)}px`;
-  void z.offsetWidth;
-  z.classList.add('show');
+  z.style.setProperty('--arrow-y', `${Math.round(card.offsetTop + card.offsetHeight / 2 - 18)}px`);
+}
+function stepSacZoom(dir) {
+  const card = document.getElementById('sacZoomCard');
+  const next = sacIndex + dir;
+  if (next < 0 || next >= sacList.length) { card.style.transform = ''; return; } // bout de la pile : la carte revient
+  sacIndex = next;
+  placeSacCards(); // la pile du Sac suit, derrière
+  card.style.transition = 'none';
+  card.style.transform = '';
+  fillSacZoom(sacList[sacIndex]);
+  sizeSacZoom();
+  card.classList.remove('slide-l', 'slide-r');
+  void card.offsetWidth;
+  card.classList.add(dir > 0 ? 'slide-r' : 'slide-l');
+  card.style.transition = '';
+}
+// Glisser la carte zoomée à gauche ou à droite : carte suivante ou précédente
+function bindSacZoomSwipe() {
+  const card = document.getElementById('sacZoomCard');
+  if (card.dataset.swipeBound) return;
+  card.dataset.swipeBound = '1';
+  let x0 = null, dx = 0;
+  card.addEventListener('pointerdown', e => { x0 = e.clientX; dx = 0; card.style.transition = 'none'; });
+  card.addEventListener('pointermove', e => {
+    if (x0 === null) return;
+    dx = e.clientX - x0;
+    if (Math.abs(dx) > 6) card.style.transform = `translateX(${dx}px) rotate(${dx / 40}deg)`;
+  });
+  const end = () => {
+    if (x0 === null) return;
+    x0 = null;
+    card.style.transition = '';
+    if (Math.abs(dx) > 50) stepSacZoom(dx < 0 ? 1 : -1);
+    else card.style.transform = '';
+  };
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => card.addEventListener(t, end));
 }
 function closeSacZoom() { document.getElementById('sacZoom').classList.add('hidden'); }
 function sacDo(action, idx) {
