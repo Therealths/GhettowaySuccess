@@ -27,9 +27,9 @@ const sellPrice = it => Math.floor((it.price ?? it.p ?? 3000) * 0.5);
 const SAC_USE = {
   def_malus_round: ['ph-hand-grabbing', 'Lancer'], crowbar: ['ph-wrench', 'Forcer'], scratch: ['ph-hand', 'Gratter'],
   patrol_reroll: ['ph-broadcast', 'Utiliser'], voucher: ['ph-ticket', 'Activer'], pm_turn: ['ph-sneaker-move', 'Utiliser'],
-  stray_dog: ['ph-dog', 'Siffler'], heal: ['ph-fork-knife', 'Manger']
+  stray_dog: ['ph-dog', 'Siffler'], heal: ['ph-fork-knife', 'Manger'], botox: ['ph-syringe', 'Injecter']
 };
-const SAC_AUTO = ['cancel_police', 'free_prostitute', 'botox', 'double_fouille'];
+const SAC_AUTO = ['cancel_police', 'free_prostitute', 'double_fouille'];
 // Ces objets ouvrent leur propre écran : on ferme le Sac avant
 const SAC_LEAVES = ['def_malus_round', 'crowbar', 'patrol_reroll'];
 

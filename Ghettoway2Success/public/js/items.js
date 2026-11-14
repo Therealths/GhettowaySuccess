@@ -197,7 +197,7 @@ function findRows(it) {
   if (e === 'crowbar') return itemRow('ph-vault', 'Effet', 'coffre d’un rival : 5 000 € ou 5 kg') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'patrol_reroll') return itemRow('ph-dice-five', 'Effet', 'tu choisis le prochain dé de patrouille') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'double_fouille') return itemRow('ph-eye', 'Effet', '2 objets, tu gardes le meilleur') + itemRow('ph-backpack', 'Quand ?', 'tout seul à ta prochaine Fouille');
-  if (e === 'botox') return itemRow('ph-syringe', 'Effet', 'prochaine rente des prostituées x2') + itemRow('ph-backpack', 'Quand ?', 'tout seul au début de la manche');
+  if (e === 'botox') return itemRow('ph-syringe', 'Effet', 'prochaine rente des prostituées x2') + itemRow('ph-backpack', 'Quand ?', 'à injecter depuis le Sac');
   if (e === 'voucher') return itemRow('ph-ticket', 'Effet', `−50 % : ${escapeHtml(it.shop || '')}`) + itemRow('ph-backpack', 'Quand ?', 'prochain achat (à activer)');
   if (e === 'def_malus_round') return itemRow('ph-shield', 'Effet', '−1 Défense à un rival') + itemRow('ph-backpack', 'Quand ?', 'avant ou pendant un combat');
   if (e === 'stray_dog') return itemRow('ph-dog', 'Effet', 'rallie le Chien Errant') + itemRow('ph-backpack', 'Quand ?', 'ton tour ou en combat');

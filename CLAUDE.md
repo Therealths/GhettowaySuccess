@@ -102,7 +102,7 @@ Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` /
 - Hôpital débordé (`NO_HEAL`) : Kebab refusé au Sac et « Hôpital débordé » dans la pile de combat ; la carte reste.
 - Règlement de comptes (`COMBAT_WIN_CASH` 2000) : le serveur ajoute le bonus à chaque vainqueur et l'envoie (`winBonus`) ; le téléphone l'ajoute s'il n'est pas `late` et l'affiche sur l'écran VICTOIRE.
 - Grève des transports (`BASKETS_PM_SET` 5) : métro fermé (règle du plateau seulement) et Vieilles baskets +5 PM.
-- Flics en planque (`PROSTITUTE_REV_MULT` 0) : pas de rente ; la Seringue de botox n'est pas consommée.
+- Flics en planque (`PROSTITUTE_REV_MULT` 0) : pas de rente ; une Seringue de botox injectée attend la rente suivante.
 - Chutes de neige exceptionnelles (`SNOW`) : `getTotalPm` ignore le véhicule (tout le monde à pied, 8 PM) et la patrouille est bloquée comme pendant la grève (écran « BLOQUÉE PAR LA NEIGE »).
 - 3 manches calmes (`NONE`, ton `calme` bleu ciel) : Grand soleil sur la cité, Dimanche tranquille, Ciel bleu sur le périph. Rien ne change.
 
@@ -121,7 +121,7 @@ Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` /
 | Vieilles baskets | `pm_turn` | +3 PM ce tour | Sac |
 | Manteau de fourrure | `free_prostitute` | Prostituée Niv. 1 gratuite | **automatique** au Nightclub |
 | 4 Bons de réduction | `voucher` | −50 % sur le prochain achat de la boutique | Sac (« Activer ») |
-| Seringue de botox | `botox` | prochaine rente des prostituées ×2 (une fois) | **automatique** au début de manche, s'il y a des prostituées au QG |
+| Seringue de botox | `botox` | prochaine rente des prostituées ×2 (une fois) | **à injecter** depuis le Sac (« Injecter », `botoxActive`, une seule à la fois) ; doublé à la rente suivante (début de manche, prostituées au QG) |
 | Ticket à gratter | `scratch` | 1 chance sur 3 de gagner 5 000 € | Sac (« Gratter ») |
 | Pied de biche | `crowbar` | coffre du QG d'un rival : jusqu'à **5 parts** (1 000 € ou 1 kg chacune) | Sac ; demande d'abord « es-tu devant son QG ? » |
 | Talkie-walkie de flic | `patrol_reroll` | choisir en secret le dé et la direction de la **prochaine** patrouille (de n'importe quel joueur) | Sac |

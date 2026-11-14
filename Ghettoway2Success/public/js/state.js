@@ -64,6 +64,7 @@ let localPlayer = {
   prostitutesAtSafeList: [],
   freeProstituteClaimed: false,
   vouchers: [], // bons de réduction activés (nom de la boutique)
+  botoxActive: false, // Seringue de botox injectée : prochaine rente des prostituées ×2
   inventory: [],
   specialUsedThisTurn: false,
   allianceActive: false,
@@ -140,6 +141,7 @@ function applyCaidToLocalPlayer(chosenCaid) {
   localPlayer.prostitutesAtSafeList = [];
   localPlayer.freeProstituteClaimed = false;
   localPlayer.vouchers = [];
+  localPlayer.botoxActive = false;
 }
 
 function updateRivalsList(players) {

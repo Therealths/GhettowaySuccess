@@ -340,6 +340,7 @@ function refreshHud() {
       freeItemsClaimed: localPlayer.freeItemsClaimed || [],
       roundSeen: localPlayer.roundSeen || 0,
       proteinRound: localPlayer.proteinRound || 0,
+      botoxActive: !!localPlayer.botoxActive,
       vouchers: localPlayer.vouchers || []
     });
   }
@@ -395,7 +396,14 @@ async function useItem(idx) {
   if (it.eff === 'cancel_police') return showAppAlert("Ton Passeport diplomatique te sera proposé automatiquement au prochain contrôle de police.", "🛂 Passeport diplomatique");
   if (it.eff === 'none') return showAppAlert(/trognon/i.test(it.name || '') ? "Un trognon de pomme… Ça ne sert à rien, mais faut pas gâcher !" : `${it.name} : ça ne sert à rien…`, `${itemEmoji(it)} ${it.name}`);
   if (it.eff === 'free_prostitute') return showAppAlert("Ton Manteau de fourrure sera utilisé tout seul au Nightclub : ta prochaine Prostituée Niv. 1 est gratuite.", "🧥 Manteau de fourrure");
-  if (it.eff === 'botox') return showAppAlert("Ta Seringue de botox sera utilisée toute seule au début d'une manche où tu as des prostituées au QG : leur rente sera doublée.", "💉 Seringue de botox");
+  // Seringue de botox : le joueur l'injecte ; la prochaine rente versée par ses prostituées au QG sera doublée
+  if (it.eff === 'botox') {
+    if (localPlayer.botoxActive) return showAppAlert("Une injection est déjà en cours : la prochaine rente de tes prostituées sera déjà doublée.", "💉 Seringue de botox");
+    localPlayer.inventory.splice(idx, 1);
+    localPlayer.botoxActive = true;
+    refreshHud();
+    return showCardPlayed(it, [['ph-high-heel', 'Prochaine rente de tes prostituées', '×2'], ['ph-clock', 'Quand ?', 'prochaine manche']]);
+  }
   if (it.eff === 'pm_turn') {
     localPlayer.inventory.splice(idx, 1);
     const pm = isRadioEffectActive('BASKETS_PM_SET') ? getRadioEffectValue('BASKETS_PM_SET', 5) : (it.val || 3);
