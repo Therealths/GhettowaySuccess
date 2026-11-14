@@ -390,7 +390,7 @@
           <button type="button" onclick="openQrScannerModal()" class="hud-scan" aria-label="Scanner"><i class="ph-bold ph-qr-code"></i><b>Scanner</b></button>
         </div>
         <div class="hud-bars">
-          <button type="button" onclick="endCurrentPlayerTurn()" class="hud-bar end"><i class="ph-bold ph-dice-five"></i>Fin de tour · dé de patrouille</button>
+          <button type="button" onclick="endCurrentPlayerTurn()" class="hud-bar end"><i class="ph-bold ph-police-car"></i>Fin de tour · patrouille</button>
         </div>
       </div>
     </div>
@@ -920,8 +920,8 @@
         <div class="text-center text-sm font-bold text-slate-300 px-6 mt-1">Donne tes ordres à la patrouille : son prochain déplacement, c’est toi qui décides. Personne ne le saura.</div>
         <div class="pass-card-wrap"><img id="talkiePic" src="" alt="" class="talkie-pic"></div>
         <div class="police-panel">
-          <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mb-2">Dé de la patrouille</div>
-          <div id="talkieDice" class="talkie-dice"></div>
+          <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mb-2">Cases de la patrouille</div>
+          <div class="flex items-center gap-4"><div id="talkieGauge" class="patrol-gauge talkie-gauge"></div><div><div id="talkieVal" class="patrol-big"></div><div class="text-[11px] font-bold text-slate-400 mt-1">Fais tourner l’aiguille au doigt (1 à 6)</div></div></div>
           <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mt-3 mb-2">Direction</div>
           <div id="talkieDirs" class="talkie-dirs"></div>
           <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="btn-close ally-ghost" onclick="closeTalkie()">Annuler</button><button type="button" id="talkieGo" class="police-cta" style="margin-top:0" onclick="sendTalkieOrder()">Envoyer l’ordre</button></div>

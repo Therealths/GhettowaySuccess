@@ -4,7 +4,7 @@
       "id": "rad_police_raid",
       "title": "Descente de Police massive",
       "impact": "Patrouille +2 points de déplacement",
-      "desc": "La patrouille de police gagne +2 points de déplacement au dé de fin de tour.",
+      "desc": "La patrouille de police gagne +2 points de déplacement en fin de tour.",
       "effectType": "PATROL_DICE_BONUS",
       "effectVal": 2,
       "message": "Descente de police massive ce soir ! Les patrouilles accélèrent, planquez la marchandise…",
@@ -12,12 +12,12 @@
         "big": "+2",
         "tone": "malus",
         "label": "points de déplacement pour la patrouille",
-        "sub": "au dé de fin de chaque tour",
+        "sub": "à la fin de chaque tour",
         "rows": [
           [
-            "ph-dice-five",
-            "Dé de patrouille",
-            "1 à 6",
+            "ph-gauge",
+            "Patrouille",
+            "1 à 6 cases",
             "3 à 8"
           ]
         ]
@@ -148,9 +148,9 @@
         "sub": "elle reste au poste cette manche",
         "rows": [
           [
-            "ph-dice-five",
-            "Dé de patrouille",
-            "1 à 6",
+            "ph-gauge",
+            "Patrouille",
+            "1 à 6 cases",
             "0"
           ]
         ]
@@ -499,7 +499,7 @@
       "id": "rad_second_patrol",
       "title": "Trop de criminalité",
       "impact": "Une 2e voiture de patrouille, pour toute la partie",
-      "desc": "La préfecture envoie une deuxième voiture de patrouille, qui reste jusqu'à la fin de la partie. Les deux voitures avancent du même lancer de dé en fin de tour.",
+      "desc": "La préfecture envoie une deuxième voiture de patrouille, qui reste jusqu'à la fin de la partie. Les deux voitures avancent du même nombre de cases en fin de tour.",
       "effectType": "EXTRA_PATROL_CAR",
       "effectVal": 1,
       "once": true,
@@ -517,10 +517,10 @@
             "2"
           ],
           [
-            "ph-dice-five",
-            "Un seul dé pour les deux",
+            "ph-gauge",
+            "Un seul compteur pour les deux",
             "",
-            "même lancer"
+            "mêmes cases"
           ]
         ]
       }
@@ -681,7 +681,7 @@
           [
             "ph-police-car",
             "Patrouille",
-            "dé 1 à 6",
+            "1 à 6 cases",
             "bloquée"
           ]
         ]

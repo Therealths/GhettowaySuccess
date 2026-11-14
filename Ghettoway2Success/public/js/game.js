@@ -488,13 +488,12 @@ async function endCurrentPlayerTurn(forced = false) {
   showPatrolScreen();
 }
 
-// Patrouille de fin de tour : le dé roule, puis on indique de combien de cases et dans quel sens avancer le pion.
-// Le résultat s'affiche sur un compteur de vitesse (0 à 8, repères 0, 4 et 8) : graduations du dé en bleu,
-// bonus radio en orange, le 0 toujours en rouge, aiguille sur le nombre de cases
-const GAUGE = { max: 8, cx: 66, cy: 72, r: 50 };
+// Patrouille de fin de tour : le compteur s'emballe, puis on indique de combien de cases et dans quel sens avancer le pion.
+// Compteur de vitesse (0 à 10, repères 0, 5 et 10 ; la voiture fait 8 cases au plus) : graduations du tirage en bleu,
+// bonus radio en orange, le 0 toujours en rouge, aiguille sur le nombre de cases. Aussi sur l'écran du Talkie-walkie.
+const GAUGE = { max: 10, cx: 66, cy: 72, r: 50 };
 const gaugeAt = (n, r) => { const a = Math.PI * (1 - n / GAUGE.max); return [GAUGE.cx + Math.cos(a) * r, GAUGE.cy - Math.sin(a) * r].map(v => v.toFixed(1)); };
-function buildPatrolGauge() {
-  const el = document.getElementById('patrolGauge');
+function buildGauge(el) {
   if (el.firstChild) return;
   const { max, cx, cy, r } = GAUGE;
   let ticks = '', labels = '';
@@ -502,15 +501,15 @@ function buildPatrolGauge() {
     const [x1, y1] = gaugeAt(i, r - 9), [x2, y2] = gaugeAt(i, r);
     ticks += `<line data-i="${i}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
   }
-  [0, 4, 8].forEach(i => { const [x, y] = gaugeAt(i, r + 11); labels += `<text x="${x}" y="${+y + 4}">${i}</text>`; });
+  [0, 5, 10].forEach(i => { const [x, y] = gaugeAt(i, r + 11); labels += `<text x="${x}" y="${+y + 4}">${i}</text>`; });
   el.innerHTML = `<svg viewBox="0 0 132 84">${ticks}${labels}<line class="needle" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r + 13}"/><circle cx="${cx}" cy="${cy}" r="6"/></svg>`;
 }
-function setPatrolGauge(n, dice = n) {
-  buildPatrolGauge();
-  const el = document.getElementById('patrolGauge');
+function setGauge(el, n, dice = n) {
+  buildGauge(el);
   el.querySelectorAll('line[data-i]').forEach(t => { const i = +t.dataset.i; t.setAttribute('class', !i ? 'zero' : i <= dice ? 'dice' : i <= n ? 'radio' : ''); });
   el.querySelector('.needle').style.transform = `rotate(${(Math.min(n, GAUGE.max) / GAUGE.max) * 180 - 90}deg)`;
 }
+const setPatrolGauge = (n, dice) => setGauge(document.getElementById('patrolGauge'), n, dice);
 // Prochain joueur de la manche (celui qui n'a pas encore joué et n'est pas allié ce tour)
 function nextPlayerLabel() {
   const order = lastTurnOrder || [];
@@ -543,7 +542,7 @@ function showPatrolScreen() {
   scr.classList.toggle('two-cars', two);
   document.getElementById('patrolRound').innerText = currentSession.round || 1;
   document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>TOURNENT…' : 'LA PATROUILLE<br>TOURNE…';
-  info.innerHTML = '<div class="text-xs font-black uppercase tracking-widest text-sky-300">Le dé roule…</div><div class="patrol-big text-slate-500">?</div>';
+  info.innerHTML = '<div class="text-xs font-black uppercase tracking-widest text-sky-300">Le compteur s’emballe…</div><div class="patrol-big text-slate-500">?</div>';
   cta.innerText = nextPlayerLabel();
   cta.disabled = true;
   scr.dataset.state = 'roule';
@@ -559,7 +558,7 @@ function showPatrolScreen() {
   const dirCells = (left, uturn, note) => `<div class="mt-3 text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</div>
       <div class="patrol-dirs mt-1.5"><span class="${left === true ? 'on' : ''}">⬅ Gauche</span><span class="opt ${uturn ? 'on' : ''}">🔄 Demi-tour<small>${uturn == null ? '…' : uturn ? 'Oui' : 'Non'}</small></span><span class="${left === false ? 'on' : ''}">Droite ➡</span></div>
       <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
-  dirBox.innerHTML = dirCells(null, null, two ? 'Un seul dé pour les 2 voitures : même nombre de cases, même sens.' : 'Le dé décide de combien de cases et dans quel sens avance la patrouille.');
+  dirBox.innerHTML = dirCells(null, null, two ? 'Un seul compteur pour les 2 voitures : même nombre de cases, même sens.' : 'Le compteur décide de combien de cases et dans quel sens avance la patrouille.');
 
   const land = () => {
     cta.disabled = false;
@@ -576,7 +575,7 @@ function showPatrolScreen() {
     setPatrolGauge(finalMove, baseRoll);
     document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>BOUGENT.' : 'LA PATROUILLE<br>BOUGE.';
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
-      + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">Dé ${baseRoll} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
+      + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">${baseRoll} case${baseRoll > 1 ? 's' : ''} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
     const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau`;
     dirBox.innerHTML = dirCells(left, uturn, uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`);
     // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau

@@ -53,7 +53,7 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 | `items.js` | table des Fouilles, découverte, écran **carte jouée**, ticket à gratter, pile d'objets du combat, Talkie, Passeport, préchargement des images |
 | `sac.js` | écran **Sac** et bouton Sac de l'écran principal |
 | `qr.js` | scanner (html5-qrcode), actions des cases (`processQrPayload`), raccourcis de test |
-| `game.js` | création de partie, manches, rente du QG, fin de tour, **dé de patrouille** |
+| `game.js` | création de partie, manches, rente du QG, fin de tour, **patrouille** (compteur) |
 | `socket.js` | connexion et réception de tous les événements serveur |
 | `testmode.js` | partie de test à 3 Caïds pilotés depuis un seul téléphone |
 
@@ -87,7 +87,7 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 - **Lascars** (Sportclub, 3 au plus) : +ATK et +DÉF.
 - **QR des cartes** (JSON, champ `t`) : Yencli `{"t":"yen","d":kg demandés,"c":gain}` ; Braquage `{"t":"brq","n":nom,"req":ATK requise,"m":membres requis,"c":cash,"d":kg (facultatif),"p":niveau de prostituée (facultatif)}`. Avec `p`, chaque braqueur récupère une prostituée de ce niveau (`claimHeistProstitute` dans `qr.js`) ; en alliance, le serveur l'envoie aux alliés (`heist_prostitute`). S'il en a déjà une en transit, on lui propose de remplacer l'actuelle.
 - **Contrôle de police** : 30 % rien, 35 % drogue, 35 % armes ; saisie immédiate, +1 arrestation, fin de tour forcée. Le Passeport est proposé avant (écran plein page), puis la Prière de J-Lo.
-- **Fin de tour** : le joueur lance le **dé de patrouille** (1 à 6 + bonus radio, direction gauche/droite 50/50, plus l'**option 🔄 demi-tour** (20 %, `PATROL_UTURN_CHANCE`) qui **n'annule pas** la direction : sur le plateau, la voiture doit savoir de quel côté tourner au croisement). Écran : le nombre de cases s'affiche sur un **compteur de vitesse** (`#patrolGauge`, `setPatrolGauge`, 0 à 8 avec repères 0/4/8, graduation 0 rouge, dé en bleu, bonus radio en orange, aiguille qui balaie pendant le lancer) ; directions en 3 cases comme le Talkie (Gauche, Demi-tour Oui/Non, Droite), ce qui n'est pas sorti est grisé, sauf « Grève au Commissariat ».
+- **Fin de tour** : le joueur lance la **patrouille** (tirage 1 à 6 cases + bonus radio, plus de dé à l'écran ; direction gauche/droite 50/50, plus l'**option 🔄 demi-tour** (20 %, `PATROL_UTURN_CHANCE`) qui **n'annule pas** la direction : sur le plateau, la voiture doit savoir de quel côté tourner au croisement). Écran : le nombre de cases s'affiche sur un **compteur de vitesse** (`#patrolGauge`, `setPatrolGauge`, 0 à 10 avec repères 0/5/10 (8 cases au plus), graduation 0 rouge, tirage en bleu, bonus radio en orange, aiguille qui balaie pendant le lancer) ; directions en 3 cases comme le Talkie (Gauche, Demi-tour Oui/Non, Droite), ce qui n'est pas sorti est grisé, sauf « Grève au Commissariat ».
 - **Combat** : attaque contre défense ; le perdant perd 1 cœur, le gagnant choisit un butin (cash, drogue ou prostituée en transit). Phase 2 de riposte possible. Alliances : attaques et braquages coordonnés, pactes de non-agression.
 
 ### Flash radio (`public/radio_events.json`, 29 événements, un tiré par manche par `drawRadio` dans `server.js`)
@@ -124,7 +124,7 @@ Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` /
 | Seringue de botox | `botox` | prochaine rente des prostituées ×2 (une fois) | **à injecter** depuis le Sac (« Injecter », `botoxActive`, une seule à la fois) ; doublé à la rente suivante (début de manche, prostituées au QG) |
 | Ticket à gratter | `scratch` | 1 chance sur 3 de gagner 5 000 € | Sac (« Gratter ») |
 | Pied de biche | `crowbar` | coffre du QG d'un rival : jusqu'à **5 parts** (1 000 € ou 1 kg chacune) | Sac ; demande d'abord « es-tu devant son QG ? » |
-| Talkie-walkie de flic | `patrol_reroll` | choisir en secret le dé, la direction et l'option demi-tour (`rig_patrol { roll, left, uturn }`) de la **prochaine** patrouille (de n'importe quel joueur) | Sac |
+| Talkie-walkie de flic | `patrol_reroll` | choisir en secret le nombre de cases (compteur dont on tourne l'aiguille au doigt, 1 à 6, `bindTalkieGauge`), la direction et l'option demi-tour (`rig_patrol { roll, left, uturn }`) de la **prochaine** patrouille (de n'importe quel joueur) | Sac |
 | Lunettes de soleil | `double_fouille` | à la prochaine Fouille, 2 objets différents, on en garde un | **automatique** |
 
 Objets jouables en combat : `isCombatItem` (durée `combat`, Kebab, Sifflet, Canette). Les autres sont visibles dans la pile mais grisés « Pas en combat ».

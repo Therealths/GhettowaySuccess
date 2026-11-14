@@ -195,7 +195,7 @@ function findRows(it) {
   if (e === 'free_prostitute') return itemRow('ph-high-heel', 'Effet', '1 Prostituée Niv. 1 gratuite') + itemRow('ph-backpack', 'Quand ?', 'utilisé tout seul au Nightclub');
   if (e === 'scratch') return itemRow('ph-ticket', 'Effet', `1 chance sur 3 : +${(it.val || 5000).toLocaleString()} €`) + itemRow('ph-backpack', 'Quand ?', 'à gratter pendant ton tour');
   if (e === 'crowbar') return itemRow('ph-vault', 'Effet', 'coffre d’un rival : 5 000 € ou 5 kg') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
-  if (e === 'patrol_reroll') return itemRow('ph-dice-five', 'Effet', 'tu choisis le prochain dé de patrouille') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
+  if (e === 'patrol_reroll') return itemRow('ph-gauge', 'Effet', 'tu choisis le prochain déplacement de la patrouille') + itemRow('ph-backpack', 'Quand ?', 'pendant ton tour');
   if (e === 'double_fouille') return itemRow('ph-eye', 'Effet', '2 objets, tu gardes le meilleur') + itemRow('ph-backpack', 'Quand ?', 'tout seul à ta prochaine Fouille');
   if (e === 'botox') return itemRow('ph-syringe', 'Effet', 'prochaine rente des prostituées x2') + itemRow('ph-backpack', 'Quand ?', 'à injecter depuis le Sac');
   if (e === 'voucher') return itemRow('ph-ticket', 'Effet', `−50 % : ${escapeHtml(it.shop || '')}`) + itemRow('ph-backpack', 'Quand ?', 'prochain achat (à activer)');
@@ -297,7 +297,7 @@ const FOUILLE_TABLE = [
   [1, { name: 'Seringue de botox', eff: 'botox', desc: 'La prochaine rente de tes prostituées au QG est doublée (une seule fois)' }],
   [1, { name: 'Ticket à gratter', eff: 'scratch', val: 5000, desc: '1 chance sur 3 de gagner 5 000 €' }],
   [1, { name: 'Pied de biche', eff: 'crowbar', desc: 'Vole dans le coffre du QG d’un rival : jusqu’à 5 000 €, 5 kg, ou un partage des deux' }],
-  [1, { name: 'Talkie-walkie de flic', eff: 'patrol_reroll', desc: 'Choisis à l’avance le dé et la direction du prochain déplacement de la patrouille' }],
+  [1, { name: 'Talkie-walkie de flic', eff: 'patrol_reroll', desc: 'Choisis à l’avance le nombre de cases et la direction du prochain déplacement de la patrouille' }],
   [1, { name: 'Lunettes de soleil', eff: 'double_fouille', desc: 'À ta prochaine Fouille, tu vois 2 objets et tu gardes le meilleur' }],
   [1, { name: 'Rat crevé', eff: 'none', desc: 'Il a eu une vie plus dure que toi.' }]
 ];
@@ -522,17 +522,38 @@ function openTalkie(it) {
   document.getElementById('talkieRound').innerText = currentSession.round || 1;
   document.getElementById('talkiePic').src = itemArt(it) || 'patrol-car.webp';
   renderTalkie();
+  bindTalkieGauge();
   scr.classList.remove('hidden', 'show');
   void scr.offsetWidth;
   scr.classList.add('show');
 }
 function renderTalkie() {
-  document.getElementById('talkieDice').innerHTML = [1, 2, 3, 4, 5, 6].map(n => `<button type="button" class="${n === talkieRoll ? 'on' : ''}" onclick="talkieRoll=${n};renderTalkie()">${n}</button>`).join('');
+  setGauge(document.getElementById('talkieGauge'), talkieRoll);
+  document.getElementById('talkieVal').innerHTML = `${talkieRoll} <span>case${talkieRoll > 1 ? 's' : ''}</span>`;
   // Gauche à gauche, droite à droite (au prochain croisement) ; au milieu, le demi-tour en option : Oui / Non d'un toucher
   const dir = (l, t) => `<button type="button" class="${l === talkieLeft ? 'on' : ''}" onclick="talkieLeft=${l};renderTalkie()">${t}</button>`;
   document.getElementById('talkieDirs').innerHTML = dir(true, '⬅ Gauche')
     + `<button type="button" class="opt ${talkieUturn ? 'on' : ''}" onclick="talkieUturn=!talkieUturn;renderTalkie()">🔄 Demi-tour<small>${talkieUturn ? 'Oui' : 'Non'}</small></button>`
     + dir(false, 'Droite ➡');
+}
+// Compteur du Talkie : on fait tourner l'aiguille au doigt, de 1 à 6 cases (le bonus radio s'ajoute au lancer)
+function bindTalkieGauge() {
+  const el = document.getElementById('talkieGauge');
+  if (el.dataset.bound) return;
+  el.dataset.bound = '1';
+  let held = false;
+  const pick = e => {
+    const box = el.querySelector('svg').getBoundingClientRect(), k = 132 / box.width;
+    const x = (e.clientX - box.left) * k - GAUGE.cx, y = GAUGE.cy - (e.clientY - box.top) * k;
+    const n = Math.max(1, Math.min(6, Math.round((1 - Math.atan2(Math.max(y, 0), x) / Math.PI) * GAUGE.max)));
+    if (n === talkieRoll) return;
+    talkieRoll = n;
+    buzz(8);
+    renderTalkie();
+  };
+  el.addEventListener('pointerdown', e => { held = true; el.setPointerCapture(e.pointerId); pick(e); });
+  el.addEventListener('pointermove', e => { if (held) pick(e); });
+  ['pointerup', 'pointercancel'].forEach(t => el.addEventListener(t, () => { held = false; }));
 }
 function closeTalkie() {
   const scr = document.getElementById('talkieScreen');
@@ -548,7 +569,7 @@ async function sendTalkieOrder() {
   talkieItem = null;
   closeTalkie();
   refreshHud();
-  await showCardPlayed(it, [['ph-dice-five', 'Dé de la prochaine patrouille', `${talkieRoll}`], ['ph-arrows-left-right', 'Direction', talkieLeft ? '⬅ Gauche' : 'Droite ➡'], ['ph-arrow-u-up-left', 'Demi-tour d’abord', talkieUturn ? '🔄 Oui' : 'Non'], ['ph-broadcast', 'Bonus de la radio', 'en plus']]);
+  await showCardPlayed(it, [['ph-gauge', 'Prochaine patrouille', `${talkieRoll} case${talkieRoll > 1 ? 's' : ''}`], ['ph-arrows-left-right', 'Direction', talkieLeft ? '⬅ Gauche' : 'Droite ➡'], ['ph-arrow-u-up-left', 'Demi-tour d’abord', talkieUturn ? '🔄 Oui' : 'Non'], ['ph-broadcast', 'Bonus de la radio', 'en plus']]);
 }
 
 // =========================================================================
