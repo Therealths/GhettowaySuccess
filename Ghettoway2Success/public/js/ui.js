@@ -143,7 +143,7 @@ function navTo(pageId) {
   const current = document.querySelector('.screen-view.active');
   const target = document.getElementById(pageId);
   clearTimeout(slideTimer);
-  if (!backTrapArmed) { clearTimeout(exitHintTimer); armBackTrap(); }
+  armBackTrap();
   document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active', 'slide-in-up', 'slide-out-down'));
   if (target) target.classList.add('active');
   const fromId = current && current.id;
@@ -160,58 +160,57 @@ function navTo(pageId) {
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-// Bouton retour du téléphone : on garde toujours une entrée d'historique en réserve pour que
-// le retour agisse dans l'appli au lieu de la fermer. Sur l'accueil, il faut appuyer deux fois.
-let backTrapArmed = false, exitHintTimer = null;
+// Bouton retour du téléphone : on garde toujours une entrée d'historique en réserve, pour que le retour
+// agisse dans l'appli et ne la ferme jamais. Il ferme la fenêtre du dessus avec son propre bouton
+// (Fermer, Annuler, Retour, Quitter…) ; sans bouton de ce genre (validation en attente), sur l'écran
+// principal ou sur l'accueil, il ne fait rien.
+let backTrapArmed = false;
 function armBackTrap() {
   if (backTrapArmed) return;
   history.pushState({ ghettoway: true }, '');
   backTrapArmed = true;
 }
-// Ferme la fenêtre du dessus si elle a un bouton de fermeture ; les fenêtres obligatoires restent ouvertes
-function closeTopModalOnBack() {
-  const open = [...document.querySelectorAll('[id^="modal"]:not(.hidden)')];
-  const top = open[open.length - 1];
-  if (!top) {
-    // Écran de combat : le retour ne ferme que le choix de la cible, jamais un duel en cours
-    const fight = document.getElementById('fightScreen');
-    if (!fight || fight.classList.contains('hidden')) return false;
-    if (fight.dataset.state === 'choix' && !currentDuelInfo) closeFightScreen();
-    return true;
-  }
-  const btn = [...top.querySelectorAll('button')].find(b => {
-    const a = b.getAttribute('onclick') || '';
-    return a.includes(`closeModal('${top.id}')`) || a.includes('closeQrScannerModal()');
-  });
-  if (btn) btn.click();
-  return true;
+// Boutons qui ne sont pas un simple « retour » : quitter la partie, annuler un combat engagé
+const BACK_NEVER = ['confirmLeaveGame', 'abortCombat'];
+const isShown = el => !!el && !el.classList.contains('hidden') && getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden';
+// Fenêtre du dessus : un écran plein (inset-0), un modal ou le zoom du Sac, visible, hors pages
+function topOverlay() {
+  const all = [...document.querySelectorAll('#app-container [id][class*="inset-0"], #app-container [id^="modal"], #sacZoom')]
+    .filter(el => !el.classList.contains('screen-view') && isShown(el) && el.getClientRects().length)
+    .filter(el => { for (let p = el.parentElement; p && p.id !== 'app-container'; p = p.parentElement) if (!isShown(p)) return false; return true; });
+  if (!all.length) return null;
+  // Le plus au-dessus à l'œil : celui qui contient l'élément au centre de l'écran, sinon le dernier du z-index le plus haut
+  const r = document.getElementById('app-container').getBoundingClientRect();
+  let hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+  while (hit && !all.includes(hit)) hit = hit.parentElement;
+  const z = el => parseInt(getComputedStyle(el).zIndex, 10) || 0;
+  let win = hit || all.reduce((best, el) => (z(el) >= z(best) ? el : best));
+  // Une fenêtre ouverte à l'intérieur d'une autre (zoom du Sac, aperçu photo du Scanner) passe avant elle
+  for (let inner; (inner = all.filter(el => el !== win && win.contains(el)).pop());) win = inner;
+  return win;
 }
-function showExitHint() {
-  let el = document.getElementById('exitHint');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'exitHint';
-    el.className = 'absolute bottom-24 left-1/2 -translate-x-1/2 z-[70] px-4 py-2 rounded-full bg-black/85 border border-white/15 text-white text-xs font-bold whitespace-nowrap pointer-events-none transition-opacity duration-300';
-    el.innerText = 'Appuie encore pour quitter';
-    document.getElementById('app-container').appendChild(el);
-  }
-  el.style.opacity = '1';
+function backCloseButton(win) {
+  return [...win.querySelectorAll('button')].find(b => {
+    const a = b.getAttribute('onclick') || '';
+    if (b.disabled || !b.getClientRects().length || BACK_NEVER.some(f => a.includes(f))) return false;
+    for (let p = b.parentElement; p && p !== win; p = p.parentElement) if (!isShown(p)) return false;
+    return b.classList.contains('btn-close') || /^\s*(close|cancel)\w*\(/.test(a);
+  });
 }
 window.addEventListener('popstate', () => {
   backTrapArmed = false;
-  const page = document.querySelector('.screen-view.active:not(.slide-out-down)');
-  const pageId = page && page.id;
-  if (!closeTopModalOnBack()) {
-    if (pageId === 'page-1') {
-      // Pas de nouvelle entrée pendant 2 s : un second retour ferme l'appli
-      showExitHint();
-      clearTimeout(exitHintTimer);
-      exitHintTimer = setTimeout(() => { document.getElementById('exitHint').style.opacity = '0'; armBackTrap(); }, 2000);
-      return;
-    }
-    if (SLIDE_PAGES.includes(pageId)) navTo('page-1');
-    else if (pageId === 'page-6' && sacIsOpen()) closeSac();
-  }
   armBackTrap();
+  if (document.body.classList.contains('msg-open')) return; // message à valider
+  const win = topOverlay();
+  if (win) {
+    const btn = backCloseButton(win);
+    if (btn) btn.click();
+    return;
+  }
+  const page = document.querySelector('.screen-view.active:not(.slide-out-down)');
+  if (page && SLIDE_PAGES.includes(page.id)) navTo('page-1');
 });
+// Un toucher redonne au navigateur le droit de garder notre entrée d'historique (Chrome ignore celles
+// ajoutées sans geste de l'utilisateur) : on la remet si besoin
+document.addEventListener('pointerdown', armBackTrap, true);
 armBackTrap();
