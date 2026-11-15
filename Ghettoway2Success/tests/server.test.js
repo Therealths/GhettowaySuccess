@@ -180,12 +180,15 @@ test('pouvoir ciblé : la cible reçoit l’effet avec le nom de l’expéditeur
   assert.deepStrictEqual([fx.effectType, fx.senderCaid, fx.senderToken], ['canette', 'Burger Queen', a.token]);
 });
 
-test('victoire à 100 000 € : fin de partie annoncée à tous avec le classement', async () => {
+test('victoire à 100 000 € au coffre : fin de partie annoncée à tous avec le classement', async () => {
   const { players: [a, b] } = await startGame();
   a.emit('sync_player', { pocketCash: 60000, safeCash: 40000 });
+  await never(b, 'game_over'); // l'argent en poche ne compte pas
+  b.emit('sync_player', { pocketCash: 0, safeCash: 20000 });
+  a.emit('sync_player', { pocketCash: 0, safeCash: 100000 });
   const over = await waitFor(b, 'game_over');
   assert.strictEqual(over.winnerToken, a.token);
-  assert.deepStrictEqual(over.standings.map(p => p.fortune), [100000, 5000]);
+  assert.deepStrictEqual(over.standings.map(p => p.fortune), [100000, 20000]);
 });
 
 test('partie test : le défenseur reçoit le combat quand on bascule sur lui, puis le résultat manqué à son retour', async () => {
@@ -348,7 +351,7 @@ test('une attaque à 0 (Danse lascive) compte 0 : contre 0 de défense, l’assa
 
 test('après la fin de partie, plus de tour ni de nouvelle manche', async () => {
   const { players: [a, b] } = await startGame();
-  a.emit('sync_player', { pocketCash: 100000 });
+  a.emit('sync_player', { safeCash: 100000 });
   await waitFor(b, 'game_over');
   b.events.length = 0;
   a.emit('next_player_turn');

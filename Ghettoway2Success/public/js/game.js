@@ -729,7 +729,7 @@ function notifyMyTurn(round) {
 }
 
 function escapeHtml(t) { return String(t).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`); }
-// Fin de partie (annoncée par le serveur quand un Caïd atteint 100 000 €) : écran du gagnant ou d'un perdant,
+// Fin de partie (annoncée par le serveur quand un Caïd a 100 000 € au coffre du QG) : écran du gagnant ou d'un perdant,
 // podium, titres de la partie
 function showGameOver({ winnerToken, round, standings }) {
   document.querySelectorAll('[id^="modal"]').forEach(m => m.classList.add('hidden'));
@@ -776,7 +776,7 @@ function showGameOver({ winnerToken, round, standings }) {
         <div class="end-tag">${win ? 'La ville est à toi' : `${escapeHtml(winner.caidName)} règne sur la ville`}</div>
         <h2 class="font-anton end-title">${win ? 'ROI DE LA VILLE !' : 'C’EST PERDU.'}</h2>
         <div class="end-cash" id="endCash">${euros(winner.fortune)}</div>
-        <div class="end-sub">${win ? `amassés en ${nbRounds} manche${nbRounds > 1 ? 's' : ''}` : `amassés par ${escapeHtml(winner.caidName)}`}</div>
+        <div class="end-sub">${win ? `au coffre en ${nbRounds} manche${nbRounds > 1 ? 's' : ''}` : `au coffre de ${escapeHtml(winner.caidName)}`}</div>
       </div>
       <div class="end-podium">${step(1, 44)}${step(0, 66)}${step(2, 28)}</div>
       ${rest}

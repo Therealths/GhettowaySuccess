@@ -83,7 +83,7 @@ if (!REDIRECT_TO) {
   setInterval(saveRooms, 3000);
   for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => { saveRooms(); process.exit(0); });
 }
-// Fin de partie : le premier Caïd qui réunit cette somme (poche + coffre) gagne
+// Fin de partie : le premier Caïd qui a cette somme au coffre du QG gagne (l'argent en poche ne compte pas)
 const WIN_CASH = 100000;
 
 function buildStandings(room) {
@@ -92,7 +92,7 @@ function buildStandings(room) {
       playerToken: p.playerToken,
       caidId: p.caidId,
       caidName: p.caidName || 'Caïd',
-      fortune: (p.pocketCash || 0) + (p.safeCash || 0),
+      fortune: p.safeCash || 0,
       drugs: (p.drugs || 0) + (p.safeDrugs || 0),
       combatWins: p.combatWins || 0,
       combatLosses: p.combatLosses || 0,
@@ -103,7 +103,7 @@ function buildStandings(room) {
 
 function checkVictory(room, roomId) {
   if (!room.gameStarted || room.gameOver) return;
-  const winner = room.players.find(p => (p.pocketCash || 0) + (p.safeCash || 0) >= WIN_CASH);
+  const winner = room.players.find(p => (p.safeCash || 0) >= WIN_CASH);
   if (!winner) return;
   room.gameOver = { winnerToken: winner.playerToken, round: room.round, standings: buildStandings(room) };
   io.to(roomId).emit('game_over', room.gameOver);
