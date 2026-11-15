@@ -175,6 +175,6 @@ Outils (hors dépôt) dans `~/.cache/ghettoway-tools/` :
 - `cd Ghettoway2Success && npm test` (29 tests du serveur, socket.io réel sur un port aléatoire).
 - Serveur de test : `PORT=3100 GAME_DATA_DIR=<dossier jetable> nice -n 10 node server.js`.
 - Dans le navigateur : `enterTestGame(1)` (J1 Burger Queen), `enterTestGame(2)` (J2 Jamel)… Pour **deux joueurs en même temps**, ouvrir l'un sur `http://localhost:3100` et l'autre sur `http://127.0.0.1:3100` (stockages séparés).
-- Raccourcis de test (faux QR : boutiques, objets, Fouille, Ticket…) : **5 appuis rapides** sur le titre « FLASH UN QR CODE » (ou l'étiquette « Scanner ») de la page Scanner ; le choix est retenu sur le téléphone (`g2s_test_mode`).
+- Raccourcis de test (faux QR : boutiques, objets, Fouille, Fouille forcée drogue / argent via `testFouille`, Ticket, Deal Yencli 2 kg…) : **5 appuis rapides** sur le titre « FLASH UN QR CODE » (ou l'étiquette « Scanner ») de la page Scanner ; le choix est retenu sur le téléphone (`g2s_test_mode`).
 - Le navigateur intégré de l'app de bureau ralentit ou fige les animations quand il n'est pas affiché : pour juger une animation, enregistrer avec un Chrome sans écran (puppeteer-core), captures en boucle, puis `ffmpeg` en MP4.
 - Vérifier sur au moins deux hauteurs d'écran (375×812 et 375×667) ; le téléphone de l'utilisateur fait environ 412×830.

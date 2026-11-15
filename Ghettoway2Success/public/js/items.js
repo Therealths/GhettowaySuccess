@@ -320,6 +320,12 @@ function openFouille() {
   b.id += '_b';
   openFouilleChoice([a, b]);
 }
+// Raccourci de test du scanner : Fouille qui tombe sur la liasse ou le sachet
+function testFouille(eff) {
+  closeQrScannerModal();
+  const pick = FOUILLE_TABLE.find(([, it]) => it.eff === eff)[1];
+  claimFouille(Object.assign({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', val: 0, dur: 'instant' }, pick));
+}
 function claimFouille(it) {
   if (it.eff === 'cash') return openLootDiscoveryModal(it, "Récupérer", () => { localPlayer.pocketCash += it.val; spendActionPm(); });
   if (it.eff === 'drug') return openLootDiscoveryModal(it, "Récupérer", () => { localPlayer.drugs += it.val; spendActionPm(); });
