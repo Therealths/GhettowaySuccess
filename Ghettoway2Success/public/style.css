@@ -1315,13 +1315,8 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
    le titre tombe puis les lignes arrivent et le cash compte jusqu'au gain. Refusé : la scène s'éteint, le titre tremble. */
 .yen-screen { --c: #34d399; background: #07080e; color: #fff; overflow: hidden; }
 .yen-screen[data-ok="0"] { --c: #fb7185; }
-.yen-scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; container-type: size; }
-/* Illustration en calques (fond rebouché, paquet, liasse, doigts du client) : cadrée comme un object-fit: cover à 50% 38% */
-.yen-art { --w: max(100cqw, 100cqh * 768 / 1376); --h: calc(var(--w) * 1376 / 768); position: absolute; width: var(--w); height: var(--h); left: calc((100cqw - var(--w)) / 2); top: calc((100cqh - var(--h)) * 0.38); transform-origin: 52% 42%; }
-.yen-art img { position: absolute; left: 0; top: 0; width: 100%; }
-.yen-art .yen-pkg { left: 44.661%; top: 36.773%; width: 33.333%; }
-.yen-art .yen-cash { left: 42.057%; top: 51.744%; width: 16.276%; }
-.yen-art .yen-grip { left: 59.766%; top: 34.52%; width: 20.313%; }
+.yen-scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.yen-scene img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 38%; transform-origin: 52% 42%; }
 .yen-scene::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(7,8,14,0.75), rgba(7,8,14,0.1) 24%, transparent 45%, rgba(7,8,14,0.85) 66%, #07080e 74%); }
 .yen-chip { padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 900; color: #fff; background: #059669; }
 .yen-screen[data-ok="0"] .yen-chip { background: #e11d48; }
@@ -1332,12 +1327,8 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .yen-cta { background: linear-gradient(90deg, #6ee7b7, #059669); color: #022c22; }
 .yen-screen[data-ok="0"] .yen-cta { background: linear-gradient(90deg, #fca5a5, #e11d48); color: #fff; }
 .yen-glint { position: absolute; z-index: 1; left: 0; right: 0; top: 30%; height: 30%; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,236,170,0.4) 50%, transparent 65%); background-size: 250% 100%; }
-.yen-screen.show .yen-art { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both; }
-.yen-screen.show[data-ok="0"] .yen-art { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both, yenDim 0.6s ease-out 0.9s both; }
-/* Deal conclu : la liasse passe de la main du client à celle du joueur, le paquet dans l'autre sens ; l'image d'origine reprend la main à l'arrivée */
-.yen-screen.show[data-ok="1"] .yen-pkg { animation: yenPkg 0.85s cubic-bezier(.45,0,.25,1) 0.3s both; }
-.yen-screen.show[data-ok="1"] .yen-cash { animation: yenCash 0.85s cubic-bezier(.45,0,.25,1) 0.3s both; }
-.yen-screen.show[data-ok="1"] .yen-full { animation: yenFull 0.2s ease-out 1.15s both; }
+.yen-screen.show .yen-scene img { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both; }
+.yen-screen.show[data-ok="0"] .yen-scene img { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both, yenDim 0.6s ease-out 0.9s both; }
 .yen-screen.show[data-ok="1"] .yen-glint { animation: yenGlint 0.9s ease-in-out 1s both; }
 .yen-screen.show .yen-head { animation: policeStamp 0.4s cubic-bezier(.2,1.6,.4,1) 0.55s both; }
 .yen-screen.show[data-ok="0"] .yen-head { animation: policeStamp 0.4s cubic-bezier(.2,1.6,.4,1) 0.55s both, policeShake 0.4s ease-in-out 1s; }
@@ -1345,9 +1336,6 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .yen-screen.show .police-row { animation: policeRowIn 0.35s ease-out both; }
 .yen-screen.show .yen-cta { animation: allyUp 0.35s ease-out 1.4s both; }
 @keyframes yenPush { from { transform: scale(1.22); filter: brightness(0.35); } to { transform: scale(1); filter: none; } }
-@keyframes yenPkg { from { transform: translate(-41%, 7%) rotate(-2deg); } 55% { transform: translate(-16%, -4%) rotate(-1deg); } to { transform: none; } }
-@keyframes yenCash { from { transform: translate(94%, 57%) rotate(4deg); } 50% { transform: translate(48%, 6%) rotate(2deg); } to { transform: none; } }
-@keyframes yenFull { from { opacity: 0; } to { opacity: 1; } }
 @keyframes yenDim { to { filter: grayscale(0.7) brightness(0.55); } }
 @keyframes yenGlint { from { opacity: 1; background-position: 120% 0; } to { opacity: 1; background-position: -20% 0; } }
 @media (max-height: 700px) { .yen-sub { font-size: 12px; } }
