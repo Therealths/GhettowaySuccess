@@ -224,6 +224,35 @@ async function claimHeistProstitute(lvl) {
     { kicker: 'Butin du braquage', stamp: 'ph-heart', face: shopCardFace({ img: pr.image || `plvl${lvl}.jpg`, name: girl.name, bonus: `+${girl.revenue.toLocaleString()} € / manche`, desc: pr.desc, cls: 'veh' }) });
 }
 
+// DEAL YENCLI : écran avec l'illustration de l'échange ; le cash compte jusqu'au gain une fois les lignes arrivées
+function showYencliScreen(ok, rows, cashGain = 0) {
+  return msgQueue(done => {
+    const scr = document.getElementById('yenScreen');
+    scr.dataset.ok = ok ? '1' : '0';
+    document.getElementById('yenRound').innerText = currentSession.round || 1;
+    document.getElementById('yenHead').innerHTML = ok ? 'MARCHÉ<br>CONCLU.' : 'DEAL<br>REFUSÉ.';
+    document.getElementById('yenSub').innerText = ok ? 'Le client a payé, la came a changé de mains.' : 'Pas assez de marchandise : le client repart les mains vides.';
+    document.getElementById('yenRows').innerHTML = rows.map(([icon, label, value, cls], i) =>
+      `<div class="police-row" style="animation-delay:${0.9 + i * 0.15}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft ${cls || ''}">${value}</span></div>`).join('');
+    const cta = document.getElementById('yenCta');
+    cta.innerText = ok ? 'Empocher' : 'Compris';
+    cta.onclick = () => { scr.classList.add('hidden'); scr.classList.remove('show'); done(); };
+    scr.classList.remove('hidden', 'show');
+    void scr.offsetWidth;
+    scr.classList.add('show');
+    setTimeout(() => buzz(ok ? [40, 60, 90] : 160), 550); // le titre tombe
+    const cash = document.getElementById('yenCash');
+    if (!cash || !cashGain) return;
+    const t0 = performance.now() + 1100, dur = 800;
+    const tick = t => {
+      const k = Math.max(0, Math.min(1, (t - t0) / dur));
+      cash.innerText = `+${Math.round(cashGain * (1 - Math.pow(1 - k, 3))).toLocaleString()} €`;
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 async function processQrPayload(payload) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   closeQrScannerModal();
@@ -289,17 +318,19 @@ async function processQrPayload(payload) {
   }
 
   if (type === 'yen') {
-    if (localPlayer.drugs < data.d) return showAppAlert(`Drogue insuffisante (${data.d} kg requis).`, "Deal Refusé");
+    if (localPlayer.drugs < data.d) return showYencliScreen(false, [['ph-leaf', 'Drogue demandée', `${data.d} kg`], ['ph-backpack', 'Sur toi', `${localPlayer.drugs} kg ❌`, 'neg'], ['ph-lightning', 'PM', 'non dépensés']]);
     const radioBonus = isRadioEffectActive('YENCLI_CASH_BONUS') ? getRadioEffectValue('YENCLI_CASH_BONUS', 1500) : 0;
     const radioMult = isRadioEffectActive('YENCLI_CASH_MULT') ? getRadioEffectValue('YENCLI_CASH_MULT', 1) : 1;
     const totalGain = Math.round((data.c || 0) * radioMult) + radioBonus;
     localPlayer.drugs -= data.d;
     localPlayer.pocketCash += totalGain;
     spendActionPm();
-    const bonusTxt = radioBonus > 0 ? ` (dont +${radioBonus.toLocaleString()} € Bonus Radio !)`
-      : radioMult !== 1 ? ` (Flash Radio : ${radioMult > 1 ? `×${radioMult}` : `−${Math.round((1 - radioMult) * 100)} %`})` : '';
-    await showAppAlert(`+${totalGain.toLocaleString()} € en poche !${bonusTxt}`, "🤝 Deal Yencli");
+    const rows = [['ph-leaf', 'Drogue livrée', `−${data.d} kg`, 'neg'], ['ph-money', 'Cash en poche', '<span id="yenCash">+0 €</span>', 'pos']];
+    if (radioBonus > 0) rows.push(['ph-radio', 'Dont bonus radio', `+${radioBonus.toLocaleString()} €`, 'pos']);
+    else if (radioMult !== 1) rows.push(['ph-radio', 'Flash Radio', radioMult > 1 ? `×${radioMult}` : `−${Math.round((1 - radioMult) * 100)} %`, radioMult > 1 ? 'pos' : 'neg']);
+    rows.push(['ph-lightning', 'PM', '−2']);
     refreshHud();
+    await showYencliScreen(true, rows, totalGain);
     return;
   }
 

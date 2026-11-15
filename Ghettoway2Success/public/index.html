@@ -993,6 +993,25 @@
     </div>
 
     <!-- CARTE JOUÉE : la carte grandit, le tampon « JOUÉE » tombe (choc), puis ses effets s'affichent -->
+    <!-- DEAL YENCLI : l'échange dans la ruelle, puis ce que rapporte le deal (ou pourquoi il est refusé) -->
+    <div id="yenScreen" class="hidden absolute inset-0 z-[60] yen-screen" data-ok="1">
+      <div class="yen-scene"><img src="yencli-deal.webp" alt="Échange dans une ruelle"></div>
+      <i class="yen-glint"></i>
+      <div class="relative z-[1] flex flex-col h-full">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="yenRound">1</span></span>
+          <span class="yen-chip"><i class="ph-fill ph-handshake"></i> Deal Yencli</span>
+        </div>
+        <h2 id="yenHead" class="font-anton qg-head yen-head px-4 mt-2"></h2>
+        <div id="yenSub" class="yen-sub px-4 mt-1"></div>
+        <div class="flex-1"></div>
+        <div class="police-panel qg-panel">
+          <div id="yenRows" class="flex flex-col gap-1.5"></div>
+          <button type="button" id="yenCta" class="qg-cta yen-cta mt-3"></button>
+        </div>
+      </div>
+    </div>
+
     <div id="playedScreen" class="hidden absolute inset-0 z-[60] played-screen">
       <div class="played-rays"></div>
       <div class="played-content">
