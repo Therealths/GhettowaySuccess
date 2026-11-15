@@ -236,8 +236,19 @@ function showYencliScreen(ok, rows, cashGain = 0) {
       `<div class="police-row" style="animation-delay:${0.9 + i * 0.15}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft ${cls || ''}">${value}</span></div>`).join('');
     const cta = document.getElementById('yenCta');
     cta.innerText = ok ? 'Empocher' : 'Compris';
-    cta.onclick = () => { scr.classList.add('hidden'); scr.classList.remove('show'); done(); };
-    scr.classList.remove('hidden', 'show');
+    cta.onclick = () => {
+      cta.onclick = null;
+      if (!ok || !cashGain) { scr.classList.add('hidden'); scr.classList.remove('show'); return done(); }
+      // Empocher : coup de tampon qui secoue l'écran, puis l'écran s'efface pendant que les billets filent vers le Sac
+      scr.classList.add('stamped');
+      setTimeout(() => buzz([70, 30, 25]), 260);
+      setTimeout(() => {
+        flyCashToSac(document.querySelector('#yenScreen .yen-hand-cash'), cashGain, 0.7, 0.3);
+        scr.classList.add('leaving');
+      }, 900);
+      setTimeout(() => { scr.classList.add('hidden'); scr.classList.remove('show', 'leaving', 'stamped'); done(); }, 1280);
+    };
+    scr.classList.remove('hidden', 'show', 'stamped', 'leaving');
     void scr.offsetWidth;
     scr.classList.add('show');
     setTimeout(() => buzz(ok ? [40, 60, 90] : 160), 550); // le titre tombe
@@ -251,6 +262,42 @@ function showYencliScreen(ok, rows, cashGain = 0) {
     };
     requestAnimationFrame(tick);
   });
+}
+
+// Billets qui partent d'un point de l'élément (fx, fy en fraction de sa taille) et atterrissent sur le bouton Sac de l'écran principal, puis « +X € » au-dessus du Sac
+function flyCashToSac(fromEl, amount, fx = 0.5, fy = 0.5) {
+  const sac = document.getElementById('btnOpenSac');
+  const to = sac && sac.getBoundingClientRect();
+  if (!to || !to.width || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const from = fromEl.getBoundingClientRect();
+  const x0 = from.left + from.width * fx, y0 = from.top + from.height * fy;
+  const x1 = to.left + to.width / 2, y1 = to.top + to.height / 2;
+  const n = 7, flight = 900;
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('span');
+    el.className = 'cash-fly';
+    el.textContent = '💵';
+    document.body.appendChild(el);
+    const sx = x0 + (Math.random() - 0.5) * 60, sy = y0 + (Math.random() - 0.5) * 30;
+    const mx = (sx + x1) / 2 + (Math.random() - 0.5) * 90, my = Math.min(sy, y1) - 70 - Math.random() * 60;
+    const r = (Math.random() - 0.5) * 70;
+    el.animate([
+      { transform: `translate(${sx}px, ${sy}px) translate(-50%, -50%) rotate(${r}deg) scale(0.6)`, opacity: 0 },
+      { transform: `translate(${sx}px, ${sy - 18}px) translate(-50%, -50%) rotate(${r}deg) scale(1.15)`, opacity: 1, offset: 0.15 },
+      { transform: `translate(${mx}px, ${my}px) translate(-50%, -50%) rotate(${r * -1.5}deg) scale(1)`, opacity: 1, offset: 0.55 },
+      { transform: `translate(${x1}px, ${y1}px) translate(-50%, -50%) rotate(0deg) scale(0.45)`, opacity: 0.2 }
+    ], { duration: flight, delay: i * 55, easing: 'cubic-bezier(.45,0,.35,1)', fill: 'both' }).onfinish = () => el.remove();
+  }
+  setTimeout(() => {
+    sac.classList.remove('got-cash'); void sac.offsetWidth; sac.classList.add('got-cash');
+    const tag = document.createElement('span');
+    tag.className = 'cash-fly-tag';
+    tag.textContent = `+${amount.toLocaleString()} €`;
+    tag.style.left = `${x1}px`; tag.style.top = `${to.top}px`;
+    document.body.appendChild(tag);
+    setTimeout(() => { tag.remove(); sac.classList.remove('got-cash'); }, 1300);
+    buzz(30);
+  }, flight + (n - 1) * 55 - 120);
 }
 
 async function processQrPayload(payload) {
