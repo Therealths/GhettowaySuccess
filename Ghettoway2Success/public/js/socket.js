@@ -378,6 +378,8 @@ if (socket) {
   // late : message gardé par le serveur pendant qu'on était hors ligne (le Cœur perdu, le butin… sont déjà dans nos stats)
   socket.on('combat_finished_result', async ({ outcome, dmgNet, opponentCaid, isPrimaryPicker, pillageInfo, winBonus, late }) => {
     const last = fightLast;
+    // Perdant : l'écran Défaite attendra le racket choisi par le vainqueur (il peut arriver avant que l'écran s'affiche)
+    if (outcome === 'loser') { fightRacketWait = true; fightRacketDone = null; clearTimeout(fightRacketTimer); }
     endSingleCombatEffects();
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
@@ -401,24 +403,25 @@ if (socket) {
   // Braquage en alliance avec des prostituées au butin : chaque allié en récupère une
   socket.on('heist_prostitute', ({ lvl }) => claimHeistProstitute(lvl));
 
+  // Racket subi : appliqué tout de suite ; affiché sur l'écran Défaite qui l'attend, sinon en message
   socket.on('you_were_pillaged', async ({ category, amount, items, thiefCaid }) => {
-    if (category === 'cash') {
-      localPlayer.pocketCash = 0;
-      refreshHud();
-      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ton Cash en poche (${amount.toLocaleString()} €) !`, "💸 Pillage Subi");
-    } else if (category === 'drugs') {
-      localPlayer.drugs = 0;
-      refreshHud();
-      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ta Drogue en poche (${amount} kg) !`, "🌿 Pillage Subi");
-    } else if (category === 'prostitute') {
-      localPlayer.prostituteInTransit = null;
-      refreshHud();
-      await showAppAlert(`${thiefCaid} a capturé ta Prostituée en transit !`, "👠 Pillage Subi");
-    } else if (category === 'items') {
+    if (category === 'cash') localPlayer.pocketCash = 0;
+    else if (category === 'drugs') localPlayer.drugs = 0;
+    else if (category === 'prostitute') localPlayer.prostituteInTransit = null;
+    else if (category === 'items') {
       // Le serveur a déjà retiré les objets de mon Sac : on enlève les mêmes (par id) de mon côté
       const ids = (items || []).map(it => it && it.id);
       localPlayer.inventory = localPlayer.inventory.filter(it => !ids.includes(it && it.id));
-      refreshHud();
+    }
+    refreshHud();
+    if (onRacketKnown({ category, amount, items, thiefCaid }) || category === 'none') return;
+    if (category === 'cash') {
+      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ton Cash en poche (${amount.toLocaleString()} €) !`, "💸 Pillage Subi");
+    } else if (category === 'drugs') {
+      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ta Drogue en poche (${amount} kg) !`, "🌿 Pillage Subi");
+    } else if (category === 'prostitute') {
+      await showAppAlert(`${thiefCaid} a capturé ta Prostituée en transit !`, "👠 Pillage Subi");
+    } else if (category === 'items') {
       await showAppAlert(amount ? `${thiefCaid} t'a pris ${amount} objet${amount > 1 ? 's' : ''} de Fouille : ${(items || []).map(it => it.name).join(', ')}.` : `${thiefCaid} a fouillé ton Sac… vide !`, "🎒 Pillage Subi");
     }
   });

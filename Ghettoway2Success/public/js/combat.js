@@ -405,6 +405,30 @@ function fightRacket() {
   if (info) openPillageModalUI(info);
 }
 
+// Racket subi : l'écran Défaite attend le choix du vainqueur (bouton grisé), l'affiche, puis libère le bouton
+let fightRacketWait = false, fightRacketDone = null, fightRacketTimer = null;
+function racketRowHtml(who, plural) {
+  const r = fightRacketDone;
+  if (!r) return fightRow('ph-hand-grabbing', `${who} ${plural ? 'choisissent leur' : 'choisit son'} butin`, '<span class="fight-wait">en attente…</span>');
+  const thief = escapeHtml(allyShort(r.thiefCaid || who));
+  const names = (r.items || []).map(it => escapeHtml(it.name)).join(', ');
+  const take = { cash: [`−${(r.amount || 0).toLocaleString()} €`, 'ton cash'], drugs: [`−${r.amount || 0} kg`, 'ta drogue'],
+    items: [r.amount ? `${r.amount} objet${r.amount > 1 ? 's' : ''}` : 'Sac vide', 'dans ton Sac'], prostitute: ['ta prostituée', 'en transit'], none: ['rien', 'il te laisse filer'] }[r.category] || ['—', ''];
+  return fightRow('ph-hand-grabbing', `${thief} a pris <small class="fight-racket-sub">${take[1]}</small>`, take[0])
+    + (names ? `<div class="fight-racket-items">${names}</div>` : '');
+}
+// Appelé à l'arrivée du racket : vrai si l'écran Défaite l'attendait (il l'affiche à la place du message)
+function onRacketKnown(data) {
+  if (!fightRacketWait) return false;
+  fightRacketWait = false;
+  clearTimeout(fightRacketTimer);
+  fightRacketDone = data;
+  const box = document.getElementById('fightRacketBox'), btn = document.getElementById('fightDefeatCta');
+  if (box) box.innerHTML = racketRowHtml(box.dataset.who, box.dataset.plural === '1');
+  if (btn) btn.disabled = false;
+  return true;
+}
+
 // DÉFAITE : montrée avant l'écran Hôpital (l'appelant attend la fermeture)
 function showFightDefeat({ dmgNet, opponentCaid, heartsBefore }, last) {
   const me = getMyCaid();
@@ -421,10 +445,12 @@ function showFightDefeat({ dmgNet, opponentCaid, heartsBefore }, last) {
   const who = plural ? escapeHtml(allyListNames(winners.map(w => allyShort(w.label)))) : escapeHtml(allyShort(opponentCaid || 'Le vainqueur'));
   const rows = first
     + fightRow('ph-heart-break', 'Cœurs de vie', `<span class="fight-hearts">${hearts}</span> ${heartsBefore} → ${after}`)
-    + fightRow('ph-hand-grabbing', `${who} ${plural ? 'choisissent leur' : 'choisit son'} butin`, 'cash, drogue…');
+    + `<div id="fightRacketBox" class="flex flex-col gap-1.5" data-who="${who}" data-plural="${plural ? 1 : 0}">${racketRowHtml(who, plural)}</div>`;
   const bottom = `<h2 class="font-anton ally-head">DÉFAITE.</h2>
     <div class="flex flex-col gap-1.5 mt-3">${rows}</div>
-    <button type="button" class="ally-cta mt-4" onclick="closeFightScreen()">Je m’en souviendrai</button>`;
+    <button type="button" id="fightDefeatCta" class="ally-cta mt-4" onclick="closeFightScreen()" ${fightRacketWait ? 'disabled' : ''}>Je m’en souviendrai</button>`;
+  // Filet de sécurité : si le vainqueur ne choisit jamais (téléphone éteint…), le bouton se libère au bout d'1 min 30
+  if (fightRacketWait) fightRacketTimer = setTimeout(() => { if (fightRacketWait) onRacketKnown({ category: 'none', thiefCaid: opponentCaid }); }, 90000);
   return fightRender('defaite', 'lose', 'defaite', stage, bottom);
 }
 

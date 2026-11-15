@@ -132,6 +132,18 @@ test('racket : le vainqueur prend jusqu’à 3 objets de Fouille au hasard, jama
   assert.ok(got.items.every(i => i.type === 'ITEM_CARD'));
 });
 
+test('racket : si le vainqueur ne prend rien, le perdant est quand même prévenu (son écran Défaite attend)', async () => {
+  const { players: [a, b] } = await startGame();
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
+  await waitFor(b, 'combat_duel_opened');
+  a.emit('combat_set_ready', { currentStat: 3 });
+  b.emit('combat_set_ready', { currentStat: 1 });
+  await waitFor(a, 'combat_finished_result');
+  a.emit('execute_pillage_choice', { category: 'none' });
+  const got = await waitFor(b, 'you_were_pillaged');
+  assert.deepStrictEqual([got.category, got.thiefCaid], ['none', 'Burger Queen']);
+});
+
 test('assaut bloqué : riposte du défenseur en phase 2, puis match nul', async () => {
   const { players: [a, b] } = await startGame();
   a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });

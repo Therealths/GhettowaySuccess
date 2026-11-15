@@ -1301,6 +1301,8 @@ io.on('connection', (socket) => {
     }
 
     if (category === 'none') {
+      // Le perdant attend le choix sur son écran Défaite : on le prévient aussi quand rien n'est pris
+      sendToPlayer(loserP, 'you_were_pillaged', { category: 'none', amount: 0, thiefCaid: primaryWinner.caidName });
       room.pendingPillage = null;
       return;
     }
