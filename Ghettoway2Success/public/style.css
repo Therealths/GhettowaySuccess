@@ -1315,8 +1315,13 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
    le titre tombe puis les lignes arrivent et le cash compte jusqu'au gain. Refusé : la scène s'éteint, le titre tremble. */
 .yen-screen { --c: #34d399; background: #07080e; color: #fff; overflow: hidden; }
 .yen-screen[data-ok="0"] { --c: #fb7185; }
-.yen-scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.yen-scene img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 38%; transform-origin: 52% 42%; }
+.yen-scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; container-type: size; }
+/* Illustration en calques (fond sans les mains du bas, colis + ses deux mains, main à la liasse, main ouverte) cadrée comme un object-fit: cover à 50% 38% */
+.yen-art { --w: max(100cqw, 100cqh * 768 / 1376); --h: calc(var(--w) * 1376 / 768); position: absolute; width: var(--w); height: var(--h); left: calc((100cqw - var(--w)) / 2); top: calc((100cqh - var(--h)) * 0.38); transform-origin: 52% 42%; }
+.yen-art img { position: absolute; left: 0; top: 0; width: 100%; }
+.yen-art .yen-parcel { left: 32.943%; top: 32.776%; width: 48.568%; }
+.yen-art .yen-hand-cash { left: 19.401%; top: 51.09%; width: 39.063%; transform-origin: 2% 50%; }
+.yen-art .yen-hand-open { left: 51.172%; top: 55.16%; width: 33.073%; transform-origin: 98% 45%; }
 .yen-scene::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(7,8,14,0.75), rgba(7,8,14,0.1) 24%, transparent 45%, rgba(7,8,14,0.85) 66%, #07080e 74%); }
 .yen-chip { padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 900; color: #fff; background: #059669; }
 .yen-screen[data-ok="0"] .yen-chip { background: #e11d48; }
@@ -1327,8 +1332,12 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .yen-cta { background: linear-gradient(90deg, #6ee7b7, #059669); color: #022c22; }
 .yen-screen[data-ok="0"] .yen-cta { background: linear-gradient(90deg, #fca5a5, #e11d48); color: #fff; }
 .yen-glint { position: absolute; z-index: 1; left: 0; right: 0; top: 30%; height: 30%; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,236,170,0.4) 50%, transparent 65%); background-size: 250% 100%; }
-.yen-screen.show .yen-scene img { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both; }
-.yen-screen.show[data-ok="0"] .yen-scene img { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both, yenDim 0.6s ease-out 0.9s both; }
+.yen-screen.show .yen-art { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both; }
+.yen-screen.show[data-ok="0"] .yen-art { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both, yenDim 0.6s ease-out 0.9s both; }
+/* Deal conclu : la liasse descend vers le client qui tend la main, le colis fait un va-et-vient (en boucle) */
+.yen-screen.show[data-ok="1"] .yen-hand-cash { animation: yenHandCash 1.35s ease-in-out 0.2s infinite alternate both; }
+.yen-screen.show[data-ok="1"] .yen-hand-open { animation: yenHandOpen 1.35s ease-in-out 0.2s infinite alternate both; }
+.yen-screen.show[data-ok="1"] .yen-parcel { animation: yenParcel 1.85s ease-in-out infinite alternate both; }
 .yen-screen.show[data-ok="1"] .yen-glint { animation: yenGlint 0.9s ease-in-out 1s both; }
 .yen-screen.show .yen-head { animation: policeStamp 0.4s cubic-bezier(.2,1.6,.4,1) 0.55s both; }
 .yen-screen.show[data-ok="0"] .yen-head { animation: policeStamp 0.4s cubic-bezier(.2,1.6,.4,1) 0.55s both, policeShake 0.4s ease-in-out 1s; }
@@ -1336,6 +1345,9 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .yen-screen.show .police-row { animation: policeRowIn 0.35s ease-out both; }
 .yen-screen.show .yen-cta { animation: allyUp 0.35s ease-out 1.4s both; }
 @keyframes yenPush { from { transform: scale(1.22); filter: brightness(0.35); } to { transform: scale(1); filter: none; } }
+@keyframes yenHandCash { to { transform: rotate(4.5deg); } }
+@keyframes yenHandOpen { to { transform: rotate(5.5deg); } }
+@keyframes yenParcel { from { transform: translateX(-1.7%); } to { transform: translateX(1.7%); } }
 @keyframes yenDim { to { filter: grayscale(0.7) brightness(0.55); } }
 @keyframes yenGlint { from { opacity: 1; background-position: 120% 0; } to { opacity: 1; background-position: -20% 0; } }
 @media (max-height: 700px) { .yen-sub { font-size: 12px; } }
