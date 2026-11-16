@@ -95,7 +95,8 @@ const HEIST_ART = {
   nightclub: ['braquage-nightclub-1.webp'],
   magasin: ['braquage-magasin-1.webp'],
   maison: ['braquage-maison-1.webp', 'braquage-maison-2.webp'],
-  armurerie: ['braquage-armurerie-1.webp']
+  armurerie: ['braquage-armurerie-1.webp'],
+  hopital: ['braquage-hopital-1.webp']
 };
 HEIST_ART.poste = HEIST_ART.laposte;
 const heistKey = name => String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
