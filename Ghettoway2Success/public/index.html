@@ -783,10 +783,12 @@
         <div id="scanPanel" class="police-panel scan-panel pointer-events-auto">
           <h2 class="font-anton scan-head" onclick="tapScannerTitle()">FLASH UN QR CODE</h2>
           <div id="qrScannerStatus" class="scan-status text-[11px] text-center font-bold text-amber-300 mt-1">Démarrage de la caméra…</div>
-          <div class="grid grid-cols-3 gap-2 mt-3">
+          <div id="qrCamDebug" class="hidden text-[9px] font-mono text-slate-400 text-center mt-1 break-all"></div>
+          <div class="grid grid-cols-4 gap-2 mt-3">
             <label class="scan-btn cursor-pointer"><i class="ph-bold ph-image"></i><span>Photo</span>
               <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="scanFromImageFile(this)"></label>
             <button type="button" id="btnQrTorch" onclick="toggleQrTorch()" class="scan-btn" disabled><i class="ph-bold ph-flashlight"></i><span>Lampe</span></button>
+            <button type="button" id="btnQrCam" onclick="switchQrCamera()" class="scan-btn" disabled><i class="ph-bold ph-camera-rotate"></i><span>Caméra</span></button>
             <button type="button" onclick="closeQrScannerModal()" class="btn-close scan-btn"><i class="ph-bold ph-x"></i><span>Fermer</span></button>
           </div>
           <div id="qrTestButtons" class="hidden mt-3 grid grid-cols-2 gap-1.5 text-[10px] font-mono max-h-40 overflow-y-auto">

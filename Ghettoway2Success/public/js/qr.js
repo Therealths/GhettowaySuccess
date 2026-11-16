@@ -3,6 +3,32 @@
 // =========================================================================
 // SCANNER QR CORRIGÉ
 // =========================================================================
+// Objectifs arrière du téléphone : par défaut le navigateur prend parfois le grand-angle, souvent sans autofocus.
+// On prend l'objectif principal (ou celui choisi avec le bouton « Caméra », retenu sur le téléphone)
+const QR_CAM_KEY = 'g2s_qr_cam';
+let qrBackCams = [], qrCamId = null;
+async function pickBackCamera() {
+  let cams = [];
+  try { cams = await Html5Qrcode.getCameras(); } catch (e) { return null; }
+  const back = cams.filter(c => /back|rear|arri[eè]re|environment/i.test(c.label || ''));
+  qrBackCams = back.length ? back : cams;
+  let saved = null;
+  try { saved = localStorage.getItem(QR_CAM_KEY); } catch (e) {}
+  if (saved && qrBackCams.some(c => c.id === saved)) return saved;
+  const main = qrBackCams.find(c => /camera2 0\b|camera 0\b/i.test(c.label))
+    || qrBackCams.find(c => !/ultra|wide|grand|tele|depth|macro|0[.,]5/i.test(c.label))
+    || qrBackCams[0];
+  return main ? main.id : null;
+}
+async function switchQrCamera() {
+  if (qrBackCams.length < 2) return;
+  const i = qrBackCams.findIndex(c => c.id === qrCamId);
+  qrCamId = qrBackCams[(i + 1) % qrBackCams.length].id;
+  try { localStorage.setItem(QR_CAM_KEY, qrCamId); } catch (e) {}
+  await startLiveQrCamera();
+  const n = qrBackCams.findIndex(c => c.id === qrCamId) + 1;
+  document.getElementById('qrScannerStatus').innerText = `Caméra ${n} / ${qrBackCams.length} : vise le QR code`;
+}
 // Lecteur de QR du téléphone quand il existe (plus rapide, tolère mieux une image un peu floue)
 const newQrReader = () => new Html5Qrcode("qr-reader", { verbose: false, experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
 async function startLiveQrCamera() {
@@ -31,13 +57,15 @@ async function startLiveQrCamera() {
     } else if (html5QrScannerInstance.isScanning) {
       await html5QrScannerInstance.stop();
     }
+    if (!qrCamId) qrCamId = await pickBackCamera();
+    const lens = qrCamId ? { deviceId: { exact: qrCamId } } : { facingMode: 'environment' };
     await html5QrScannerInstance.start(
-      { facingMode: "environment" },
+      qrCamId || { facingMode: 'environment' },
       {
         // Caméra plein écran : toute l'image est lue (le cadre de visée n'est qu'un repère)
         fps: 15,
         // Image en haute définition : un QR un peu loin ou un peu flou reste lisible
-        videoConstraints: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+        videoConstraints: { ...lens, width: { ideal: 1280 }, height: { ideal: 720 } }
       },
       (txt) => onQrDetected(txt),
       () => {}
@@ -46,6 +74,8 @@ async function startLiveQrCamera() {
     setupQrTorch();
     tuneQrCamera();
   } catch (e) {
+    // L'objectif retenu n'existe plus (autre téléphone, autre navigateur) : on repart sur la caméra arrière par défaut
+    if (qrCamId) { qrCamId = null; try { localStorage.removeItem(QR_CAM_KEY); } catch (er) {} return startLiveQrCamera(); }
     document.getElementById('modalQrScanner').dataset.state = 'nocam';
     statusEl.innerText = 'Caméra indisponible : autorise-la dans ton navigateur, ou utilise « Photo ».';
   }
@@ -131,6 +161,17 @@ async function tuneQrCamera() {
   if (focus.includes('continuous')) await qrConstrain({ focusMode: 'continuous' });
   const z = qrCaps.zoom;
   if (z && z.max >= 1.5) await qrConstrain({ zoom: Math.max(z.min || 1, Math.min(1.6, z.max)) });
+  document.getElementById('btnQrCam').disabled = qrBackCams.length < 2;
+  // Mode test : objectif utilisé et ce que la caméra sait faire (pour comprendre un téléphone qui ne fait pas le point)
+  const dbg = document.getElementById('qrCamDebug');
+  dbg.classList.toggle('hidden', !qrTestOn());
+  if (qrTestOn()) {
+    let label = '?', set = {};
+    try { const tr = html5QrScannerInstance.getRunningTrackSettings() || {}; set = tr; } catch (e) {}
+    const cam = qrBackCams.find(c => c.id === qrCamId);
+    if (cam) label = cam.label;
+    dbg.innerText = `${label} · ${qrBackCams.length} objectif(s) · focus [${focus.join(', ') || 'aucun'}] → ${set.focusMode || '?'} · zoom ${z ? `${z.min}-${z.max} → ${set.zoom ?? '?'}` : 'non'} · ${set.width || '?'}×${set.height || '?'}`;
+  }
 }
 async function qrConstrain(c) {
   try { await html5QrScannerInstance.applyVideoConstraints({ advanced: [c] }); return true; } catch (e) { return false; }
