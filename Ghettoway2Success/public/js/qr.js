@@ -3,6 +3,8 @@
 // =========================================================================
 // SCANNER QR CORRIGÉ
 // =========================================================================
+// Lecteur de QR du téléphone quand il existe (plus rapide, tolère mieux une image un peu floue)
+const newQrReader = () => new Html5Qrcode("qr-reader", { verbose: false, experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
 async function startLiveQrCamera() {
   const statusEl = document.getElementById('qrScannerStatus');
   const previewBox = document.getElementById('qr-photo-preview-box');
@@ -25,7 +27,7 @@ async function startLiveQrCamera() {
   statusEl.innerText = 'Démarrage de la caméra…';
   try {
     if (!html5QrScannerInstance) {
-      html5QrScannerInstance = new Html5Qrcode("qr-reader");
+      html5QrScannerInstance = newQrReader();
     } else if (html5QrScannerInstance.isScanning) {
       await html5QrScannerInstance.stop();
     }
@@ -33,13 +35,16 @@ async function startLiveQrCamera() {
       { facingMode: "environment" },
       {
         // Caméra plein écran : toute l'image est lue (le cadre de visée n'est qu'un repère)
-        fps: 15
+        fps: 15,
+        // Image en haute définition : un QR un peu loin ou un peu flou reste lisible
+        videoConstraints: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
       },
       (txt) => onQrDetected(txt),
       () => {}
     );
     statusEl.innerText = 'Vise le QR code d’une case du plateau';
     setupQrTorch();
+    tuneQrCamera();
   } catch (e) {
     document.getElementById('modalQrScanner').dataset.state = 'nocam';
     statusEl.innerText = 'Caméra indisponible : autorise-la dans ton navigateur, ou utilise « Photo ».';
@@ -116,6 +121,36 @@ function setupQrTorch() {
   try { caps = html5QrScannerInstance.getRunningTrackCapabilities() || {}; } catch (e) {}
   btn.disabled = !caps.torch;
 }
+// Mise au point : continue si la caméra le permet, léger zoom (on tient le téléphone plus loin, là où l'objectif
+// fait le point), et un toucher sur l'image relance la mise au point à cet endroit
+let qrCaps = {};
+async function tuneQrCamera() {
+  qrCaps = {};
+  try { qrCaps = html5QrScannerInstance.getRunningTrackCapabilities() || {}; } catch (e) {}
+  const focus = qrCaps.focusMode || [];
+  if (focus.includes('continuous')) await qrConstrain({ focusMode: 'continuous' });
+  const z = qrCaps.zoom;
+  if (z && z.max >= 1.5) await qrConstrain({ zoom: Math.max(z.min || 1, Math.min(1.6, z.max)) });
+}
+async function qrConstrain(c) {
+  try { await html5QrScannerInstance.applyVideoConstraints({ advanced: [c] }); return true; } catch (e) { return false; }
+}
+async function refocusQrAt(e) {
+  if (!html5QrScannerInstance || !html5QrScannerInstance.isScanning) return;
+  const focus = qrCaps.focusMode || [];
+  if (!focus.length) return;
+  const box = e.currentTarget.getBoundingClientRect();
+  const x = Math.min(1, Math.max(0, (e.clientX - box.left) / box.width)), y = Math.min(1, Math.max(0, (e.clientY - box.top) / box.height));
+  const spot = qrCaps.pointsOfInterest ? { pointsOfInterest: [{ x, y }] } : {};
+  if (focus.includes('single-shot')) await qrConstrain({ ...spot, focusMode: 'single-shot' });
+  else if (focus.includes('manual') && focus.includes('continuous')) await qrConstrain({ focusMode: 'manual' });
+  if (focus.includes('continuous')) setTimeout(() => qrConstrain({ ...spot, focusMode: 'continuous' }), 700);
+  const st = document.getElementById('qrScannerStatus');
+  st.innerText = 'Mise au point…';
+  setTimeout(() => { if (st.innerText === 'Mise au point…') st.innerText = 'Vise le QR code d’une case du plateau'; }, 1200);
+}
+document.addEventListener('DOMContentLoaded', () => { const r = document.getElementById('qr-reader'); if (r) r.addEventListener('pointerup', refocusQrAt); });
+
 async function toggleQrTorch() {
   if (!html5QrScannerInstance) return;
   try {
@@ -217,7 +252,7 @@ async function scanFromImageFile(input) {
 
   try {
     if (!html5QrScannerInstance) {
-      html5QrScannerInstance = new Html5Qrcode("qr-reader");
+      html5QrScannerInstance = newQrReader();
     }
     const decodedText = await html5QrScannerInstance.scanFile(file, false);
     onQrDetected(decodedText);
