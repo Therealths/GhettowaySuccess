@@ -178,3 +178,14 @@ Outils (hors dépôt) dans `~/.cache/ghettoway-tools/` :
 - Raccourcis de test (faux QR : boutiques, objets, Fouille, Fouille forcée drogue / argent via `testFouille`, +100 kg de drogue via `testDrugs`, Ticket, Deal Yencli 2 kg, Braquages Kebab / Chantier / La Poste…) : **5 appuis rapides** sur le titre « FLASH UN QR CODE » (ou l'étiquette « Scanner ») de la page Scanner ; le choix est retenu sur le téléphone (`g2s_test_mode`).
 - Le navigateur intégré de l'app de bureau ralentit ou fige les animations quand il n'est pas affiché : pour juger une animation, enregistrer avec un Chrome sans écran (puppeteer-core), captures en boucle, puis `ffmpeg` en MP4.
 - Vérifier sur au moins deux hauteurs d'écran (375×812 et 375×667) ; le téléphone de l'utilisateur fait environ 412×830.
+
+## 8. Extension à venir : guerre de territoire (rien n'est codé, pistes validées en brainstorm)
+
+- **Principe** : plateau découpé en quartiers (6 à 8, nombre à confirmer avec l'utilisateur), chacun avec une case « Territoire » et son QR (par ex. `{"t":"ter","id":"docks"}`). Le Caïd qui tient un quartier touche une **rente au coffre** à chaque manche.
+- **Prendre un quartier libre** : flasher la case et payer pour « poser son tag » (par ex. 5 000 €, 2 PM). Sur le plateau, un jeton de sa couleur.
+- **Garnison** : des Lascars laissés dans le quartier le défendent mais quittent l'équipe de combat (vrai choix).
+- **Assaut** : flasher le quartier d'un rival → combat ATK contre défense du quartier (garnison + bonus), **résolu par le serveur** comme le Pied de biche ; le propriétaire est prévenu par `sendToPlayer` / boîte aux lettres. Assauts possibles en alliance.
+- **Plus tard** (après les parties tests) : chaleur policière (plus de quartiers = plus de contrôles / balances), bonus par quartier (Grossiste moins cher, +1 DÉF, rente plus forte mais plus de police…), événements radio (« Descente dans les Docks », « Guerre des gangs », « Fête de quartier »), victoire alternative (tenir 4 quartiers en début de manche).
+- **Victoire** : on garde les 100 000 € au coffre (les rentes y tombent).
+- **Technique** : état sur le serveur (`room.territories`), rente versée au passage de manche (autour de `new_round_started` dans `server.js`), nouveau type QR dans `processQrPayload` (`qr.js`), **écran Carte** stylisé des quartiers (couleur du Caïd, garnison, rente) = écran signature. Activée par une option « Extension Guerre de territoire » à la création de partie, pour laisser le jeu de base intact.
+- **Première version proposée** : quartiers + tag + rente + assaut contre la garnison + écran Carte. Prochaine étape suggérée : maquette (vidéo) de l'écran Carte et de l'écran d'assaut avant d'implémenter.
