@@ -181,7 +181,7 @@ Outils (hors dépôt) dans `~/.cache/ghettoway-tools/` :
 
 ## 8. Extension à venir : guerre de territoire (rien n'est codé, pistes validées en brainstorm)
 
-- **Plateau réel** : 25 cases (grille 5 × 5). Les 4 coins sont les QG des joueurs, la case centrale est la Mairie, et il y a une case Commissariat, une Hôpital et une Cité (grossiste), soit 8 cases spéciales et 17 cases restantes. À confirmer : où se trouvent les boutiques (Armurerie, NightClub, SportClub, Concessionnaire) et la case Fouilles, et si un quartier = une case ou un groupe de cases.
+- **Plateau réel** : 25 cases (grille 5 × 5). Les 4 coins sont les QG des joueurs, la case centrale est la Mairie, et il y a une case Commissariat, une Hôpital, une Cité (grossiste) et une Boîte de nuit (NightClub), soit 9 cases spéciales et 16 cases restantes. À confirmer : où se trouvent les autres boutiques (Armurerie, SportClub, Concessionnaire) et la case Fouilles, et si un quartier = une case ou un groupe de cases.
 - **Principe** : plateau découpé en quartiers (nombre à caler sur le plateau ci-dessus), chacun avec une case « Territoire » et son QR (par ex. `{"t":"ter","id":"docks"}`). Le Caïd qui tient un quartier touche une **rente au coffre** à chaque manche.
 - **Prendre un quartier libre** : flasher la case et payer pour « poser son tag » (par ex. 5 000 €, 2 PM). Sur le plateau, un jeton de sa couleur.
 - **Garnison** : des Lascars laissés dans le quartier le défendent mais quittent l'équipe de combat (vrai choix).
