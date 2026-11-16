@@ -49,6 +49,30 @@ async function startLiveQrCamera() {
 // QR reconnu : cadre vert, vibration, bandeau de ce qui a été flashé, puis on ouvre la case
 const QR_LABELS = { qg: 'COFFRE DU QG', coffre: 'COFFRE DU QG', armurerie: 'ARMURERIE', nightclub: 'NIGHTCLUB', sportclub: 'SPORTCLUB', concessionnaire: 'CONCESSIONNAIRE', dealer: 'CONCESSIONNAIRE', grossiste: 'GROSSISTE', obj: 'OBJET TROUVÉ', brq: 'BRAQUAGE', yen: 'DEAL YENCLI', gb: 'LASCAR', pr: 'NIGHTCLUB', eq: 'ÉQUIPEMENT', fouilles: 'FOUILLES', fouille: 'FOUILLES' };
 // Fond de la case à précharger pendant le bandeau, pour qu'elle s'affiche d'un coup
+// Illustrations des braquages selon le lieu (champ "n" du QR, sans majuscules ni accents) ; plusieurs images → une au hasard
+const HEIST_ART = {
+  kebab: ['braquage-kebab-1.webp', 'braquage-kebab-2.webp', 'braquage-kebab-3.webp', 'braquage-kebab-4.webp'],
+  laposte: ['braquage-poste-1.webp', 'braquage-poste-2.webp'],
+  chantier: ['braquage-chantier-1.webp', 'braquage-chantier-2.webp'],
+  parc: ['braquage-parc-1.webp', 'braquage-parc-2.webp'],
+  cite: ['braquage-cite-1.webp', 'braquage-cite-2.webp'],
+  eglise: ['braquage-eglise-1.webp'],
+  nightclub: ['braquage-nightclub-1.webp'],
+  magasin: ['braquage-magasin-1.webp'],
+  maison: ['braquage-maison-1.webp', 'braquage-maison-2.webp'],
+  armurerie: ['braquage-armurerie-1.webp']
+};
+HEIST_ART.poste = HEIST_ART.laposte;
+const heistKey = name => String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+let heistArtPicked = null; // tirée au flash (préchargement), reprise à l'ouverture de l'écran
+function heistArt(name, keep) {
+  const key = heistKey(name);
+  if (heistArtPicked && heistArtPicked.key === key) { const src = heistArtPicked.src; if (!keep) heistArtPicked = null; return src; }
+  const list = HEIST_ART[key];
+  const src = list ? list[Math.floor(Math.random() * list.length)] : 'wallpaper-clean.jpg';
+  heistArtPicked = keep ? { key, src } : null;
+  return src;
+}
 const QR_PRELOAD = { qg: 'qg-coffre.webp', coffre: 'qg-coffre.webp', armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', brq: 'sac-butin.webp', fouilles: 'fouilles-ruelle.webp', fouille: 'fouilles-ruelle.webp' };
 function qrType(txt) {
   let data;
@@ -57,7 +81,8 @@ function qrType(txt) {
   return { data, type: String((data && (data.t || data.type)) || '').toLowerCase() };
 }
 function preloadQrTarget(txt) {
-  const src = QR_PRELOAD[qrType(txt).type];
+  const { data, type } = qrType(txt);
+  const src = type === 'brq' ? heistArt(data && data.n, true) : QR_PRELOAD[type];
   if (!src) return;
   const img = new Image();
   img.src = src;
@@ -243,7 +268,7 @@ function showYencliScreen(ok, rows, cashGain = 0) {
       scr.classList.add('stamped');
       setTimeout(() => buzz([70, 30, 25]), 260);
       setTimeout(() => {
-        flyCashToSac(document.querySelector('#yenScreen .yen-hand-cash'), cashGain, 0.7, 0.3);
+        flyCashToSac(document.querySelector('#yenScreen .yen-hand-cash'), `+${cashGain.toLocaleString()} €`, 0.7, 0.3);
         scr.classList.add('leaving');
       }, 900);
       setTimeout(() => { scr.classList.add('hidden'); scr.classList.remove('show', 'leaving', 'stamped'); done(); }, 1280);
@@ -252,20 +277,56 @@ function showYencliScreen(ok, rows, cashGain = 0) {
     void scr.offsetWidth;
     scr.classList.add('show');
     setTimeout(() => buzz(ok ? [40, 60, 90] : 160), 550); // le titre tombe
-    const cash = document.getElementById('yenCash');
-    if (!cash || !cashGain) return;
-    const t0 = performance.now() + 1100, dur = 800;
-    const tick = t => {
-      const k = Math.max(0, Math.min(1, (t - t0) / dur));
-      cash.innerText = `+${Math.round(cashGain * (1 - Math.pow(1 - k, 3))).toLocaleString()} €`;
-      if (k < 1) requestAnimationFrame(tick);
+    countUpGain(document.getElementById('yenCash'), cashGain);
+  });
+}
+// Le gain défile de +0 € jusqu'au montant, une fois les lignes arrivées
+function countUpGain(el, gain) {
+  if (!el || !gain) return;
+  const t0 = performance.now() + 1100, dur = 800;
+  const tick = t => {
+    const k = Math.max(0, Math.min(1, (t - t0) / dur));
+    el.innerText = `+${Math.round(gain * (1 - Math.pow(1 - k, 3))).toLocaleString()} €`;
+    if (k < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// BRAQUAGE SOLO : même mise en scène que le Yencli, avec l'illustration du lieu ; Empocher → tampon « BRAQUÉ » puis le butin file vers le Sac
+function showHeistScreen(ok, name, rows, cashGain = 0, drugsGain = 0) {
+  return msgQueue(done => {
+    const scr = document.getElementById('brqScreen');
+    scr.dataset.ok = ok ? '1' : '0';
+    document.getElementById('brqImg').src = heistArt(name);
+    document.getElementById('brqRound').innerText = currentSession.round || 1;
+    document.getElementById('brqPlace').innerText = name ? `Braquage · ${name}` : 'Braquage';
+    document.getElementById('brqHead').innerHTML = ok ? 'BRAQUAGE<br>RÉUSSI.' : 'BRAQUAGE<br>RATÉ.';
+    document.getElementById('brqSub').innerText = ok ? 'La caisse est vide, le sac est plein.' : 'Pas assez de monde ou de puissance de feu : vous repartez bredouilles.';
+    document.getElementById('brqRows').innerHTML = rows.map(([icon, label, value, cls], i) =>
+      `<div class="police-row" style="animation-delay:${0.9 + i * 0.15}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft ${cls || ''}">${value}</span></div>`).join('');
+    const cta = document.getElementById('brqCta');
+    cta.innerText = ok ? 'Empocher' : 'Compris';
+    cta.onclick = () => {
+      cta.onclick = null;
+      if (!ok || !(cashGain || drugsGain)) { scr.classList.add('hidden'); scr.classList.remove('show'); return done(); }
+      scr.classList.add('stamped');
+      setTimeout(() => buzz([70, 30, 25]), 260);
+      setTimeout(() => {
+        flyCashToSac(document.querySelector('#brqScreen .yen-scene'), cashGain ? `+${cashGain.toLocaleString()} €` : `+${drugsGain} kg`, 0.5, 0.45, cashGain ? '💵' : '🌿');
+        scr.classList.add('leaving');
+      }, 900);
+      setTimeout(() => { scr.classList.add('hidden'); scr.classList.remove('show', 'leaving', 'stamped'); done(); }, 1280);
     };
-    requestAnimationFrame(tick);
+    scr.classList.remove('hidden', 'show', 'stamped', 'leaving');
+    void scr.offsetWidth;
+    scr.classList.add('show');
+    setTimeout(() => buzz(ok ? [40, 60, 90] : 160), 550);
+    countUpGain(document.getElementById('brqCash'), cashGain);
   });
 }
 
-// Billets qui partent d'un point de l'élément (fx, fy en fraction de sa taille) et atterrissent sur le bouton Sac de l'écran principal, puis « +X € » au-dessus du Sac
-function flyCashToSac(fromEl, amount, fx = 0.5, fy = 0.5) {
+// Billets (ou sachets) qui partent d'un point de l'élément (fx, fy en fraction de sa taille) et atterrissent sur le bouton Sac de l'écran principal, puis le gain (« +X € ») au-dessus du Sac
+function flyCashToSac(fromEl, label, fx = 0.5, fy = 0.5, emoji = '💵') {
   const sac = document.getElementById('btnOpenSac');
   const to = sac && sac.getBoundingClientRect();
   if (!to || !to.width || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -276,7 +337,7 @@ function flyCashToSac(fromEl, amount, fx = 0.5, fy = 0.5) {
   for (let i = 0; i < n; i++) {
     const el = document.createElement('span');
     el.className = 'cash-fly';
-    el.textContent = '💵';
+    el.textContent = emoji;
     document.body.appendChild(el);
     const sx = x0 + (Math.random() - 0.5) * 60, sy = y0 + (Math.random() - 0.5) * 30;
     const mx = (sx + x1) / 2 + (Math.random() - 0.5) * 90, my = Math.min(sy, y1) - 70 - Math.random() * 60;
@@ -292,7 +353,7 @@ function flyCashToSac(fromEl, amount, fx = 0.5, fy = 0.5) {
     sac.classList.remove('got-cash'); void sac.offsetWidth; sac.classList.add('got-cash');
     const tag = document.createElement('span');
     tag.className = 'cash-fly-tag';
-    tag.textContent = `+${amount.toLocaleString()} €`;
+    tag.textContent = label;
     tag.style.left = `${x1}px`; tag.style.top = `${to.top}px`;
     document.body.appendChild(tag);
     setTimeout(() => { tag.remove(); sac.classList.remove('got-cash'); }, 1300);
@@ -402,10 +463,12 @@ async function processQrPayload(payload) {
     const members = 1 + localPlayer.musclesOnPerson.length + allyMembers;
 
     if (teamAtk < data.req || members < data.m) {
-      return showAppAlert(
-        `Prérequis insuffisants (${coordinateWithAlly ? (n === 2 ? 'en Duo' : `à ${n}`) : 'en Solo'}) !\nRequis : ${data.req} Atk et ${data.m} membre(s).\nVotre force : ${teamAtk} Atk et ${members} membre(s).`,
-        "💥 Échec Braquage"
-      );
+      const team = coordinateWithAlly ? (n === 2 ? ' (en duo)' : ` (à ${n})`) : '';
+      return showHeistScreen(false, data.n, [
+        ['ph-sword', `Attaque${team}`, `${teamAtk} / ${data.req} ${teamAtk < data.req ? '❌' : '✅'}`, teamAtk < data.req ? 'neg' : 'pos'],
+        ['ph-users-three', `Membres${team}`, `${members} / ${data.m} ${members < data.m ? '❌' : '✅'}`, members < data.m ? 'neg' : 'pos'],
+        ['ph-lightning', 'PM', 'non dépensés']
+      ]);
     }
 
     const radioHeistBonus = isRadioEffectActive('HEIST_CASH_BONUS') ? getRadioEffectValue('HEIST_CASH_BONUS', 2000) : 0;
@@ -425,8 +488,13 @@ async function processQrPayload(payload) {
       localPlayer.pocketCash += totalCash;
       localPlayer.drugs += totalDrugs;
       refreshHud(); // gain enregistré tout de suite, sans attendre la lecture du message
-      const bonusTxt = radioHeistBonus > 0 ? ` (dont +${radioHeistBonus.toLocaleString()} € Bonus Radio !)` : '';
-      await showAppAlert(`+${totalCash.toLocaleString()} € et +${totalDrugs} kg gagnés en solo !${bonusTxt}`, "🏆 Braquage Réussi");
+      const rows = [];
+      if (totalCash) rows.push(['ph-money', 'Cash en poche', '<span id="brqCash">+0 €</span>', 'pos']);
+      if (radioHeistBonus > 0) rows.push(['ph-radio', 'Dont bonus radio', `+${radioHeistBonus.toLocaleString()} €`, 'pos']);
+      if (totalDrugs) rows.push(['ph-plant', 'Drogue', `+${totalDrugs} kg`, 'pos']);
+      if (data.p) rows.push(['ph-person-simple-walk', 'Prostituée libérée', `Niv. ${data.p}`, 'pos']);
+      rows.push(['ph-lightning', 'PM', '−2']);
+      await showHeistScreen(true, data.n, rows, totalCash, totalDrugs);
     }
     // "p" : niveau des prostituées libérées pendant le braquage, une pour chaque braqueur (les alliés la reçoivent par le serveur)
     if (data.p) await claimHeistProstitute(data.p);

@@ -809,7 +809,9 @@
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Vieille canette\",\"eff\":\"def_malus_round\",\"val\":1,\"desc\":\"−1 Défense à un rival jusqu&apos;à la fin de la manche\"}")' class="p-2 glass-panel rounded-xl text-left text-rose-300">🥫 Vieille canette</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Passeport diplomatique\",\"eff\":\"cancel_police\",\"desc\":\"Annule un contrôle de police\"}")' class="p-2 glass-panel rounded-xl text-left text-sky-300">🛂 Passeport diplomatique</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Ticket à gratter\",\"eff\":\"scratch\",\"val\":5000,\"desc\":\"1 chance sur 3 de gagner 5 000 €\"}")' class="col-span-2 p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🎰 Ticket à gratter</button>
-          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Bijouterie\",\"req\":3,\"m\":2,\"c\":8000,\"d\":2}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage (3Atk/2M • 8000€ + 2kg)</button>
+          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Kebab\",\"req\":2,\"m\":1,\"c\":6000}")' class="p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage Kebab (2Atk/1M • 6000€)</button>
+          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"Chantier\",\"req\":5,\"m\":1,\"c\":0,\"d\":3}")' class="p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage Chantier (5Atk/1M • 3kg)</button>
+          <button onclick='processQrPayload("{\"t\":\"brq\",\"n\":\"La Poste\",\"req\":3,\"m\":2,\"c\":8000,\"d\":2}")' class="col-span-2 p-2 glass-panel rounded-xl text-center text-ghetto-gold">💥 Braquage La Poste (3Atk/2M • 8000€ + 2kg)</button>
         </div>
         </div>
       </div>
@@ -1017,6 +1019,26 @@
         <div class="police-panel qg-panel">
           <div id="yenRows" class="flex flex-col gap-1.5"></div>
           <button type="button" id="yenCta" class="qg-cta yen-cta mt-3"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRAQUAGE SOLO : illustration du lieu braqué (tirée au hasard parmi celles du lieu), puis le butin ou ce qui manquait -->
+    <div id="brqScreen" class="hidden absolute inset-0 z-[60] yen-screen brq-screen" data-ok="1">
+      <div class="yen-scene"><img id="brqImg" class="brq-img" src="wallpaper-clean.jpg" alt=""></div>
+      <i class="yen-glint"></i>
+      <div class="yen-stamp" aria-hidden="true"><b>BRAQUÉ</b><small>Le butin est à toi</small></div>
+      <div class="relative z-[1] flex flex-col h-full">
+        <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
+          <span>Manche <span id="brqRound">1</span></span>
+          <span class="yen-chip"><i class="ph-fill ph-mask-happy"></i> <span id="brqPlace">Braquage</span></span>
+        </div>
+        <h2 id="brqHead" class="font-anton qg-head yen-head px-4 mt-2"></h2>
+        <div id="brqSub" class="yen-sub px-4 mt-1"></div>
+        <div class="flex-1"></div>
+        <div class="police-panel qg-panel">
+          <div id="brqRows" class="flex flex-col gap-1.5"></div>
+          <button type="button" id="brqCta" class="qg-cta yen-cta mt-3"></button>
         </div>
       </div>
     </div>

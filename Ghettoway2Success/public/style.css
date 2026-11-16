@@ -1365,6 +1365,10 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 @keyframes yenLeave { to { opacity: 0; transform: scale(1.04); } }
 @keyframes cashTag { 0% { opacity: 0; translate: 0 10px; scale: 0.6; } 18% { opacity: 1; translate: 0 0; scale: 1.15; } 30% { scale: 1; } 75% { opacity: 1; } 100% { opacity: 0; translate: 0 -34px; } }
 @keyframes sacGotCash { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.9); transform: scale(1); } 25% { transform: scale(1.07); box-shadow: 0 0 0 6px rgba(52,211,153,0.55), 0 0 28px rgba(52,211,153,0.7); } 100% { transform: scale(1); box-shadow: 0 0 0 14px rgba(52,211,153,0); } }
+/* Braquage : une seule image plein écran (cadrée comme l'illustration du Yencli), éteinte si le braquage rate */
+.brq-screen .yen-scene img.brq-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 38%; transform-origin: 52% 42%; }
+.brq-screen.show .brq-img { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both; }
+.brq-screen.show[data-ok="0"] .brq-img { animation: yenPush 1.4s cubic-bezier(.25,.8,.3,1) both, yenDim 0.6s ease-out 0.9s both; }
 @keyframes yenHandCash { to { transform: rotate(4.5deg); } }
 @keyframes yenHandOpen { to { transform: rotate(5.5deg); } }
 @keyframes yenParcel { from { transform: translateX(-1.7%); } to { transform: translateX(1.7%); } }
