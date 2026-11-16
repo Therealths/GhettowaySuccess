@@ -96,9 +96,11 @@ const HEIST_ART = {
   magasin: ['braquage-magasin-1.webp'],
   maison: ['braquage-maison-1.webp', 'braquage-maison-2.webp'],
   armurerie: ['braquage-armurerie-1.webp'],
-  hopital: ['braquage-hopital-1.webp']
+  hopital: ['braquage-hopital-1.webp'],
+  concession: ['braquage-concession-1.webp']
 };
 HEIST_ART.poste = HEIST_ART.laposte;
+HEIST_ART.concessionnaire = HEIST_ART.concession;
 const heistKey = name => String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 let heistArtPicked = null; // tirée au flash (préchargement), reprise à l'ouverture de l'écran
 function heistArt(name, keep) {
