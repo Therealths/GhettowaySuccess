@@ -326,6 +326,11 @@ function testFouille(eff) {
   const pick = FOUILLE_TABLE.find(([, it]) => it.eff === eff)[1];
   claimFouille(Object.assign({ id: 'obj_' + Date.now(), type: 'ITEM_CARD', val: 0, dur: 'instant' }, pick));
 }
+function testDrugs(kg) {
+  localPlayer.drugs += kg;
+  closeQrScannerModal();
+  refreshHud();
+}
 function claimFouille(it) {
   if (it.eff === 'cash') return openLootDiscoveryModal(it, "Récupérer", () => { localPlayer.pocketCash += it.val; spendActionPm(); });
   if (it.eff === 'drug') return openLootDiscoveryModal(it, "Récupérer", () => { localPlayer.drugs += it.val; spendActionPm(); });
