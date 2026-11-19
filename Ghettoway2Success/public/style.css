@@ -1393,3 +1393,5 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .qg-lab .qg-slot.next img { opacity: 0.45; }
 .qg-lab .qg-slot.locked img { opacity: 0.22; filter: grayscale(1); }
 .qg-lab .qg-slot.locked b { color: #94a3b8; }
+.lab-screen { --c: #a3e635; }
+.lab-screen .yen-chip { background: #65a30d; }

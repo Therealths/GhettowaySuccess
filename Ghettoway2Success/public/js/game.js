@@ -466,12 +466,46 @@ async function startRoundPhase1() {
   // Labo du QG : sa production tombe au coffre
   const lab = labLevelInfo(localPlayer.labLevel || 0);
   if (lab) {
-    localPlayer.safeDrugs = (localPlayer.safeDrugs || 0) + lab.kg;
-    await showAppAlert(`Ton labo (${lab.nom}) a produit ${lab.kg} kg, rangés au coffre du QG.`, "🧪 Labo du QG");
+    const before = localPlayer.safeDrugs || 0;
+    localPlayer.safeDrugs = before + lab.kg;
+    refreshHud();
+    await showLabHarvestScreen(lab, before);
   }
   refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');
 }
+// Écran de la récolte du labo : illustration du labo installé, « RÉCOLTE TERMINÉE. », puis tampon « RÉCOLTÉ »
+const LAB_HARVEST_SUB = { 1: 'Le placard a bien poussé.', 2: 'La cave tourne à plein régime.', 3: 'Le hangar crache sa récolte.' };
+function showLabHarvestScreen(lab, before) {
+  return msgQueue(done => {
+    const scr = document.getElementById('labScreen');
+    document.getElementById('labImg').src = lab.img;
+    document.getElementById('labRound').innerText = currentSession.round || 1;
+    document.getElementById('labPlace').innerText = `Labo · ${lab.nom}`;
+    document.getElementById('labSub').innerText = LAB_HARVEST_SUB[lab.lvl] || '';
+    const next = labLevelInfo(lab.lvl + 1);
+    const rows = [
+      ['ph-plant', 'Production du labo', `+${lab.kg} kg`, 'pos'],
+      ['ph-vault', 'Drogue au coffre du QG', `${before} → ${before + lab.kg} kg`],
+      next ? ['ph-arrow-fat-up', `${next.lvl === 2 ? 'Passer à la Cave' : `Passer au ${next.nom}`} (Dépôt-Vente)`, `${next.kg} kg / manche`] : ['ph-crown', 'Labo au maximum', `${lab.kg} kg / manche`]
+    ];
+    document.getElementById('labRows').innerHTML = rows.map(([icon, label, value, cls], i) =>
+      `<div class="police-row" style="animation-delay:${0.9 + i * 0.15}s"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft ${cls || ''}">${value}</span></div>`).join('');
+    const cta = document.getElementById('labCta');
+    cta.onclick = () => {
+      cta.onclick = null;
+      scr.classList.add('stamped');
+      setTimeout(() => buzz([70, 30, 25]), 260);
+      setTimeout(() => scr.classList.add('leaving'), 900);
+      setTimeout(() => { scr.classList.add('hidden'); scr.classList.remove('show', 'leaving', 'stamped'); done(); }, 1280);
+    };
+    scr.classList.remove('hidden', 'show', 'stamped', 'leaving');
+    void scr.offsetWidth;
+    scr.classList.add('show');
+    setTimeout(() => buzz([40, 60, 90]), 550);
+  });
+}
+
 function acknowledgeRadioCard() {
   if (isRadioEffectActive('INFORMANT') && informantVote.phase === 'pick' && informantRivals().length) return informantSendVote();
   navTo('page-6');
