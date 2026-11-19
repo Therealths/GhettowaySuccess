@@ -579,7 +579,9 @@ const labLevelInfo = lvl => LAB_LEVELS.find(l => l.lvl === lvl);
 // « Culture dans le placard / la cave / le hangar » : le niveau de labo (le plus haut acheté) en une ligne
 const labCultureLabel = l => `Culture dans ${l.lvl === 2 ? 'la' : 'le'} ${l.nom.toLowerCase()}`;
 const labArt = (l, cls = '', gear = false) => `<img class="lab-art ${cls}" src="${gear ? l.gearImg : l.img}" alt="Labo ${l.nom}">`;
-const labFace = l => `<div class="sac-gear lab"><img src="${l.gearImg}" alt=""><div class="b"><h4>Labo · ${l.nom}</h4><span>+${l.kg} kg / manche</span><p>${escapeHtml(l.desc)}</p></div></div>`;
+// Nom du matériel vendu au Dépôt-Vente
+const labSetName = l => `Set de culture indoor lvl${l.lvl}`;
+const labFace = l => `<div class="sac-gear lab"><img src="${l.gearImg}" alt=""><div class="b"><h4>${labSetName(l)}</h4><span>+${l.kg} kg / manche</span><p>${escapeHtml(l.desc)}</p></div></div>`;
 // installé, en transit, prochain à acheter, ou verrouillé (le niveau d'avant n'est pas encore acheté).
 // Le matériel sur soi est cumulatif : labGearInTransit garde le plus haut niveau acheté, on peut enchaîner
 // Placard puis Cave sans passer par le QG, et l'installation pose tout d'un coup.
@@ -612,7 +614,7 @@ function buildMagasinStackDOM() {
       : `<button type="button" disabled class="deck-buy-btn w-full py-2 bg-slate-800 text-slate-400 font-black uppercase tracking-wider rounded-xl text-[10px] flex items-center justify-center gap-1">${
         st === 'installed' ? '<i class="ph-bold ph-check"></i> Installé au QG'
         : st === 'transit' ? '<i class="ph-bold ph-package"></i> Sur toi : installe-le au QG'
-        : `<i class="ph-bold ph-lock"></i> Il faut d’abord ${prev.lvl === 2 ? 'la' : 'le'} ${prev.nom}`}</button>`;
+        : `<i class="ph-bold ph-lock"></i> Nécessite le set lvl${prev.lvl}`}</button>`;
     return `
       <div id="magasinDeckCard_${idx}" onclick="onMagasinCardClick(${idx})" class="deck-card-item border border-violet-500/45">
         <div>
@@ -621,7 +623,7 @@ function buildMagasinStackDOM() {
             <span class="px-1.5 py-0.5 rounded-md border bg-violet-500/20 text-violet-200 border-violet-500/40 font-mono text-[9px] font-black">+${l.kg} kg / manche</span>
             <span class="text-[9px] font-mono text-slate-400">Niv. ${l.lvl}/${total}</span>
           </div>
-          <h4 class="text-xs font-black text-white uppercase truncate mt-1">Labo · ${l.nom}</h4>
+          <h4 class="text-xs font-black text-white uppercase leading-tight mt-1">${labSetName(l)}</h4>
           <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${l.desc}"</p>
         </div>
         <div class="pt-1.5 border-t border-white/10">
@@ -653,9 +655,9 @@ function onMagasinCardClick(idx) {
 async function buyMagasinLab(lvl) {
   const l = labLevelInfo(lvl);
   if (!l || labLevelState(l) !== 'next') return;
-  if (localPlayer.pocketCash + localPlayer.safeCash < l.prix) return showBrokeScreen(l.prix, `Labo · ${l.nom}`);
+  if (localPlayer.pocketCash + localPlayer.safeCash < l.prix) return showBrokeScreen(l.prix, labSetName(l));
   closeModal('modalMagasinShop');
-  openPaymentChoiceModal({ type: 'lab', data: { lvl }, cost: l.prix, name: `Labo · ${l.nom}`, shop: 'Dépôt-Vente' });
+  openPaymentChoiceModal({ type: 'lab', data: { lvl }, cost: l.prix, name: labSetName(l), shop: 'Dépôt-Vente' });
 }
 
 // Malus J-Lo Gramme : ses 5 premiers kg achetés au grossiste (sur la partie) coûtent le double
@@ -887,7 +889,7 @@ async function finalizePurchaseExecution(pData) {
     const l = labLevelInfo(data.lvl);
     localPlayer.labGearInTransit = l.lvl;
     refreshHud();
-    await showCardPlayed({ name: `Labo · ${l.nom}` }, [['ph-flask', 'Production au QG', `+${l.kg} kg / manche`], ['ph-map-pin', 'Sur toi', 'à installer au QG']], 'MATÉRIEL ACHETÉ',
+    await showCardPlayed({ name: labSetName(l) }, [['ph-flask', 'Production au QG', `+${l.kg} kg / manche`], ['ph-map-pin', 'Sur toi', 'à installer au QG']], 'MATÉRIEL ACHETÉ',
       { kicker: 'Dépôt-Vente', stamp: 'ph-shopping-cart-simple', face: labFace(l) });
   }
 }
