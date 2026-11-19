@@ -112,14 +112,12 @@ async function triggerPoliceInspection(informant = false, focus = null, endingTu
   const weapons = [localPlayer.equipped.weapon, ...localPlayer.inventory.filter(it => it && it.type === 'WEAPON')].filter(Boolean);
   const drugs = localPlayer.drugs;
   const prostitute = localPlayer.prostituteInTransit;
-  // Matériel de labo sur soi (tous les niveaux pas encore installés) : saisi avec la drogue
-  const labGear = localPlayer.labGearInTransit ? { nom: LAB_LEVELS.filter(l => l.lvl > (localPlayer.labLevel || 0) && l.lvl <= localPlayer.labGearInTransit).map(l => l.nom).join(' + ') } : null;
   const arrests = localPlayer.arrests || 0;
-  const caught = (pick === 'DRUGS_FOUND' && (drugs > 0 || !!labGear)) || (pick === 'WEAPONS_FOUND' && weapons.length > 0) || (pick === 'PROSTITUTE_FOUND' && !!prostitute);
+  const caught = (pick === 'DRUGS_FOUND' && drugs > 0) || (pick === 'WEAPONS_FOUND' && weapons.length > 0) || (pick === 'PROSTITUTE_FOUND' && !!prostitute);
 
   // La saisie est appliquée tout de suite (un rechargement de page ne l'annule pas), l'écran raconte ensuite la scène
   if (caught) {
-    if (pick === 'DRUGS_FOUND') { localPlayer.drugs = 0; localPlayer.labGearInTransit = null; }
+    if (pick === 'DRUGS_FOUND') localPlayer.drugs = 0;
     else if (pick === 'PROSTITUTE_FOUND') localPlayer.prostituteInTransit = null;
     else {
       localPlayer.equipped.weapon = null;
@@ -129,12 +127,12 @@ async function triggerPoliceInspection(informant = false, focus = null, endingTu
     refreshHud();
   }
 
-  await showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds, labGear });
+  await showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds });
   if (caught && isMyTurnToPlay && !endingTurn) endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
 }
 
 // Écran plein écran du contrôle : la patrouille arrive, tire au sort ce qu'elle cherche, puis le verdict
-function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds, labGear }) {
+function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds }) {
   const scr = document.getElementById('policeScreen');
   const caid = getMyCaid();
   const cta = document.getElementById('policeCta');
@@ -157,7 +155,7 @@ function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, o
   };
   const searched = { DRUGS_FOUND: 'de la drogue', WEAPONS_FOUND: 'des armes', PROSTITUTE_FOUND: 'ton escort' }[pick];
   // Ce que tu as sur toi, pour chaque chose que la patrouille peut chercher
-  const onYou = () => (odds.DRUGS_FOUND !== undefined ? row('ph-leaf', 'Drogue sur toi', '', `${drugs} kg`) + (labGear ? row('ph-flask', 'Matériel de labo', '', labGear.nom) : '') : '')
+  const onYou = () => (odds.DRUGS_FOUND !== undefined ? row('ph-leaf', 'Drogue sur toi', '', `${drugs} kg`) : '')
     + (odds.WEAPONS_FOUND !== undefined ? row('ph-knife', 'Armes sur toi', '', weapons.length ? `${weapons.length}` : 'aucune', weaponNames) : '')
     + (odds.PROSTITUTE_FOUND !== undefined ? row('ph-high-heel', 'Escort en transit', '', prostitute ? 'oui' : 'aucune', prName) : '');
 
@@ -216,7 +214,7 @@ function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, o
         );
       } else {
         setRows(
-          (pick === 'DRUGS_FOUND' ? row('ph-leaf', 'Drogue sur toi', `${drugs} kg`, '0 kg', 'saisie') + (labGear ? row('ph-flask', 'Matériel de labo', labGear.nom, 'rien', 'saisi') : '')
+          (pick === 'DRUGS_FOUND' ? row('ph-leaf', 'Drogue sur toi', `${drugs} kg`, '0 kg', 'saisie')
             : pick === 'PROSTITUTE_FOUND' ? row('ph-high-heel', 'Escort en transit', '1', '0', `${prName} embarquée par la police`)
             : row('ph-knife', 'Armes sur toi', `${weapons.length}`, '0', `saisies : ${weaponNames}`)) +
           row('ph-lock-key', 'Arrestations', `${arrests}`, `${arrests + 1}`) +
@@ -530,9 +528,7 @@ function updateTransferUI(amountOnly) {
   if (res === 'lab') {
     const gear = gearLab, cur = curLab;
     meIll.innerHTML = gear ? labArt(gear, 'qg-portrait', true) : '<div class="qg-empty"><i class="ph-bold ph-package"></i></div>';
-    // Matériel cumulé sur soi (ex. Placard + Cave achetés d'affilée)
-    const carried = gear ? LAB_LEVELS.filter(l => l.lvl > (localPlayer.labLevel || 0) && l.lvl <= gear.lvl) : [];
-    document.getElementById('qgMeVal').innerText = gear ? carried.map(l => l.nom).join(' + ') : 'rien';
+    document.getElementById('qgMeVal').innerText = gear ? gear.nom : 'rien';
     document.getElementById('qgMeAfter').innerText = gear ? '→ rien' : '';
     document.getElementById('qgSafeVal').innerText = cur ? cur.nom : 'pas de labo';
     document.getElementById('qgSafeAfter').innerText = gear ? `→ ${gear.kg} kg/manche` : (cur ? `${cur.kg} kg/manche` : '');
@@ -541,7 +537,7 @@ function updateTransferUI(amountOnly) {
       : gear && l.lvl <= gear.lvl ? `<div class="qg-slot next">${labArt(l)}<b>+</b></div>`
       : `<div class="qg-slot locked">${labArt(l)}<b>${l.nom}</b></div>`).join('');
     document.getElementById('qgLabBox').innerHTML = `<div class="qg-escort-head">${gear
-      ? `<b>Labo · ${carried.map(l => l.nom).join(' + ')}</b><span>+${gear.kg} kg / manche au coffre</span>`
+      ? `<b>${labCultureLabel(gear)}</b><span>+${gear.kg} kg / manche au coffre</span>`
       : cur && cur.lvl === LAB_LEVELS.length ? `<b>Labo au maximum</b><span>+${cur.kg} kg / manche au coffre</span>`
       : '<b>Aucun matériel sur toi</b><span>Achète-le au Dépôt-Vente</span>'}</div>
       <div class="qg-slots">${slots}</div><div class="qg-slots-cap">Production : ${cur ? cur.kg : 0} kg par manche</div>`;

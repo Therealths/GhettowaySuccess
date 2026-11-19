@@ -576,6 +576,8 @@ const LAB_LEVELS = [
 ];
 const labLevelInfo = lvl => LAB_LEVELS.find(l => l.lvl === lvl);
 // img : le labo installé (écran du QG) ; gearImg : le matériel vendu au Dépôt-Vente (carte d'achat, matériel sur soi)
+// « Culture dans le placard / la cave / le hangar » : le niveau de labo (le plus haut acheté) en une ligne
+const labCultureLabel = l => `Culture dans ${l.lvl === 2 ? 'la' : 'le'} ${l.nom.toLowerCase()}`;
 const labArt = (l, cls = '', gear = false) => `<img class="lab-art ${cls}" src="${gear ? l.gearImg : l.img}" alt="Labo ${l.nom}">`;
 const labFace = l => `<div class="sac-gear lab"><img src="${l.gearImg}" alt=""><div class="b"><h4>Labo · ${l.nom}</h4><span>+${l.kg} kg / manche</span><p>${escapeHtml(l.desc)}</p></div></div>`;
 // installé, en transit, prochain à acheter, ou verrouillé (le niveau d'avant n'est pas encore acheté).
