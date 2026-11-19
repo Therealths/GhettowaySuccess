@@ -48,7 +48,21 @@ if (socket) {
     resumeRequested = false;
     showAppAlert(reason === 'not_member' ? "Tu ne fais pas partie de cette partie." : "Cette partie n'existe plus.", "Reprendre la partie");
   });
-  socket.on('rooms_list', (list) => {
+  // Téléphone du créateur : débloqué une fois pour toutes (ou déjà en mode test des raccourcis du Scanner)
+  const testerUnlocked = () => { try { return localStorage.getItem('g2s_tester') === '1' || localStorage.getItem('g2s_test_mode') === '1'; } catch (e) { return false; } };
+  let lockedTestTaps = [], lastRoomsList = [];
+  function tapLockedTestRoom() {
+    const now = Date.now();
+    lockedTestTaps = lockedTestTaps.filter(t => now - t < 2500).concat(now);
+    if (lockedTestTaps.length < 5) return;
+    lockedTestTaps = [];
+    try { localStorage.setItem('g2s_tester', '1'); } catch (e) {}
+    buzz([40, 60, 40]);
+    renderRoomsList(lastRoomsList);
+  }
+  socket.on('rooms_list', list => renderRoomsList(list));
+  function renderRoomsList(list) {
+    lastRoomsList = list;
     const container = document.getElementById('gamesListContainer');
     if (!container) return;
     container.innerHTML = list.length ? '' : '<p class="text-xs text-slate-500 italic p-3 text-center">Aucun salon actif détecté.</p>';
@@ -58,8 +72,15 @@ if (socket) {
       const div = document.createElement('div');
       div.className = "p-3.5 glass-panel rounded-2xl flex items-center justify-between gap-2 cursor-pointer hover:border-cyan-400/40";
       if (r.isTest) {
-        div.onclick = () => enterTestGame(1);
-        div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${escapeHtml(r.name)}</h4><span class="text-[10px] text-slate-400 font-mono">Partie de test • 3 Caïds sur ce téléphone</span></div><span class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-3 py-1 rounded-lg border border-amber-500/30">Tester</span>`;
+        // Partie test réservée au téléphone du créateur du jeu : grisée ailleurs, 5 appuis rapides la débloquent sur ce téléphone
+        if (testerUnlocked()) {
+          div.onclick = () => enterTestGame(1);
+          div.innerHTML = `<div><h4 class="font-black text-xs text-white uppercase">${escapeHtml(r.name)}</h4><span class="text-[10px] text-slate-400 font-mono">Partie de test • 3 Caïds sur ce téléphone</span></div><span class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-3 py-1 rounded-lg border border-amber-500/30">Tester</span>`;
+        } else {
+          div.className = "p-3.5 glass-panel rounded-2xl flex items-center justify-between gap-2 opacity-40 grayscale select-none";
+          div.onclick = tapLockedTestRoom;
+          div.innerHTML = `<div><h4 class="font-black text-xs text-slate-300 uppercase">${escapeHtml(r.name)}</h4><span class="text-[10px] text-slate-500 font-mono">Partie de test</span></div><span class="text-[10px] font-bold text-slate-400 bg-slate-800/80 px-3 py-1 rounded-lg border border-white/10"><i class="ph-bold ph-lock"></i> Réservée</span>`;
+        }
         return container.appendChild(div);
       }
       if (r.started) {
@@ -88,7 +109,7 @@ if (socket) {
       div.querySelector('[aria-label="Supprimer la partie"]').onclick = (e) => { e.stopPropagation(); confirmDeleteRoom(r); };
       container.appendChild(div);
     });
-  });
+  }
   // Suppression définitive d'une partie (le serveur refuse si on n'en est pas joueur)
   async function confirmDeleteRoom(r) {
     if (!await showAppConfirm(`Supprimer définitivement la partie ${r.name} ?\n\nTous les Caïds et leur progression seront perdus. Cette action est irréversible.`, "🗑️ Supprimer la partie", "Supprimer", "Annuler")) return;
@@ -209,18 +230,20 @@ if (socket) {
   socket.on('patrol_control', async ({ byCaid }) => {
     await msgIdle();
     await showAppAlert(`La patrouille de police t'a croisé${byCaid ? ` (lancée par ${byCaid})` : ''} !\nContrôle immédiat.`, '🚨 Patrouille');
-    if (document.getElementById('page-5').classList.contains('active')) navTo('page-6');
-    await triggerPoliceInspection(true);
+    // Pas de navTo : sur la page Flash Radio (début de manche), le joueur doit encore lire la carte et voter
+    // Contrôlé pendant le tour d'un autre : même si la main lui arrive entre-temps, son propre tour n'est pas coupé
+    await triggerPoliceInspection(true, null, true);
   });
   // Une balance dans le quartier : avancement du vote, puis résultat pour tous ; le Caïd désigné est contrôlé tout de suite
   socket.on('informant_vote_progress', informantProgress);
   socket.on('informant_result', async r => {
+    const wasMyTurn = isMyTurnToPlay; // vote dépouillé en fin de tour d'un autre : le tour qui suit n'est pas coupé
     informantVote = { phase: 'done' };
     if (document.getElementById('page-5').classList.contains('active') && isRadioEffectActive('INFORMANT')) renderInformantVote();
     await informantResultScreen(r);
     if (r.targetToken !== myPlayerToken) return;
     if (document.getElementById('page-5').classList.contains('active')) navTo('page-6');
-    await triggerPoliceInspection(true, r.policeTarget);
+    await triggerPoliceInspection(true, r.policeTarget, !wasMyTurn);
   });
   socket.on('turn_state_updated', ({ activePlayerToken, activeCaidName, alliedTokens, nonAggressionPacts: serverPacts, round, turnOrder, turnId }) => {
     if (serverPacts) nonAggressionPacts = serverPacts;
@@ -248,7 +271,7 @@ if (socket) {
     // Fin du tour (ou de sa participation d'allié) : boutiques, coffre et paiement se ferment
     if (wasMyTurn && !isMyTurnToPlay) {
       pmBonusThisTurn = 0;
-      ['modalArmoryShop', 'modalDealerShop', 'modalNightclubShop', 'modalSportclubShop', 'modalPaymentChoice', 'modalTransfer', 'grossisteScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      ['modalArmoryShop', 'modalDealerShop', 'modalNightclubShop', 'modalSportclubShop', 'modalMagasinShop', 'modalPaymentChoice', 'modalTransfer', 'grossisteScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
     }
     // Sortie d'hôpital au début de son tour, ou quand il rejoint le tour d'un allié
     if (activePlayerToken === myPlayerToken || (isMyTurnToPlay && !wasMyTurn)) checkHospitalRelease(round);

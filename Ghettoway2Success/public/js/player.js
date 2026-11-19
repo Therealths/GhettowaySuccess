@@ -84,7 +84,7 @@ async function depositProstituteToSafe() {
 // même hors de son tour (pas de fin de tour forcée alors). focus : ce que la balance a dénoncé (drogue, armes,
 // escort en transit) → contrôle ciblé à 50 % rien / 50 % trouvé.
 const POLICE_FOCUS = { drugs: 'DRUGS_FOUND', weapons: 'WEAPONS_FOUND', prostitute: 'PROSTITUTE_FOUND' };
-// endingTurn : contrôle pendant la fin de tour (patrouille) : pas de nouvelle fin de tour forcée
+// endingTurn : contrôle pendant une fin de tour (la sienne ou celle d'un autre) : pas de fin de tour forcée
 async function triggerPoliceInspection(informant = false, focus = null, endingTurn = false) {
   if (!informant && !isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   if (!informant && !await showAppConfirm("Lancer le contrôle de police ?", "🚨 Contrôle de Police")) return;

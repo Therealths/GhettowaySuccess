@@ -448,29 +448,34 @@ async function startRoundPhase1() {
   document.getElementById('hudRadioReminderTitle').innerText = ev.title;
   document.getElementById('hudRadioReminderDesc').innerText = ev.impact || ev.desc;
 
+  // Gains de la manche (rente, labo) ajoutés et envoyés au serveur AVANT tout écran : un rechargement
+  // pendant un message ne les fait pas perdre (le serveur note la manche comme vue dès le premier refreshHud)
   const revMult = isRadioEffectActive('PROSTITUTE_REV_MULT') ? getRadioEffectValue('PROSTITUTE_REV_MULT', 2) : 1;
-  // Flics en planque : pas de rente, une Seringue de botox injectée attend la rente suivante
-  if (localPlayer.prostitutesAtSafeList.length > 0 && revMult === 0) {
-    await showAppAlert("Des flics en planque surveillent les clients : tes prostituées ne rapportent rien cette manche.", "🚔 Flics en planque");
-  } else if (localPlayer.prostitutesAtSafeList.length > 0) {
+  const hasEscorts = localPlayer.prostitutesAtSafeList.length > 0;
+  let income = 0, botox = null;
+  if (hasEscorts && revMult !== 0) {
     const baseIncome = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || (p.level === 2 ? 2500 : 1000)), 0);
     // Seringue de botox injectée par le joueur (depuis le Sac) : double cette rente une fois
-    const botox = localPlayer.botoxActive ? { name: 'Seringue de botox', eff: 'botox' } : null;
+    botox = localPlayer.botoxActive ? { name: 'Seringue de botox', eff: 'botox' } : null;
     localPlayer.botoxActive = false;
-    const income = baseIncome * revMult * (botox ? 2 : 1);
+    income = baseIncome * revMult * (botox ? 2 : 1);
     localPlayer.safeCash += income;
+  }
+  // Labo du QG : sa production tombe au coffre
+  const lab = labLevelInfo(localPlayer.labLevel || 0);
+  const drugsBefore = localPlayer.safeDrugs || 0;
+  if (lab) localPlayer.safeDrugs = drugsBefore + lab.kg;
+  refreshHud();
+
+  // Flics en planque : pas de rente, une Seringue de botox injectée attend la rente suivante
+  if (hasEscorts && revMult === 0) {
+    await showAppAlert("Des flics en planque surveillent les clients : tes prostituées ne rapportent rien cette manche.", "🚔 Flics en planque");
+  } else if (hasEscorts) {
     const vipNote = revMult > 1 ? ` (Soirée VIP x${revMult} !)` : '';
     if (botox) await showCardPlayed(botox, [['ph-high-heel', 'Rente de tes prostituées', '×2'], ['ph-vault', `Versé au coffre du QG${vipNote}`, `+${income.toLocaleString()} €`]]);
     else await showAppAlert(`+${income.toLocaleString()} € versés au coffre par tes prostituées${vipNote}.`, "💰 Rente QG perçue");
   }
-  // Labo du QG : sa production tombe au coffre
-  const lab = labLevelInfo(localPlayer.labLevel || 0);
-  if (lab) {
-    const before = localPlayer.safeDrugs || 0;
-    localPlayer.safeDrugs = before + lab.kg;
-    refreshHud();
-    await showLabHarvestScreen(lab, before);
-  }
+  if (lab) await showLabHarvestScreen(lab, drugsBefore);
   refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');
 }

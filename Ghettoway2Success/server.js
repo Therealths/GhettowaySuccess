@@ -503,6 +503,7 @@ io.on('connection', (socket) => {
 
     if (room.isTestRoom) room.players.forEach(p => { if (p.socketId === socket.id) p.socketId = null; });
     existingPlayer.socketId = socket.id;
+    if (existingPlayer.isHost) room.hostSocketId = socket.id; // nouveau socket (page rechargée, serveur redémarré)
     socket.join(roomId);
     socket.roomId = roomId;
     const wasAway = clearPlayerAway(room, existingPlayer);
@@ -779,6 +780,7 @@ io.on('connection', (socket) => {
     const existing = room.players.find(p => p.playerToken === playerToken);
     if (existing) {
       existing.socketId = socket.id;
+      if (existing.isHost) room.hostSocketId = socket.id;
       socket.join(roomId);
       socket.roomId = roomId;
       const wasAway = clearPlayerAway(room, existing);
@@ -1991,7 +1993,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     const room = rooms[socket.roomId];
     if (room && !room.gameStarted) {
-      handlePlayerDisconnect(socket);
+      // Salon : un téléphone qui se verrouille ou recharge la page garde sa place et son Caïd
+      // (seul le bouton Quitter retire le joueur, via leave_room)
+      if (room.isTestRoom) handlePlayerDisconnect(socket);
+      else room.players.forEach(p => { if (p.socketId === socket.id) p.socketId = null; });
     }
   });
 });

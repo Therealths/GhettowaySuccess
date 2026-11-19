@@ -512,3 +512,29 @@ test('braquage en alliance avec une prostituée au butin : chaque allié en reç
   assert.strictEqual((await waitFor(b, 'heist_prostitute')).lvl, 2);
   await never(a, 'heist_prostitute');
 });
+
+test('salon : un téléphone qui se déconnecte garde sa place, et l’hôte revenu peut lancer la partie', async () => {
+  const host = await connect();
+  host.token = `tok_host_${Math.random().toString(36).slice(2, 7)}`;
+  host.emit('create_room', { gameName: 'Salon', maxPlayers: 2, selectionMode: 'manual', playerToken: host.token });
+  const { roomId } = await waitFor(host, 'room_created');
+  host.emit('assign_caid', { caidId: 'caid_1', caidName: 'Burger Queen', startCash: 5000, startDrug: 5, startHearts: 3, unarmedAtk: 1, playerToken: host.token });
+  await waitFor(host, 'caid_assigned_ok');
+  const b = await connect();
+  b.token = `tok_b_${Math.random().toString(36).slice(2, 7)}`;
+  b.emit('join_room', { roomId, playerToken: b.token });
+  await waitFor(b, 'room_joined');
+  b.emit('assign_caid', { caidId: 'caid_7', caidName: 'Jamel Pépouze', startCash: 5000, startDrug: 5, startHearts: 3, unarmedAtk: 1, playerToken: b.token });
+  await waitFor(b, 'caid_assigned_ok');
+
+  // L'hôte verrouille son téléphone, puis revient sur un nouveau socket
+  host.disconnect();
+  await new Promise(r => setTimeout(r, 200));
+  const host2 = await connect();
+  host2.emit('reconnect_player', { roomId, playerToken: host.token });
+  const back = await waitFor(host2, 'reconnect_success');
+  assert.strictEqual(back.player.caidId, 'caid_1');
+  assert.strictEqual(back.players.length, 2);
+  host2.emit('start_game');
+  await Promise.all([waitFor(host2, 'game_started'), waitFor(b, 'game_started')]);
+});
