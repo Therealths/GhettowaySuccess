@@ -112,7 +112,8 @@ async function triggerPoliceInspection(informant = false, focus = null, endingTu
   const weapons = [localPlayer.equipped.weapon, ...localPlayer.inventory.filter(it => it && it.type === 'WEAPON')].filter(Boolean);
   const drugs = localPlayer.drugs;
   const prostitute = localPlayer.prostituteInTransit;
-  const labGear = labLevelInfo(localPlayer.labGearInTransit); // matériel de labo : saisi avec la drogue
+  // Matériel de labo sur soi (tous les niveaux pas encore installés) : saisi avec la drogue
+  const labGear = localPlayer.labGearInTransit ? { nom: LAB_LEVELS.filter(l => l.lvl > (localPlayer.labLevel || 0) && l.lvl <= localPlayer.labGearInTransit).map(l => l.nom).join(' + ') } : null;
   const arrests = localPlayer.arrests || 0;
   const caught = (pick === 'DRUGS_FOUND' && (drugs > 0 || !!labGear)) || (pick === 'WEAPONS_FOUND' && weapons.length > 0) || (pick === 'PROSTITUTE_FOUND' && !!prostitute);
 
@@ -529,16 +530,18 @@ function updateTransferUI(amountOnly) {
   if (res === 'lab') {
     const gear = gearLab, cur = curLab;
     meIll.innerHTML = gear ? labArt(gear, 'qg-portrait', true) : '<div class="qg-empty"><i class="ph-bold ph-package"></i></div>';
-    document.getElementById('qgMeVal').innerText = gear ? gear.nom : 'rien';
+    // Matériel cumulé sur soi (ex. Placard + Cave achetés d'affilée)
+    const carried = gear ? LAB_LEVELS.filter(l => l.lvl > (localPlayer.labLevel || 0) && l.lvl <= gear.lvl) : [];
+    document.getElementById('qgMeVal').innerText = gear ? carried.map(l => l.nom).join(' + ') : 'rien';
     document.getElementById('qgMeAfter').innerText = gear ? '→ rien' : '';
     document.getElementById('qgSafeVal').innerText = cur ? cur.nom : 'pas de labo';
     document.getElementById('qgSafeAfter').innerText = gear ? `→ ${gear.kg} kg/manche` : (cur ? `${cur.kg} kg/manche` : '');
     // Les 3 niveaux du labo : installés, celui qui arrive en pointillés, à venir
     const slots = LAB_LEVELS.map(l => l.lvl <= (localPlayer.labLevel || 0) ? `<div class="qg-slot on">${labArt(l)}<b>${l.nom}</b></div>`
-      : gear && l.lvl === gear.lvl ? `<div class="qg-slot next">${labArt(l)}<b>+</b></div>`
+      : gear && l.lvl <= gear.lvl ? `<div class="qg-slot next">${labArt(l)}<b>+</b></div>`
       : `<div class="qg-slot locked">${labArt(l)}<b>${l.nom}</b></div>`).join('');
     document.getElementById('qgLabBox').innerHTML = `<div class="qg-escort-head">${gear
-      ? `<b>Labo · ${gear.nom}</b><span>+${gear.kg} kg / manche au coffre</span>`
+      ? `<b>Labo · ${carried.map(l => l.nom).join(' + ')}</b><span>+${gear.kg} kg / manche au coffre</span>`
       : cur && cur.lvl === LAB_LEVELS.length ? `<b>Labo au maximum</b><span>+${cur.kg} kg / manche au coffre</span>`
       : '<b>Aucun matériel sur toi</b><span>Achète-le au Dépôt-Vente</span>'}</div>
       <div class="qg-slots">${slots}</div><div class="qg-slots-cap">Production : ${cur ? cur.kg : 0} kg par manche</div>`;

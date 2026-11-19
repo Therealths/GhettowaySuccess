@@ -578,12 +578,14 @@ const labLevelInfo = lvl => LAB_LEVELS.find(l => l.lvl === lvl);
 // img : le labo installé (écran du QG) ; gearImg : le matériel vendu au Dépôt-Vente (carte d'achat, matériel sur soi)
 const labArt = (l, cls = '', gear = false) => `<img class="lab-art ${cls}" src="${gear ? l.gearImg : l.img}" alt="Labo ${l.nom}">`;
 const labFace = l => `<div class="sac-gear lab"><img src="${l.gearImg}" alt=""><div class="b"><h4>Labo · ${l.nom}</h4><span>+${l.kg} kg / manche</span><p>${escapeHtml(l.desc)}</p></div></div>`;
-// installé, en transit, prochain à acheter, ou verrouillé (le niveau d'avant n'est pas encore installé)
+// installé, en transit, prochain à acheter, ou verrouillé (le niveau d'avant n'est pas encore acheté).
+// Le matériel sur soi est cumulatif : labGearInTransit garde le plus haut niveau acheté, on peut enchaîner
+// Placard puis Cave sans passer par le QG, et l'installation pose tout d'un coup.
 function labLevelState(l) {
-  const installed = localPlayer.labLevel || 0;
+  const installed = localPlayer.labLevel || 0, owned = Math.max(installed, localPlayer.labGearInTransit || 0);
   if (l.lvl <= installed) return 'installed';
-  if (localPlayer.labGearInTransit === l.lvl) return 'transit';
-  if (l.lvl === installed + 1 && !localPlayer.labGearInTransit) return 'next';
+  if (l.lvl <= owned) return 'transit';
+  if (l.lvl === owned + 1) return 'next';
   return 'locked';
 }
 let activeMagasinIndex = 0;
@@ -591,7 +593,7 @@ let activeMagasinIndex = 0;
 function openMagasinShopModal() {
   document.getElementById('magasinPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
   document.getElementById('magasinSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
-  activeMagasinIndex = Math.min(localPlayer.labLevel || 0, LAB_LEVELS.length - 1);
+  activeMagasinIndex = Math.min(Math.max(localPlayer.labLevel || 0, localPlayer.labGearInTransit || 0), LAB_LEVELS.length - 1);
   buildMagasinStackDOM();
   bindDeckSwipeAndDrag('magasinCardsContainer', stepMagasinDeck);
   document.getElementById('modalMagasinShop').classList.remove('hidden');
@@ -608,8 +610,7 @@ function buildMagasinStackDOM() {
       : `<button type="button" disabled class="deck-buy-btn w-full py-2 bg-slate-800 text-slate-400 font-black uppercase tracking-wider rounded-xl text-[10px] flex items-center justify-center gap-1">${
         st === 'installed' ? '<i class="ph-bold ph-check"></i> Installé au QG'
         : st === 'transit' ? '<i class="ph-bold ph-package"></i> Sur toi : installe-le au QG'
-        : localPlayer.labGearInTransit ? '<i class="ph-bold ph-lock"></i> Installe d’abord ton matériel'
-        : `<i class="ph-bold ph-lock"></i> Il faut d’abord le ${prev.nom}`}</button>`;
+        : `<i class="ph-bold ph-lock"></i> Il faut d’abord ${prev.lvl === 2 ? 'la' : 'le'} ${prev.nom}`}</button>`;
     return `
       <div id="magasinDeckCard_${idx}" onclick="onMagasinCardClick(${idx})" class="deck-card-item border border-violet-500/45">
         <div>
