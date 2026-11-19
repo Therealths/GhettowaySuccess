@@ -463,6 +463,12 @@ async function startRoundPhase1() {
     if (botox) await showCardPlayed(botox, [['ph-high-heel', 'Rente de tes prostituées', '×2'], ['ph-vault', `Versé au coffre du QG${vipNote}`, `+${income.toLocaleString()} €`]]);
     else await showAppAlert(`+${income.toLocaleString()} € versés au coffre par tes prostituées${vipNote}.`, "💰 Rente QG perçue");
   }
+  // Labo du QG : sa production tombe au coffre
+  const lab = labLevelInfo(localPlayer.labLevel || 0);
+  if (lab) {
+    localPlayer.safeDrugs = (localPlayer.safeDrugs || 0) + lab.kg;
+    await showAppAlert(`Ton labo (${lab.nom}) a produit ${lab.kg} kg, rangés au coffre du QG.`, "🧪 Labo du QG");
+  }
   refreshHud(); // les PM dépendent de la manche (radio, malus Burger Queen)
   navTo('page-5');
 }

@@ -65,6 +65,8 @@ let localPlayer = {
   freeProstituteClaimed: false,
   vouchers: [], // bons de réduction activés (nom de la boutique)
   botoxActive: false, // Seringue de botox injectée : prochaine rente des prostituées ×2
+  labLevel: 0, // labo installé au QG (0 = aucun, 1 Placard, 2 Cave, 3 Hangar)
+  labGearInTransit: null, // niveau du matériel acheté au Magasin, pas encore installé
   inventory: [],
   specialUsedThisTurn: false,
   allianceActive: false,
@@ -142,6 +144,8 @@ function applyCaidToLocalPlayer(chosenCaid) {
   localPlayer.freeProstituteClaimed = false;
   localPlayer.vouchers = [];
   localPlayer.botoxActive = false;
+  localPlayer.labLevel = 0;
+  localPlayer.labGearInTransit = null;
 }
 
 function updateRivalsList(players) {

@@ -499,6 +499,25 @@
       </div>
     </div>
 
+    <!-- ================= 5. MODALE MAGASIN (dépôt-vente : matériel du labo) ================= -->
+    <div id="modalMagasinShop" class="hidden absolute inset-0 z-50 px-4 pt-4 pb-7 flex flex-col justify-end magasin-bg">
+      <button onclick="closeModal('modalMagasinShop')" class="btn-close absolute top-3 right-3 w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-200 hover:text-white shadow-lg z-30"><i class="ph-bold ph-x text-base"></i></button>
+      <div class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-violet-500 text-black text-[10px] font-black uppercase tracking-widest z-30"><i class="ph-bold ph-storefront"></i> Dépôt-Vente</div>
+      <div class="w-full flex flex-col gap-2.5">
+        <div class="py-1.5 px-3 glass-panel rounded-2xl grid grid-cols-2 gap-2 text-xs font-mono shadow-lg">
+          <div class="border-r border-white/10 pr-2 flex items-center justify-between"><span class="text-[9px] text-amber-400 uppercase font-bold">Poche</span><span id="magasinPocketCashDisplay" class="text-xs font-black text-white">5 000 €</span></div>
+          <div class="pl-2 flex items-center justify-between"><span class="text-[9px] text-sky-400 uppercase font-bold">Coffre QG</span><span id="magasinSafeCashDisplay" class="text-xs font-black text-white">0 €</span></div>
+        </div>
+        <div onclick="stepMagasinDeck(1)" class="py-1 px-3 rounded-full bg-black/80 border border-violet-500/40 text-[10px] font-mono text-violet-200 text-center mx-auto shadow-md cursor-pointer relative z-30"><i class="ph-bold ph-flask"></i> Matériel du labo : Placard → Cave → Hangar</div>
+        <div class="relative w-full flex items-center justify-center">
+          <button type="button" onclick="stepMagasinDeck(-1)" class="absolute left-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-left"></i></button>
+          <div id="magasinCardsContainer" class="deck-stage"></div>
+          <button type="button" onclick="stepMagasinDeck(1)" class="absolute right-1 z-30 w-9 h-9 rounded-full glass-panel text-white flex items-center justify-center shadow-lg active:scale-90"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+        <button onclick="closeModal('modalMagasinShop')" class="btn-close w-full py-3 glass-panel text-white font-bold rounded-2xl text-xs uppercase hover:bg-white/10 transition shadow-xl relative z-30">Quitter le Dépôt-Vente</button>
+      </div>
+    </div>
+
     <!-- CAPACITÉ SPÉCIALE : écran plein page (choix de la cible, lancement, pouvoir sans cible, Prière, « Touché ! » côté victime) -->
     <div id="powerScreen" class="hidden absolute inset-0 z-50 pow-screen" data-state="choix">
       <div class="pow-banner"><img id="powBanner" src="bandeau-jaune.jpg" alt=""></div>
@@ -716,7 +735,7 @@
 
     <!-- COFFRE DU QG : sur toi ⇄ au QG (argent, drogue), et installation d'une escort (aller simple) -->
     <div id="modalTransfer" class="hidden absolute inset-0 z-50 qg-screen" data-res="cash" data-dir="deposit">
-      <div class="qg-scene"><img src="grossiste-hall.webp" alt=""></div>
+      <div class="qg-scene"><img id="qgSceneImg" src="grossiste-hall.webp" alt=""></div>
       <div class="relative z-[1] flex flex-col h-full">
         <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
           <span>Manche <span id="qgRound">1</span></span>
@@ -732,6 +751,7 @@
             <button type="button" data-res="cash" onclick="switchTransferResource('cash')"><i class="ph-bold ph-money"></i> Argent</button>
             <button type="button" data-res="drugs" onclick="switchTransferResource('drugs')"><i class="ph-bold ph-leaf"></i> Drogue</button>
             <button type="button" data-res="escort" onclick="switchTransferResource('escort')"><i class="ph-bold ph-sparkle"></i> Escort</button>
+            <button type="button" data-res="lab" onclick="switchTransferResource('lab')"><i class="ph-bold ph-flask"></i> Labo</button>
           </div>
           <div class="qg-duo mt-3">
             <div class="qg-side"><div id="qgMeIll" class="qg-ill"></div><b>Sur toi</b><div id="qgMeVal" class="qg-val">0</div><div id="qgMeAfter" class="qg-after"></div></div>
@@ -752,6 +772,7 @@
             </div>
           </div>
           <div id="qgEscortBox" class="qg-escort hidden"></div>
+          <div id="qgLabBox" class="qg-escort qg-lab hidden"></div>
           <div id="qgHint" class="qg-hint mt-3"></div>
           <button type="button" id="qgCta" class="qg-cta mt-3" onclick="confirmTransferAction()">Déposer</button>
         </div>
@@ -805,6 +826,7 @@
           <button onclick='processQrPayload("{\"t\":\"fouilles\"}")' class="col-span-2 p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">🗑️ Case Fouilles (objet au hasard)</button>
           <button onclick='testFouille("drug")' class="p-2 glass-panel rounded-xl text-left text-emerald-300 font-bold border border-emerald-500/40">🌿 Fouille : drogue</button>
           <button onclick='testFouille("cash")' class="p-2 glass-panel rounded-xl text-left text-amber-300 font-bold border border-amber-500/40">💰 Fouille : argent</button>
+          <button onclick='processQrPayload("{\"t\":\"magasin\"}")' class="col-span-2 p-2 glass-panel rounded-xl text-left text-violet-300 font-bold border border-violet-500/40">🧪 Dépôt-Vente (labo)</button>
           <button onclick='testDrugs(100)' class="col-span-2 p-2 glass-panel rounded-xl text-left text-emerald-300 font-bold border border-emerald-500/40">🌿 Drogue : +100 kg</button>
           <button onclick='processQrPayload("{\"t\":\"yen\",\"d\":2,\"c\":5000}")' class="col-span-2 p-2 glass-panel rounded-xl text-left text-emerald-400 font-bold border border-emerald-500/40">🤝 Deal Yencli (2 kg • 5 000 €)</button>
           <button onclick='processQrPayload("{\"t\":\"obj\",\"n\":\"Kebab\",\"eff\":\"heal\",\"val\":1,\"desc\":\"Restaure 1 Cœur de Vie\"}")' class="p-2 glass-panel rounded-xl text-left text-amber-300">🥙 Kebab</button>

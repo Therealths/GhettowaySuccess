@@ -30,6 +30,7 @@ body { background-color: #030407; margin: 0; padding: 0; display: flex; justify-
 .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
 .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
 .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
+.magasin-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('braquage-magasin-1.webp'); background-size: cover; background-position: center top; }
 .dealer-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_concessionnaire.jpg'); background-size: cover; background-position: center top; }
 
 /* Pile de cartes 3D */
@@ -731,11 +732,12 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .qg-screen { --c: #fbbf24; background: #07080e; overflow-y: auto; color: #fff; }
 .qg-screen[data-res="drugs"] { --c: #34d399; }
 .qg-screen[data-res="escort"] { --c: #f472b6; }
+.qg-screen[data-res="lab"] { --c: #a78bfa; }
 .qg-scene { position: absolute; left: 0; right: 0; top: 40px; height: 330px; opacity: 0.45; pointer-events: none; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 55%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 55%, transparent); }
 .qg-scene img { width: 100%; height: 100%; object-fit: cover; }
 .qg-head { font-size: 40px; line-height: 0.95; color: #fff; text-shadow: 0 4px 18px #000; }
 .qg-panel { margin-bottom: 14px; }
-.qg-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: rgba(255,255,255,0.06); }
+.qg-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: rgba(255,255,255,0.06); }
 .qg-tabs button { padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; color: #94a3b8; }
 .qg-tabs button.on { background: var(--c); color: #111; }
 .qg-duo { position: relative; display: grid; grid-template-columns: 1fr 70px 1fr; align-items: center; }
@@ -1376,3 +1378,18 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 @keyframes yenGlint { from { opacity: 1; background-position: 120% 0; } to { opacity: 1; background-position: -20% 0; } }
 @media (max-height: 700px) { .yen-sub { font-size: 12px; } }
 @media (prefers-reduced-motion: reduce) { .yen-screen * { animation: none !important; } }
+
+/* Labo du QG (matériel du Dépôt-Vente) : illustration du niveau (Placard, Cave, Hangar) */
+.lab-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.sac-gear.lab { border-color: rgba(167,139,250,0.6); }
+.sac-gear.lab span { background: rgba(167,139,250,0.18); color: #ddd6fe; border-color: rgba(167,139,250,0.45); }
+.qg-ill img.lab-art.qg-portrait { position: static; width: 96px; height: 96px; border-color: #a78bfa; }
+.qg-screen[data-res="lab"] .qg-scene { opacity: 0.7; }
+.qg-lab { background: rgba(167,139,250,0.07); border-color: rgba(167,139,250,0.3); }
+.qg-lab .qg-escort-head span { color: #c4b5fd; }
+.qg-lab .qg-slots { grid-template-columns: repeat(3, 1fr); max-width: 260px; }
+.qg-lab .qg-slot { aspect-ratio: 5 / 4; border-color: rgba(167,139,250,0.35); }
+.qg-lab .qg-slot.on, .qg-lab .qg-slot.next { border-color: #a78bfa; }
+.qg-lab .qg-slot.next img { opacity: 0.45; }
+.qg-lab .qg-slot.locked img { opacity: 0.22; filter: grayscale(1); }
+.qg-lab .qg-slot.locked b { color: #94a3b8; }

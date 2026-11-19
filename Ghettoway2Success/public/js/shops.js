@@ -567,6 +567,94 @@ async function buyDealerCatalogItem(itemId) {
   openPaymentChoiceModal(pPayload);
 }
 
+// --- 5. MAGASIN (dépôt-vente) : matériel du labo du QG, un niveau après l'autre ---
+// Acheté ici, transporté sur soi (saisi par la police avec la drogue), installé au QG ; le labo produit au coffre à chaque manche
+const LAB_LEVELS = [
+  { lvl: 1, nom: 'Placard', prix: 8000, kg: 1, img: 'labo-placard.webp', gearImg: 'labo-materiel-1.webp', desc: "Une lampe, un ventilo et un placard qui sent fort." },
+  { lvl: 2, nom: 'Cave', prix: 15000, kg: 2, img: 'labo-cave.webp', gearImg: 'labo-materiel-2.webp', desc: "Au sous-sol, la production passe à la vitesse supérieure." },
+  { lvl: 3, nom: 'Hangar', prix: 30000, kg: 4, img: 'labo-hangar.webp', gearImg: 'labo-materiel-3.webp', desc: "Production industrielle, odeur comprise." }
+];
+const labLevelInfo = lvl => LAB_LEVELS.find(l => l.lvl === lvl);
+// img : le labo installé (écran du QG) ; gearImg : le matériel vendu au Dépôt-Vente (carte d'achat, matériel sur soi)
+const labArt = (l, cls = '', gear = false) => `<img class="lab-art ${cls}" src="${gear ? l.gearImg : l.img}" alt="Labo ${l.nom}">`;
+const labFace = l => `<div class="sac-gear lab"><img src="${l.gearImg}" alt=""><div class="b"><h4>Labo · ${l.nom}</h4><span>+${l.kg} kg / manche</span><p>${escapeHtml(l.desc)}</p></div></div>`;
+// installé, en transit, prochain à acheter, ou verrouillé (le niveau d'avant n'est pas encore installé)
+function labLevelState(l) {
+  const installed = localPlayer.labLevel || 0;
+  if (l.lvl <= installed) return 'installed';
+  if (localPlayer.labGearInTransit === l.lvl) return 'transit';
+  if (l.lvl === installed + 1 && !localPlayer.labGearInTransit) return 'next';
+  return 'locked';
+}
+let activeMagasinIndex = 0;
+
+function openMagasinShopModal() {
+  document.getElementById('magasinPocketCashDisplay').innerText = `${localPlayer.pocketCash.toLocaleString()} €`;
+  document.getElementById('magasinSafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
+  activeMagasinIndex = Math.min(localPlayer.labLevel || 0, LAB_LEVELS.length - 1);
+  buildMagasinStackDOM();
+  bindDeckSwipeAndDrag('magasinCardsContainer', stepMagasinDeck);
+  document.getElementById('modalMagasinShop').classList.remove('hidden');
+}
+
+function buildMagasinStackDOM() {
+  const container = document.getElementById('magasinCardsContainer');
+  const total = LAB_LEVELS.length;
+  container.innerHTML = LAB_LEVELS.map((l, idx) => {
+    const st = labLevelState(l);
+    const prev = labLevelInfo(l.lvl - 1);
+    const btn = st === 'next'
+      ? `<button onclick="event.stopPropagation(); buyMagasinLab(${l.lvl})" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-violet-400 to-fuchsia-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1"><i class="ph-bold ph-shopping-cart-simple"></i> Acheter</button>`
+      : `<button type="button" disabled class="deck-buy-btn w-full py-2 bg-slate-800 text-slate-400 font-black uppercase tracking-wider rounded-xl text-[10px] flex items-center justify-center gap-1">${
+        st === 'installed' ? '<i class="ph-bold ph-check"></i> Installé au QG'
+        : st === 'transit' ? '<i class="ph-bold ph-package"></i> Sur toi : installe-le au QG'
+        : localPlayer.labGearInTransit ? '<i class="ph-bold ph-lock"></i> Installe d’abord ton matériel'
+        : `<i class="ph-bold ph-lock"></i> Il faut d’abord le ${prev.nom}`}</button>`;
+    return `
+      <div id="magasinDeckCard_${idx}" onclick="onMagasinCardClick(${idx})" class="deck-card-item border border-violet-500/45">
+        <div>
+          <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5">${labArt(l, '', true)}</div>
+          <div class="flex items-center justify-between gap-1">
+            <span class="px-1.5 py-0.5 rounded-md border bg-violet-500/20 text-violet-200 border-violet-500/40 font-mono text-[9px] font-black">+${l.kg} kg / manche</span>
+            <span class="text-[9px] font-mono text-slate-400">Niv. ${l.lvl}/${total}</span>
+          </div>
+          <h4 class="text-xs font-black text-white uppercase truncate mt-1">Labo · ${l.nom}</h4>
+          <p class="text-[10px] text-slate-300 italic mt-0.5 leading-tight line-clamp-2">"${l.desc}"</p>
+        </div>
+        <div class="pt-1.5 border-t border-white/10">
+          <div class="flex items-center justify-between font-mono mb-1">
+            <span class="text-[9px] text-slate-400 uppercase">${l.lvl > 1 ? 'Amélioration :' : 'Prix :'}</span>
+            <span class="text-xs font-black text-ghetto-gold">${st === 'installed' ? '—' : `${l.prix.toLocaleString()} €`}</span>
+          </div>
+          ${btn}
+        </div>
+      </div>`;
+  }).join('');
+  applyDeckStackPositions('magasinDeckCard', total, activeMagasinIndex);
+}
+
+function stepMagasinDeck(dir = 1) {
+  const nextIdx = activeMagasinIndex + dir;
+  if (nextIdx < 0 || nextIdx >= LAB_LEVELS.length) return;
+  activeMagasinIndex = nextIdx;
+  applyDeckStackPositions('magasinDeckCard', LAB_LEVELS.length, activeMagasinIndex);
+}
+
+function onMagasinCardClick(idx) {
+  if (idx !== activeMagasinIndex) {
+    activeMagasinIndex = idx;
+    applyDeckStackPositions('magasinDeckCard', LAB_LEVELS.length, activeMagasinIndex);
+  }
+}
+
+async function buyMagasinLab(lvl) {
+  const l = labLevelInfo(lvl);
+  if (!l || labLevelState(l) !== 'next') return;
+  if (localPlayer.pocketCash + localPlayer.safeCash < l.prix) return showBrokeScreen(l.prix, `Labo · ${l.nom}`);
+  closeModal('modalMagasinShop');
+  openPaymentChoiceModal({ type: 'lab', data: { lvl }, cost: l.prix, name: `Labo · ${l.nom}`, shop: 'Dépôt-Vente' });
+}
+
 // Malus J-Lo Gramme : ses 5 premiers kg achetés au grossiste (sur la partie) coûtent le double
 function getJloDoubledKgLeft() {
   return localPlayer.caidId === 'caid_5' ? Math.max(0, 5 - (localPlayer.jloDoubledKgBought || 0)) : 0;
@@ -792,5 +880,11 @@ async function finalizePurchaseExecution(pData) {
     const rev = localPlayer.prostituteInTransit.revenue;
     await showCardPlayed({ name: localPlayer.prostituteInTransit.name }, [['ph-high-heel', 'Rente au QG', `+${rev.toLocaleString()} € / manche`], ['ph-map-pin', 'En transit', 'dépose-la au QG']], 'PROSTITUÉE RECRUTÉE',
       { kicker: 'Recrutement', stamp: 'ph-heart', face: shopCardFace({ img: pr.image || 'plvl1.jpg', name: pr.nom || localPlayer.prostituteInTransit.name, bonus: `+${rev.toLocaleString()} € / manche`, desc: pr.desc, cls: 'veh' }) });
+  } else if (type === 'lab') {
+    const l = labLevelInfo(data.lvl);
+    localPlayer.labGearInTransit = l.lvl;
+    refreshHud();
+    await showCardPlayed({ name: `Labo · ${l.nom}` }, [['ph-flask', 'Production au QG', `+${l.kg} kg / manche`], ['ph-map-pin', 'Sur toi', 'à installer au QG']], 'MATÉRIEL ACHETÉ',
+      { kicker: 'Dépôt-Vente', stamp: 'ph-shopping-cart-simple', face: labFace(l) });
   }
 }

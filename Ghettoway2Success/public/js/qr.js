@@ -111,7 +111,7 @@ function heistArt(name, keep) {
   heistArtPicked = keep ? { key, src } : null;
   return src;
 }
-const QR_PRELOAD = { qg: 'qg-coffre.webp', coffre: 'qg-coffre.webp', armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', brq: 'sac-butin.webp', fouilles: 'fouilles-ruelle.webp', fouille: 'fouilles-ruelle.webp' };
+const QR_PRELOAD = { qg: 'qg-coffre.webp', coffre: 'qg-coffre.webp', armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', magasin: 'braquage-magasin-1.webp', depotvente: 'braquage-magasin-1.webp', brq: 'sac-butin.webp', fouilles: 'fouilles-ruelle.webp', fouille: 'fouilles-ruelle.webp' };
 function qrType(txt) {
   let data;
   try { data = JSON.parse(String(txt).trim().replace(/[\u201C\u201D]/g, '"')); } catch (e) { data = { t: String(txt).trim() }; }
@@ -464,6 +464,7 @@ async function processQrPayload(payload) {
   if (type === 'nightclub') return openNightclubShopModal();
   if (type === 'sportclub') return openSportclubShopModal();
   if (type === 'concessionnaire' || type === 'dealer') return openDealerShopModal();
+  if (type === 'magasin' || type === 'depotvente') return openMagasinShopModal();
 
   if (type === 'grossiste') return openGrossisteModal(data.p || 1000);
   // Case Fouilles : objet tiré au hasard

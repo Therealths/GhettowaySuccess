@@ -112,12 +112,13 @@ async function triggerPoliceInspection(informant = false, focus = null, endingTu
   const weapons = [localPlayer.equipped.weapon, ...localPlayer.inventory.filter(it => it && it.type === 'WEAPON')].filter(Boolean);
   const drugs = localPlayer.drugs;
   const prostitute = localPlayer.prostituteInTransit;
+  const labGear = labLevelInfo(localPlayer.labGearInTransit); // matériel de labo : saisi avec la drogue
   const arrests = localPlayer.arrests || 0;
-  const caught = (pick === 'DRUGS_FOUND' && drugs > 0) || (pick === 'WEAPONS_FOUND' && weapons.length > 0) || (pick === 'PROSTITUTE_FOUND' && !!prostitute);
+  const caught = (pick === 'DRUGS_FOUND' && (drugs > 0 || !!labGear)) || (pick === 'WEAPONS_FOUND' && weapons.length > 0) || (pick === 'PROSTITUTE_FOUND' && !!prostitute);
 
   // La saisie est appliquée tout de suite (un rechargement de page ne l'annule pas), l'écran raconte ensuite la scène
   if (caught) {
-    if (pick === 'DRUGS_FOUND') localPlayer.drugs = 0;
+    if (pick === 'DRUGS_FOUND') { localPlayer.drugs = 0; localPlayer.labGearInTransit = null; }
     else if (pick === 'PROSTITUTE_FOUND') localPlayer.prostituteInTransit = null;
     else {
       localPlayer.equipped.weapon = null;
@@ -127,12 +128,12 @@ async function triggerPoliceInspection(informant = false, focus = null, endingTu
     refreshHud();
   }
 
-  await showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds });
+  await showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds, labGear });
   if (caught && isMyTurnToPlay && !endingTurn) endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
 }
 
 // Écran plein écran du contrôle : la patrouille arrive, tire au sort ce qu'elle cherche, puis le verdict
-function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds }) {
+function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds, labGear }) {
   const scr = document.getElementById('policeScreen');
   const caid = getMyCaid();
   const cta = document.getElementById('policeCta');
@@ -155,7 +156,7 @@ function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, o
   };
   const searched = { DRUGS_FOUND: 'de la drogue', WEAPONS_FOUND: 'des armes', PROSTITUTE_FOUND: 'ton escort' }[pick];
   // Ce que tu as sur toi, pour chaque chose que la patrouille peut chercher
-  const onYou = () => (odds.DRUGS_FOUND !== undefined ? row('ph-leaf', 'Drogue sur toi', '', `${drugs} kg`) : '')
+  const onYou = () => (odds.DRUGS_FOUND !== undefined ? row('ph-leaf', 'Drogue sur toi', '', `${drugs} kg`) + (labGear ? row('ph-flask', 'Matériel de labo', '', labGear.nom) : '') : '')
     + (odds.WEAPONS_FOUND !== undefined ? row('ph-knife', 'Armes sur toi', '', weapons.length ? `${weapons.length}` : 'aucune', weaponNames) : '')
     + (odds.PROSTITUTE_FOUND !== undefined ? row('ph-high-heel', 'Escort en transit', '', prostitute ? 'oui' : 'aucune', prName) : '');
 
@@ -214,7 +215,7 @@ function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, o
         );
       } else {
         setRows(
-          (pick === 'DRUGS_FOUND' ? row('ph-leaf', 'Drogue sur toi', `${drugs} kg`, '0 kg', 'saisie')
+          (pick === 'DRUGS_FOUND' ? row('ph-leaf', 'Drogue sur toi', `${drugs} kg`, '0 kg', 'saisie') + (labGear ? row('ph-flask', 'Matériel de labo', labGear.nom, 'rien', 'saisi') : '')
             : pick === 'PROSTITUTE_FOUND' ? row('ph-high-heel', 'Escort en transit', '1', '0', `${prName} embarquée par la police`)
             : row('ph-knife', 'Armes sur toi', `${weapons.length}`, '0', `saisies : ${weaponNames}`)) +
           row('ph-lock-key', 'Arrestations', `${arrests}`, `${arrests + 1}`) +
@@ -341,7 +342,9 @@ function refreshHud() {
       roundSeen: localPlayer.roundSeen || 0,
       proteinRound: localPlayer.proteinRound || 0,
       botoxActive: !!localPlayer.botoxActive,
-      vouchers: localPlayer.vouchers || []
+      vouchers: localPlayer.vouchers || [],
+      labLevel: localPlayer.labLevel || 0,
+      labGearInTransit: localPlayer.labGearInTransit || null
     });
   }
 }
@@ -461,21 +464,23 @@ async function qgOnlyHint() {
 async function openTransferModal(mode, res) {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
   currentTransferMode = mode === 'withdraw' ? 'withdraw' : 'deposit';
-  currentTransferResource = res || (currentTransferResource === 'escort' ? 'cash' : currentTransferResource || 'cash');
-  if (currentTransferResource === 'escort') currentTransferMode = 'deposit';
+  currentTransferResource = res || (['escort', 'lab'].includes(currentTransferResource) ? 'cash' : currentTransferResource || 'cash');
+  if (oneWayRes(currentTransferResource)) currentTransferMode = 'deposit';
   document.getElementById('qgRound').innerText = currentSession.round || 1;
   document.getElementById('modalTransfer').classList.remove('hidden');
   transferAmount = 0;
   updateTransferUI();
 }
+// Escort et matériel de labo : aller simple vers le QG
+const oneWayRes = res => res === 'escort' || res === 'lab';
 function switchTransferResource(res) {
   currentTransferResource = res;
-  if (res === 'escort') currentTransferMode = 'deposit';
+  if (oneWayRes(res)) currentTransferMode = 'deposit';
   transferAmount = 0;
   updateTransferUI();
 }
 function toggleTransferDirection() {
-  if (currentTransferResource === 'escort') return; // aller simple
+  if (oneWayRes(currentTransferResource)) return; // aller simple
   currentTransferMode = currentTransferMode === 'deposit' ? 'withdraw' : 'deposit';
   transferAmount = 0;
   updateTransferUI();
@@ -510,10 +515,39 @@ function updateTransferUI(amountOnly) {
   const meIll = document.getElementById('qgMeIll');
   const hint = document.getElementById('qgHint');
   const cta = document.getElementById('qgCta');
-  document.getElementById('qgAmountBox').classList.toggle('hidden', res === 'escort');
+  document.getElementById('qgAmountBox').classList.toggle('hidden', oneWayRes(res));
   document.getElementById('qgEscortBox').classList.toggle('hidden', res !== 'escort');
-  document.getElementById('qgArrowHint').innerText = res === 'escort' ? 'aller simple' : 'toucher pour inverser';
-  document.getElementById('qgArrowLabel').innerText = res === 'escort' ? 'Installer' : (dep ? 'Déposer' : 'Retirer');
+  document.getElementById('qgLabBox').classList.toggle('hidden', res !== 'lab');
+  document.getElementById('qgArrowHint').innerText = oneWayRes(res) ? 'aller simple' : 'toucher pour inverser';
+  document.getElementById('qgArrowLabel').innerText = oneWayRes(res) ? 'Installer' : (dep ? 'Déposer' : 'Retirer');
+
+  // Onglet Labo : l'illustration du labo (celui qui arrive, sinon celui installé) passe en fond
+  const gearLab = labLevelInfo(localPlayer.labGearInTransit), curLab = labLevelInfo(localPlayer.labLevel || 0);
+  const scene = document.getElementById('qgSceneImg');
+  const sceneSrc = res === 'lab' ? (gearLab || curLab || LAB_LEVELS[0]).img : 'grossiste-hall.webp';
+  if (scene.getAttribute('src') !== sceneSrc) scene.src = sceneSrc;
+  if (res === 'lab') {
+    const gear = gearLab, cur = curLab;
+    meIll.innerHTML = gear ? labArt(gear, 'qg-portrait', true) : '<div class="qg-empty"><i class="ph-bold ph-package"></i></div>';
+    document.getElementById('qgMeVal').innerText = gear ? gear.nom : 'rien';
+    document.getElementById('qgMeAfter').innerText = gear ? '→ rien' : '';
+    document.getElementById('qgSafeVal').innerText = cur ? cur.nom : 'pas de labo';
+    document.getElementById('qgSafeAfter').innerText = gear ? `→ ${gear.kg} kg/manche` : (cur ? `${cur.kg} kg/manche` : '');
+    // Les 3 niveaux du labo : installés, celui qui arrive en pointillés, à venir
+    const slots = LAB_LEVELS.map(l => l.lvl <= (localPlayer.labLevel || 0) ? `<div class="qg-slot on">${labArt(l)}<b>${l.nom}</b></div>`
+      : gear && l.lvl === gear.lvl ? `<div class="qg-slot next">${labArt(l)}<b>+</b></div>`
+      : `<div class="qg-slot locked">${labArt(l)}<b>${l.nom}</b></div>`).join('');
+    document.getElementById('qgLabBox').innerHTML = `<div class="qg-escort-head">${gear
+      ? `<b>Labo · ${gear.nom}</b><span>+${gear.kg} kg / manche au coffre</span>`
+      : cur && cur.lvl === LAB_LEVELS.length ? `<b>Labo au maximum</b><span>+${cur.kg} kg / manche au coffre</span>`
+      : '<b>Aucun matériel sur toi</b><span>Achète-le au Dépôt-Vente</span>'}</div>
+      <div class="qg-slots">${slots}</div><div class="qg-slots-cap">Production : ${cur ? cur.kg : 0} kg par manche</div>`;
+    document.getElementById('qgHeadline').innerHTML = 'ÇA POUSSE.';
+    hint.innerHTML = '<i class="ph-fill ph-flask"></i> Le labo dépose sa production au coffre au début de chaque manche';
+    cta.innerText = 'Installer au QG';
+    cta.disabled = !gear;
+    return;
+  }
 
   if (res === 'escort') {
     const pr = localPlayer.prostituteInTransit;
@@ -581,6 +615,11 @@ async function confirmTransferAction() {
     playTransferFly('💃', true);
     localPlayer.prostitutesAtSafeList.push(localPlayer.prostituteInTransit);
     localPlayer.prostituteInTransit = null;
+  } else if (res === 'lab') {
+    if (!localPlayer.labGearInTransit) return;
+    playTransferFly('🧪', true);
+    localPlayer.labLevel = localPlayer.labGearInTransit;
+    localPlayer.labGearInTransit = null;
   } else {
     const amt = transferAmount;
     if (amt <= 0) return;
