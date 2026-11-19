@@ -580,7 +580,7 @@ const labLevelInfo = lvl => LAB_LEVELS.find(l => l.lvl === lvl);
 const labCultureLabel = l => `Culture dans ${l.lvl === 2 ? 'la' : 'le'} ${l.nom.toLowerCase()}`;
 const labArt = (l, cls = '', gear = false) => `<img class="lab-art ${cls}" src="${gear ? l.gearImg : l.img}" alt="Labo ${l.nom}">`;
 // Nom du matériel vendu au Dépôt-Vente
-const labSetName = l => `Set de culture indoor lvl${l.lvl}`;
+const labSetName = l => `Set de culture lvl${l.lvl}`;
 const labFace = l => `<div class="sac-gear lab"><img src="${l.gearImg}" alt=""><div class="b"><h4>${labSetName(l)}</h4><span>+${l.kg} kg / manche</span><p>${escapeHtml(l.desc)}</p></div></div>`;
 // installé, en transit, prochain à acheter, ou verrouillé (le niveau d'avant n'est pas encore acheté).
 // Le matériel sur soi est cumulatif : labGearInTransit garde le plus haut niveau acheté, on peut enchaîner
