@@ -30,7 +30,7 @@ body { background-color: #030407; margin: 0; padding: 0; display: flex; justify-
 .armory-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_armurerie.jpg'); background-size: cover; background-position: center top; }
 .nightclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_club.jpg'); background-size: cover; background-position: center top; }
 .sportclub-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_sport.jpg'); background-size: cover; background-position: center top; }
-.magasin-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('braquage-magasin-1.webp'); background-size: cover; background-position: center top; }
+.magasin-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('magasin-hall.webp'); background-size: cover; background-position: center top; }
 .dealer-bg { background-image: linear-gradient(to bottom, rgba(9,10,16,0.02) 0%, rgba(9,10,16,0.22) 42%, rgba(9,10,16,0.92) 100%), url('wp_concessionnaire.jpg'); background-size: cover; background-position: center top; }
 
 /* Pile de cartes 3D */
