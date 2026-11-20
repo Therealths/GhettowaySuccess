@@ -127,12 +127,12 @@ async function triggerPoliceInspection(informant = false, focus = null, endingTu
     refreshHud();
   }
 
-  await showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds });
+  await showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds, endingTurn });
   if (caught && isMyTurnToPlay && !endingTurn) endCurrentPlayerTurn(true); // garde à vue : fin de tour forcée, sans confirmation
 }
 
 // Écran plein écran du contrôle : la patrouille arrive, tire au sort ce qu'elle cherche, puis le verdict
-function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds }) {
+function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, odds, endingTurn }) {
   const scr = document.getElementById('policeScreen');
   const caid = getMyCaid();
   const cta = document.getElementById('policeCta');
@@ -210,7 +210,7 @@ function showPoliceScreen({ pick, caught, drugs, weapons, prostitute, arrests, o
       if (!caught) {
         setRows(
           (pick === 'CLEAN' ? row('ph-magnifying-glass', 'Contrôle de routine', '', 'R.A.S.') : row('ph-magnifying-glass', `Ils cherchaient ${searched}`, '', 'rien trouvé')) +
-          (isMyTurnToPlay ? row('ph-person-simple-walk', 'Ton tour', '', 'continue') : '')
+          (isMyTurnToPlay && !endingTurn ? row('ph-person-simple-walk', 'Ton tour', '', 'continue') : '')
         );
       } else {
         setRows(

@@ -288,6 +288,8 @@ function advanceTurn(room, roomId, activePlayer) {
 
   // Joueur suivant dans l'ordre de la manche ; on saute ceux qui ont déjà joué (en alliance pendant le tour d'un autre)
   if (!room.roundOrder) { room.roundOrder = buildRoundOrder(room); room.turnPos = room.currentTurnIndex; }
+  // « Tour déjà joué » : seulement si la manche ne change pas juste après (sinon le message tomberait sur la nouvelle Flash Radio)
+  const skipped = [];
   for (let guard = 0; guard < 2 * room.players.length + 2; guard++) {
     room.turnPos++;
 
@@ -312,14 +314,13 @@ function advanceTurn(room, roomId, activePlayer) {
     if (!next) continue; // joueur parti
     if (next.away) continue; // joueur absent (a quitté la partie) : son tour est passé
     if (room.playedThisRoundTokens.includes(next.playerToken)) {
-      io.to(next.socketId).emit('turn_skipped', {
-        allyCaid: (room.alliedWithThisRound || {})[next.playerToken] || null
-      });
+      skipped.push({ p: next, round: room.round, allyCaid: (room.alliedWithThisRound || {})[next.playerToken] || null });
       continue;
     }
     room.currentTurnIndex = room.players.indexOf(next);
     break;
   }
+  skipped.filter(s => s.round === room.round).forEach(s => io.to(s.p.socketId).emit('turn_skipped', { allyCaid: s.allyCaid }));
 
   broadcastTurnState(roomId);
   io.to(roomId).emit('update_room_players', {
@@ -646,7 +647,7 @@ io.on('connection', (socket) => {
     resendActiveCombat(room, player, sock);
     const pp = room.pendingPillage;
     if (pp && pp.winnerTokens[0] === tok && !(player.mailbox || []).some(m => m.event === 'combat_finished_result')) {
-      sock.emit('combat_finished_result', { outcome: 'winner', opponentCaid: pp.loserCaid, isPrimaryPicker: true, pillageInfo: pp, late: true });
+      sock.emit('combat_finished_result', { outcome: 'winner', dmgNet: pp.dmgNet, opponentCaid: pp.loserCaid, isPrimaryPicker: true, pillageInfo: pp, late: true });
     }
     // Messages arrivés pendant son absence (résultat de combat, pillage, pouvoir subi…)
     const box = player.mailbox || [];
@@ -1257,7 +1258,8 @@ io.on('connection', (socket) => {
       availableDrugs: loserP.drugs || 0,
       availableItems: (loserP.inventory || []).filter(isFouilleItem).length,
       hasProstitute: !!loserP.hasProstituteInTransit,
-      prostituteObj: loserP.prostituteObj || { level: 1, name: 'Prostituée Niv. 1', revenue: 1000 }
+      prostituteObj: loserP.prostituteObj || { level: 1, name: 'Prostituée Niv. 1', revenue: (room.settings && room.settings.rent && room.settings.rent[1]) || 1000 },
+      dmgNet
     };
 
     const winnerNames = winnerTokens

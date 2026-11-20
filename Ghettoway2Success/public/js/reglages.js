@@ -50,6 +50,15 @@ function radioRuleWithSettings(ev) {
     rows = rows.map(row => { const it = items.find(x => x.nom === row[1]); return it ? [row[0], row[1], fmt(it.prix), fmt(Math.round(it.prix * v))] : row; });
   } else if (t === 'PROSTITUTE_REV_MULT') {
     rows = rows.map(row => { const m = /Niveau (\d)/.exec(row[1]); if (!m) return row; const r = prostituteRent(+m[1]); return [row[0], row[1], fmt(r), fmt(Math.round(r * v))]; });
+  } else if (/^(YENCLI|HEIST)_CASH_/.test(t)) {
+    // Gains des cartes réglés en % : « Deal à 5 000 € » rapporte 5 000 × % (puis l'effet de la radio)
+    const pct = settingVal(t.startsWith('YENCLI') ? 'yencliPct' : 'heistPct', 100) / 100;
+    if (pct !== 1) rows = rows.map(row => {
+      const card = Number(String(row[2]).replace(/\D/g, ''));
+      if (!/€/.test(row[2]) || !card) return row;
+      const gain = Math.round(card * pct);
+      return [row[0], row[1], fmt(gain), fmt(/_MULT$/.test(t) ? Math.round(gain * v) : gain + v)];
+    });
   } else if (t === 'GROSSISTE_PRICE_SET' && settingVal('grossiste', 1000) !== 1000) {
     const base = settingVal('grossiste', 1000), now = Math.round(v * grossisteFactor());
     big = fmt(now); sub = `au lieu de ${fmt(base)}`;

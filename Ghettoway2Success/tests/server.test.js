@@ -554,3 +554,27 @@ test('réglages avancés : gardés avec la partie (nombres seulement) et renvoy�
   c.emit('create_room', { gameName: 'Normale', maxPlayers: 2, selectionMode: 'manual', playerToken: `tok_set_c_${Math.random().toString(36).slice(2, 7)}`, settings: {} });
   assert.strictEqual((await waitFor(c, 'room_created')).room.settings, null);
 });
+
+test('« Tour déjà joué » : prévenu en milieu de manche, mais pas juste avant la manche suivante', async () => {
+  const trio = [['caid_1', 'Burger Queen'], ['caid_7', 'Jamel Pépouze'], ['caid_5', 'J-Lo Gramme']];
+  const ally = async (from, to) => {
+    from.emit('propose_alliance', { targetPlayerTokens: [to.token], senderName: 'X' });
+    const req = await waitFor(to, 'alliance_request_received');
+    to.emit('respond_alliance', { requestId: req.requestId, accepted: true });
+    await waitFor(from, 'alliance_confirmed');
+  };
+  // Allié du joueur suivant : son tour saute, il est prévenu
+  const g1 = (await startGame(trio)).players;
+  await ally(g1[0], g1[1]);
+  g1[0].emit('next_player_turn');
+  await waitFor(g1[1], 'turn_skipped');
+  await waitFor(g1[2], 'turn_state_updated', t => t.activePlayerToken === g1[2].token);
+  // Allié du dernier de la manche : la manche suivante commence, pas de message par-dessus la radio
+  const [a, b, c] = (await startGame(trio)).players;
+  await ally(a, c);
+  a.emit('next_player_turn');
+  await waitFor(b, 'turn_state_updated', t => t.activePlayerToken === b.token);
+  b.emit('next_player_turn');
+  await waitFor(c, 'new_round_started');
+  await never(c, 'turn_skipped');
+});

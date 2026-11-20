@@ -414,6 +414,7 @@ function racketRowHtml(who, plural) {
   const names = (r.items || []).map(it => escapeHtml(it.name)).join(', ');
   const take = { cash: [`−${(r.amount || 0).toLocaleString()} €`, 'ton cash'], drugs: [`−${r.amount || 0} kg`, 'ta drogue'],
     items: [r.amount ? `${r.amount} objet${r.amount > 1 ? 's' : ''}` : 'Sac vide', 'dans ton Sac'], prostitute: ['ta prostituée', 'en transit'], none: ['rien', 'il te laisse filer'] }[r.category] || ['—', ''];
+  if (r.category === 'none') return fightRow('ph-hand-grabbing', `${thief} te laisse filer`, 'rien pris');
   return fightRow('ph-hand-grabbing', `${thief} a pris <small class="fight-racket-sub">${take[1]}</small>`, take[0])
     + (names ? `<div class="fight-racket-items">${names}</div>` : '');
 }
