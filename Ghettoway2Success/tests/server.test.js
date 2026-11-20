@@ -175,6 +175,24 @@ test('une seule attaque par cible et par tour ; un assaut annulé avant le duel 
   assert.match(await waitFor(att, 'error_msg'), /déjà attaqué/);
 });
 
+test('ordre des tours : le même à chaque manche (1, 2, 3, puis 1, 2, 3)', async () => {
+  const { players } = await startGame([['caid_1', 'Burger Queen'], ['caid_7', 'Jamel Pépouze'], ['caid_3', 'Nelson Sativa']]);
+  const tokens = players.map(s => s.token);
+  const order = async () => (await waitFor(players[0], 'turn_state_updated')).turnOrder.map(t => t.token);
+  assert.deepStrictEqual(await order(), tokens);
+  for (const i of [0, 1, 2]) {
+    const s = players.find(x => x.token === tokens[i]);
+    s.emit('next_player_turn');
+    await new Promise(r => setTimeout(r, 80));
+  }
+  const next = players[0].events.filter(e => e.event === 'new_round_started' || e.event === 'turn_state_updated').pop();
+  const turn = players[0].events.filter(e => e.event === 'turn_state_updated').pop().data;
+  assert.strictEqual(turn.round, 2);
+  assert.deepStrictEqual(turn.turnOrder.map(t => t.token), tokens);
+  assert.strictEqual(turn.activePlayerToken, tokens[0]);
+  assert.ok(next);
+});
+
 test('racket : le vainqueur prend jusqu’à 3 objets de Fouille au hasard, jamais l’équipement', async () => {
   const { players: [a, b] } = await startGame();
   const objets = ['Kebab', 'Sifflet', 'Botox', 'Canette'].map((name, i) => ({ id: `o${i}`, type: 'ITEM_CARD', name }));
@@ -347,17 +365,17 @@ test('un seul combat à la fois, et seul le vainqueur choisit le butin', async (
   await waitFor(b, 'you_were_pillaged');
 });
 
-test('à 2 joueurs, le dernier de la manche rejoue en premier : son tour est bien un nouveau tour', async () => {
+test('à 2 joueurs, A B puis A B : le premier rejoue en début de manche, avec un nouveau tour', async () => {
   const { players: [a, b] } = await startGame();
   const t1 = await waitFor(a, 'turn_state_updated');
   assert.strictEqual(t1.activePlayerToken, a.token);
   a.emit('next_player_turn');
-  const t2 = await waitFor(b, 'turn_state_updated', t => t.activePlayerToken === b.token);
+  await waitFor(b, 'turn_state_updated', t => t.activePlayerToken === b.token);
   b.emit('next_player_turn');
   await waitFor(b, 'new_round_started');
   const t3 = await waitFor(b, 'turn_state_updated', t => t.round === 2);
-  assert.strictEqual(t3.activePlayerToken, b.token);
-  assert.notStrictEqual(t3.turnId, t2.turnId);
+  assert.strictEqual(t3.activePlayerToken, a.token);
+  assert.notStrictEqual(t3.turnId, t1.turnId);
 });
 
 test('alliance : impossible avec un Caïd qui a déjà joué sa manche', async () => {
@@ -481,7 +499,9 @@ test('attaque en alliance : l’allié lié à la cible par un pacte ne particip
   a.emit('next_player_turn');
   await waitFor(b, 'turn_state_updated', t => t.activePlayerToken === b.token);
   b.emit('next_player_turn');
-  // Manche 2 (ordre B C A) : B s'allie avec C et attaque A « en alliance »
+  // Manche 2 (même ordre A B C) : A passe, puis B s'allie avec C et attaque A « en alliance »
+  await waitFor(a, 'turn_state_updated', t => t.round === 2 && t.activePlayerToken === a.token);
+  a.emit('next_player_turn');
   await waitFor(b, 'turn_state_updated', t => t.round === 2 && t.activePlayerToken === b.token);
   b.emit('propose_alliance', { targetPlayerTokens: [c.token], senderName: 'Jamel Pépouze' });
   const r2 = await waitFor(c, 'alliance_request_received');

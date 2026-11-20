@@ -180,11 +180,9 @@ function arePlayersInNonAggressionPact(room, tokenA, tokenB) {
   );
 }
 
-// Ordre de passage de la manche : le premier joueur se décale d'un cran à chaque manche (A B C, B C A, C A B...)
+// Ordre de passage : toujours le même à chaque manche, dans l'ordre d'arrivée des joueurs (A B C, A B C, A B C...)
 function buildRoundOrder(room) {
-  const n = room.players.length;
-  const start = (room.round - 1) % n;
-  return room.players.map((_, i) => room.players[(start + i) % n].playerToken);
+  return room.players.map(p => p.playerToken);
 }
 
 // Partie de test permanente : 3 joueurs déjà lancés, pilotables depuis un seul téléphone
