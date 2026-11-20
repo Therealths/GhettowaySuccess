@@ -53,7 +53,9 @@ fetch('/catalog.json')
   .catch(() => {});
 
 // Boutique ouverte hors de son tour (écran d'attente) : consultation, sans bouton d'achat
-const markShopBrowse = id => document.getElementById(id).classList.toggle('shop-browse', !isMyTurnToPlay);
+// (ou ouverte depuis le bouton Infos, même pendant son tour : shopBrowseForced)
+let shopBrowseForced = false;
+const markShopBrowse = id => document.getElementById(id).classList.toggle('shop-browse', !isMyTurnToPlay || shopBrowseForced);
 // Inflation (Flash Radio) : tous les prix des boutiques et du Grossiste augmentent
 const inflated = p => isRadioEffectActive('INFLATION_PRICE_MULT') ? Math.round(p * getRadioEffectValue('INFLATION_PRICE_MULT', 1.2)) : p;
 const getNightclubPrice = item => inflated(item.prix || 0);
@@ -308,7 +310,7 @@ function onArmoryCardClick(idx) {
 function freeItemClaimed(item) { return !item.prix && (localPlayer.freeItemsClaimed || []).includes(item.id); }
 
 async function buyArmoryCatalogItem(itemId) {
-  if (!isMyTurnToPlay) return;
+  if (!isMyTurnToPlay || shopBrowseForced) return;
   const item = ARMORY_CATALOG.find(i => i.id === itemId);
   if (!item) return;
   if (freeItemClaimed(item)) return showAppAlert(`${item.nom} : déjà récupérée, une seule par partie !`, "⛔ Déjà prise");
@@ -414,7 +416,7 @@ function toggleNightclubStackCard() {
 }
 
 async function buyNightclubItem(itemId) {
-  if (!isMyTurnToPlay) return;
+  if (!isMyTurnToPlay || shopBrowseForced) return;
   const item = NIGHTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
   if (!item) return;
   if (localPlayer.prostituteInTransit) {
@@ -502,7 +504,7 @@ function toggleSportclubStackCard() {
 }
 
 async function buySportclubItem(itemId) {
-  if (!isMyTurnToPlay) return;
+  if (!isMyTurnToPlay || shopBrowseForced) return;
   const item = SPORTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
   if (!item) return;
   if (localPlayer.musclesOnPerson.length >= 3) {
@@ -585,7 +587,7 @@ function onDealerCardClick(idx) {
 }
 
 async function buyDealerCatalogItem(itemId) {
-  if (!isMyTurnToPlay) return;
+  if (!isMyTurnToPlay || shopBrowseForced) return;
   const item = DEALER_CATALOG.find(i => i.id === itemId);
   if (!item) return;
   await offerVoucher('Concessionnaire', getDealerItemEffectivePrice(item));
@@ -704,7 +706,7 @@ function onMagasinCardClick(idx) {
 }
 
 async function buyMagasinLab(lvl) {
-  if (!isMyTurnToPlay) return;
+  if (!isMyTurnToPlay || shopBrowseForced) return;
   const l = labLevelInfo(lvl);
   if (!l || labLevelState(l) !== 'next') return;
   const cost = getLabEffectivePrice(l);

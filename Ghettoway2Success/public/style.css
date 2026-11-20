@@ -1541,3 +1541,6 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .wp-skill.used em { color: #94a3b8; }
 .wp-bm { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; font-size: 11px; }
 .wp-bm .b { color: #6ee7b7; } .wp-bm .m { color: #fca5a5; }
+
+.hud-info { position: absolute; top: 46px; right: 8px; z-index: 45; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #fde68a; background: rgba(0,0,0,.55); border: 1px solid rgba(253,230,138,.45); backdrop-filter: blur(4px); }
+.hud-info:active { transform: scale(.92); }

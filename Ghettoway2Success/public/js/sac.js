@@ -282,7 +282,9 @@ function waitGrossistePrice() {
   const base = isRadioEffectActive('GROSSISTE_PRICE_SET') ? getRadioEffectValue('GROSSISTE_PRICE_SET', 1500) : 1000;
   return inflated(Math.round(base * grossisteFactor()));
 }
-function openWaitShops() {
+// fromInfo : bouton Infos du bandeau, les boutiques restent en consultation même pendant son tour
+function openWaitShops(fromInfo = false) {
+  shopBrowseForced = !!fromInfo;
   const closed = closedShop();
   const tag = key => key === closed ? '<em class="off">fermé cette manche</em>' : isRadioEffectActive('INFLATION_PRICE_MULT') ? '<em class="up">prix +20 %</em>' : '';
   document.getElementById('wsList').innerHTML = WAIT_SHOPS.map(([key, name, icon, sub], i) =>
@@ -290,7 +292,10 @@ function openWaitShops() {
     + `<div class="ws-shop static"><i class="ph-fill ph-package"></i><span><b>Grossiste</b><small>prix du kilo</small></span>${closed === 'grossiste' ? '<em class="off">fermé cette manche</em>' : `<em>${waitGrossistePrice().toLocaleString()} € / kg</em>`}</div>`;
   document.getElementById('waitShops').classList.remove('hidden');
 }
-function closeWaitSheet(id) { document.getElementById(id).classList.add('hidden'); }
+function closeWaitSheet(id) {
+  document.getElementById(id).classList.add('hidden');
+  if (id === 'waitShops') shopBrowseForced = false;
+}
 // Son tour commence : on referme tout ce qu'on consultait (les boutiques se rouvriront avec leurs boutons d'achat)
 function closeWaitBrowsers() {
   ['waitProfile', 'waitShops'].forEach(closeWaitSheet);
