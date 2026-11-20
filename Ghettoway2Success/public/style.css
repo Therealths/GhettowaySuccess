@@ -176,7 +176,9 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 /* Talkie-walkie de flic : on choisit le dé et la direction de la prochaine patrouille */
 .talkie-gauge { touch-action: none; cursor: pointer; }
 .talkie-dirs button { padding: 10px 0; border-radius: 12px; font-family: 'Anton', sans-serif; font-size: 22px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); }
-.talkie-dirs { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; }
+.talkie-dirs { display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 6px; }
+.talkie-dirs button.opt { grid-column: 1 / -1; }
+.talkie-dirs button.opt small { display: inline !important; }
 .talkie-dirs button.opt { padding: 5px 0; line-height: 1.15; }
 .talkie-dirs button.opt small { display: block; font-size: 11px; color: #64748b; }
 .talkie-dirs button.opt.on small { color: #fbbf24; }
@@ -523,7 +525,8 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .patrol-dir { font-family: 'Anton', sans-serif; font-size: 32px; line-height: 1; color: #93c5fd; }
 .patrol-screen[data-state="greve"] .police-lights i { animation: none; opacity: 0.08; }
 .patrol-screen.result .patrol-dir { animation: policeRowIn 0.35s ease-out both; }
-.patrol-dirs { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; }
+.patrol-dirs { display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 6px; }
+.patrol-dirs span.opt { grid-column: 1 / -1; flex-direction: row; gap: 6px; min-height: 30px; font-size: 11px; }
 .patrol-dirs span { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 40px; border-radius: 12px; font-size: 13px; font-weight: 900; line-height: 1.15; text-transform: uppercase; color: #475569; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.06); }
 .patrol-dirs span small { font-size: 11px; }
 .patrol-dirs span.on { color: #fff; border-color: #60a5fa; background: rgba(96,165,250,0.18); }

@@ -566,6 +566,16 @@ function nextPlayerLabel() {
 // Demi-tour : une option tirée en plus (20 %), qui n'annule pas la direction. Gauche ou droite (50/50) sert
 // toujours : sur le plateau, la voiture doit savoir de quel côté tourner au prochain croisement.
 const PATROL_UTURN_CHANCE = 0.2;
+// Tirage favorisant les grands déplacements : poids des faces 1 à 6 (1 et 2 rares, 6 le plus fréquent)
+const PATROL_ROLL_WEIGHTS = [1, 1, 2, 3, 4, 5];
+function drawPatrolRoll() {
+  let r = Math.random() * PATROL_ROLL_WEIGHTS.reduce((a, b) => a + b, 0);
+  return PATROL_ROLL_WEIGHTS.findIndex(w => (r -= w) < 0) + 1 || 6;
+}
+// Direction au prochain croisement : tout droit 50 %, gauche 25 %, droite 25 %
+const drawPatrolDir = () => { const r = Math.random(); return r < 0.5 ? 'straight' : r < 0.75 ? 'left' : 'right'; };
+const patrolDirOf = rig => rig.dir || (rig.left ? 'left' : 'right');
+const PATROL_DIR_TXT = { left: 'vers la gauche', right: 'vers la droite', straight: 'tout droit' };
 // spec : patrouille lancée par un autre joueur, regardée en direct ({ roll, left, uturn, rigged, caid }) ; rien à faire, juste « Fermer »
 function showPatrolScreen(spec = null) {
   const scr = document.getElementById('patrolScreen');
@@ -577,7 +587,7 @@ function showPatrolScreen(spec = null) {
   const snow = isRadioEffectActive('SNOW');
   const greve = isRadioEffectActive('PATROL_FREEZE') || snow;
   const radioExtra = isRadioEffectActive('PATROL_DICE_BONUS') ? getRadioEffectValue('PATROL_DICE_BONUS', 2) : 0;
-  let baseRoll, finalMove, left, uturn, rigged = false;
+  let baseRoll, finalMove, dir, uturn, rigged = false;
   const talkieFx = document.getElementById('patrolTalkie');
   talkieFx.classList.add('hidden');
   scr.classList.remove('talkie', 'tk-bubble', 'tk-card', 'picking');
@@ -604,8 +614,8 @@ function showPatrolScreen(spec = null) {
       <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
   // Même disposition que le Talkie : Gauche à gauche, Droite à droite, Demi-tour (Oui / Non) au milieu ;
   // ce qui n'est pas sorti est grisé (tout est grisé tant que le dé roule)
-  const dirCells = (left, uturn, note) => `<div class="mt-3 text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</div>
-      <div class="patrol-dirs mt-1.5"><span class="${left === true ? 'on' : ''}">⬅ Gauche</span><span class="opt ${uturn ? 'on' : ''}">🔄 Demi-tour<small>${uturn == null ? '…' : uturn ? 'Oui' : 'Non'}</small></span><span class="${left === false ? 'on' : ''}">Droite ➡</span></div>
+  const dirCells = (dir, uturn, note) => `<div class="mt-3 text-[10px] font-black uppercase tracking-widest text-sky-300">Direction</div>
+      <div class="patrol-dirs mt-1.5"><span class="${dir === 'left' ? 'on' : ''}">⬅ Gauche</span><span class="${dir === 'straight' ? 'on' : ''}">⬆ Tout droit</span><span class="${dir === 'right' ? 'on' : ''}">Droite ➡</span><span class="opt ${uturn ? 'on' : ''}">🔄 Demi-tour d’abord : <small>${uturn == null ? '…' : uturn ? 'Oui' : 'Non'}</small></span></div>
       <div class="patrol-note text-xs text-slate-300 mt-2">${note}</div>`;
   dirBox.innerHTML = dirCells(null, null, two ? 'Un seul compteur pour les 2 voitures : même nombre de cases, même sens.' : 'Le compteur décide de combien de cases et dans quel sens avance la patrouille.');
 
@@ -625,8 +635,8 @@ function showPatrolScreen(spec = null) {
     document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>BOUGENT.' : 'LA PATROUILLE<br>BOUGE.';
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">${baseRoll} case${baseRoll > 1 ? 's' : ''} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
-    const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau`;
-    dirBox.innerHTML = dirCells(left, uturn, uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`);
+    const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} ${PATROL_DIR_TXT[dir]} (au croisement) sur le plateau`;
+    dirBox.innerHTML = dirCells(dir, uturn, uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`);
     // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau (c'est le joueur actif qui répond)
     if (spec) return;
     cta.classList.add('hidden');
@@ -638,12 +648,12 @@ function showPatrolScreen(spec = null) {
   const roll = (rig, seen) => {
     rigged = !!rig;
     if (seen) { rig = seen; }
-    baseRoll = rig ? rig.roll : Math.floor(Math.random() * 6) + 1;
+    baseRoll = rig ? rig.roll : drawPatrolRoll();
     finalMove = baseRoll + radioExtra;
-    left = rig ? !!rig.left : Math.random() < 0.5;
+    dir = rig ? patrolDirOf(rig) : drawPatrolDir();
     uturn = rig ? !!rig.uturn : Math.random() < PATROL_UTURN_CHANCE;
     // Les autres joueurs regardent le même lancer en direct
-    if (!spec && socket) socket.emit('patrol_rolled', { roll: baseRoll, left, uturn, rigged });
+    if (!spec && socket) socket.emit('patrol_rolled', { roll: baseRoll, dir, left: dir === 'left', uturn, rigged });
     // Talkie-walkie : pendant que le dé roule, la bulle « message au talkie » arrive, puis la carte tamponnée (choc) ;
     // le dé ne tombe qu'après, sur le résultat commandé
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

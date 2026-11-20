@@ -143,8 +143,15 @@ test('combat et patrouille en direct : le 3e joueur suit le duel et la patrouill
   await never(a, 'combat_live', 50);
   await never(b, 'combat_live', 50);
   // Patrouille lancée par le joueur actif : les deux autres la voient, pas lui
-  a.emit('patrol_rolled', { roll: 4, left: true, uturn: false, rigged: true });
-  for (const s of [b, c]) assert.deepStrictEqual(await waitFor(s, 'patrol_show'), { roll: 4, left: true, uturn: false, rigged: true, caid: res.winners[0] });
+  a.emit('patrol_rolled', { roll: 4, dir: 'straight', uturn: false, rigged: true });
+  for (const s of [b, c]) assert.deepStrictEqual(await waitFor(s, 'patrol_show'), { roll: 4, dir: 'straight', left: false, uturn: false, rigged: true, caid: res.winners[0] });
+  // Ancien téléphone (sans « dir ») : gauche ou droite comme avant
+  a.emit('patrol_rolled', { roll: 2, left: true, uturn: true });
+  assert.strictEqual((await waitFor(b, 'patrol_show')).dir, 'left');
+  // Talkie : la direction « tout droit » est gardée pour le prochain lancer
+  a.emit('rig_patrol', { roll: 6, dir: 'straight', uturn: false });
+  await new Promise(r => setTimeout(r, 50));
+  assert.deepStrictEqual(await new Promise(r => a.emit('take_patrol_rig', r)), { roll: 6, dir: 'straight', left: false, uturn: false });
   await never(a, 'patrol_show', 50);
 });
 
@@ -530,10 +537,10 @@ test('Talkie-walkie : dé, direction et option demi-tour commandés, remis une s
   const { players: [a, b] } = await startGame();
   a.emit('rig_patrol', { roll: 4, left: true, uturn: true });
   const rig = await new Promise(r => b.emit('take_patrol_rig', r));
-  assert.deepStrictEqual(rig, { roll: 4, left: true, uturn: true });
+  assert.deepStrictEqual(rig, { roll: 4, dir: 'left', left: true, uturn: true });
   assert.strictEqual(await new Promise(r => b.emit('take_patrol_rig', r)), null);
   a.emit('rig_patrol', { roll: 2, left: false }); // sans l'option
-  assert.deepStrictEqual(await new Promise(r => a.emit('take_patrol_rig', r)), { roll: 2, left: false, uturn: false });
+  assert.deepStrictEqual(await new Promise(r => a.emit('take_patrol_rig', r)), { roll: 2, dir: 'right', left: false, uturn: false });
 });
 
 test('braquage en alliance avec une prostituée au butin : chaque allié en reçoit une', async () => {

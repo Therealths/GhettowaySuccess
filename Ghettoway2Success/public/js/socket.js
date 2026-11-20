@@ -309,10 +309,10 @@ if (socket) {
     closeModal('modalCombatItemSelector');
     renderFightDuel(true);
 
-    // J-Lo Gramme agressée : Prière Miraculeuse (50% d'annuler l'agression), 1x par manche
-    if (role === 'defender' && (phase || 1) === 1 && localPlayer.caidId === 'caid_5' && !localPlayer.specialUsedThisTurn) {
+    // J-Lo Gramme agressée : Prière Miraculeuse (50% d'annuler l'agression), recharge en 4 manches
+    if (role === 'defender' && (phase || 1) === 1 && localPlayer.caidId === 'caid_5' && specialReady()) {
       if (await showAppConfirm(`${opponentCaid} t'agresse !\n\nTenter ta 'Prière Miraculeuse' (50 % d'annuler cette agression) ?`, "🙏 J-Lo Gramme")) {
-        localPlayer.specialUsedThisTurn = true;
+        markSpecialUsed();
         refreshHud();
         if (Math.random() >= 0.5) {
           socket.emit('combat_prayer_cancel');

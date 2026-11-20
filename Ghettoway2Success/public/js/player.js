@@ -92,9 +92,9 @@ async function triggerPoliceInspection(informant = false, focus = null, endingTu
   // Passeport diplomatique : proposé avant tout le reste, annule le contrôle
   if (await offerPassportAtPolice()) return;
   const caid = getMyCaid();
-  if (caid.id === 'caid_5' && !localPlayer.specialUsedThisTurn) {
+  if (caid.id === 'caid_5' && specialReady()) {
     if (await showAppConfirm("Tenter ta 'Prière Miraculeuse' (50 % d'annuler ce contrôle) ?", "🙏 J-Lo Gramme")) {
-      localPlayer.specialUsedThisTurn = true;
+      markSpecialUsed();
       refreshHud();
       if (Math.random() >= 0.5) return showAppAlert("FACE ! Contrôle annulé ce tour !", "🙏 Miracle");
       await showAppAlert("PILE ! La prière échoue.", "🙏 Échec");
@@ -299,9 +299,9 @@ function refreshHud() {
   document.getElementById('hudSpecialPowerDesc').innerText = caid.skillDesc;
   const btnSpec = document.getElementById('btnSpecialPower');
   const actionLabel = document.getElementById('hudSpecialActionBtnLabel');
-  // Capacité déjà utilisée cette manche : bouton grisé (il reste touchable pour le rappeler)
-  btnSpec.classList.toggle('used', !!localPlayer.specialUsedThisTurn);
-  actionLabel.innerText = localPlayer.specialUsedThisTurn ? 'épuisée' : 'prête';
+  // Capacité en recharge (4 manches) : bouton grisé (il reste touchable pour le rappeler)
+  btnSpec.classList.toggle('used', !specialReady());
+  actionLabel.innerText = specialReady() ? 'prête' : `manche ${specialReadyRound()}`;
   renderInventoryList(); // bouton Sac et écran Sac (js/sac.js)
   updateArenaLiveStats();
   if (socket) {
@@ -336,6 +336,7 @@ function refreshHud() {
       canetteDefMalus: localPlayer.canetteDefMalus || 0,
       firstWeaponDoubled: localPlayer.firstWeaponDoubled,
       specialUsedThisTurn: localPlayer.specialUsedThisTurn,
+      specialUsedRound: localPlayer.specialUsedRound || 0,
       jloDoubledKgBought: localPlayer.jloDoubledKgBought || 0,
       freeItemsClaimed: localPlayer.freeItemsClaimed || [],
       roundSeen: localPlayer.roundSeen || 0,

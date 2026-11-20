@@ -72,6 +72,18 @@ let localPlayer = {
   allianceActive: false,
   activeAllies: [] // { allyToken, caid, caidId, grosBrasCount, allyAtk, hasProstituteInTransit } par allié du tour
 };
+// Capacité spéciale : une fois utilisée, de nouveau prête 4 manches plus tard (utilisée manche 2 → prête manche 6)
+const SPECIAL_COOLDOWN = 4;
+const specialReadyRound = () => (localPlayer.specialUsedRound || 0) + SPECIAL_COOLDOWN;
+// specialUsedThisTurn : utilisée avant la règle des 4 manches (partie en cours), compte comme utilisée cette manche
+function specialReady() {
+  if (localPlayer.specialUsedThisTurn && !localPlayer.specialUsedRound) return false;
+  return !localPlayer.specialUsedRound || (currentSession.round || 1) >= specialReadyRound();
+}
+function markSpecialUsed() {
+  localPlayer.specialUsedThisTurn = true;
+  localPlayer.specialUsedRound = currentSession.round || 1;
+}
 function getMyCaid() {
   const id = localPlayer.caidId || localStorage.getItem('g2s_saved_caid_id');
   return CAID_ROSTER.find(c => c.id === id) || CAID_ROSTER[0];

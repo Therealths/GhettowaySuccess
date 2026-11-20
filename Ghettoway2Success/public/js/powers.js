@@ -118,7 +118,7 @@ function refreshPowerChoice() { if (powState() === 'choix') powChoice(); }
 
 async function openSpecialAbilityPrompt() {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour de jouer !", "Tour Inactif");
-  if (localPlayer.specialUsedThisTurn) return showAppAlert("Capacité spéciale déjà utilisée cette manche !", "Capacité Épuisée");
+  if (!specialReady()) return showAppAlert(`Capacité spéciale déjà utilisée : elle se recharge en 4 manches.\nDe nouveau prête à la manche ${specialReadyRound()}.`, "Capacité en recharge");
   powItem = null;
   const caid = getMyCaid();
   if (POW_TARGETED[caid.id]) {
@@ -131,7 +131,7 @@ async function openSpecialAbilityPrompt() {
     const stage = `<div class="pow-solo">${powAv(caid.imageFile, 'Toi', 'halo')}</div>`;
     const bottom = `${powRow('ph-siren', 'Contrôle de police annulé', '50 %')}
       <div class="mt-2">${powRow('ph-sword', 'Agression d’un rival annulée', '50 %')}</div>
-      <div class="text-center text-[11px] font-bold text-slate-400 mt-3">Elle te sera proposée automatiquement au bon moment. 1 fois par manche.</div>
+      <div class="text-center text-[11px] font-bold text-slate-400 mt-3">Elle te sera proposée automatiquement au bon moment. Se recharge en 4 manches.</div>
       <button type="button" class="ally-cta pow-cta mt-4" onclick="closePowerScreen()">Compris</button>`;
     return powRender('info', caid, powChipHtml('ph-hands-praying', 'Pouvoir passif'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), stage, bottom);
   }
@@ -142,19 +142,19 @@ async function openSpecialAbilityPrompt() {
   const info = sieste
     ? `${powHearts(h)}<div class="text-center text-sm font-bold text-slate-300 mt-2">Cœurs de vie : ${h} / 3${h < 3 ? ` → <b class="pow-ac">${h + 1} / 3</b>` : ' (déjà au maximum)'}</div>`
     : powRow('ph-path', 'Déplacement', 'jusqu’à 5 cases');
-  const bottom = `${info}<div class="text-center text-[11px] font-bold text-slate-500 mt-2">Utilisable 1 fois par manche</div>
+  const bottom = `${info}<div class="text-center text-[11px] font-bold text-slate-500 mt-2">Se recharge en 4 manches après usage</div>
     <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closePowerScreen()">Annuler</button><button type="button" class="ally-cta pow-cta" onclick="launchSelfPower()">${POW_CTA[caid.id] || 'Activer'}</button></div>`;
   return powRender('self', caid, powChipHtml('ph-lightning', 'Capacité spéciale'), powHeadHtml(caid.name, caid.skillName, escapeHtml(caid.skillDesc)), stage, bottom);
 }
 
 // LANCEMENT sans cible : Zzz puis le cœur qui se rallume, ou la boule qui roule
 function launchSelfPower() {
-  if (localPlayer.specialUsedThisTurn) return;
+  if (!specialReady()) return;
   const caid = getMyCaid();
   const sieste = caid.id === 'caid_3';
   const before = localPlayer.hearts;
   if (sieste) localPlayer.hearts = Math.min(3, localPlayer.hearts + 1);
-  localPlayer.specialUsedThisTurn = true;
+  markSpecialUsed();
   refreshHud();
   const stage = sieste
     ? `<div class="pow-solo">${powAv(caid.imageFile, 'Toi', 'sleep')}<span class="pow-z z0">Z</span><span class="pow-z z1">z</span><span class="pow-z z2">z</span></div>`
@@ -177,7 +177,7 @@ function openItemTargetPower(item) {
 
 async function launchTargetedPower() {
   const target = (connectedRivals || []).find(r => r.playerToken === powTargetToken);
-  if (!target || (!powItem && localPlayer.specialUsedThisTurn)) return;
+  if (!target || (!powItem && !specialReady())) return;
   if (isRivalProtectedByPact(target.playerToken)) return showAppAlert(`Pacte de non-agression avec ce Caïd jusqu’à la fin de la manche ${fightPactUntil(target.playerToken) || ((currentSession.round || 1) + 1)} : impossible de le cibler.`, "🤝 Cible protégée");
   const caid = powCaid();
   const effect = POW_TARGETED[caid.id];
@@ -200,7 +200,7 @@ async function launchTargetedPower() {
     const idx = localPlayer.inventory.indexOf(powItem);
     if (idx >= 0) localPlayer.inventory.splice(idx, 1);
     powItem = null;
-  } else localPlayer.specialUsedThisTurn = true;
+  } else markSpecialUsed();
   refreshHud();
   const name = allyRivalName(target);
   const stage = powDuo(powAv(caid.imageFile, 'Toi', 'me'), powAv(allyCaidImg(target.caidId, name), name, 'hit'), powFx(effect), `fx-${effect}`);

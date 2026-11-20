@@ -1762,18 +1762,21 @@ io.on('connection', (socket) => {
   });
 
   // Talkie-walkie de flic : dé et direction choisis à l'avance, pris par le prochain lancer de patrouille
-  socket.on('rig_patrol', ({ roll, left, uturn } = {}) => {
+  socket.on('rig_patrol', ({ roll, dir, left, uturn } = {}) => {
     const room = rooms[socket.roomId];
     if (!room) return;
     // Gauche ou droite, et le demi-tour en option (il n'annule pas la direction)
-    room.patrolRig = { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), left: !!left, uturn: !!uturn };
+    // dir : gauche, tout droit ou droite (left gardé pour les téléphones pas encore à jour)
+    const d = ['left', 'right', 'straight'].includes(dir) ? dir : (left ? 'left' : 'right');
+    room.patrolRig = { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), dir: d, left: d === 'left', uturn: !!uturn };
   });
   // Patrouille lancée par le joueur actif : les autres la regardent en direct (Talkie compris)
-  socket.on('patrol_rolled', ({ roll, left, uturn, rigged } = {}) => {
+  socket.on('patrol_rolled', ({ roll, dir, left, uturn, rigged } = {}) => {
     const room = rooms[socket.roomId];
     const me = room && room.players.find(p => p.socketId === socket.id);
     if (!room || !me || !room.gameStarted) return;
-    socket.to(socket.roomId).emit('patrol_show', { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), left: !!left, uturn: !!uturn, rigged: !!rigged, caid: me.caidName || 'un Caïd' });
+    const d = ['left', 'right', 'straight'].includes(dir) ? dir : (left ? 'left' : 'right');
+    socket.to(socket.roomId).emit('patrol_show', { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), dir: d, left: d === 'left', uturn: !!uturn, rigged: !!rigged, caid: me.caidName || 'un Caïd' });
   });
   socket.on('take_patrol_rig', (ack) => {
     const room = rooms[socket.roomId];

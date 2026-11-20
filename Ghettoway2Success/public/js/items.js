@@ -526,7 +526,7 @@ function confirmCombatItems() {
 // =========================================================================
 // TALKIE-WALKIE DE FLIC : on choisit en secret le dé et la direction de la prochaine patrouille
 // =========================================================================
-let talkieItem = null, talkieRoll = 3, talkieLeft = true, talkieUturn = false;
+let talkieItem = null, talkieRoll = 3, talkieDir = 'straight', talkieUturn = false;
 function openTalkie(it) {
   talkieItem = it;
   const scr = document.getElementById('talkieScreen');
@@ -541,11 +541,10 @@ function openTalkie(it) {
 function renderTalkie() {
   setGauge(document.getElementById('talkieGauge'), talkieRoll);
   document.getElementById('talkieVal').innerHTML = `${talkieRoll} <span>case${talkieRoll > 1 ? 's' : ''}</span>`;
-  // Gauche à gauche, droite à droite (au prochain croisement) ; au milieu, le demi-tour en option : Oui / Non d'un toucher
-  const dir = (l, t) => `<button type="button" class="${l === talkieLeft ? 'on' : ''}" onclick="talkieLeft=${l};renderTalkie()">${t}</button>`;
-  document.getElementById('talkieDirs').innerHTML = dir(true, '⬅ Gauche')
-    + `<button type="button" class="opt ${talkieUturn ? 'on' : ''}" onclick="talkieUturn=!talkieUturn;renderTalkie()">🔄 Demi-tour<small>${talkieUturn ? 'Oui' : 'Non'}</small></button>`
-    + dir(false, 'Droite ➡');
+  // Gauche, tout droit ou droite (au prochain croisement) ; dessous, le demi-tour en option : Oui / Non d'un toucher
+  const dir = (d, t) => `<button type="button" class="${d === talkieDir ? 'on' : ''}" onclick="talkieDir='${d}';renderTalkie()">${t}</button>`;
+  document.getElementById('talkieDirs').innerHTML = dir('left', '⬅ Gauche') + dir('straight', '⬆ Tout droit') + dir('right', 'Droite ➡')
+    + `<button type="button" class="opt ${talkieUturn ? 'on' : ''}" onclick="talkieUturn=!talkieUturn;renderTalkie()">🔄 Demi-tour d’abord : <small>${talkieUturn ? 'Oui' : 'Non'}</small></button>`;
 }
 // Compteur du Talkie : on fait tourner l'aiguille au doigt, de 1 à 6 cases (le bonus radio s'ajoute au lancer)
 function bindTalkieGauge() {
@@ -575,12 +574,12 @@ async function sendTalkieOrder() {
   const idx = localPlayer.inventory.indexOf(talkieItem);
   if (idx < 0) return closeTalkie();
   const it = talkieItem;
-  if (socket) socket.emit('rig_patrol', { roll: talkieRoll, left: talkieLeft, uturn: talkieUturn });
+  if (socket) socket.emit('rig_patrol', { roll: talkieRoll, dir: talkieDir, left: talkieDir === 'left', uturn: talkieUturn });
   localPlayer.inventory.splice(idx, 1);
   talkieItem = null;
   closeTalkie();
   refreshHud();
-  await showCardPlayed(it, [['ph-gauge', 'Prochaine patrouille', `${talkieRoll} case${talkieRoll > 1 ? 's' : ''}`], ['ph-arrows-left-right', 'Direction', talkieLeft ? '⬅ Gauche' : 'Droite ➡'], ['ph-arrow-u-up-left', 'Demi-tour d’abord', talkieUturn ? '🔄 Oui' : 'Non'], ['ph-broadcast', 'Bonus de la radio', 'en plus']]);
+  await showCardPlayed(it, [['ph-gauge', 'Prochaine patrouille', `${talkieRoll} case${talkieRoll > 1 ? 's' : ''}`], ['ph-arrows-left-right', 'Direction', { left: '⬅ Gauche', straight: '⬆ Tout droit', right: 'Droite ➡' }[talkieDir]], ['ph-arrow-u-up-left', 'Demi-tour d’abord', talkieUturn ? '🔄 Oui' : 'Non'], ['ph-broadcast', 'Bonus de la radio', 'en plus']]);
 }
 
 // =========================================================================

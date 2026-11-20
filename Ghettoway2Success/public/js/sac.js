@@ -250,7 +250,7 @@ function openWaitProfile() {
   const lascars = lp.musclesOnPerson.length ? lp.musclesOnPerson.map(m => `${escapeHtml(m.name)} <small>(+${m.bonusVal || 1})</small>`).join('<br>') : 'aucun';
   const atQg = lp.prostitutesAtSafeList || [];
   const rent = atQg.reduce((s, p) => s + (p.revenue || prostituteRent(p.level || 1)), 0);
-  const used = !!lp.specialUsedThisTurn;
+  const used = !specialReady();
   document.getElementById('wpBody').innerHTML = `
     <div class="wp-head"><img src="${c.imageFile}" alt=""><div><small>Mon Caïd</small><b>${escapeHtml(c.name)}</b></div></div>
     <div class="wp-stats">
@@ -267,7 +267,7 @@ function openWaitProfile() {
       ${row('ph-dog', 'Chien errant', lp.strayDogActive ? 'avec toi (+2 / +2)' : 'non')}
     </div>
     <div class="ws-label">Capacité spéciale</div>
-    <div class="wp-skill ${used ? 'used' : ''}"><b><i class="ph-fill ph-lightning"></i> ${escapeHtml(c.skillName)}</b><p>${escapeHtml(c.skillDesc)}</p><em>${used ? 'déjà utilisée' : 'prête pour ton tour'}</em></div>
+    <div class="wp-skill ${used ? 'used' : ''}"><b><i class="ph-fill ph-lightning"></i> ${escapeHtml(c.skillName)}</b><p>${escapeHtml(c.skillDesc)}</p><em>${used ? `en recharge · prête à la manche ${specialReadyRound()}` : 'prête pour ton tour'}</em></div>
     <div class="wp-bm"><span class="b">＋ ${escapeHtml(c.bonus)}</span><span class="m">− ${escapeHtml(c.malus)}</span></div>`;
   document.getElementById('waitProfile').classList.remove('hidden');
 }
