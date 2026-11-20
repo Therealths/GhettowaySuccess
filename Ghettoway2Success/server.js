@@ -1030,8 +1030,17 @@ io.on('connection', (socket) => {
           .map(t => room.players.find(p => p.playerToken === t))
           .filter(Boolean)
       : [];
+    // Un même Caïd ne peut être attaqué qu'une fois par tour par le même joueur (les alliés qui l'ont déjà attaqué restent en dehors)
+    const turnKey = `${room.round}:${room.turnPos || 0}`;
+    if (!room.attacksThisTurn || room.attacksThisTurn.turnId !== turnKey) room.attacksThisTurn = { turnId: turnKey, pairs: [] };
+    const hit = p => room.attacksThisTurn.pairs.includes(`${p.playerToken}>${targetPlayer.playerToken}`);
+    if (hit(attackerPlayer)) {
+      return socket.emit('error_msg', `Tu as déjà attaqué ${targetPlayer.caidName || 'ce Caïd'} ce tour : une seule attaque par joueur et par tour.`);
+    }
+    allyPlayers.splice(0, allyPlayers.length, ...allyPlayers.filter(p => !hit(p)));
     const isAllied = allyPlayers.length > 0;
     const attackers = [attackerPlayer, ...allyPlayers];
+    attackers.forEach(p => room.attacksThisTurn.pairs.push(`${p.playerToken}>${targetPlayer.playerToken}`));
 
     const attackerTokens = attackers.map(p => p.playerToken);
 
@@ -1491,6 +1500,8 @@ io.on('connection', (socket) => {
         const p = room.players.find(x => x.playerToken === tok);
         sendToPlayer(p, 'combat_aborted', {});
       });
+      // Assaut annulé par l'attaquant avant le duel : il ne compte pas comme une attaque
+      if (room.attacksThisTurn) room.attacksThisTurn.pairs = room.attacksThisTurn.pairs.filter(k => !c.attackerTokens.some(t => k === `${t}>${c.defenderToken}`));
       combatLive(room, room.activeCombat, 'aborted');
       room.activeCombat = null;
     }

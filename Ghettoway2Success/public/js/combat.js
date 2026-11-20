@@ -226,9 +226,11 @@ function fightPactUntil(token) {
     .reduce((m, p) => Math.max(m, p.untilRound || 0), 0);
 }
 
+// Caïds déjà attaqués pendant ce tour (une seule attaque par cible et par tour ; le serveur le vérifie aussi)
+let attackedThisTurn = [];
 function renderFightChoice() {
   const rivals = connectedRivals || [];
-  const isOff = r => !!r.inHospital || !!r.away || isRivalProtectedByPact(r.playerToken);
+  const isOff = r => !!r.inHospital || !!r.away || isRivalProtectedByPact(r.playerToken) || attackedThisTurn.includes(r.playerToken);
   const free = rivals.filter(r => !isOff(r));
   if (!free.some(r => r.playerToken === fightTargetToken)) fightTargetToken = free.length ? free[0].playerToken : null;
   const target = free.find(r => r.playerToken === fightTargetToken);
@@ -245,6 +247,7 @@ function renderFightChoice() {
     if (isRivalProtectedByPact(r.playerToken)) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🤝 ${name}</b><span>Pacte actif : pas d’attaque jusqu’à la manche ${fightPactUntil(r.playerToken) || (currentSession.round || 1)}</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     if (r.away) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>💤 ${name}</b><span>A quitté la partie : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     if (r.inHospital) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🏥 ${name}</b><span>À l’hôpital : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
+    if (attackedThisTurn.includes(r.playerToken)) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>⚔️ ${name}</b><span>Déjà attaqué ce tour : une seule attaque par tour</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     const on = r.playerToken === fightTargetToken;
     return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickFightTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)}<br>Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'}<br>Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
   };
@@ -287,6 +290,7 @@ async function initiateCombatEngagement() {
   if (socket) {
     const btn = document.getElementById('btnInitiateFightAction');
     if (btn) btn.disabled = true; // en attente de l'ouverture du duel
+    attackedThisTurn.push(target.playerToken);
     socket.emit('start_combat_engagement', {
       targetSocketId: target.socketId,
       targetPlayerToken: target.playerToken,
@@ -304,6 +308,8 @@ function fightCanAbort(state) {
   return state === 'duel' && !!d && d.role === 'attacker' && (d.phase || 1) === 1 && !isCombatReady && !fightReadyNames.size;
 }
 function abortCombat() {
+  // Assaut annulé avant le duel : il ne compte pas
+  if (currentDuelInfo && currentDuelInfo.role === 'attacker') attackedThisTurn.pop();
   if (socket && currentDuelInfo) socket.emit('combat_cancel');
   else closeFightScreen();
 }

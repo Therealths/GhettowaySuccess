@@ -254,6 +254,7 @@ if (socket) {
     // Nouveau tour, même si c'est encore le même joueur (à 2 : A B puis B A, B joue deux tours d'affilée)
     const newTurn = turnId ? turnId !== lastTurnId : activePlayerToken !== lastActivePlayerToken;
     lastTurnId = turnId;
+    if (newTurn) attackedThisTurn = [];
     if (activePlayerToken === myPlayerToken && newTurn) notifyMyTurn(round);
     // Balle perforante, Couvercle... : effets valables jusqu'à la fin du tour en cours (le Pot de Protéine dure la manche)
     if (newTurn && !currentDuelInfo) { resetCombatModifiers(); myWeaponNullified = false; refreshHud(); }

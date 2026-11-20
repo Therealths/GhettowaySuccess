@@ -155,6 +155,26 @@ test('combat et patrouille en direct : le 3e joueur suit le duel et la patrouill
   await never(a, 'patrol_show', 50);
 });
 
+test('une seule attaque par cible et par tour ; un assaut annulé avant le duel ne compte pas', async () => {
+  const { players: [a, b] } = await startGame();
+  const turn = await waitFor(a, 'turn_state_updated');
+  const [att, def] = turn.activePlayerToken === a.token ? [a, b] : [b, a];
+  att.emit('start_combat_engagement', { targetPlayerToken: def.token });
+  await waitFor(att, 'combat_duel_opened');
+  att.emit('combat_cancel');
+  await waitFor(att, 'combat_aborted');
+  att.emit('start_combat_engagement', { targetPlayerToken: def.token });
+  await waitFor(att, 'combat_duel_opened');
+  att.emit('combat_set_ready', { currentStat: 1 });
+  def.emit('combat_set_ready', { currentStat: 5 });
+  await waitFor(def, 'combat_phase2_started');
+  att.emit('combat_set_ready', { currentStat: 0 });
+  def.emit('combat_set_ready', { currentStat: 9 });
+  await waitFor(att, 'combat_finished_result');
+  att.emit('start_combat_engagement', { targetPlayerToken: def.token });
+  assert.match(await waitFor(att, 'error_msg'), /déjà attaqué/);
+});
+
 test('racket : le vainqueur prend jusqu’à 3 objets de Fouille au hasard, jamais l’équipement', async () => {
   const { players: [a, b] } = await startGame();
   const objets = ['Kebab', 'Sifflet', 'Botox', 'Canette'].map((name, i) => ({ id: `o${i}`, type: 'ITEM_CARD', name }));
