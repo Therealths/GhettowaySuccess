@@ -1086,6 +1086,10 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .sac-zoom-card { width: min(250px, 68%); flex: none; }
 .sac-zoom-card .deck-cardbox { box-shadow: 0 0 0 3px rgba(251,191,36,0.9), 0 0 40px rgba(251,191,36,0.35), 0 24px 50px rgba(0,0,0,0.85); border-radius: 16px; }
 .sac-zoom-actions { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 6px; }
+/* Patch « PROMO » des boutiques pendant une annonce radio de soldes */
+.promo-patch { position: absolute; top: 6px; right: 6px; z-index: 2; display: flex; flex-direction: column; align-items: center; line-height: 1; padding: 4px 7px 5px; border-radius: 8px; transform: rotate(8deg); background: linear-gradient(135deg, #ef4444, #b91c1c); border: 2px solid #fde047; color: #fde047; font-family: 'Anton', sans-serif; font-size: 11px; letter-spacing: 0.06em; box-shadow: 0 3px 10px rgba(0,0,0,0.6); pointer-events: none; }
+.promo-patch b { color: #fff; font-size: 14px; font-weight: 400; margin-top: 1px; }
+.sac-zoom-actions .find-cta:disabled { filter: grayscale(1); opacity: 0.45; }
 .sac-zoom-actions .find-cta { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; }
 .sac-zrow { display: flex; gap: 8px; }
 .sac-zbtn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px 6px; border-radius: 14px; font-size: 12px; font-weight: 900; text-transform: uppercase; }

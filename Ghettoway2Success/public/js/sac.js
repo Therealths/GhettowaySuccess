@@ -13,6 +13,10 @@ const SAC_SLOTS = [
 const isGear = it => ['WEAPON', 'ARMOR', 'VEHICLE'].includes(it.type);
 const inSac = it => it && it.name !== 'À pied' && !['FOOT', 'MUSCLE', 'PROSTITUTE'].includes(it.type);
 const sacItems = () => localPlayer.inventory.filter(inSac);
+// Matériel de labo sur soi : une carte du Sac en plus (rangée avec l'équipement), qui s'installe seulement au QG
+const isLabCard = it => it && it.type === 'LABGEAR';
+const isEqCard = it => isGear(it) || isLabCard(it);
+const sacCardsAll = () => localPlayer.labGearInTransit ? [...sacItems(), { type: 'LABGEAR', lvl: localPlayer.labGearInTransit }] : sacItems();
 
 // Image et texte de boutique d'un équipement (retrouvé par son nom dans les catalogues)
 function gearInfo(it) {
@@ -76,6 +80,7 @@ function sacSlotsHtml() {
 const shopCardFace = ({ img, name, bonus, desc, cls }) => `<div class="sac-gear ${cls || ''}"><img src="${img}" alt=""><div class="b"><h4>${escapeHtml(name)}</h4><span>${bonus}</span><p>${escapeHtml(desc || '')}</p></div></div>`;
 // Face de la carte : carte Fouille de l'objet, ou carte de boutique de l'équipement
 function sacFace(it) {
+  if (isLabCard(it)) return labFace(labLevelInfo(it.lvl));
   if (isGear(it)) {
     const g = gearInfo(it);
     return shopCardFace({ img: g.img, name: it.name, bonus: `${g.bonus}${g.firearm ? ' · 🔥 Feu' : ''}`, desc: g.desc, cls: g.slot.cls });
@@ -86,6 +91,7 @@ function sacFace(it) {
 }
 // Boutons de la carte zoomée : action principale, puis vendre / jeter
 function sacActions(it) {
+  if (isLabCard(it)) return `<button type="button" class="find-cta" disabled><i class="ph-bold ph-house-line"></i> Installation QG</button><span class="sac-pill"><i class="ph-bold ph-qr-code"></i> Flashe le QR de ton QG pour l'installer</span>`;
   const real = localPlayer.inventory.indexOf(it);
   const trash = `<button type="button" class="sac-zbtn ghost" onclick="sacDo('discard', ${real})"><i class="ph-bold ph-trash"></i> Jeter</button>`;
   if (isGear(it)) {
@@ -106,9 +112,9 @@ function sacCardHtml(it, idx) {
 function renderSac() {
   const scr = document.getElementById('sacScreen');
   if (!scr) return;
-  const all = sacItems();
-  const counts = { tout: all.length, obj: all.filter(it => !isGear(it)).length, eq: all.filter(isGear).length };
-  sacList = all.filter(it => sacFilter === 'tout' || (sacFilter === 'eq') === isGear(it));
+  const all = sacCardsAll();
+  const counts = { tout: all.length, obj: all.filter(it => !isEqCard(it)).length, eq: all.filter(isEqCard).length };
+  sacList = all.filter(it => sacFilter === 'tout' || (sacFilter === 'eq') === isEqCard(it));
   sacIndex = Math.max(0, Math.min(sacIndex, sacList.length - 1));
   document.getElementById('sacSlots').innerHTML = sacSlotsHtml();
   document.getElementById('sacTabs').innerHTML = [['tout', 'Tout'], ['obj', 'Objets'], ['eq', 'Équipement']]
@@ -213,7 +219,7 @@ function sacUse(idx) {
 
 // Bouton « Sac » de l'écran principal : nombre de cartes, argent sur toi, mini-images de ce que tu portes
 function renderSacButton() {
-  const n = sacItems().length;
+  const n = sacCardsAll().length;
   document.getElementById('hudItemCount').innerText = n;
   document.getElementById('hudPocketMini').innerText = `${localPlayer.pocketCash.toLocaleString()} € · ${localPlayer.drugs} kg sur toi`;
   document.getElementById('hudGearMini').innerHTML = SAC_SLOTS.map(s => {

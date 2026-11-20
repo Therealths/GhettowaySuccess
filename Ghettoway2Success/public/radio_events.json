@@ -134,6 +134,29 @@
       }
     },
     {
+      "id": "rad_market_day",
+      "title": "Jour de marché",
+      "impact": "Zone Marché : déplacements x2",
+      "desc": "C'est jour de marché : chaque case parcourue dans la zone Marché coûte 2 points de déplacement au lieu d'un cette manche.",
+      "effectType": "BOARD_RULE_ONLY",
+      "effectVal": 0,
+      "message": "Jour de marché ! Les allées sont blindées, on avance au ralenti entre les étals…",
+      "rule": {
+        "big": "PM x2",
+        "tone": "plateau",
+        "label": "dans la zone Marché",
+        "sub": "sur le plateau, cette manche",
+        "rows": [
+          [
+            "ph-storefront",
+            "1 case dans la zone Marché",
+            "1 PM",
+            "2 PM"
+          ]
+        ]
+      }
+    },
+    {
       "id": "rad_police_strike",
       "title": "Grève au Commissariat",
       "impact": "Patrouille immobile cette manche",
@@ -419,6 +442,41 @@
             "Grosse cylindrée",
             "10 000 €",
             "7 000 €"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_depot_sale",
+      "title": "Soldes au Dépôt-Vente",
+      "impact": "-50 % sur les sets de culture",
+      "desc": "Le Dépôt-Vente vide son arrière-boutique : -50 % sur tous les sets de culture cette manche.",
+      "effectType": "LAB_PRICE_MULT",
+      "effectVal": 0.5,
+      "message": "Le Dépôt-Vente vide son arrière-boutique… tout le matos de culture à moitié prix !",
+      "rule": {
+        "big": "-50 %",
+        "tone": "bonus",
+        "label": "sur les sets de culture",
+        "sub": "au Dépôt-Vente",
+        "rows": [
+          [
+            "ph-flask",
+            "Set de culture lvl1",
+            "8 000 €",
+            "4 000 €"
+          ],
+          [
+            "ph-flask",
+            "Set de culture lvl2",
+            "15 000 €",
+            "7 500 €"
+          ],
+          [
+            "ph-flask",
+            "Set de culture lvl3",
+            "30 000 €",
+            "15 000 €"
           ]
         ]
       }

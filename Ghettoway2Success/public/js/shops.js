@@ -67,6 +67,12 @@ function getDealerItemEffectivePrice(item) {
   return isRadioEffectActive('VEHICLE_PRICE_MULT') ? Math.round(price * getRadioEffectValue('VEHICLE_PRICE_MULT', 0.7)) : price;
 }
 
+// Soldes au Dépôt-Vente (Flash Radio)
+const getLabEffectivePrice = l => isRadioEffectActive('LAB_PRICE_MULT') ? Math.round(l.prix * getRadioEffectValue('LAB_PRICE_MULT', 0.5)) : l.prix;
+// Patch « PROMO » collé sur l'image d'une carte quand une annonce radio fait baisser son prix
+const promoPatchHtml = (full, radioPrice) => full > 0 && radioPrice < full
+  ? `<span class="promo-patch">PROMO<b>-${Math.round((1 - radioPrice / full) * 100)} %</b></span>` : '';
+
 // Bon de réduction activé depuis le Sac : −50 % sur le prochain achat payant de la boutique
 const hasVoucher = shop => (localPlayer.vouchers || []).includes(shop);
 const voucherCost = (shop, cost) => cost > 0 && hasVoucher(shop) ? Math.round(cost / 2) : cost;
@@ -78,7 +84,7 @@ function useVoucher(shop) {
 }
 // Prix affiché : barré quand il est réduit
 const priceTagHtml = (full, cost) => cost < full
-  ? `<span class="line-through text-[9px] text-slate-500 mr-1">${full.toLocaleString()}€</span><span class="text-emerald-400">${cost.toLocaleString()} €</span>`
+  ? `<span class="line-through decoration-rose-500 decoration-2 text-[10px] text-slate-400 mr-1">${full.toLocaleString()}€</span><span class="text-emerald-400">${cost.toLocaleString()} €</span>`
   : `${cost.toLocaleString()} €`;
 // Manteau de fourrure (déguisement de Mac) : une Prostituée Niv. 1 gratuite, pris tout seul dans le Sac
 const macCoatIndex = () => localPlayer.inventory.findIndex(it => it && it.eff === 'free_prostitute');
@@ -215,7 +221,8 @@ function buildArmoryStackDOM() {
     const badgeColor = isWeapon ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-sky-500/20 text-sky-300 border-sky-500/40';
     const displayBonus = isWeapon ? `+${item.bonusVal} Attaque` : `+${item.bonusVal} Défense`;
     const firearmBadge = item.isFirearm ? `<span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[8px] font-bold">🔥 Feu</span>` : '';
-    const effectivePrice = voucherCost('Armurerie', getArmoryItemEffectivePrice(item));
+    const radioPrice = getArmoryItemEffectivePrice(item);
+    const effectivePrice = voucherCost('Armurerie', radioPrice);
     const priceHtml = item.prix === 0 ? 'GRATUIT' : priceTagHtml(item.prix, effectivePrice);
 
     return `
@@ -227,6 +234,7 @@ function buildArmoryStackDOM() {
               <i class="ph-bold ${isWeapon ? 'ph-sword text-rose-400' : 'ph-shield text-sky-400'} text-3xl"></i>
               <span class="text-[8px] font-mono mt-1">${imgFile}</span>
             </div>
+            ${promoPatchHtml(item.prix, radioPrice)}
           </div>
           <div class="flex items-center justify-between gap-1">
             <span class="px-1.5 py-0.5 rounded-md border ${badgeColor} font-mono text-[9px] font-black">${displayBonus}</span>
@@ -498,6 +506,7 @@ function buildDealerStackDOM() {
             <i class="ph-bold ph-moped text-3xl"></i>
             <span class="text-[8px] font-mono mt-1">${item.image}</span>
           </div>
+          ${promoPatchHtml(item.prix, getDealerItemEffectivePrice(item))}
         </div>
         <div class="flex items-center justify-between gap-1">
           <span class="px-1.5 py-0.5 rounded-md border bg-amber-500/20 text-amber-300 border-amber-500/40 font-mono text-[9px] font-black">+${item.bonusVal} PM</span>
@@ -618,7 +627,7 @@ function buildMagasinStackDOM() {
     return `
       <div id="magasinDeckCard_${idx}" onclick="onMagasinCardClick(${idx})" class="deck-card-item border border-violet-500/45">
         <div>
-          <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5">${labArt(l, '', true)}</div>
+          <div class="relative w-full h-24 rounded-xl overflow-hidden bg-black/80 border border-white/10 mb-1.5">${labArt(l, '', true)}${st === 'installed' ? '' : promoPatchHtml(l.prix, getLabEffectivePrice(l))}</div>
           <div class="flex items-center justify-between gap-1">
             <span class="px-1.5 py-0.5 rounded-md border bg-violet-500/20 text-violet-200 border-violet-500/40 font-mono text-[9px] font-black">+${l.kg} kg / manche</span>
             <span class="text-[9px] font-mono text-slate-400">Niv. ${l.lvl}/${total}</span>
@@ -629,7 +638,7 @@ function buildMagasinStackDOM() {
         <div class="pt-1.5 border-t border-white/10">
           <div class="flex items-center justify-between font-mono mb-1">
             <span class="text-[9px] text-slate-400 uppercase">${l.lvl > 1 ? 'Amélioration :' : 'Prix :'}</span>
-            <span class="text-xs font-black text-ghetto-gold">${st === 'installed' ? '—' : `${l.prix.toLocaleString()} €`}</span>
+            <span class="text-xs font-black text-ghetto-gold">${st === 'installed' ? '—' : priceTagHtml(l.prix, getLabEffectivePrice(l))}</span>
           </div>
           ${btn}
         </div>
@@ -655,9 +664,10 @@ function onMagasinCardClick(idx) {
 async function buyMagasinLab(lvl) {
   const l = labLevelInfo(lvl);
   if (!l || labLevelState(l) !== 'next') return;
-  if (localPlayer.pocketCash + localPlayer.safeCash < l.prix) return showBrokeScreen(l.prix, labSetName(l));
+  const cost = getLabEffectivePrice(l);
+  if (localPlayer.pocketCash + localPlayer.safeCash < cost) return showBrokeScreen(cost, labSetName(l));
   closeModal('modalMagasinShop');
-  openPaymentChoiceModal({ type: 'lab', data: { lvl }, cost: l.prix, name: labSetName(l), shop: 'Dépôt-Vente' });
+  openPaymentChoiceModal({ type: 'lab', data: { lvl }, cost, name: labSetName(l), shop: 'Dépôt-Vente' });
 }
 
 // Malus J-Lo Gramme : ses 5 premiers kg achetés au grossiste (sur la partie) coûtent le double
