@@ -569,6 +569,58 @@
       }
     },
     {
+      "id": "rad_network_down",
+      "title": "Panne de réseau",
+      "impact": "Talkie-walkie inutilisable cette manche",
+      "desc": "Une panne géante coupe toutes les ondes : les Talkie-walkies de flic ne marchent pas cette manche.",
+      "effectType": "NETWORK_DOWN",
+      "effectVal": 0,
+      "message": "Panne de réseau géante ! Plus de 4G, plus de radio de flic, même les talkies grésillent dans le vide…",
+      "rule": {
+        "big": "Talkie",
+        "tone": "malus",
+        "label": "hors service",
+        "sub": "cette manche",
+        "rows": [
+          [
+            "ph-walkie-talkie",
+            "Talkie-walkie de flic",
+            "patrouille truquée",
+            "rien"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_scrap_bonus",
+      "title": "Prime à la casse",
+      "impact": "Revente des objets à 100 %",
+      "desc": "Le Dépôt-Vente rachète tout au prix fort : la revente des armes, protections et véhicules rapporte 100 % du prix cette manche.",
+      "effectType": "SELL_PCT_SET",
+      "effectVal": 100,
+      "message": "Prime à la casse ! Le Dépôt-Vente rachète tout au prix du neuf, videz vos sacs avant que ça s'arrête…",
+      "rule": {
+        "big": "100 %",
+        "tone": "bonus",
+        "label": "à la revente",
+        "sub": "armes, protections et véhicules, depuis le Sac",
+        "rows": [
+          [
+            "ph-coins",
+            "Revente d'un objet",
+            "50 %",
+            "100 %"
+          ],
+          [
+            "ph-crosshair",
+            "Revolver payé 8 000 €",
+            "4 000 €",
+            "8 000 €"
+          ]
+        ]
+      }
+    },
+    {
       "id": "rad_closed_armory",
       "title": "Descente du GIGN à l'Armurerie",
       "impact": "Armurerie fermée cette manche",

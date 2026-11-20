@@ -384,7 +384,10 @@ async function useItem(idx) {
   }
   // Vieille canette, Pied de biche : on choisit le rival à viser (écran des capacités spéciales)
   if (it.eff === 'def_malus_round' || it.eff === 'crowbar') return openItemTargetPower(it);
-  if (it.eff === 'patrol_reroll') return openTalkie(it);
+  if (it.eff === 'patrol_reroll') {
+    if (isRadioEffectActive('NETWORK_DOWN')) return showAppAlert("Panne de réseau : ton Talkie-walkie ne capte rien cette manche. Garde-le pour plus tard !", "📡 Panne de réseau");
+    return openTalkie(it);
+  }
   if (it.eff === 'double_fouille') return showAppAlert("Tes Lunettes de soleil serviront toutes seules à ta prochaine Fouille : tu verras 2 objets et tu garderas le meilleur.", "🕶️ Lunettes de soleil");
   if (it.eff === 'scratch') {
     localPlayer.inventory.splice(idx, 1);

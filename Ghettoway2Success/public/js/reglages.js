@@ -59,6 +59,10 @@ function radioRuleWithSettings(ev) {
       const gain = Math.round(card * pct);
       return [row[0], row[1], fmt(gain), fmt(/_MULT$/.test(t) ? Math.round(gain * v) : gain + v)];
     });
+  } else if (t === 'SELL_PCT_SET') {
+    const pct = settingVal('sellPct', 50), price = row => Number(String(row[1]).replace(/\D/g, ''));
+    rows = rows.map(row => /%$/.test(row[2]) ? [row[0], row[1], `${pct} %`, row[3]]
+      : price(row) ? [row[0], row[1], fmt(Math.floor(price(row) * pct / 100)), fmt(Math.floor(price(row) * v / 100))] : row);
   } else if (t === 'GROSSISTE_PRICE_SET' && settingVal('grossiste', 1000) !== 1000) {
     const base = settingVal('grossiste', 1000), now = Math.round(v * grossisteFactor());
     big = fmt(now); sub = `au lieu de ${fmt(base)}`;
