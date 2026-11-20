@@ -112,9 +112,17 @@ function heistArt(name, keep) {
   return src;
 }
 const QR_PRELOAD = { qg: 'qg-coffre.webp', coffre: 'qg-coffre.webp', armurerie: 'wp_armurerie.jpg', nightclub: 'wp_club.jpg', pr: 'wp_club.jpg', sportclub: 'wp_sport.jpg', gb: 'wp_sport.jpg', concessionnaire: 'wp_concessionnaire.jpg', dealer: 'wp_concessionnaire.jpg', grossiste: 'grossiste-hall.webp', magasin: 'magasin-hall.webp', depotvente: 'magasin-hall.webp', brq: 'sac-butin.webp', fouilles: 'fouilles-ruelle.webp', fouille: 'fouilles-ruelle.webp' };
+// Texte lu nettoyé : caractères invisibles, guillemets typographiques, et seulement le {…} s'il y a du texte autour
+function cleanQrText(txt) {
+  let s = String(txt == null ? '' : txt).replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200D\u2060\uFEFF]/g, '').trim()
+    .replace(/[\u201C\u201D\u201E\u00AB\u00BB\u2033]/g, '"').replace(/[\u2018\u2019]/g, "'");
+  const a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a >= 0 && b > a) s = s.slice(a, b + 1);
+  return s;
+}
 function qrType(txt) {
   let data;
-  try { data = JSON.parse(String(txt).trim().replace(/[\u201C\u201D]/g, '"')); } catch (e) { data = { t: String(txt).trim() }; }
+  try { data = JSON.parse(cleanQrText(txt)); } catch (e) { data = { t: cleanQrText(txt) }; }
   if (typeof data === 'string') data = { t: data };
   return { data, type: String((data && (data.t || data.type)) || '').toLowerCase() };
 }
@@ -445,7 +453,7 @@ async function processQrPayload(payload) {
   closeQrScannerModal();
   let data = payload;
   if (typeof payload === 'string') {
-    const cleanStr = payload.trim().replace(/[\u201C\u201D]/g, '"');
+    const cleanStr = cleanQrText(payload);
     try {
       data = JSON.parse(cleanStr);
       if (typeof data === 'string') data = { t: data.toLowerCase() };
@@ -453,10 +461,11 @@ async function processQrPayload(payload) {
       data = { t: cleanStr.toLowerCase() };
     }
   }
-  if (!data || typeof data !== 'object') return showAppAlert("QR Code non reconnu.", "Erreur");
+  if (!data || typeof data !== 'object') return showAppAlert(`QR Code non reconnu.\nTexte lu : « ${String(payload).slice(0, 120)} »`, "Erreur");
   // Montants imprimés entre guillemets ("3000") : convertis en nombres
   ['c', 'd', 'p', 'val', 'req', 'm', 'lvl'].forEach(k => { if (data[k] !== undefined && data[k] !== null && data[k] !== '') data[k] = Number(data[k]) || 0; });
-  const type = (data.t || data.type || '').toLowerCase();
+  const type = String(data.t || data.type || '').trim().toLowerCase();
+  const rawQrText = typeof payload === 'string' ? payload : JSON.stringify(payload);
 
   // Case QG du plateau : seule façon d'ouvrir le coffre (dépôt, retrait, escort)
   if (type === 'qg' || type === 'coffre') return openTransferModal('deposit');
@@ -583,6 +592,6 @@ async function processQrPayload(payload) {
     if (data.p) await claimHeistProstitute(data.p);
     return;
   }
-  // QR lisible mais d'un type inconnu (faute à l'impression…)
-  return showAppAlert("QR Code non reconnu.", "Erreur");
+  // QR lisible mais d'un type inconnu (faute à l'impression…) : on montre ce qui a été lu, pour comprendre
+  return showAppAlert(`QR Code non reconnu.\nTexte lu : « ${String(rawQrText).slice(0, 120)} »`, "Erreur");
 }
