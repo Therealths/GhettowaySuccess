@@ -180,6 +180,29 @@
       }
     },
     {
+      "id": "rad_metro_closed",
+      "title": "Colis suspect dans le métro",
+      "impact": "Métro fermé cette manche",
+      "desc": "Un colis suspect a été signalé : toutes les stations de métro sont fermées sur le plateau cette manche.",
+      "effectType": "BOARD_RULE_ONLY",
+      "effectVal": 0,
+      "message": "Alerte au colis suspect ! Les démineurs sont sur place et toutes les stations de métro sont bouclées… finissez à pied !",
+      "rule": {
+        "big": "Métro fermé",
+        "tone": "plateau",
+        "label": "toutes les stations",
+        "sub": "sur le plateau, cette manche",
+        "rows": [
+          [
+            "ph-warning",
+            "Métro",
+            "ouvert",
+            "fermé"
+          ]
+        ]
+      }
+    },
+    {
       "id": "rad_police_strike",
       "title": "Grève au Commissariat",
       "impact": "Patrouille immobile cette manche",
