@@ -30,7 +30,8 @@ async function switchQrCamera() {
   document.getElementById('qrScannerStatus').innerText = `Caméra ${n} / ${qrBackCams.length} : vise le QR code`;
 }
 // Lecteur de QR du téléphone quand il existe (plus rapide, tolère mieux une image un peu floue)
-const newQrReader = () => new Html5Qrcode("qr-reader", { verbose: false, experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
+// (ou ZXing sinon, voir qr-detector.js) ; seulement les QR codes, sinon un bout de QR peut passer pour un code-barres
+const newQrReader = () => new Html5Qrcode("qr-reader", { verbose: false, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
 async function startLiveQrCamera() {
   const statusEl = document.getElementById('qrScannerStatus');
   const previewBox = document.getElementById('qr-photo-preview-box');
@@ -71,6 +72,7 @@ async function startLiveQrCamera() {
       () => {}
     );
     statusEl.innerText = 'Vise le QR code d’une case du plateau';
+    startFullResQrLoop();
     setupQrTorch();
     tuneQrCamera();
   } catch (e) {
@@ -79,6 +81,33 @@ async function startLiveQrCamera() {
     document.getElementById('modalQrScanner').dataset.state = 'nocam';
     statusEl.innerText = 'Caméra indisponible : autorise-la dans ton navigateur, ou utilise « Photo ».';
   }
+}
+
+// La bibliothèque lit une image réduite à la taille de l'écran (et déformée) : en plus, on lit nous-mêmes l'image
+// de la caméra en pleine résolution avec le lecteur du téléphone (ou ZXing, voir qr-detector.js)
+let qrLoopTimer = null;
+function startFullResQrLoop() {
+  clearTimeout(qrLoopTimer);
+  if (!('BarcodeDetector' in window)) return;
+  let det;
+  try { det = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { return; }
+  const c = document.createElement('canvas');
+  const tick = async () => {
+    const scr = document.getElementById('modalQrScanner');
+    const v = document.querySelector('#qr-reader video');
+    if (!html5QrScannerInstance || !html5QrScannerInstance.isScanning || scr.classList.contains('hidden')) return;
+    if (v && v.videoWidth && !qrDetectedLock) {
+      try {
+        c.width = v.videoWidth; c.height = v.videoHeight;
+        c.getContext('2d', { willReadFrequently: true }).drawImage(v, 0, 0);
+        const found = await det.detect(c);
+        const hit = found && found.find(r => r.rawValue);
+        if (hit && !qrDetectedLock && !scr.classList.contains('hidden')) onQrDetected(hit.rawValue);
+      } catch (e) {}
+    }
+    qrLoopTimer = setTimeout(tick, 120);
+  };
+  qrLoopTimer = setTimeout(tick, 300);
 }
 
 // QR reconnu : cadre vert, vibration, bandeau de ce qui a été flashé, puis on ouvre la case
@@ -266,6 +295,7 @@ window.addEventListener('resize', placeScanFrame);
 
 async function closeQrScannerModal() {
   qrTorchOn = false;
+  clearTimeout(qrLoopTimer);
   if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
     try { await html5QrScannerInstance.stop(); } catch (e) {}
   }

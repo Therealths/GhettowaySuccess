@@ -53,7 +53,8 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 | `powers.js` | capacités spéciales des Caïds, Canette et Pied de biche (même écran), écran « TOUCHÉ ! » de la victime |
 | `items.js` | table des Fouilles, découverte, écran **carte jouée**, ticket à gratter, pile d'objets du combat, Talkie, Passeport, préchargement des images |
 | `sac.js` | écran **Sac** et bouton Sac de l'écran principal |
-| `qr.js` | scanner (html5-qrcode), actions des cases (`processQrPayload`), raccourcis de test |
+| `qr.js` | scanner (html5-qrcode pour la caméra, QR codes seulement ; `startFullResQrLoop` lit en plus l'image de la caméra en pleine résolution, car la bibliothèque la réduit à la taille de l'écran et la déforme), actions des cases (`processQrPayload`, `cleanQrText`, texte lu affiché si non reconnu), raccourcis de test |
+| `qr-detector.js` | `BarcodeDetector` de secours pour les téléphones sans lecteur intégré (iPhone, certains Android) : ZXing WebAssembly (`public/vendor/zxing-reader.js`, `zxing_reader.wasm`, repris de l'appli QR Codes) |
 | `game.js` | création de partie, manches, rente du QG, fin de tour, **patrouille** (compteur) |
 | `socket.js` | connexion et réception de tous les événements serveur |
 | `testmode.js` | partie de test à 3 Caïds pilotés depuis un seul téléphone |
