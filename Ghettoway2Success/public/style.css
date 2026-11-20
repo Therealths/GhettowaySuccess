@@ -1435,3 +1435,12 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .set-reset, .set-ok { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 14px 8px; border-radius: 16px; font-weight: 900; font-size: 12px; text-transform: uppercase; }
 .set-reset { color: #cbd5e1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
 .set-ok { color: #111; background: linear-gradient(90deg, #fde68a, #f59e0b); }
+
+/* Écran « Tour de … » : bouton pour regarder son Sac pendant le tour des autres */
+.blocker-sac { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; text-align: left; color: #fde68a; background: linear-gradient(90deg, rgba(245,158,11,0.18), rgba(245,158,11,0.06)); border: 1px solid rgba(245,158,11,0.45); }
+.blocker-sac > i:first-child { font-size: 22px; }
+.blocker-sac span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.blocker-sac b { font-size: 13px; font-weight: 900; text-transform: uppercase; color: #fff; }
+.blocker-sac small { font-size: 10px; font-family: ui-monospace, monospace; color: #cbd5e1; }
+.blocker-sac:active { transform: scale(0.97); }
+.sac-readonly .sac-slot:disabled { opacity: 1; }

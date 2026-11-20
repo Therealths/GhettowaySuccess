@@ -271,6 +271,7 @@ if (socket) {
     const wasMyTurn = isMyTurnToPlay;
     isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
     if (isMyTurnToPlay && !wasMyTurn) { pmSpentThisTurn = 0; pmBonusThisTurn = 0; refreshHud(); }
+    if (wasMyTurn !== isMyTurnToPlay && sacIsOpen()) renderSac(); // Sac ouvert : boutons ou consultation selon le tour
     // Fin du tour (ou de sa participation d'allié) : boutiques, coffre et paiement se ferment
     if (wasMyTurn && !isMyTurnToPlay) {
       pmBonusThisTurn = 0;

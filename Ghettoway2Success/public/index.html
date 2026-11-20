@@ -365,6 +365,8 @@
             <span class="text-[9px] font-mono uppercase tracking-widest text-slate-400 block font-bold mb-1.5">Ordre de la manche</span>
             <div class="turn-order-list flex flex-wrap justify-center gap-1.5"></div>
           </div>
+          <!-- Pendant le tour des autres : on peut regarder son Sac (consultation seulement) pour préparer son tour -->
+          <button type="button" onclick="openSac()" class="blocker-sac"><i class="ph-fill ph-backpack"></i><span><b>Voir mon Sac</b><small id="blockerSacMini"></small></span><i class="ph-bold ph-caret-right"></i></button>
         </div>
       </div>
       <div class="hud-main">
@@ -425,7 +427,7 @@
           <div><small>Sur toi</small><b id="hudPocketCash">0 €</b><em id="hudDrugs">🌿 0 kg</em></div>
           <div><small>Au QG</small><b id="hudSafeCash">0 €</b><em id="hudSafeDrugs">📦 0 kg</em></div>
         </div>
-        <div class="px-4 mt-2"><div class="sac-label">Équipé <span>· touche pour ranger dans le sac</span></div><div id="sacSlots" class="sac-eq"></div></div>
+        <div class="px-4 mt-2"><div class="sac-label">Équipé <span id="sacSlotsHint">· touche pour ranger dans le sac</span></div><div id="sacSlots" class="sac-eq"></div></div>
         <div id="sacTabs" class="px-4 mt-3 sac-tabs"></div>
         <div id="sacStageWrap" class="relative w-full flex-1 min-h-0 flex items-center justify-center mt-2">
           <button type="button" onclick="stepSac(-1)" class="deck-arrow left-2" aria-label="Carte précédente"><i class="ph-bold ph-caret-left"></i></button>

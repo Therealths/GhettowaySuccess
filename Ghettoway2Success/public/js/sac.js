@@ -74,7 +74,7 @@ function sacSlotsHtml() {
     const it = localPlayer.equipped[s.key];
     if (!it) return `<div class="sac-slot free"><i class="ph-bold ${s.icon}"></i><small>${s.label}</small><b>${s.key === 'vehicle' ? 'À pied' : 'Libre'}</b></div>`;
     const g = gearInfo(it);
-    return `<button type="button" class="sac-slot ${s.cls}" onclick="unequipSlot('${s.key}')"><img src="${g.img}" alt=""><span class="t"><small>${s.label}</small><b>${escapeHtml(it.name)}</b><em>${g.bonus}</em></span><i class="ph-bold ph-arrow-u-down-left sac-slot-off"></i></button>`;
+    return `<button type="button" class="sac-slot ${s.cls}" ${isMyTurnToPlay ? `onclick="unequipSlot('${s.key}')"` : 'disabled'}><img src="${g.img}" alt=""><span class="t"><small>${s.label}</small><b>${escapeHtml(it.name)}</b><em>${g.bonus}</em></span><i class="ph-bold ph-arrow-u-down-left sac-slot-off"></i></button>`;
   }).join('');
 }
 
@@ -93,6 +93,7 @@ function sacFace(it) {
 }
 // Boutons de la carte zoomée : action principale, puis vendre / jeter
 function sacActions(it) {
+  if (!isMyTurnToPlay) return `<span class="sac-pill"><i class="ph-bold ph-eye"></i> Pas ton tour : tu pourras la jouer à ton tour</span>`;
   if (isLabCard(it)) return `<button type="button" class="find-cta" disabled><i class="ph-bold ph-house-line"></i> Installation QG</button><span class="sac-pill"><i class="ph-bold ph-qr-code"></i> Flashe le QR de ton QG pour l'installer</span>`;
   const real = localPlayer.inventory.indexOf(it);
   const trash = `<button type="button" class="sac-zbtn ghost" onclick="sacDo('discard', ${real})"><i class="ph-bold ph-trash"></i> Jeter</button>`;
@@ -119,6 +120,10 @@ function renderSac() {
   sacList = all.filter(it => sacFilter === 'tout' || (sacFilter === 'eq') === isEqCard(it));
   sacIndex = Math.max(0, Math.min(sacIndex, sacList.length - 1));
   document.getElementById('sacSlots').innerHTML = sacSlotsHtml();
+  // Hors de son tour : on regarde seulement (rien ne se joue, ne s'équipe ni ne se vend)
+  scr.classList.toggle('sac-readonly', !isMyTurnToPlay);
+  document.getElementById('sacSlotsHint').innerText = isMyTurnToPlay ? '· touche pour ranger dans le sac' : '· consultation, ce n’est pas ton tour';
+  if (!document.getElementById('sacZoom').classList.contains('hidden') && sacList[sacIndex]) fillSacZoom(sacList[sacIndex]);
   document.getElementById('sacTabs').innerHTML = [['tout', 'Tout'], ['obj', 'Objets'], ['eq', 'Équipement']]
     .map(([f, l]) => `<button type="button" class="${f === sacFilter ? 'on' : ''}" onclick="setSacFilter('${f}')">${l}<b>${counts[f]}</b></button>`).join('');
   document.getElementById('sacCards').innerHTML = sacList.length ? sacList.map(sacCardHtml).join('')
@@ -223,7 +228,8 @@ function sacUse(idx) {
 function renderSacButton() {
   const n = sacCardsAll().length;
   document.getElementById('hudItemCount').innerText = n;
-  document.getElementById('hudPocketMini').innerText = `${localPlayer.pocketCash.toLocaleString()} € · ${localPlayer.drugs} kg sur toi`;
+  document.getElementById('hudPocketMini').innerText = `${localPlayer.pocketCash.toLocaleString()} € · ${localPlayer.drugs} kg`;
+  document.getElementById('blockerSacMini').innerText = `${n} carte${n > 1 ? 's' : ''} · ${localPlayer.pocketCash.toLocaleString()} € · ${localPlayer.drugs} kg`;
   document.getElementById('hudGearMini').innerHTML = SAC_SLOTS.map(s => {
     const it = localPlayer.equipped[s.key];
     return it ? `<img src="${gearInfo(it).img}" alt="${escapeHtml(it.name)}">` : `<span><i class="ph-bold ${s.icon}"></i></span>`;
