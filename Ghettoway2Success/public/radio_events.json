@@ -157,6 +157,29 @@
       }
     },
     {
+      "id": "rad_drought",
+      "title": "Sécheresse sur Le Lac",
+      "impact": "Traverser le Lac : 1 PM cette manche",
+      "desc": "Le Lac est complètement asséché : le traverser ne coûte qu'un seul point de déplacement cette manche.",
+      "effectType": "BOARD_RULE_ONLY",
+      "effectVal": 0,
+      "message": "Sécheresse historique ! Le Lac est à sec, on le traverse à pied sec entre les caddies et les vieux scooters…",
+      "rule": {
+        "big": "Lac à sec",
+        "tone": "plateau",
+        "label": "traversée à 1 PM",
+        "sub": "sur le plateau, cette manche",
+        "rows": [
+          [
+            "ph-sun-dim",
+            "Traverser tout le Lac",
+            "",
+            "1 PM"
+          ]
+        ]
+      }
+    },
+    {
       "id": "rad_police_strike",
       "title": "Grève au Commissariat",
       "impact": "Patrouille immobile cette manche",
