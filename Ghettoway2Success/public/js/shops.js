@@ -52,6 +52,18 @@ fetch('/catalog.json')
   })
   .catch(() => {});
 
+// Inflation (Flash Radio) : tous les prix des boutiques et du Grossiste augmentent
+const inflated = p => isRadioEffectActive('INFLATION_PRICE_MULT') ? Math.round(p * getRadioEffectValue('INFLATION_PRICE_MULT', 1.2)) : p;
+const getNightclubPrice = item => inflated(item.prix || 0);
+const getSportclubPrice = item => inflated(item.prix || 0);
+// Fermeture d'un établissement (Flash Radio) : effectVal = type du QR de la boutique
+const closedShop = () => isRadioEffectActive('SHOP_CLOSED') ? String(currentSession.currentRadioEvent.effectVal) : '';
+
+function showShopClosed() {
+  const ev = currentSession.currentRadioEvent || {};
+  return showAppAlert(`${ev.desc || 'Établissement fermé cette manche.'} Reviens à la prochaine manche.`, `🔒 ${ev.impact || 'Fermé'}`);
+}
+
 function getArmoryItemEffectivePrice(item) {
   let price = item.prix || 0;
   if (item.categorie === 'arme' && isRadioEffectActive('WEAPON_PRICE_MULT')) {
@@ -60,19 +72,20 @@ function getArmoryItemEffectivePrice(item) {
     price = Math.round(price * getRadioEffectValue('ARMOR_PRICE_MULT', 0.5));
   }
   if (isRadioEffectActive('ARMORY_PRICE_MULT')) price = Math.round(price * getRadioEffectValue('ARMORY_PRICE_MULT', 0.7));
-  return price;
+  return inflated(price);
 }
 // Soldes chez le Concessionnaire (Flash Radio)
 function getDealerItemEffectivePrice(item) {
   const price = item.prix || 0;
-  return isRadioEffectActive('VEHICLE_PRICE_MULT') ? Math.round(price * getRadioEffectValue('VEHICLE_PRICE_MULT', 0.7)) : price;
+  return inflated(isRadioEffectActive('VEHICLE_PRICE_MULT') ? Math.round(price * getRadioEffectValue('VEHICLE_PRICE_MULT', 0.7)) : price);
 }
 
 // Soldes au Dépôt-Vente (Flash Radio)
-const getLabEffectivePrice = l => isRadioEffectActive('LAB_PRICE_MULT') ? Math.round(l.prix * getRadioEffectValue('LAB_PRICE_MULT', 0.5)) : l.prix;
-// Patch « PROMO » collé sur l'image d'une carte quand une annonce radio fait baisser son prix
+const getLabEffectivePrice = l => inflated(isRadioEffectActive('LAB_PRICE_MULT') ? Math.round(l.prix * getRadioEffectValue('LAB_PRICE_MULT', 0.5)) : l.prix);
+// Patch « PROMO » (ou « HAUSSE » pendant l'Inflation) collé sur l'image d'une carte quand une annonce radio change son prix
 const promoPatchHtml = (full, radioPrice) => full > 0 && radioPrice < full
-  ? `<span class="promo-patch">PROMO<b>-${Math.round((1 - radioPrice / full) * 100)} %</b></span>` : '';
+  ? `<span class="promo-patch">PROMO<b>-${Math.round((1 - radioPrice / full) * 100)} %</b></span>`
+  : full > 0 && radioPrice > full ? `<span class="promo-patch hausse">HAUSSE<b>+${Math.round((radioPrice / full - 1) * 100)} %</b></span>` : '';
 
 // Bon de réduction activé depuis le Sac : −50 % sur le prochain achat payant de la boutique
 const hasVoucher = shop => (localPlayer.vouchers || []).includes(shop);
@@ -84,8 +97,8 @@ function useVoucher(shop) {
   localPlayer.vouchers = v;
 }
 // Prix affiché : barré quand il est réduit
-const priceTagHtml = (full, cost) => cost < full
-  ? `<span class="line-through decoration-rose-500 decoration-2 text-[10px] text-slate-400 mr-1">${full.toLocaleString()}€</span><span class="text-emerald-400">${cost.toLocaleString()} €</span>`
+const priceTagHtml = (full, cost) => cost !== full
+  ? `<span class="line-through decoration-rose-500 decoration-2 text-[10px] text-slate-400 mr-1">${full.toLocaleString()}€</span><span class="${cost < full ? 'text-emerald-400' : 'text-rose-400'}">${cost.toLocaleString()} €</span>`
   : `${cost.toLocaleString()} €`;
 // Manteau de fourrure (déguisement de Mac) : une Prostituée Niv. 1 gratuite, pris tout seul dans le Sac
 const macCoatIndex = () => localPlayer.inventory.findIndex(it => it && it.eff === 'free_prostitute');
@@ -341,7 +354,7 @@ function buildNightclubStackDOM() {
   const hasCoat = macCoatIndex() >= 0;
   container.innerHTML = NIGHTCLUB_CATALOG.map((item, idx) => {
     const displayPrice = (item.lvl === 1 && isMaryFree) ? 'GRATUIT (Bonus)'
-      : (item.lvl === 1 && hasCoat) ? 'GRATUIT (Manteau)' : priceTagHtml(item.prix, voucherCost('Nightclub', item.prix));
+      : (item.lvl === 1 && hasCoat) ? 'GRATUIT (Manteau)' : priceTagHtml(item.prix, voucherCost('Nightclub', getNightclubPrice(item)));
     return `
       <div id="nightclubDeckCard_${idx}" onclick="onNightclubCardClick(${idx})" class="deck-card-item border border-pink-500/45">
         <div>
@@ -351,6 +364,7 @@ function buildNightclubStackDOM() {
               <i class="ph-bold ph-high-heel text-3xl"></i>
               <span class="text-[8px] font-mono mt-1">${item.image}</span>
             </div>
+            ${promoPatchHtml(item.prix, getNightclubPrice(item))}
           </div>
           <div class="flex items-center justify-between">
             <span class="px-1.5 py-0.5 rounded-md border bg-pink-500/20 text-pink-300 border-pink-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
@@ -389,7 +403,7 @@ async function buyNightclubItem(itemId) {
   if (localPlayer.prostituteInTransit) {
     return showAppAlert("Tu as déjà 1 prostituée en transit ! Dépose-la d'abord au QG.", "Limite Atteinte");
   }
-  const cost = voucherCost('Nightclub', item.prix);
+  const cost = voucherCost('Nightclub', getNightclubPrice(item));
   const rev = item.rev || item.bonusVal || prostituteRent(item.lvl || 1);
   const dataPayload = { t: 'pr', lvl: item.lvl || 1, p: item.prix, rev: rev, n: item.nom };
   closeModal('modalNightclubShop');
@@ -409,7 +423,7 @@ async function buyNightclubItem(itemId) {
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
   }
-  openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom, shop: 'Nightclub', voucher: cost < item.prix ? 'Nightclub' : null });
+  openPaymentChoiceModal({ type: 'pr', data: dataPayload, cost, name: item.nom, shop: 'Nightclub', voucher: cost < getNightclubPrice(item) ? 'Nightclub' : null });
 }
 
 // --- 3. SPORTCLUB ---
@@ -435,6 +449,7 @@ function buildSportclubStackDOM() {
             <i class="ph-bold ph-barbell text-3xl"></i>
             <span class="text-[8px] font-mono mt-1">${item.image}</span>
           </div>
+          ${promoPatchHtml(item.prix, getSportclubPrice(item))}
         </div>
         <div class="flex items-center justify-between">
           <span class="px-1.5 py-0.5 rounded-md border bg-sky-500/20 text-sky-300 border-sky-500/40 font-mono text-[9px] font-black">${item.bonusLabel}</span>
@@ -446,7 +461,7 @@ function buildSportclubStackDOM() {
       <div class="pt-1.5 border-t border-white/10">
         <div class="flex items-center justify-between font-mono mb-1">
           <span class="text-[9px] text-slate-400 uppercase">Prix :</span>
-          <span class="text-xs font-black text-ghetto-gold">${priceTagHtml(item.prix, voucherCost('Sportclub', item.prix))}</span>
+          <span class="text-xs font-black text-ghetto-gold">${priceTagHtml(item.prix, voucherCost('Sportclub', getSportclubPrice(item)))}</span>
         </div>
         <button onclick="event.stopPropagation(); buySportclubItem('${item.id}')" class="deck-buy-btn w-full py-2 bg-gradient-to-r from-sky-400 to-blue-500 text-black font-black uppercase tracking-wider rounded-xl text-[11px] shadow-lg active:scale-95 transition flex items-center justify-center gap-1">
           <i class="ph-bold ph-shopping-cart-simple"></i> Recruter
@@ -472,14 +487,14 @@ async function buySportclubItem(itemId) {
   if (localPlayer.musclesOnPerson.length >= 3) {
     return showAppAlert("Tu as déjà 3 Lascars, le maximum !", "Limite Atteinte");
   }
-  const cost = voucherCost('Sportclub', item.prix);
+  const cost = voucherCost('Sportclub', getSportclubPrice(item));
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
   }
   const atkVal = item.atk || item.bonusVal || (item.lvl === 2 ? 2 : 1);
   const dataPayload = { t: 'gb', lvl: item.lvl || 1, p: item.prix, atk: atkVal, def: atkVal, n: item.nom };
   closeModal('modalSportclubShop');
-  openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom, shop: 'Sportclub', voucher: cost < item.prix ? 'Sportclub' : null });
+  openPaymentChoiceModal({ type: 'gb', data: dataPayload, cost, name: item.nom, shop: 'Sportclub', voucher: cost < getSportclubPrice(item) ? 'Sportclub' : null });
 }
 
 // --- 4. CONCESSIONNAIRE ---
@@ -690,6 +705,7 @@ function openGrossisteModal(unitPrice) {
   if (isRadioEffectActive('GROSSISTE_PRICE_SET')) {
     basePrice = Math.round(getRadioEffectValue('GROSSISTE_PRICE_SET', 1500) * grossisteFactor());
   }
+  basePrice = inflated(basePrice);
   grossisteUnitCost = basePrice;
   grossisteKg = Math.min(1, getGrossisteMaxKg());
   const scr = document.getElementById('grossisteScreen');
@@ -719,7 +735,7 @@ function renderGrossiste() {
   document.getElementById('grossistePanel').innerHTML = `
     <div class="grid grid-cols-2 gap-2">
       <div class="gros-stat"><span class="text-amber-300">Cash en poche</span><b>${localPlayer.pocketCash.toLocaleString()} €</b></div>
-      <div class="gros-stat"><span class="text-emerald-300">Tarif</span><b>${grossisteUnitCost.toLocaleString()} € / kg</b>${jloLeft > 0 ? ' <em class="gros-malus">×2</em>' : ''}</div>
+      <div class="gros-stat"><span class="text-emerald-300">Tarif</span><b>${grossisteUnitCost.toLocaleString()} € / kg</b>${jloLeft > 0 ? ' <em class="gros-malus">×2</em>' : ''}${isRadioEffectActive('INFLATION_PRICE_MULT') ? ' <em class="gros-malus">Inflation</em>' : ''}</div>
     </div>
     <div class="flex items-center justify-between mt-4">
       <button type="button" class="gros-step" onclick="setGrossisteKg(grossisteKg - 1)" ${kg <= 0 ? 'disabled' : ''} aria-label="Un kilo de moins"><i class="ph-bold ph-minus"></i></button>

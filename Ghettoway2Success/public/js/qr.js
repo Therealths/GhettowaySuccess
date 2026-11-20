@@ -460,6 +460,9 @@ async function processQrPayload(payload) {
 
   // Case QG du plateau : seule façon d'ouvrir le coffre (dépôt, retrait, escort)
   if (type === 'qg' || type === 'coffre') return openTransferModal('deposit');
+  // Établissement fermé par la Flash Radio : la boutique ne s'ouvre pas cette manche
+  const closed = closedShop();
+  if (closed && (type === closed || (closed === 'magasin' && type === 'depotvente'))) return showShopClosed();
   if (type === 'armurerie') return openArmoryShopModal();
   if (type === 'nightclub') return openNightclubShopModal();
   if (type === 'sportclub') return openSportclubShopModal();

@@ -46,7 +46,7 @@ function radioRuleWithSettings(ev) {
   const v = Number(ev.effectVal), t = ev.effectType;
   let { rows = [], big, sub } = rule;
   if (/_PRICE_MULT$/.test(t)) {
-    const items = [...ARMORY_CATALOG, ...DEALER_CATALOG, ...LAB_LEVELS.map(l => ({ nom: labSetName(l), prix: l.prix }))];
+    const items = [...ARMORY_CATALOG, ...NIGHTCLUB_CATALOG, ...SPORTCLUB_CATALOG, ...DEALER_CATALOG, ...LAB_LEVELS.map(l => ({ nom: labSetName(l), prix: l.prix })), { nom: 'Grossiste (le kilo)', prix: settingVal('grossiste', 1000) }];
     rows = rows.map(row => { const it = items.find(x => x.nom === row[1]); return it ? [row[0], row[1], fmt(it.prix), fmt(Math.round(it.prix * v))] : row; });
   } else if (t === 'PROSTITUTE_REV_MULT') {
     rows = rows.map(row => { const m = /Niveau (\d)/.exec(row[1]); if (!m) return row; const r = prostituteRent(+m[1]); return [row[0], row[1], fmt(r), fmt(Math.round(r * v))]; });

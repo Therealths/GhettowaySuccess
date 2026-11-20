@@ -505,6 +505,162 @@
       }
     },
     {
+      "id": "rad_inflation",
+      "title": "Inflation galopante",
+      "impact": "Tous les prix +20 %",
+      "desc": "Tout augmente : les prix de toutes les boutiques et du Grossiste prennent +20 % cette manche.",
+      "effectType": "INFLATION_PRICE_MULT",
+      "effectVal": 1.2,
+      "message": "Inflation galopante ! Le prix de la baguette a doublé, et au quartier tout le monde augmente ses tarifs…",
+      "rule": {
+        "big": "+20 %",
+        "tone": "malus",
+        "label": "sur tous les prix",
+        "sub": "boutiques et Grossiste",
+        "rows": [
+          [
+            "ph-crosshair",
+            "Revolver",
+            "8 000 €",
+            "9 600 €"
+          ],
+          [
+            "ph-barbell",
+            "Lascar Niv. 1",
+            "1 500 €",
+            "1 800 €"
+          ],
+          [
+            "ph-moped",
+            "Scooter",
+            "6 000 €",
+            "7 200 €"
+          ],
+          [
+            "ph-package",
+            "Grossiste (le kilo)",
+            "1 000 €",
+            "1 200 €"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_closed_armory",
+      "title": "Descente du GIGN à l'Armurerie",
+      "impact": "Armurerie fermée cette manche",
+      "desc": "L'Armurerie est sous scellés après une descente du GIGN : impossible d'y acheter cette manche.",
+      "effectType": "SHOP_CLOSED",
+      "effectVal": "armurerie",
+      "message": "Descente du GIGN à l'Armurerie ! Le patron est en garde à vue et la boutique est sous scellés…",
+      "rule": {
+        "big": "Fermée",
+        "tone": "malus",
+        "label": "l'Armurerie, cette manche",
+        "sub": "sous scellés après une descente",
+        "rows": [
+          [
+            "ph-sword",
+            "Armurerie",
+            "ouverte",
+            "fermée"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_closed_nightclub",
+      "title": "Fermeture administrative du Nightclub",
+      "impact": "Nightclub fermé cette manche",
+      "desc": "La préfecture a ordonné la fermeture administrative du Nightclub après une bagarre : impossible d'y recruter cette manche.",
+      "effectType": "SHOP_CLOSED",
+      "effectVal": "nightclub",
+      "message": "Fermeture administrative du Nightclub ! Une bagarre de trop sur le parking et la préfecture a mis le rideau…",
+      "rule": {
+        "big": "Fermé",
+        "tone": "malus",
+        "label": "le Nightclub, cette manche",
+        "sub": "fermeture administrative",
+        "rows": [
+          [
+            "ph-high-heel",
+            "Nightclub",
+            "ouvert",
+            "fermé"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_closed_sportclub",
+      "title": "Dégât des eaux au Sportclub",
+      "impact": "Sportclub fermé cette manche",
+      "desc": "Une canalisation a lâché, le Sportclub est inondé : impossible d'y recruter cette manche.",
+      "effectType": "SHOP_CLOSED",
+      "effectVal": "sportclub",
+      "message": "Dégât des eaux au Sportclub ! Les vestiaires sont sous trente centimètres d'eau, les Lascars sont rentrés chez eux…",
+      "rule": {
+        "big": "Fermé",
+        "tone": "malus",
+        "label": "le Sportclub, cette manche",
+        "sub": "inondé, les Lascars sont rentrés",
+        "rows": [
+          [
+            "ph-barbell",
+            "Sportclub",
+            "ouvert",
+            "fermé"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_closed_depot",
+      "title": "Cambriolage au Dépôt-Vente",
+      "impact": "Dépôt-Vente fermé cette manche",
+      "desc": "Le Dépôt-Vente s'est fait cambrioler cette nuit, la police relève les empreintes : impossible d'y acheter cette manche.",
+      "effectType": "SHOP_CLOSED",
+      "effectVal": "magasin",
+      "message": "Cambriolage au Dépôt-Vente ! La vitrine a volé en éclats et la police relève les empreintes…",
+      "rule": {
+        "big": "Fermé",
+        "tone": "malus",
+        "label": "le Dépôt-Vente, cette manche",
+        "sub": "la police relève les empreintes",
+        "rows": [
+          [
+            "ph-flask",
+            "Dépôt-Vente",
+            "ouvert",
+            "fermé"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_closed_grossiste",
+      "title": "Bouclage de la cité",
+      "impact": "Grossiste fermé cette manche",
+      "desc": "Les CRS bouclent la cité : le Grossiste ne livre personne cette manche.",
+      "effectType": "SHOP_CLOSED",
+      "effectVal": "grossiste",
+      "message": "Bouclage de la cité ! Les CRS sont à chaque entrée, le Grossiste a coupé son téléphone…",
+      "rule": {
+        "big": "Fermé",
+        "tone": "malus",
+        "label": "le Grossiste, cette manche",
+        "sub": "les CRS bouclent la cité",
+        "rows": [
+          [
+            "ph-package",
+            "Grossiste",
+            "ouvert",
+            "fermé"
+          ]
+        ]
+      }
+    },
+    {
       "id": "rad_informant_drugs",
       "title": "Balance chez les dealers",
       "impact": "Votez : contrôle de drogue pour le plus désigné",
