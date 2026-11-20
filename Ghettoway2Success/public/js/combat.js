@@ -14,20 +14,20 @@ function openPillageModalUI(pillageInfo) {
   const btns = [];
 
   btns.push(`
-    <button onclick="choosePillageReward('cash')" class="w-full p-3 glass-panel rounded-2xl border border-amber-500/40 flex items-center justify-between text-left ${pillageInfo.availableCash <= 0 ? 'opacity-40 pointer-events-none' : ''}">
+    <button onclick="choosePillageReward('cash')" class="w-full p-3 glass-panel rounded-2xl border border-amber-500/40 flex items-center justify-between text-left">
       <div>
-        <span class="text-xs font-black text-amber-300 uppercase block">💰 100% du Cash en Poche</span>
-        <span class="text-[10px] font-mono text-white">${(pillageInfo.availableCash || 0).toLocaleString()} € disponibles</span>
+        <span class="text-xs font-black text-amber-300 uppercase block">💰 Son Cash en poche</span>
+        <span class="text-[10px] font-mono text-white">la roulette décide : 30 à 60 %</span>
       </div>
       <i class="ph-bold ph-arrow-right text-amber-400"></i>
     </button>
   `);
 
   btns.push(`
-    <button onclick="choosePillageReward('drugs')" class="w-full p-3 glass-panel rounded-2xl border border-emerald-500/40 flex items-center justify-between text-left ${pillageInfo.availableDrugs <= 0 ? 'opacity-40 pointer-events-none' : ''}">
+    <button onclick="choosePillageReward('drugs')" class="w-full p-3 glass-panel rounded-2xl border border-emerald-500/40 flex items-center justify-between text-left">
       <div>
-        <span class="text-xs font-black text-emerald-300 uppercase block">🌿 100% de la Drogue en Poche</span>
-        <span class="text-[10px] font-mono text-white">${pillageInfo.availableDrugs || 0} kg disponibles</span>
+        <span class="text-xs font-black text-emerald-300 uppercase block">🌿 Sa Drogue en poche</span>
+        <span class="text-[10px] font-mono text-white">la roulette décide : 30 à 60 %</span>
       </div>
       <i class="ph-bold ph-arrow-right text-emerald-400"></i>
     </button>
@@ -405,6 +405,50 @@ function fightRacket() {
   if (info) openPillageModalUI(info);
 }
 
+// Roulette du racket (cash ou drogue) : la roue tourne et s'arrête sur la part prise (30 à 60 %), puis le montant
+const RACKET_PCTS = [30, 35, 40, 45, 50, 55, 60];
+function buildRacketWheel() {
+  const el = document.getElementById('rrWheel');
+  if (el.firstChild) return;
+  const n = RACKET_PCTS.length, seg = 360 / n, r = 92, pt = (a, rr) => [100 + rr * Math.sin(a * Math.PI / 180), 100 - rr * Math.cos(a * Math.PI / 180)].map(v => v.toFixed(1));
+  el.innerHTML = `<svg viewBox="0 0 200 200">${RACKET_PCTS.map((p, i) => {
+    const a0 = i * seg - seg / 2, a1 = i * seg + seg / 2, [x0, y0] = pt(a0, r), [x1, y1] = pt(a1, r), [tx, ty] = pt(i * seg, r * 0.68);
+    return `<path d="M100 100 L${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1} Z" class="rr-seg${i % 2 ? ' b' : ''}"/><text x="${tx}" y="${ty}" transform="rotate(${(i * seg).toFixed(1)} ${tx} ${ty})">${p}%</text>`;
+  }).join('')}<circle cx="100" cy="100" r="${r}" class="rr-rim"/><circle cx="100" cy="100" r="16" class="rr-hub"/></svg>`;
+}
+// role : 'thief' (tu prends) ou 'victim' (on te prend) ; who : l'autre Caïd
+function showRacketRoulette({ category, pct, amount, who, role }) {
+  return new Promise(done => {
+    const scr = document.getElementById('racketRoulette'), wheel = document.getElementById('rrWheel');
+    buildRacketWheel();
+    const cash = category === 'cash', amt = cash ? `${(amount || 0).toLocaleString()} €` : `${amount || 0} kg`;
+    document.getElementById('rrKicker').innerText = `Racket · ${cash ? 'cash en poche' : 'drogue en poche'}`;
+    document.getElementById('rrTitle').innerText = 'LA ROULETTE TOURNE…';
+    document.getElementById('rrResult').innerHTML = '';
+    const btn = document.getElementById('rrCta');
+    btn.classList.add('hidden');
+    btn.onclick = () => { scr.classList.add('hidden'); done(); };
+    scr.dataset.cat = cash ? 'cash' : 'drugs';
+    scr.classList.remove('hidden', 'landed');
+    const i = Math.max(0, RACKET_PCTS.indexOf(pct)), seg = 360 / RACKET_PCTS.length;
+    const jitter = (Math.random() - 0.5) * seg * 0.6;
+    wheel.style.transition = 'none';
+    wheel.style.transform = 'rotate(0deg)';
+    void wheel.offsetWidth;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    wheel.style.transition = reduce ? 'none' : 'transform 3.6s cubic-bezier(.12,.8,.18,1)';
+    wheel.style.transform = `rotate(${360 * 6 - i * seg + jitter}deg)`;
+    setTimeout(() => {
+      scr.classList.add('landed');
+      buzz(80);
+      document.getElementById('rrTitle').innerText = `${pct} %`;
+      const line = role === 'thief' ? `Tu prends <b>${amt}</b> à ${escapeHtml(who)}` : `${escapeHtml(who)} te prend <b>${amt}</b>`;
+      document.getElementById('rrResult').innerHTML = amount ? line : `${role === 'thief' ? escapeHtml(who) + ' n’avait' : 'Tu n’avais'} rien sur ${role === 'thief' ? 'lui' : 'toi'} !`;
+      btn.classList.remove('hidden');
+    }, reduce ? 300 : 3800);
+  });
+}
+
 // Racket subi : l'écran Défaite attend le choix du vainqueur (bouton grisé), l'affiche, puis libère le bouton
 let fightRacketWait = false, fightRacketDone = null, fightRacketTimer = null;
 function racketRowHtml(who, plural) {
@@ -412,7 +456,8 @@ function racketRowHtml(who, plural) {
   if (!r) return fightRow('ph-hand-grabbing', `${who} ${plural ? 'choisissent leur' : 'choisit son'} butin`, '<span class="fight-wait">en attente…</span>');
   const thief = escapeHtml(allyShort(r.thiefCaid || who));
   const names = (r.items || []).map(it => escapeHtml(it.name)).join(', ');
-  const take = { cash: [`−${(r.amount || 0).toLocaleString()} €`, 'ton cash'], drugs: [`−${r.amount || 0} kg`, 'ta drogue'],
+  const pct = r.pct ? ` (${r.pct} %)` : '';
+  const take = { cash: [`−${(r.amount || 0).toLocaleString()} €`, `ton cash${pct}`], drugs: [`−${r.amount || 0} kg`, `ta drogue${pct}`],
     items: [r.amount ? `${r.amount} objet${r.amount > 1 ? 's' : ''}` : 'Sac vide', 'dans ton Sac'], prostitute: ['ta prostituée', 'en transit'], none: ['rien', 'il te laisse filer'] }[r.category] || ['—', ''];
   if (r.category === 'none') return fightRow('ph-hand-grabbing', `${thief} te laisse filer`, 'rien pris');
   return fightRow('ph-hand-grabbing', `${thief} a pris <small class="fight-racket-sub">${take[1]}</small>`, take[0])
@@ -485,4 +530,57 @@ async function toggleCombatReadyState() {
 // Bouton Prêt et pastilles « prêt / réfléchit » : l'écran du duel se redessine sans animation
 function updateCombatReadyButtonUI() {
   if (fightState() === 'duel') renderFightDuel();
+}
+
+// =========================================================================
+// COMBAT EN DIRECT : les joueurs qui ne combattent pas suivent le duel (rien à faire, juste regarder)
+// =========================================================================
+let liveFight = null;
+const LIVE_RACKET = {
+  cash: d => `${d.thief} racket ${d.pct} % du cash de ${d.loser}`,
+  drugs: d => `${d.thief} racket ${d.pct} % de la drogue de ${d.loser}`,
+  items: d => `${d.thief} fouille le Sac de ${d.loser}`,
+  prostitute: d => `${d.thief} capture la prostituée de ${d.loser}`,
+  none: d => `${d.thief} laisse filer ${d.loser}`
+};
+function onCombatLive(d) {
+  if (!liveFight || liveFight.id !== d.id) liveFight = { id: d.id, closed: false, log: [], atk: null, def: null, status: 'COMBAT !', tone: '', winners: [], loser: '' };
+  const f = liveFight, A = allyListNames((d.attackers || []).map(allyShort)), D = allyShort(d.defender);
+  if (d.attackers && d.attackers.length) { f.attackers = d.attackers; f.defender = d.defender; }
+  f.ready = d.ready || [];
+  const log = t => f.log.push(t);
+  switch (d.stage) {
+    case 'start': f.status = 'COMBAT !'; log(`${A} attaque ${D}`); break;
+    case 'items': log(`${allyShort(d.actor)} joue : ${(d.itemNames || []).join(', ')}`); break;
+    case 'ready': log(`${allyShort(d.actor)} est prêt`); break;
+    case 'unready': log(`${allyShort(d.actor)} n’est plus prêt`); break;
+    case 'hit': f.atk = d.atk; f.def = d.def; f.status = 'ÇA PASSE !'; f.tone = 'hit'; log(`Attaque ${d.atk} contre Défense ${d.def}`); break;
+    case 'blocked': f.atk = d.atk; f.def = d.def; f.status = 'BLOQUÉ !'; f.tone = 'block'; log(`Attaque ${d.atk} contre Défense ${d.def} : la défense tient`); break;
+    case 'riposte': f.atk = null; f.def = null; f.status = 'RIPOSTE !'; f.tone = ''; f.ready = []; log(`${A} contre-attaque ${D}`); break;
+    case 'draw': f.status = 'MATCH NUL'; f.tone = 'block'; log('Contre-attaque bloquée aussi : personne ne perd rien'); break;
+    case 'result': f.status = 'K.O. !'; f.tone = 'ko'; f.winners = d.winners || []; f.loser = d.loser; log(`${allyListNames(f.winners.map(allyShort))} gagne : ${allyShort(d.loser)} perd 1 cœur`); break;
+    case 'racket': f.status = 'RACKET'; f.tone = 'ko'; log((LIVE_RACKET[d.category] || LIVE_RACKET.none)({ ...d, thief: allyShort(d.thief), loser: allyShort(d.loser) })); break;
+    case 'prayer': f.status = 'ANNULÉ'; f.tone = 'block'; log(`Prière miraculeuse de ${allyShort(d.actor)} : combat annulé`); break;
+    case 'aborted': f.status = 'ANNULÉ'; f.tone = 'block'; log('Le combat a été annulé'); break;
+  }
+  renderLiveFight();
+}
+function renderLiveFight() {
+  const f = liveFight, scr = document.getElementById('liveFight');
+  if (!f || !scr) return;
+  const side = (names, cls) => `<div class="lf-side ${cls}">${(names || []).map(n => {
+    const lost = f.loser && n === f.loser, won = f.winners.includes(n), ready = f.ready.includes(n);
+    return `<div class="lf-fighter ${lost ? 'lost' : ''} ${won ? 'won' : ''}"><img src="${fightImg(n)}" alt=""><b>${escapeHtml(allyShort(n))}</b>${ready && !f.atk ? '<em><i class="ph-bold ph-check"></i> prêt</em>' : ''}</div>`;
+  }).join('')}</div>`;
+  scr.dataset.tone = f.tone;
+  document.getElementById('lfRound').innerText = currentSession.round || 1;
+  document.getElementById('lfStatus').innerText = f.status;
+  document.getElementById('lfStage').innerHTML = side(f.attackers, 'l') + '<div class="lf-vs">VS</div>' + side([f.defender], 'r');
+  document.getElementById('lfNums').innerHTML = `<div><small>Attaque</small><b>${f.atk ?? '?'}</b></div><div><small>Défense</small><b>${f.def ?? '?'}</b></div>`;
+  document.getElementById('lfLog').innerHTML = f.log.slice(-5).map((t, i, a) => `<div class="${i === a.length - 1 ? 'new' : ''}">${escapeHtml(t)}</div>`).join('');
+  if (!f.closed && scr.classList.contains('hidden')) scr.classList.remove('hidden');
+}
+function closeLiveFight() {
+  if (liveFight) liveFight.closed = true;
+  document.getElementById('liveFight').classList.add('hidden');
 }

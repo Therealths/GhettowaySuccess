@@ -1053,11 +1053,15 @@ io.on('connection', (socket) => {
       targetCaid: targetPlayer.caidName || "Défenseur",
       statsByToken: statsByToken,
       readyByToken: {},
-      targetDef: targetPlayer.def || 0
+      targetDef: targetPlayer.def || 0,
+      // Joueurs du combat (les autres le regardent en direct) et numéro du combat
+      involved: [...attackerTokens, targetPlayer.playerToken],
+      liveId: Date.now()
     };
 
     attackers.forEach(p => io.to(p.socketId).emit('combat_duel_opened', duelOpenedPayload(room, room.activeCombat, p.playerToken)));
     io.to(targetPlayer.socketId).emit('combat_duel_opened', duelOpenedPayload(room, room.activeCombat, targetPlayer.playerToken));
+    combatLive(room, room.activeCombat, 'start');
   });
 
   socket.on('combat_play_items', ({ itemNames, newTotalStat }) => {
@@ -1092,6 +1096,7 @@ io.on('connection', (socket) => {
       }
       io.to(p.socketId).emit('combat_ready_state_reset');
     });
+    combatLive(room, combat, 'items', { actor: actor.caidName, itemNames });
   });
 
   socket.on('combat_set_ready', ({ currentStat, ready }) => {
@@ -1109,6 +1114,7 @@ io.on('connection', (socket) => {
         const p = tok !== actor.playerToken && room.players.find(x => x.playerToken === tok);
         if (p) io.to(p.socketId).emit('combat_opponent_not_ready', { caidName: actor.caidName });
       });
+      combatLive(room, combat, 'unready', { actor: actor.caidName });
       return;
     }
 
@@ -1129,11 +1135,13 @@ io.on('connection', (socket) => {
     });
 
     const allReady = involvedTokens.every(tok => !!combat.readyByToken[tok]);
-    if (!allReady) return;
+    if (!allReady) return combatLive(room, combat, 'ready', { actor: actor.caidName });
 
     const totalAtk = combat.attackerTokens.reduce((sum, tok) => sum + (Number.isFinite(combat.statsByToken[tok]) ? combat.statsByToken[tok] : 1), 0);
     const totalDef = combat.targetDef || 0;
     const dmgNet = totalAtk - totalDef;
+    // Les spectateurs découvrent l'Attaque et la Défense au moment du choc
+    combatLive(room, combat, dmgNet > 0 ? 'hit' : 'blocked', { atk: totalAtk, def: totalDef });
 
     if (combat.phase === 1) {
       if (dmgNet > 0) {
@@ -1175,6 +1183,7 @@ io.on('connection', (socket) => {
             });
           }
         });
+        combatLive(room, combat, 'draw');
         room.activeCombat = null;
       }
     }
@@ -1207,8 +1216,11 @@ io.on('connection', (socket) => {
     const newAttacker = room.players.find(p => p.playerToken === newAttackerToken);
     const newDefender = room.players.find(p => p.playerToken === newDefenderToken);
     if (!newAttacker || !newDefender) return;
+    const prev = room.activeCombat || {};
 
     room.activeCombat = {
+      involved: prev.involved || [newAttackerToken, newDefenderToken],
+      liveId: prev.liveId || Date.now(),
       phase: 2,
       isAlliedAttack: false,
       attackerTokens: [newAttackerToken],
@@ -1233,6 +1245,7 @@ io.on('connection', (socket) => {
       myStat: newDefender.def || 0,
       weaponNullified: isWeaponNullifiedFor(room, room.activeCombat, newDefenderToken)
     });
+    combatLive(room, room.activeCombat, 'riposte');
   }
 
   function concludeCombatWithWinner(room, roomId, winnerTokens, loserToken, dmgNet, isAlliedVictory) {
@@ -1254,12 +1267,12 @@ io.on('connection', (socket) => {
       loserToken: loserP.playerToken,
       loserCaid: loserP.caidName || 'Perdant',
       isAlliedVictory: !!isAlliedVictory,
-      availableCash: loserP.pocketCash || 0,
-      availableDrugs: loserP.drugs || 0,
+      // Cash et drogue du perdant : pas envoyés, le vainqueur racket à l'aveugle
       availableItems: (loserP.inventory || []).filter(isFouilleItem).length,
       hasProstitute: !!loserP.hasProstituteInTransit,
       prostituteObj: loserP.prostituteObj || { level: 1, name: 'Prostituée Niv. 1', revenue: (room.settings && room.settings.rent && room.settings.rent[1]) || 1000 },
-      dmgNet
+      dmgNet,
+      live: room.activeCombat ? { involved: room.activeCombat.involved, liveId: room.activeCombat.liveId } : null
     };
 
     const winnerNames = winnerTokens
@@ -1288,6 +1301,10 @@ io.on('connection', (socket) => {
       });
     });
 
+    combatLive(room, room.activeCombat, 'result', {
+      winners: winnerTokens.map(t => (room.players.find(p => p.playerToken === t) || {}).caidName || 'Vainqueur'),
+      loser: loserP.caidName, dmgNet, hearts: loserP.hearts
+    });
     room.activeCombat = null;
   }
 
@@ -1305,21 +1322,32 @@ io.on('connection', (socket) => {
       return;
     }
 
+    // Les spectateurs voient la catégorie et la part (pas les montants)
+    const liveRacket = (extra) => combatLive(room, pillage.live, 'racket', { thief: primaryWinner.caidName, loser: loserP.caidName, category, ...extra });
     if (category === 'none') {
+      liveRacket({});
       // Le perdant attend le choix sur son écran Défaite : on le prévient aussi quand rien n'est pris
       sendToPlayer(loserP, 'you_were_pillaged', { category: 'none', amount: 0, thiefCaid: primaryWinner.caidName });
       room.pendingPillage = null;
       return;
     }
 
+    // Cash ou drogue : la roulette tombe entre 30 et 60 % (par 5) de ce que le perdant a sur lui
+    const pct = RACKET_PCTS[Math.floor(Math.random() * RACKET_PCTS.length)];
+    const rollTo = (tokens, cat, amount) => tokens.forEach(t => { const w = room.players.find(p => p.playerToken === t); if (w) sendToPlayer(w, 'racket_roll', { category: cat, pct, amount, loserCaid: loserP.caidName }); });
+
+    if (category === 'cash' || category === 'drugs') liveRacket({ pct });
+    else if (category === 'items' || category === 'prostitute') liveRacket({});
     if (category === 'cash') {
-      const stolenCash = loserP.pocketCash || 0;
-      loserP.pocketCash = 0;
+      const stolenCash = Math.round((loserP.pocketCash || 0) * pct / 100);
+      loserP.pocketCash = Math.max(0, (loserP.pocketCash || 0) - stolenCash);
       sendToPlayer(loserP, 'you_were_pillaged', {
         category: 'cash',
         amount: stolenCash,
+        pct,
         thiefCaid: primaryWinner.caidName
       });
+      if (pillage.isAlliedVictory && pillage.winnerTokens.length >= 2 && stolenCash > 0) rollTo(pillage.winnerTokens, 'cash', stolenCash);
 
       if (pillage.isAlliedVictory && pillage.winnerTokens.length === 2 && stolenCash > 0) {
         const allyP = room.players.find(p => p.playerToken === pillage.winnerTokens[1]);
@@ -1347,17 +1375,22 @@ io.on('connection', (socket) => {
         sendToPlayer(primaryWinner, 'pillage_gain_applied', {
           category: 'cash',
           amount: stolenCash,
+          pct,
           loserCaid: loserP.caidName
         });
       }
     } else if (category === 'drugs') {
-      const stolenDrugs = loserP.drugs || 0;
-      loserP.drugs = 0;
+      const had = loserP.drugs || 0;
+      // Au moins 1 kg s'il en a (sinon 30 % de 1 kg ne donnerait rien)
+      const stolenDrugs = had ? Math.max(1, Math.round(had * pct / 100)) : 0;
+      loserP.drugs = had - stolenDrugs;
       sendToPlayer(loserP, 'you_were_pillaged', {
         category: 'drugs',
         amount: stolenDrugs,
+        pct,
         thiefCaid: primaryWinner.caidName
       });
+      if (pillage.isAlliedVictory && pillage.winnerTokens.length >= 2 && stolenDrugs > 0) rollTo(pillage.winnerTokens, 'drugs', stolenDrugs);
 
       if (pillage.isAlliedVictory && pillage.winnerTokens.length === 2 && stolenDrugs > 0) {
         const allyP = room.players.find(p => p.playerToken === pillage.winnerTokens[1]);
@@ -1384,6 +1417,7 @@ io.on('connection', (socket) => {
         sendToPlayer(primaryWinner, 'pillage_gain_applied', {
           category: 'drugs',
           amount: stolenDrugs,
+          pct,
           loserCaid: loserP.caidName
         });
       }
@@ -1441,6 +1475,7 @@ io.on('connection', (socket) => {
       const p = room.players.find(x => x.playerToken === tok);
       sendToPlayer(p, 'combat_cancelled_by_prayer', { caidName: defender.caidName });
     });
+    combatLive(room, room.activeCombat, 'prayer', { actor: defender.caidName });
     room.activeCombat = null;
   });
 
@@ -1456,6 +1491,7 @@ io.on('connection', (socket) => {
         const p = room.players.find(x => x.playerToken === tok);
         sendToPlayer(p, 'combat_aborted', {});
       });
+      combatLive(room, room.activeCombat, 'aborted');
       room.activeCombat = null;
     }
   });
@@ -1732,6 +1768,13 @@ io.on('connection', (socket) => {
     // Gauche ou droite, et le demi-tour en option (il n'annule pas la direction)
     room.patrolRig = { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), left: !!left, uturn: !!uturn };
   });
+  // Patrouille lancée par le joueur actif : les autres la regardent en direct (Talkie compris)
+  socket.on('patrol_rolled', ({ roll, left, uturn, rigged } = {}) => {
+    const room = rooms[socket.roomId];
+    const me = room && room.players.find(p => p.socketId === socket.id);
+    if (!room || !me || !room.gameStarted) return;
+    socket.to(socket.roomId).emit('patrol_show', { roll: Math.max(1, Math.min(6, Math.round(Number(roll) || 1))), left: !!left, uturn: !!uturn, rigged: !!rigged, caid: me.caidName || 'un Caïd' });
+  });
   socket.on('take_patrol_rig', (ack) => {
     const room = rooms[socket.roomId];
     const rig = room && room.patrolRig || null;
@@ -2006,6 +2049,20 @@ io.on('connection', (socket) => {
 
 // Joueur hors ligne (partie test pilotée depuis un seul téléphone, réseau coupé…) :
 // le message est gardé et lui est remis à sa reconnexion (marqué « late »)
+// Combat en direct : chaque étape est envoyée aux joueurs qui ne combattent pas (rien à faire, juste regarder)
+function combatLive(room, combat, stage, extra = {}) {
+  if (!room || !combat) return;
+  const involved = combat.involved || [];
+  const name = t => (room.players.find(p => p.playerToken === t) || {}).caidName || 'Caïd';
+  const data = {
+    id: combat.liveId || 0, stage, phase: combat.phase || 1,
+    attackers: (combat.attackerTokens || []).map(name), defender: combat.defenderToken ? name(combat.defenderToken) : '',
+    ready: Object.keys(combat.readyByToken || {}).map(name), ...extra
+  };
+  room.players.forEach(p => { if (!involved.includes(p.playerToken) && p.socketId && !p.away) io.to(p.socketId).emit('combat_live', data); });
+}
+// Racket du cash ou de la drogue : part tirée à la roulette (7 cases)
+const RACKET_PCTS = [30, 35, 40, 45, 50, 55, 60];
 // Objets de Fouille (cartes du Sac, hors équipement) : le racket peut en prendre jusqu'à 3
 const PILLAGE_ITEMS = 3;
 const isFouilleItem = it => !!it && !['WEAPON', 'ARMOR', 'VEHICLE', 'PROSTITUTE'].includes(it.type);

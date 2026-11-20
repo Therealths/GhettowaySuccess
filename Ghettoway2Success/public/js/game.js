@@ -566,8 +566,11 @@ function nextPlayerLabel() {
 // Demi-tour : une option tirée en plus (20 %), qui n'annule pas la direction. Gauche ou droite (50/50) sert
 // toujours : sur le plateau, la voiture doit savoir de quel côté tourner au prochain croisement.
 const PATROL_UTURN_CHANCE = 0.2;
-function showPatrolScreen() {
+// spec : patrouille lancée par un autre joueur, regardée en direct ({ roll, left, uturn, rigged, caid }) ; rien à faire, juste « Fermer »
+function showPatrolScreen(spec = null) {
   const scr = document.getElementById('patrolScreen');
+  scr.dataset.spectate = spec ? '1' : '';
+  document.getElementById('patrolWho').innerText = spec ? `tour de ${spec.caid || 'un rival'}` : 'fin de tour';
   const cta = document.getElementById('patrolCta');
   const info = document.getElementById('patrolInfo');
   const dirBox = document.getElementById('patrolDirection');
@@ -589,7 +592,7 @@ function showPatrolScreen() {
   document.getElementById('patrolRound').innerText = currentSession.round || 1;
   document.getElementById('patrolHeadline').innerHTML = two ? 'LES PATROUILLES<br>TOURNENT…' : 'LA PATROUILLE<br>TOURNE…';
   info.innerHTML = '<div class="text-xs font-black uppercase tracking-widest text-sky-300">Le compteur s’emballe…</div><div class="patrol-big text-slate-500">?</div>';
-  cta.innerText = nextPlayerLabel();
+  cta.innerText = spec ? 'Fermer' : nextPlayerLabel();
   cta.disabled = true;
   scr.dataset.state = 'roule';
   scr.classList.remove('hidden', 'show', 'result');
@@ -624,19 +627,23 @@ function showPatrolScreen() {
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">${baseRoll} case${baseRoll > 1 ? 's' : ''} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
     const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} vers la ${left ? 'gauche' : 'droite'} sur le plateau`;
     dirBox.innerHTML = dirCells(left, uturn, uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`);
-    // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau
+    // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau (c'est le joueur actif qui répond)
+    if (spec) return;
     cta.classList.add('hidden');
     document.getElementById('patrolAsk').classList.remove('hidden');
   };
 
   // Le dé change de face quelques fois avant de tomber
   // (Talkie-walkie de flic : un joueur a peut-être choisi à l'avance le dé et la direction, en secret)
-  const roll = rig => {
+  const roll = (rig, seen) => {
     rigged = !!rig;
+    if (seen) { rig = seen; }
     baseRoll = rig ? rig.roll : Math.floor(Math.random() * 6) + 1;
     finalMove = baseRoll + radioExtra;
     left = rig ? !!rig.left : Math.random() < 0.5;
     uturn = rig ? !!rig.uturn : Math.random() < PATROL_UTURN_CHANCE;
+    // Les autres joueurs regardent le même lancer en direct
+    if (!spec && socket) socket.emit('patrol_rolled', { roll: baseRoll, left, uturn, rigged });
     // Talkie-walkie : pendant que le dé roule, la bulle « message au talkie » arrive, puis la carte tamponnée (choc) ;
     // le dé ne tombe qu'après, sur le résultat commandé
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -660,6 +667,7 @@ function showPatrolScreen() {
     };
     setTimeout(tick, 300);
   };
+  if (spec) return roll(spec.rigged ? spec : null, spec);
   if (!socket) return roll(null);
   let asked = false;
   const go = rig => { if (!asked) { asked = true; roll(rig); } };
@@ -671,6 +679,7 @@ function skipPatrolWait() {
   const scr = document.getElementById('patrolScreen');
   scr.classList.add('hidden');
   scr.classList.remove('show', 'result', 'picking');
+  if (scr.dataset.spectate === '1') { scr.dataset.spectate = ''; return; } // simple spectateur : la main ne passe pas
   if (socket) socket.emit('next_player_turn');
 }
 

@@ -239,3 +239,60 @@ function renderInventoryList() {
   renderSacButton();
   if (sacIsOpen()) renderSac();
 }
+
+// =========================================================================
+// ÉCRAN D'ATTENTE : « Mon Caïd » et « Boutiques » (consultation, rien ne se joue)
+// =========================================================================
+function openWaitProfile() {
+  const c = getMyCaid(), lp = localPlayer;
+  const row = (icon, label, val) => `<div class="police-row"><i class="ph-bold ${icon}"></i><span class="lbl">${label}</span><span class="aft">${val}</span></div>`;
+  const hearts = Array.from({ length: Math.max(3, lp.hearts) }, (_, i) => `<i class="ph-fill ph-heart ${i < lp.hearts ? '' : 'off'}"></i>`).join('');
+  const lascars = lp.musclesOnPerson.length ? lp.musclesOnPerson.map(m => `${escapeHtml(m.name)} <small>(+${m.bonusVal || 1})</small>`).join('<br>') : 'aucun';
+  const atQg = lp.prostitutesAtSafeList || [];
+  const rent = atQg.reduce((s, p) => s + (p.revenue || prostituteRent(p.level || 1)), 0);
+  const used = !!lp.specialUsedThisTurn;
+  document.getElementById('wpBody').innerHTML = `
+    <div class="wp-head"><img src="${c.imageFile}" alt=""><div><small>Mon Caïd</small><b>${escapeHtml(c.name)}</b></div></div>
+    <div class="wp-stats">
+      <div><span class="wp-hearts">${hearts}</span><small>Cœurs</small></div>
+      <div><b class="text-rose-400">${getTotalAtk()}</b><small>Attaque</small></div>
+      <div><b class="text-sky-400">${getTotalDef()}</b><small>Défense</small></div>
+      <div><b class="text-emerald-400">${getTotalPm()}</b><small>PM</small></div>
+    </div>
+    <div class="ws-label">Mon équipe</div>
+    <div class="flex flex-col gap-1.5">
+      ${row('ph-barbell', 'Lascars', lascars)}
+      ${row('ph-high-heel', 'Escort en transit', lp.prostituteInTransit ? escapeHtml(lp.prostituteInTransit.name || 'Prostituée') : 'aucune')}
+      ${row('ph-vault', 'Prostituées au QG', atQg.length ? `${atQg.length} · +${rent.toLocaleString()} € / manche` : 'aucune')}
+      ${row('ph-dog', 'Chien errant', lp.strayDogActive ? 'avec toi (+2 / +2)' : 'non')}
+    </div>
+    <div class="ws-label">Capacité spéciale</div>
+    <div class="wp-skill ${used ? 'used' : ''}"><b><i class="ph-fill ph-lightning"></i> ${escapeHtml(c.skillName)}</b><p>${escapeHtml(c.skillDesc)}</p><em>${used ? 'déjà utilisée' : 'prête pour ton tour'}</em></div>
+    <div class="wp-bm"><span class="b">＋ ${escapeHtml(c.bonus)}</span><span class="m">− ${escapeHtml(c.malus)}</span></div>`;
+  document.getElementById('waitProfile').classList.remove('hidden');
+}
+const WAIT_SHOPS = [
+  ['armurerie', 'Armurerie', 'ph-sword', 'armes et protections', () => openArmoryShopModal()],
+  ['nightclub', 'Nightclub', 'ph-high-heel', 'prostituées', () => openNightclubShopModal()],
+  ['sportclub', 'Sportclub', 'ph-barbell', 'lascars', () => openSportclubShopModal()],
+  ['concessionnaire', 'Concessionnaire', 'ph-moped', 'véhicules', () => openDealerShopModal()],
+  ['magasin', 'Dépôt-Vente', 'ph-flask', 'matériel de labo', () => openMagasinShopModal()]
+];
+function waitGrossistePrice() {
+  const base = isRadioEffectActive('GROSSISTE_PRICE_SET') ? getRadioEffectValue('GROSSISTE_PRICE_SET', 1500) : 1000;
+  return inflated(Math.round(base * grossisteFactor()));
+}
+function openWaitShops() {
+  const closed = closedShop();
+  const tag = key => key === closed ? '<em class="off">fermé cette manche</em>' : isRadioEffectActive('INFLATION_PRICE_MULT') ? '<em class="up">prix +20 %</em>' : '';
+  document.getElementById('wsList').innerHTML = WAIT_SHOPS.map(([key, name, icon, sub], i) =>
+    `<button type="button" class="ws-shop" onclick="WAIT_SHOPS[${i}][4]()"><i class="ph-fill ${icon}"></i><span><b>${name}</b><small>${sub}</small></span>${tag(key)}<i class="ph-bold ph-caret-right"></i></button>`).join('')
+    + `<div class="ws-shop static"><i class="ph-fill ph-package"></i><span><b>Grossiste</b><small>prix du kilo</small></span>${closed === 'grossiste' ? '<em class="off">fermé cette manche</em>' : `<em>${waitGrossistePrice().toLocaleString()} € / kg</em>`}</div>`;
+  document.getElementById('waitShops').classList.remove('hidden');
+}
+function closeWaitSheet(id) { document.getElementById(id).classList.add('hidden'); }
+// Son tour commence : on referme tout ce qu'on consultait (les boutiques se rouvriront avec leurs boutons d'achat)
+function closeWaitBrowsers() {
+  ['waitProfile', 'waitShops'].forEach(closeWaitSheet);
+  document.querySelectorAll('.shop-browse').forEach(m => { m.classList.add('hidden'); m.classList.remove('shop-browse'); });
+}

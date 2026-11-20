@@ -109,9 +109,43 @@ test('combat gagné : les deux joueurs voient le duel, le perdant perd un cœur,
   assert.deepStrictEqual([win.outcome, win.dmgNet, win.isPrimaryPicker], ['winner', 2, true]);
   assert.strictEqual(lose.outcome, 'loser');
 
+  // Racket à l'aveugle : le vainqueur ne voit pas le cash ni la drogue du perdant
+  assert.strictEqual(win.pillageInfo.availableCash, undefined);
+  assert.strictEqual(win.pillageInfo.availableDrugs, undefined);
+  // La roulette tombe entre 30 et 60 % (par 5) ; les deux joueurs voient la même part et le même montant
   a.emit('execute_pillage_choice', { category: 'cash' });
-  assert.strictEqual((await waitFor(b, 'you_were_pillaged')).amount, 5000);
-  assert.strictEqual((await waitFor(a, 'pillage_gain_applied')).amount, 5000);
+  const lost = await waitFor(b, 'you_were_pillaged'), got = await waitFor(a, 'pillage_gain_applied');
+  assert.ok([30, 35, 40, 45, 50, 55, 60].includes(lost.pct), `part ${lost.pct}`);
+  assert.strictEqual(lost.amount, 5000 * lost.pct / 100);
+  assert.deepStrictEqual([got.amount, got.pct], [lost.amount, lost.pct]);
+});
+
+test('combat et patrouille en direct : le 3e joueur suit le duel et la patrouille, sans les montants du racket', async () => {
+  const { players } = await startGame([['caid_1', 'Burger Queen'], ['caid_7', 'Jamel Pépouze'], ['caid_3', 'Nelson Sativa']]);
+  const turn = await waitFor(players[0], 'turn_state_updated');
+  const a = players.find(s => s.token === turn.activePlayerToken), [b, c] = players.filter(s => s !== a);
+  a.emit('start_combat_engagement', { targetPlayerToken: b.token });
+  const start = await waitFor(c, 'combat_live', d => d.stage === 'start');
+  assert.strictEqual(start.defender, (await waitFor(b, 'combat_duel_opened')) && start.defender);
+  a.emit('combat_set_ready', { currentStat: 4 });
+  assert.strictEqual((await waitFor(c, 'combat_live', d => d.stage === 'ready')).ready.length, 1);
+  b.emit('combat_set_ready', { currentStat: 1 });
+  const hit = await waitFor(c, 'combat_live', d => d.stage === 'hit');
+  assert.deepStrictEqual([hit.atk, hit.def], [4, 1]);
+  const res = await waitFor(c, 'combat_live', d => d.stage === 'result');
+  assert.strictEqual(res.winners.length, 1);
+  a.emit('execute_pillage_choice', { category: 'drugs' });
+  const racket = await waitFor(c, 'combat_live', d => d.stage === 'racket');
+  assert.strictEqual(racket.category, 'drugs');
+  assert.ok(racket.pct >= 30 && racket.pct <= 60);
+  assert.strictEqual(racket.amount, undefined);
+  // Les combattants ne reçoivent pas le direct
+  await never(a, 'combat_live', 50);
+  await never(b, 'combat_live', 50);
+  // Patrouille lancée par le joueur actif : les deux autres la voient, pas lui
+  a.emit('patrol_rolled', { roll: 4, left: true, uturn: false, rigged: true });
+  for (const s of [b, c]) assert.deepStrictEqual(await waitFor(s, 'patrol_show'), { roll: 4, left: true, uturn: false, rigged: true, caid: res.winners[0] });
+  await never(a, 'patrol_show', 50);
 });
 
 test('racket : le vainqueur prend jusqu’à 3 objets de Fouille au hasard, jamais l’équipement', async () => {

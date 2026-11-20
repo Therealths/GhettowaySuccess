@@ -271,7 +271,8 @@ if (socket) {
     const wasMyTurn = isMyTurnToPlay;
     isMyTurnToPlay = (activePlayerToken === myPlayerToken) || isAlliedNow;
     if (isMyTurnToPlay && !wasMyTurn) { pmSpentThisTurn = 0; pmBonusThisTurn = 0; refreshHud(); }
-    if (wasMyTurn !== isMyTurnToPlay && sacIsOpen()) renderSac(); // Sac ouvert : boutons ou consultation selon le tour
+    if (wasMyTurn !== isMyTurnToPlay && sacIsOpen()) renderSac();
+    if (isMyTurnToPlay && !wasMyTurn) closeWaitBrowsers(); // Sac ouvert : boutons ou consultation selon le tour
     // Fin du tour (ou de sa participation d'allié) : boutiques, coffre et paiement se ferment
     if (wasMyTurn && !isMyTurnToPlay) {
       pmBonusThisTurn = 0;
@@ -287,6 +288,11 @@ if (socket) {
     }
     syncMultiplayerTargets();
   });
+
+  // Combat entre d'autres joueurs : on le suit en direct
+  socket.on('combat_live', d => onCombatLive(d));
+  // Patrouille d'un autre joueur : on la regarde en direct
+  socket.on('patrol_show', spec => showPatrolScreen(spec));
 
   // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---
   socket.on('combat_duel_opened', async ({ phase, role, isAlliedAttack, allyCaid, allyAtk, allies, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog, weaponNullified }) => {
@@ -431,9 +437,9 @@ if (socket) {
   socket.on('heist_prostitute', ({ lvl }) => claimHeistProstitute(lvl));
 
   // Racket subi : appliqué tout de suite ; affiché sur l'écran Défaite qui l'attend, sinon en message
-  socket.on('you_were_pillaged', async ({ category, amount, items, thiefCaid }) => {
-    if (category === 'cash') localPlayer.pocketCash = 0;
-    else if (category === 'drugs') localPlayer.drugs = 0;
+  socket.on('you_were_pillaged', async ({ category, amount, pct, items, thiefCaid }) => {
+    if (category === 'cash') localPlayer.pocketCash = Math.max(0, localPlayer.pocketCash - (amount || 0));
+    else if (category === 'drugs') localPlayer.drugs = Math.max(0, localPlayer.drugs - (amount || 0));
     else if (category === 'prostitute') localPlayer.prostituteInTransit = null;
     else if (category === 'items') {
       // Le serveur a déjà retiré les objets de mon Sac : on enlève les mêmes (par id) de mon côté
@@ -441,11 +447,13 @@ if (socket) {
       localPlayer.inventory = localPlayer.inventory.filter(it => !ids.includes(it && it.id));
     }
     refreshHud();
-    if (onRacketKnown({ category, amount, items, thiefCaid }) || category === 'none') return;
+    // Cash ou drogue : la roulette d'abord (le perdant la voit tourner aussi)
+    if (pct && (category === 'cash' || category === 'drugs')) await showRacketRoulette({ category, pct, amount, who: thiefCaid, role: 'victim' });
+    if (onRacketKnown({ category, amount, pct, items, thiefCaid }) || category === 'none') return;
     if (category === 'cash') {
-      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ton Cash en poche (${amount.toLocaleString()} €) !`, "💸 Pillage Subi");
+      await showAppAlert(`${thiefCaid} t'a pris ${pct || 100} % de ton Cash en poche (${amount.toLocaleString()} €) !`, "💸 Pillage Subi");
     } else if (category === 'drugs') {
-      await showAppAlert(`${thiefCaid} t'a dépouillé de 100 % de ta Drogue en poche (${amount} kg) !`, "🌿 Pillage Subi");
+      await showAppAlert(`${thiefCaid} t'a pris ${pct || 100} % de ta Drogue en poche (${amount} kg) !`, "🌿 Pillage Subi");
     } else if (category === 'prostitute') {
       await showAppAlert(`${thiefCaid} a capturé ta Prostituée en transit !`, "👠 Pillage Subi");
     } else if (category === 'items') {
@@ -453,14 +461,19 @@ if (socket) {
     }
   });
 
-  socket.on('pillage_gain_applied', async ({ category, amount, items, prostituteObj, loserCaid, late }) => {
+  // Racket en alliance : le butin part au partage, mais chaque vainqueur voit la roulette
+  socket.on('racket_roll', ({ category, pct, amount, loserCaid }) => showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief' }));
+
+  socket.on('pillage_gain_applied', async ({ category, amount, pct, items, prostituteObj, loserCaid, late }) => {
     if (category === 'cash') {
       if (!late) localPlayer.pocketCash += (amount || 0);
       refreshHud();
+      if (pct && !late) return showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief' });
       await showAppAlert(`Tu as pris +${(amount || 0).toLocaleString()} € en cash sur ${loserCaid} !`, "💰 Butin Récupéré");
     } else if (category === 'drugs') {
       if (!late) localPlayer.drugs += (amount || 0);
       refreshHud();
+      if (pct && !late) return showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief' });
       await showAppAlert(`Tu as pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
     } else if (category === 'prostitute') {
       localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée Niv. 1', revenue: prostituteRent(1) };

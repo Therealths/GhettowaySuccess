@@ -52,6 +52,8 @@ fetch('/catalog.json')
   })
   .catch(() => {});
 
+// Boutique ouverte hors de son tour (écran d'attente) : consultation, sans bouton d'achat
+const markShopBrowse = id => document.getElementById(id).classList.toggle('shop-browse', !isMyTurnToPlay);
 // Inflation (Flash Radio) : tous les prix des boutiques et du Grossiste augmentent
 const inflated = p => isRadioEffectActive('INFLATION_PRICE_MULT') ? Math.round(p * getRadioEffectValue('INFLATION_PRICE_MULT', 1.2)) : p;
 const getNightclubPrice = item => inflated(item.prix || 0);
@@ -90,6 +92,16 @@ const promoPatchHtml = (full, radioPrice) => full > 0 && radioPrice < full
 // Bon de réduction activé depuis le Sac : −50 % sur le prochain achat payant de la boutique
 const hasVoucher = shop => (localPlayer.vouchers || []).includes(shop);
 const voucherCost = (shop, cost) => cost > 0 && hasVoucher(shop) ? Math.round(cost / 2) : cost;
+// Achat payant dans une boutique dont on a un Bon de réduction dans le Sac (pas encore activé) : on propose de l'utiliser
+async function offerVoucher(shop, cost) {
+  if (!(cost > 0) || hasVoucher(shop)) return;
+  const idx = localPlayer.inventory.findIndex(it => it && it.eff === 'voucher' && it.shop === shop);
+  if (idx < 0) return;
+  if (!await showAppConfirm(`Tu as un Bon de réduction ${shop} dans ton Sac.\nL'utiliser pour cet achat ?\n${cost.toLocaleString()} € → ${Math.round(cost / 2).toLocaleString()} €`, '🎟️ Bon de réduction', 'Utiliser (−50 %)', 'Garder le bon')) return;
+  localPlayer.inventory.splice(idx, 1);
+  localPlayer.vouchers = [...(localPlayer.vouchers || []), shop];
+  refreshHud();
+}
 function useVoucher(shop) {
   const v = [...(localPlayer.vouchers || [])];
   const i = v.indexOf(shop);
@@ -205,6 +217,7 @@ function openArmoryShopModal() {
   document.getElementById('armorySafeCashDisplay').innerText = `${localPlayer.safeCash.toLocaleString()} €`;
   bindDeckSwipeAndDrag('armoryCardsContainer', stepArmoryDeck);
   switchArmoryTab('arme');
+  markShopBrowse('modalArmoryShop');
   document.getElementById('modalArmoryShop').classList.remove('hidden');
 }
 
@@ -295,6 +308,7 @@ function onArmoryCardClick(idx) {
 function freeItemClaimed(item) { return !item.prix && (localPlayer.freeItemsClaimed || []).includes(item.id); }
 
 async function buyArmoryCatalogItem(itemId) {
+  if (!isMyTurnToPlay) return;
   const item = ARMORY_CATALOG.find(i => i.id === itemId);
   if (!item) return;
   if (freeItemClaimed(item)) return showAppAlert(`${item.nom} : déjà récupérée, une seule par partie !`, "⛔ Déjà prise");
@@ -305,6 +319,7 @@ async function buyArmoryCatalogItem(itemId) {
     await showAppAlert(`Malus Tonteushi Kitano : ton premier achat d'arme à l'Armurerie coûte le double (${cost.toLocaleString()} €) !`, "🥋 Malus Kitano");
   }
   const fullCost = cost;
+  await offerVoucher('Armurerie', cost);
   cost = voucherCost('Armurerie', cost);
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
@@ -345,6 +360,7 @@ function openNightclubShopModal() {
   activeNightclubIndex = 0;
   buildNightclubStackDOM();
   bindDeckSwipeAndDrag('nightclubStackContainer', () => toggleNightclubStackCard());
+  markShopBrowse('modalNightclubShop');
   document.getElementById('modalNightclubShop').classList.remove('hidden');
 }
 
@@ -398,12 +414,13 @@ function toggleNightclubStackCard() {
 }
 
 async function buyNightclubItem(itemId) {
+  if (!isMyTurnToPlay) return;
   const item = NIGHTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
   if (!item) return;
   if (localPlayer.prostituteInTransit) {
     return showAppAlert("Tu as déjà 1 prostituée en transit ! Dépose-la d'abord au QG.", "Limite Atteinte");
   }
-  const cost = voucherCost('Nightclub', getNightclubPrice(item));
+  let cost = voucherCost('Nightclub', getNightclubPrice(item));
   const rev = item.rev || item.bonusVal || prostituteRent(item.lvl || 1);
   const dataPayload = { t: 'pr', lvl: item.lvl || 1, p: item.prix, rev: rev, n: item.nom };
   closeModal('modalNightclubShop');
@@ -420,6 +437,8 @@ async function buyNightclubItem(itemId) {
     refreshHud();
     return;
   }
+  await offerVoucher('Nightclub', getNightclubPrice(item));
+  cost = voucherCost('Nightclub', getNightclubPrice(item));
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
   }
@@ -435,6 +454,7 @@ function openSportclubShopModal() {
   activeSportclubIndex = 0;
   buildSportclubStackDOM();
   bindDeckSwipeAndDrag('sportclubStackContainer', () => toggleSportclubStackCard());
+  markShopBrowse('modalSportclubShop');
   document.getElementById('modalSportclubShop').classList.remove('hidden');
 }
 
@@ -482,11 +502,13 @@ function toggleSportclubStackCard() {
 }
 
 async function buySportclubItem(itemId) {
+  if (!isMyTurnToPlay) return;
   const item = SPORTCLUB_CATALOG.find(i => i.id === itemId || i.lvl === itemId);
   if (!item) return;
   if (localPlayer.musclesOnPerson.length >= 3) {
     return showAppAlert("Tu as déjà 3 Lascars, le maximum !", "Limite Atteinte");
   }
+  await offerVoucher('Sportclub', getSportclubPrice(item));
   const cost = voucherCost('Sportclub', getSportclubPrice(item));
   if (localPlayer.pocketCash + localPlayer.safeCash < cost) {
     return showBrokeScreen(cost, item.nom || item.name);
@@ -506,6 +528,7 @@ function openDealerShopModal() {
   activeDealerIndex = 0;
   buildDealerStackDOM();
   bindDeckSwipeAndDrag('dealerCardsContainer', stepDealerDeck);
+  markShopBrowse('modalDealerShop');
   document.getElementById('modalDealerShop').classList.remove('hidden');
 }
 
@@ -562,8 +585,10 @@ function onDealerCardClick(idx) {
 }
 
 async function buyDealerCatalogItem(itemId) {
+  if (!isMyTurnToPlay) return;
   const item = DEALER_CATALOG.find(i => i.id === itemId);
   if (!item) return;
+  await offerVoucher('Concessionnaire', getDealerItemEffectivePrice(item));
   const cost = voucherCost('Concessionnaire', getDealerItemEffectivePrice(item));
   const totalFunds = localPlayer.pocketCash + localPlayer.safeCash;
   if (totalFunds < cost) {
@@ -625,6 +650,7 @@ function openMagasinShopModal() {
   activeMagasinIndex = Math.min(Math.max(localPlayer.labLevel || 0, localPlayer.labGearInTransit || 0), LAB_LEVELS.length - 1);
   buildMagasinStackDOM();
   bindDeckSwipeAndDrag('magasinCardsContainer', stepMagasinDeck);
+  markShopBrowse('modalMagasinShop');
   document.getElementById('modalMagasinShop').classList.remove('hidden');
 }
 
@@ -678,6 +704,7 @@ function onMagasinCardClick(idx) {
 }
 
 async function buyMagasinLab(lvl) {
+  if (!isMyTurnToPlay) return;
   const l = labLevelInfo(lvl);
   if (!l || labLevelState(l) !== 'next') return;
   const cost = getLabEffectivePrice(l);

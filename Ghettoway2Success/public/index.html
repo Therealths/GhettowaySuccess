@@ -367,6 +367,10 @@
           </div>
           <!-- Pendant le tour des autres : on peut regarder son Sac (consultation seulement) pour préparer son tour -->
           <button type="button" onclick="openSac()" class="blocker-sac"><i class="ph-fill ph-backpack"></i><span><b>Voir mon Sac</b></span><i class="ph-bold ph-caret-right"></i></button>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="openWaitProfile()" class="blocker-sac sm"><i class="ph-fill ph-user-circle"></i><span><b>Mon Caïd</b></span></button>
+            <button type="button" onclick="openWaitShops()" class="blocker-sac sm"><i class="ph-fill ph-storefront"></i><span><b>Boutiques</b></span></button>
+          </div>
         </div>
       </div>
       <div class="hud-main">
@@ -574,12 +578,47 @@
     </div>
 
     <!-- MODALE PILLAGE DU PERDANT (100% CASH, DROGUE OU PROSTITUÉE) -->
+    <!-- Pendant le tour des autres : son Caïd (stats, équipe, capacité) et les boutiques à consulter -->
+    <div id="waitProfile" class="hidden absolute inset-0 z-[45] wait-sheet">
+      <div class="ws-card">
+        <div id="wpBody"></div>
+        <button type="button" class="lf-close" onclick="closeWaitSheet('waitProfile')">Fermer</button>
+      </div>
+    </div>
+    <div id="waitShops" class="hidden absolute inset-0 z-[45] wait-sheet">
+      <div class="ws-card">
+        <div class="ws-head"><i class="ph-fill ph-storefront"></i> Boutiques <small>consultation</small></div>
+        <div id="wsList" class="ws-list"></div>
+        <button type="button" class="lf-close" onclick="closeWaitSheet('waitShops')">Fermer</button>
+      </div>
+    </div>
+    <!-- Combat en direct (joueurs qui ne combattent pas) -->
+    <div id="liveFight" class="hidden absolute inset-0 z-[45] live-fight" data-tone="">
+      <div class="lf-card">
+        <div class="lf-top"><span class="lf-live"><i></i> En direct</span><span>Manche <span id="lfRound">1</span></span></div>
+        <h2 id="lfStatus" class="font-anton lf-status">COMBAT !</h2>
+        <div id="lfStage" class="lf-stage"></div>
+        <div id="lfNums" class="lf-nums"></div>
+        <div id="lfLog" class="lf-log"></div>
+        <button type="button" class="lf-close" onclick="closeLiveFight()">Fermer</button>
+      </div>
+    </div>
+    <!-- Roulette du racket : part du cash ou de la drogue prise (30 à 60 %) -->
+    <div id="racketRoulette" class="hidden absolute inset-0 z-[55] racket-roul" data-cat="cash">
+      <div class="rr-card">
+        <div id="rrKicker" class="rr-kicker">Racket</div>
+        <h2 id="rrTitle" class="font-anton rr-title">LA ROULETTE TOURNE…</h2>
+        <div class="rr-stage"><i class="rr-pointer"></i><div id="rrWheel" class="rr-wheel"></div></div>
+        <div id="rrResult" class="rr-result"></div>
+        <button type="button" id="rrCta" class="rr-cta hidden">OK</button>
+      </div>
+    </div>
     <div id="modalCombatPillage" class="hidden absolute inset-0 z-50 loot-screen flex flex-col">
       <div class="loot-bag-wrap"><img src="sac-butin.webp" alt="Sac de butin" class="loot-bag"></div>
       <div class="loot-panel space-y-4">
         <div class="text-center">
           <h3 class="font-anton loot-head">RACKET</h3>
-          <p class="text-xs text-slate-300 mt-0.5">Choisis ce que tu prends (100 %) sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
+          <p class="text-xs text-slate-300 mt-0.5">Choisis ce que tu rackettes sur <strong id="pillageLoserName" class="text-rose-400">le perdant</strong> :</p>
         </div>
         <div id="pillageOptionsContainer" class="space-y-2"></div>
       </div>
@@ -873,7 +912,7 @@
       <div class="police-shade"></div>
       <div class="police-content">
         <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
-          <span>Manche <span id="patrolRound">1</span> · fin de tour</span>
+          <span>Manche <span id="patrolRound">1</span> · <span id="patrolWho">fin de tour</span></span>
           <span class="px-2.5 py-1 rounded-full bg-blue-600 text-white text-[10px] font-black"><i class="ph-fill ph-siren"></i> Patrouille</span>
         </div>
         <h2 id="patrolHeadline" class="font-anton police-headline px-4 mt-2"></h2>
