@@ -94,7 +94,7 @@ Node + Express + socket.io, client en **JavaScript sans framework** (Tailwind pa
 - **Fin de tour** : le joueur lance la **patrouille** (tirage 1 à 6 cases + bonus radio, plus de dé à l'écran ; direction gauche/droite 50/50, plus l'**option 🔄 demi-tour** (20 %, `PATROL_UTURN_CHANCE`) qui **n'annule pas** la direction : sur le plateau, la voiture doit savoir de quel côté tourner au croisement). Écran : le nombre de cases s'affiche sur un **compteur de vitesse** (`#patrolGauge`, `setPatrolGauge`, 0 à 10 avec repères 0/5/10 (8 cases au plus), graduation 0 rouge, tirage en bleu, bonus radio en orange, aiguille qui balaie pendant le lancer) ; directions en 3 cases comme le Talkie (Gauche, Demi-tour Oui/Non, Droite), ce qui n'est pas sorti est grisé, sauf « Grève au Commissariat ».
 - **Combat** : attaque contre défense ; le perdant perd 1 cœur, le gagnant choisit un butin (cash, drogue ou prostituée en transit). Phase 2 de riposte possible. Alliances : attaques et braquages coordonnés, pactes de non-agression.
 
-### Flash radio (`public/radio_events.json`, 29 événements, un tiré par manche par `drawRadio` dans `server.js`)
+### Flash radio (`public/radio_events.json`, 33 événements, un tiré par manche par `drawRadio` dans `server.js`)
 Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` / `getRadioEffectValue`), champ libre éventuel (`getRadioField`), `message` de l'animateur et `rule` (grand chiffre, ton bonus/malus/plateau, lignes avant → après) pour la page Flash Radio.
 - Descente de police (patrouille +2), Pénurie (Yencli +1 500 €), Canicule (véhicules à moteur −2 PM), Guerre des gangs (−30 % armes), Brouillard (Lac infranchissable), Grève au commissariat (patrouille immobile), Saisie aux douanes (Grossiste 1 500 €/kg), Soirée VIP (rente ×2), Tournoi au Sportclub (Lascars +1 ATK), Panne de fourgon (braquages +2 000 €), Couvre-feu (−2 PM à pied), Cargaison tombée du camion (−50 % protections).
 - Krach du shit (`YENCLI_CASH_MULT` 0,5) et Festival en ville (`YENCLI_CASH_MULT` 2 + `policeClean: 0.15` : au contrôle, « rien » passe de 30 % à 15 %, le reste partagé drogue/armes).
@@ -108,7 +108,7 @@ Chaque événement : `effectType` / `effectVal` (lus par `isRadioEffectActive` /
 - Grève des transports (`BASKETS_PM_SET` 5) : métro fermé (règle du plateau seulement) et Vieilles baskets +5 PM.
 - Flics en planque (`PROSTITUTE_REV_MULT` 0) : pas de rente ; une Seringue de botox injectée attend la rente suivante.
 - Chutes de neige exceptionnelles (`SNOW`) : `getTotalPm` ignore le véhicule (tout le monde à pied, 8 PM) et la patrouille est bloquée comme pendant la grève (écran « BLOQUÉE PAR LA NEIGE »).
-- 3 manches calmes (`NONE`, ton `calme` bleu ciel) : Grand soleil sur la cité, Dimanche tranquille, Ciel bleu sur le périph. Rien ne change.
+- 5 manches calmes (`NONE`, ton `calme` bleu ciel) : Grand soleil sur la cité, Dimanche tranquille, Ciel bleu sur le périph, Soir de match, Mariage au quartier. Rien ne change.
 
 ### Objets de Fouille (`FOUILLE_TABLE` dans `items.js`, même chance pour chacun)
 | Objet | `eff` | Effet | Utilisation |

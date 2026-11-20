@@ -813,6 +813,52 @@
           ]
         ]
       }
+    },
+    {
+      "id": "rad_calm_match",
+      "title": "Soir de match",
+      "impact": "Rien de spécial cette manche",
+      "desc": "Une manche tranquille : aucune règle ne change.",
+      "effectType": "NONE",
+      "effectVal": 0,
+      "message": "Ce soir c'est le grand match ! Tout le quartier est scotché devant la télé du kebab… personne ne bouge, rien à signaler.",
+      "rule": {
+        "big": "Calme plat",
+        "tone": "calme",
+        "label": "rien ne change",
+        "sub": "les règles normales s’appliquent",
+        "rows": [
+          [
+            "ph-soccer-ball",
+            "Tout le monde regarde le match",
+            "",
+            "rien ne change"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rad_calm_wedding",
+      "title": "Mariage au quartier",
+      "impact": "Rien de spécial cette manche",
+      "desc": "Une manche tranquille : aucune règle ne change.",
+      "effectType": "NONE",
+      "effectVal": 0,
+      "message": "Klaxons, youyous et cortège de grosses cylindrées : c'est mariage au quartier ! Ce soir on fait la fête, pas les affaires.",
+      "rule": {
+        "big": "Calme plat",
+        "tone": "calme",
+        "label": "rien ne change",
+        "sub": "les règles normales s’appliquent",
+        "rows": [
+          [
+            "ph-confetti",
+            "Tout le monde est à la fête",
+            "",
+            "rien ne change"
+          ]
+        ]
+      }
     }
   ]
 }
