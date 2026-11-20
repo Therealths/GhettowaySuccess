@@ -73,6 +73,7 @@ function emitCreateGame() {
   localStorage.removeItem('g2s_saved_caid_id');
   if (socket) {
     socket.emit('create_room', {
+      settings: buildGameSettings(),
       gameName: gName,
       maxPlayers: selectedPlayerCount,
       selectionMode: selectedCaidMode,
@@ -351,7 +352,7 @@ const RADIO_TONES = {
   calme: { color: '#7dd3fc', chip: 'bg-sky-400/15 text-sky-300', label: 'Calme' }
 };
 function renderRadioCard(ev) {
-  const rule = ev.rule || { big: '', tone: 'plateau', label: ev.impact || ev.title, sub: ev.desc, rows: [] };
+  const rule = radioRuleWithSettings(ev) || { big: '', tone: 'plateau', label: ev.impact || ev.title, sub: ev.desc, rows: [] };
   const tone = RADIO_TONES[rule.tone] || RADIO_TONES.plateau;
   document.getElementById('radioRoundNumber').innerText = currentSession.round;
   document.getElementById('radioCardTitle').innerText = ev.title;
@@ -454,7 +455,7 @@ async function startRoundPhase1() {
   const hasEscorts = localPlayer.prostitutesAtSafeList.length > 0;
   let income = 0, botox = null;
   if (hasEscorts && revMult !== 0) {
-    const baseIncome = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || (p.level === 2 ? 2500 : 1000)), 0);
+    const baseIncome = localPlayer.prostitutesAtSafeList.reduce((acc, p) => acc + (p.revenue || prostituteRent(p.level || 1)), 0);
     // Seringue de botox injectée par le joueur (depuis le Sac) : double cette rente une fois
     botox = localPlayer.botoxActive ? { name: 'Seringue de botox', eff: 'botox' } : null;
     localPlayer.botoxActive = false;

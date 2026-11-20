@@ -1399,3 +1399,38 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .qg-lab .qg-slot.locked b { color: #94a3b8; }
 .lab-screen { --c: #a3e635; }
 .lab-screen .yen-chip { background: #65a30d; }
+
+/* Réglages avancés de la partie (page-reglages) */
+.set-open { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; text-align: left; color: #e2e8f0; background: rgba(255,255,255,0.04); border: 1px dashed rgba(251,191,36,0.4); }
+.set-open > i:first-child { font-size: 20px; color: #fbbf24; }
+.set-open span { flex: 1; display: flex; flex-direction: column; }
+.set-open b { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+.set-open small { font-size: 10px; color: #94a3b8; }
+.set-open em { font-style: normal; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; color: #94a3b8; background: rgba(255,255,255,0.06); }
+.set-open em.on { color: #111; background: #fbbf24; }
+.set-page { padding: 0 !important; }
+.set-top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; padding: 18px 16px 10px; background: linear-gradient(#090a10 75%, rgba(9,10,16,0)); }
+.set-intro { margin: 0 16px 10px; font-size: 11px; color: #94a3b8; display: flex; gap: 6px; align-items: flex-start; }
+.set-intro i { color: #fbbf24; margin-top: 1px; }
+.set-list { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+.set-sec { border-radius: 16px; padding: 10px 12px 4px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); }
+.set-sec h3 { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: 0.04em; text-transform: uppercase; color: #fbbf24; }
+.set-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+.set-sec h3 + .set-row, .set-caid-head + .set-row { border-top: 0; }
+.set-row > b { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 12px; font-weight: 700; color: #f1f5f9; }
+.set-row > b small { font-size: 9.5px; font-weight: 600; color: #64748b; }
+.set-field { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 2px; border-radius: 10px; background: rgba(8,9,14,0.8); border: 1px solid rgba(255,255,255,0.14); }
+.set-field input { width: 74px; padding: 7px 4px 7px 8px; background: transparent; color: #fff; font-weight: 800; font-size: 13px; text-align: right; outline: none; -moz-appearance: textfield; }
+.set-field input::-webkit-outer-spin-button, .set-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.set-field span { font-size: 10px; font-weight: 700; color: #94a3b8; white-space: nowrap; }
+.set-field.changed { border-color: #fbbf24; background: rgba(251,191,36,0.1); }
+.set-field.changed input { color: #fbbf24; }
+.set-caid-head { display: grid; grid-template-columns: 1fr 104px 74px; gap: 8px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; text-align: center; }
+.set-caid { display: grid; grid-template-columns: 1fr 104px 74px; }
+.set-caid > b { flex-direction: row; align-items: center; gap: 7px; font-size: 11px; }
+.set-caid > b img { width: 26px; height: 26px; border-radius: 8px; object-fit: cover; object-position: top; flex-shrink: 0; }
+.set-caid .set-field input { width: 100%; min-width: 0; }
+.set-bottom { position: sticky; bottom: 0; z-index: 5; display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 14px; padding: 14px 16px max(16px, env(safe-area-inset-bottom)); background: linear-gradient(rgba(9,10,16,0), #090a10 30%); }
+.set-reset, .set-ok { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 14px 8px; border-radius: 16px; font-weight: 900; font-size: 12px; text-transform: uppercase; }
+.set-reset { color: #cbd5e1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+.set-ok { color: #111; background: linear-gradient(90deg, #fde68a, #f59e0b); }

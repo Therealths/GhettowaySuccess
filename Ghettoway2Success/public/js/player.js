@@ -230,7 +230,7 @@ async function sellItem(idx) {
   if (!isMyTurnToPlay) return;
   const item = localPlayer.inventory[idx];
   if (!item) return;
-  const val = Math.floor((item.price ?? item.p ?? 3000) * 0.5);
+  const val = sellPrice(item);
   if (await showAppConfirm(`Revendre "${item.name}" pour ${val.toLocaleString()} € ?`, "💰 Revente")) {
     localPlayer.inventory.splice(idx, 1);
     localPlayer.pocketCash += val;
@@ -453,7 +453,7 @@ async function useItem(idx) {
 
 // Coffre du QG : sur toi ⇄ au QG pour l'argent et la drogue, installation d'une escort (aller simple)
 let transferAmount = 0;
-const escortRent = pr => pr.revenue || (pr.level === 2 ? 2500 : 1000);
+const escortRent = pr => pr.revenue || prostituteRent(pr.level || 1);
 const QG_ESCORT_SLOTS = 5; // emplacements d'escorts au QG
 const escortImg = pr => pr.level === 2 ? 'plvl2.jpg' : 'plvl1.jpg';
 // Le coffre ne s'ouvre qu'en flashant le QR de la case QG du plateau

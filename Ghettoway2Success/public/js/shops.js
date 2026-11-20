@@ -48,6 +48,7 @@ fetch('/catalog.json')
     if (Array.isArray(json.nightclub)) NIGHTCLUB_CATALOG = json.nightclub;
     if (Array.isArray(json.sportclub)) SPORTCLUB_CATALOG = json.sportclub;
     if (Array.isArray(json.concessionnaire)) DEALER_CATALOG = json.concessionnaire;
+    applyGameSettings(GAME_SETTINGS); // réglages de la partie par-dessus les nouveaux catalogues
   })
   .catch(() => {});
 
@@ -389,7 +390,7 @@ async function buyNightclubItem(itemId) {
     return showAppAlert("Tu as déjà 1 prostituée en transit ! Dépose-la d'abord au QG.", "Limite Atteinte");
   }
   const cost = voucherCost('Nightclub', item.prix);
-  const rev = item.rev || item.bonusVal || (item.lvl === 2 ? 2500 : 1000);
+  const rev = item.rev || item.bonusVal || prostituteRent(item.lvl || 1);
   const dataPayload = { t: 'pr', lvl: item.lvl || 1, p: item.prix, rev: rev, n: item.nom };
   closeModal('modalNightclubShop');
   if (getMyCaid().id === 'caid_4' && !localPlayer.freeProstituteClaimed && (item.lvl === 1 || item.id === 'pr_lvl1')) {
@@ -685,9 +686,9 @@ function getGrossisteMaxKg() {
 // Grossiste plein écran : compteur de kilos, raccourcis, total, puis écran de livraison
 let grossisteKg = 0;
 function openGrossisteModal(unitPrice) {
-  let basePrice = unitPrice || 1000;
+  let basePrice = Math.round((unitPrice || 1000) * grossisteFactor());
   if (isRadioEffectActive('GROSSISTE_PRICE_SET')) {
-    basePrice = getRadioEffectValue('GROSSISTE_PRICE_SET', 1500);
+    basePrice = Math.round(getRadioEffectValue('GROSSISTE_PRICE_SET', 1500) * grossisteFactor());
   }
   grossisteUnitCost = basePrice;
   grossisteKg = Math.min(1, getGrossisteMaxKg());
@@ -889,7 +890,7 @@ async function finalizePurchaseExecution(pData) {
     await showCardPlayed({ name: `Lascar Niv. ${data.lvl || 1}` }, [['ph-sword', 'Attaque', `+${bVal}`], ['ph-shield', 'Défense', `+${bVal}`]], 'LASCAR RECRUTÉ',
       { kicker: 'Recrutement', stamp: 'ph-handshake', face: shopCardFace({ img: gb.image || 'gblvl1.jpg', name: gb.nom || `Lascar Niv. ${data.lvl || 1}`, bonus: `+${bVal} ATK / +${bVal} DÉF`, desc: gb.desc, cls: 'def' }) });
   } else if (type === 'pr') {
-    localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée Niv. ${data.lvl||1}`, revenue: data.rev || (data.lvl === 2 ? 2500 : 1000) };
+    localPlayer.prostituteInTransit = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: data.lvl || 1, name: `Prostituée Niv. ${data.lvl||1}`, revenue: data.rev || prostituteRent(data.lvl || 1) };
     refreshHud();
     const pr = NIGHTCLUB_CATALOG.find(i => (i.lvl || 1) === (data.lvl || 1)) || {};
     const rev = localPlayer.prostituteInTransit.revenue;

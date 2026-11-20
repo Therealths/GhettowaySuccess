@@ -319,7 +319,7 @@ async function cancelSelectedQrPhoto() {
 
 async function claimHeistProstitute(lvl) {
   const pr = NIGHTCLUB_CATALOG.find(i => (i.lvl || 1) === lvl) || {};
-  const girl = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: lvl, name: pr.nom || `Prostituée Niv. ${lvl}`, revenue: pr.rev || (lvl === 2 ? 2500 : 1000) };
+  const girl = { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: lvl, name: pr.nom || `Prostituée Niv. ${lvl}`, revenue: pr.rev || prostituteRent(lvl) };
   const old = localPlayer.prostituteInTransit;
   if (old && !(await showAppConfirm(`Une ${girl.name} veut te suivre, mais tu as déjà une ${old.name || 'Prostituée'} en transit (une seule à la fois).\n\nRemplacer l'actuelle par la ${girl.name} ?`, "👠 Prostituée libérée", "Remplacer", "Garder l'actuelle"))) return;
   localPlayer.prostituteInTransit = girl;
@@ -509,7 +509,7 @@ async function processQrPayload(payload) {
     if (localPlayer.drugs < data.d) return showYencliScreen(false, [['ph-leaf', 'Drogue demandée', `${data.d} kg`], ['ph-backpack', 'Sur toi', `${localPlayer.drugs} kg ❌`, 'neg'], ['ph-lightning', 'PM', 'non dépensés']]);
     const radioBonus = isRadioEffectActive('YENCLI_CASH_BONUS') ? getRadioEffectValue('YENCLI_CASH_BONUS', 1500) : 0;
     const radioMult = isRadioEffectActive('YENCLI_CASH_MULT') ? getRadioEffectValue('YENCLI_CASH_MULT', 1) : 1;
-    const totalGain = Math.round((data.c || 0) * radioMult) + radioBonus;
+    const totalGain = Math.round((data.c || 0) * settingVal('yencliPct', 100) / 100 * radioMult) + radioBonus;
     localPlayer.drugs -= data.d;
     localPlayer.pocketCash += totalGain;
     spendActionPm();
@@ -552,7 +552,7 @@ async function processQrPayload(payload) {
     }
 
     const radioHeistBonus = isRadioEffectActive('HEIST_CASH_BONUS') ? getRadioEffectValue('HEIST_CASH_BONUS', 2000) : 0;
-    const totalCash = (data.c || 0) + radioHeistBonus;
+    const totalCash = Math.round((data.c || 0) * settingVal('heistPct', 100) / 100) + radioHeistBonus;
     const totalDrugs = data.d || 0;
     spendActionPm();
 

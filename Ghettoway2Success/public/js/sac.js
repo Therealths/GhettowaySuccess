@@ -25,7 +25,7 @@ function gearInfo(it) {
   const slot = SAC_SLOTS[['WEAPON', 'ARMOR', 'VEHICLE'].indexOf(it.type)];
   return { img, slot, desc: c.desc || it.desc || '', bonus: `+${it.bonusVal || 0} ${slot.unit}`, firearm: !!(it.isFirearm || c.isFirearm) };
 }
-const sellPrice = it => Math.floor((it.price ?? it.p ?? 3000) * 0.5);
+const sellPrice = it => Math.floor((it.price ?? it.p ?? 3000) * settingVal('sellPct', 50) / 100);
 
 // Bouton d'action d'un objet de Fouille (null : objet automatique ou inutile)
 const SAC_USE = {

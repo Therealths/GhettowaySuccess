@@ -200,11 +200,33 @@
               </button>
             </div>
           </div>
+          <button type="button" onclick="openSettingsPage()" class="set-open">
+            <i class="ph-bold ph-sliders-horizontal"></i>
+            <span><b>Réglages avancés</b><small>Prix, rentes, départ, gains</small></span>
+            <em id="createSettingsBadge">origine</em>
+            <i class="ph-bold ph-caret-right"></i>
+          </button>
         </div>
       </div>
       <button type="button" onclick="emitCreateGame()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black uppercase tracking-wider rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2">
         <span>Créer & Continuer</span><i class="ph-bold ph-arrow-right"></i>
       </button>
+    </div>
+    <!-- RÉGLAGES AVANCÉS (création de partie) : prix, rentes, départ des Caïds, gains -->
+    <div id="page-reglages" class="screen-view bg-ghetto-surface set-page">
+      <div class="set-top">
+        <button onclick="closeSettingsPage()" class="w-10 h-10 rounded-xl glass-panel text-white flex items-center justify-center shrink-0"><i class="ph-bold ph-caret-left text-lg"></i></button>
+        <div>
+          <h2 class="text-base font-black text-white uppercase tracking-wider">Réglages avancés</h2>
+          <p id="settingsCount" class="text-[10px] text-slate-400">Valeurs d’origine</p>
+        </div>
+      </div>
+      <p class="set-intro"><i class="ph-fill ph-info"></i> Pour toute la partie et tous les joueurs. Les valeurs ne changent plus une fois la partie créée.</p>
+      <div id="settingsList" class="set-list"></div>
+      <div class="set-bottom">
+        <button type="button" onclick="resetSettings()" class="set-reset"><i class="ph-bold ph-arrow-counter-clockwise"></i> Origine</button>
+        <button type="button" onclick="closeSettingsPage()" class="set-ok"><i class="ph-bold ph-check"></i> Valider</button>
+      </div>
     </div>
     <!-- PAGE 3 : REJOINDRE -->
     <div id="page-3" class="screen-view p-5 justify-between bg-ghetto-surface">
@@ -1128,6 +1150,7 @@
   <script src="js/ui.js"></script>
   <script src="js/state.js"></script>
   <script src="js/shops.js"></script>
+  <script src="js/reglages.js"></script>
   <script src="js/player.js"></script>
   <script src="js/combat.js"></script>
   <script src="js/alliance.js"></script>

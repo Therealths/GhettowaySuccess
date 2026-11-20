@@ -538,3 +538,19 @@ test('salon : un téléphone qui se déconnecte garde sa place, et l’hôte rev
   host2.emit('start_game');
   await Promise.all([waitFor(host2, 'game_started'), waitFor(b, 'game_started')]);
 });
+
+test('réglages avancés : gardés avec la partie (nombres seulement) et renvoyés à ceux qui rejoignent', async () => {
+  const host = await connect();
+  host.token = `tok_set_${Math.random().toString(36).slice(2, 7)}`;
+  host.emit('create_room', { gameName: 'Réglée', maxPlayers: 2, selectionMode: 'manual', playerToken: host.token,
+    settings: { prices: { wp_gun: 6000, 'x y': 5, lab_2: -3 }, rent: { 1: '1500', 9: 100 }, startCash: { caid_2: 9000 }, sellPct: 250, grossiste: 'abc', yencliPct: 150 } });
+  const { roomId, room } = await waitFor(host, 'room_created');
+  assert.deepStrictEqual(room.settings, { prices: { wp_gun: 6000 }, rent: { 1: 1500 }, labKg: {}, startCash: { caid_2: 9000 }, startDrug: {}, yencliPct: 150, sellPct: 100 });
+  const b = await connect();
+  b.emit('join_room', { roomId, playerToken: `tok_set_b_${Math.random().toString(36).slice(2, 7)}` });
+  assert.strictEqual((await waitFor(b, 'room_joined')).room.settings.prices.wp_gun, 6000);
+  // Sans réglages : rien
+  const c = await connect();
+  c.emit('create_room', { gameName: 'Normale', maxPlayers: 2, selectionMode: 'manual', playerToken: `tok_set_c_${Math.random().toString(36).slice(2, 7)}`, settings: {} });
+  assert.strictEqual((await waitFor(c, 'room_created')).room.settings, null);
+});

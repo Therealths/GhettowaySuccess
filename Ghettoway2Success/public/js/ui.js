@@ -233,6 +233,7 @@ window.addEventListener('popstate', e => {
   }
   const page = document.querySelector('.screen-view.active:not(.slide-out-down)');
   if (page && SLIDE_PAGES.includes(page.id)) navTo('page-1');
+  else if (page && page.id === 'page-reglages') navTo('page-2');
 });
 // Entrée provisoire au chargement (avant tout toucher), puis la vraie au premier toucher
 pushBackTop();

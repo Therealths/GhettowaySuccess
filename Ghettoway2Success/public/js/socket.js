@@ -12,7 +12,8 @@ if (socket) {
     const savedRoomId = localStorage.getItem('g2s_room_id');
     if (savedRoomId) socket.emit('reconnect_player', { roomId: savedRoomId, playerToken: myPlayerToken });
   });
-  socket.on('reconnect_success', ({ roomId, player, gameStarted, round, radio, policeCars, players, selectionMode }) => {
+  socket.on('reconnect_success', ({ roomId, room, player, gameStarted, round, radio, policeCars, players, selectionMode }) => {
+    applyGameSettings(room && room.settings);
     currentSession.policeCars = policeCars || 1;
     resumeRequested = false;
     localStorage.setItem('g2s_room_id', roomId);
@@ -128,7 +129,8 @@ if (socket) {
   socket.on('player_returned', ({ caidName } = {}) => {
     showAppAlert(`${caidName || 'Un Caïd'} est de retour dans la partie !`, "👋 Retour");
   });
-  socket.on('room_created', ({ roomId, selectionMode }) => {
+  socket.on('room_created', ({ roomId, room, selectionMode }) => {
+    applyGameSettings(room && room.settings);
     localStorage.setItem('g2s_room_id', roomId);
     localStorage.removeItem('g2s_saved_caid_id');
     localPlayer.caidId = null;
@@ -137,7 +139,8 @@ if (socket) {
     roomSelectionMode = selectionMode || selectedCaidMode;
     navTo('page-4');
   });
-  socket.on('room_joined', ({ roomId, selectionMode }) => {
+  socket.on('room_joined', ({ roomId, room, selectionMode }) => {
+    applyGameSettings(room && room.settings);
     localStorage.setItem('g2s_room_id', roomId);
     localStorage.removeItem('g2s_saved_caid_id');
     localPlayer.caidId = null;
@@ -459,7 +462,7 @@ if (socket) {
       refreshHud();
       await showAppAlert(`Tu as pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
     } else if (category === 'prostitute') {
-      localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée Niv. 1', revenue: 1000 };
+      localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée Niv. 1', revenue: prostituteRent(1) };
       refreshHud();
       await showAppAlert(`Tu as récupéré la Prostituée de ${loserCaid} en transit !`, "👠 Escort Capturée");
     } else if (category === 'items') {

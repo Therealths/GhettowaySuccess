@@ -719,7 +719,7 @@ io.on('connection', (socket) => {
     };
   }
 
-  socket.on('create_room', ({ gameName, maxPlayers, selectionMode, playerToken }) => {
+  socket.on('create_room', ({ gameName, maxPlayers, selectionMode, playerToken, settings }) => {
     const roomId = 'GW_' + Math.random().toString(36).substring(2, 7).toUpperCase();
     rooms[roomId] = {
       id: roomId,
@@ -739,6 +739,7 @@ io.on('connection', (socket) => {
       pendingPillage: null,
       gameStarted: false,
       currentRadio: RADIO_EVENTS[0],
+      settings: cleanGameSettings(settings),
       players: []
     };
 
@@ -2053,6 +2054,31 @@ function handlePlayerDisconnect(socket) {
     }
     io.emit('rooms_list', getAvailableRooms());
   }
+}
+
+// Réglages avancés de la partie (prix, rentes, départ, gains) : seulement des nombres raisonnables,
+// rangés par l'hôte à la création ; les téléphones les appliquent par-dessus les valeurs d'origine
+function cleanGameSettings(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const num = (v, max) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= 0 ? Math.min(n, max) : undefined; };
+  const map = (o, max, keyRe) => {
+    const out = {};
+    if (o && typeof o === 'object') Object.keys(o).slice(0, 60).forEach(k => { const n = num(o[k], max); if (keyRe.test(k) && n !== undefined) out[k] = n; });
+    return out;
+  };
+  const out = {
+    prices: map(raw.prices, 1000000, /^[a-z0-9_]{1,24}$/),
+    rent: map(raw.rent, 1000000, /^[12]$/),
+    labKg: map(raw.labKg, 100, /^[123]$/),
+    startCash: map(raw.startCash, 1000000, /^caid_\d{1,2}$/),
+    startDrug: map(raw.startDrug, 1000, /^caid_\d{1,2}$/)
+  };
+  [['grossiste', 1000000], ['yencliPct', 1000], ['heistPct', 1000], ['sellPct', 100]].forEach(([k, max]) => {
+    const n = num(raw[k], max);
+    if (n !== undefined) out[k] = n;
+  });
+  const empty = Object.values(out).every(v => typeof v === 'object' && !Object.keys(v).length);
+  return empty ? null : out;
 }
 
 function getAvailableRooms() {
