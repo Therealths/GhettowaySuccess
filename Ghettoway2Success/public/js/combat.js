@@ -217,6 +217,7 @@ async function openCombatModal() {
   if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour d'attaquer !", "Tour Inactif");
   isCombatReady = false;
   fightTargetToken = null;
+  fightMode = 'caid';
   syncMultiplayerTargets();
   return renderFightChoice();
 }
@@ -234,14 +235,6 @@ let attackedThisTurn = [];
 const QG_RAID_LASCARS = 3;
 const qgRaidAllies = () => (localPlayer.allianceActive ? (localPlayer.activeAllies || []) : []);
 const allyLascars = a => ((connectedRivals || []).find(r => r.playerToken === a.allyToken) || {}).musclesCount || 0;
-function qgRaidButtonHtml() {
-  const rivals = (connectedRivals || []).filter(r => !r.away && !isRivalProtectedByPact(r.playerToken));
-  if (!rivals.length) return '';
-  const mine = localPlayer.musclesOnPerson.length, withAllies = mine + qgRaidAllies().reduce((n, a) => n + allyLascars(a), 0);
-  const done = localPlayer.qgRaidRound === (currentSession.round || 1);
-  const sub = done ? 'déjà fait cette manche' : withAllies >= QG_RAID_LASCARS ? `${withAllies} Lascars avec toi${withAllies > mine ? ' et tes alliés' : ''}` : `3 Lascars requis (tu en as ${withAllies})`;
-  return `<button type="button" class="qg-raid-btn" onclick="startQgRaid()" ${done || withAllies < QG_RAID_LASCARS ? 'disabled' : ''}><i class="ph-fill ph-house-line"></i><span><b>Attaquer son QG</b><small>${sub}</small></span><i class="ph-bold ph-caret-right"></i></button>`;
-}
 async function startQgRaid() {
   const target = (connectedRivals || []).find(r => r.playerToken === fightTargetToken);
   if (!target || !isMyTurnToPlay) return;
@@ -284,26 +277,37 @@ function takeQgRaid(category) {
   if (socket) socket.emit('qg_raid_take', { category });
 }
 
+// Après le choix du joueur : on attaque le Caïd (duel) ou son QG
+let fightMode = 'caid';
+function setFightMode(m) { fightMode = m; buzz(15); renderFightChoice(); }
+function qgRaidState() {
+  const mine = localPlayer.musclesOnPerson.length, withAllies = mine + qgRaidAllies().reduce((n, a) => n + allyLascars(a), 0);
+  const done = localPlayer.qgRaidRound === (currentSession.round || 1);
+  return { ok: !done && withAllies >= QG_RAID_LASCARS, sub: done ? 'Déjà une attaque de QG cette manche' : withAllies >= QG_RAID_LASCARS ? `${withAllies} Lascars avec toi${withAllies > mine ? ' et tes alliés' : ''} · 1 fois par manche` : `3 Lascars requis : tu en as ${withAllies}` };
+}
 function renderFightChoice() {
   const rivals = connectedRivals || [];
-  const isOff = r => !!r.inHospital || !!r.away || isRivalProtectedByPact(r.playerToken) || attackedThisTurn.includes(r.playerToken);
+  const qg = fightMode === 'qg';
+  // Le QG reste attaquable si son Caïd est à l'hôpital ou a déjà été attaqué ce tour
+  const isOff = r => !!r.away || isRivalProtectedByPact(r.playerToken) || (!qg && (!!r.inHospital || attackedThisTurn.includes(r.playerToken)));
   const free = rivals.filter(r => !isOff(r));
   if (!free.some(r => r.playerToken === fightTargetToken)) fightTargetToken = free.length ? free[0].playerToken : null;
   const target = free.find(r => r.playerToken === fightTargetToken);
   const me = getMyCaid();
 
   const right = target
-    ? allyTag(allyCaidImg(target.caidId, allyRivalName(target)), allyRivalName(target))
+    ? (qg ? allyTag('qg-coffre.webp', `QG de ${allyShort(allyRivalName(target))}`) : allyTag(allyCaidImg(target.caidId, allyRivalName(target)), allyRivalName(target)))
     : `<div class="ally-tag"><div class="ally-unknown">?</div><b>Ta cible</b></div>`;
   const stage = allyAt('l', '52%', allyTag(me.imageFile, 'Toi'), '18px') + allyAt('r', '52%', right, '14px') + fightVs(1, 1);
 
   const lascars = n => `${n} Lascar${n > 1 ? 's' : ''}`;
+  const raid = qgRaidState();
   const pick = r => {
     const img = allyCaidImg(r.caidId, allyRivalName(r)), name = escapeHtml(allyRivalName(r));
     if (isRivalProtectedByPact(r.playerToken)) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🤝 ${name}</b><span>Pacte actif : pas d’attaque jusqu’à la manche ${fightPactUntil(r.playerToken) || (currentSession.round || 1)}</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     if (r.away) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>💤 ${name}</b><span>A quitté la partie : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
-    if (r.inHospital) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🏥 ${name}</b><span>À l’hôpital : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
-    if (attackedThisTurn.includes(r.playerToken)) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>⚔️ ${name}</b><span>Déjà attaqué ce tour : une seule attaque par tour</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
+    if (r.inHospital && !qg) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>🏥 ${name}</b><span>À l’hôpital : intouchable</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
+    if (attackedThisTurn.includes(r.playerToken) && !qg) return `<div class="ally-pick off"><img src="${img}" alt=""><div class="n"><b>⚔️ ${name}</b><span>Déjà attaqué ce tour : une seule attaque par tour</span></div><i class="ph-bold ph-prohibit text-slate-500 text-xl"></i></div>`;
     const on = r.playerToken === fightTargetToken;
     return `<button type="button" class="ally-pick ${on ? 'on' : ''}" data-token="${escapeHtml(r.playerToken)}" onclick="pickFightTarget(this.dataset.token)"><img src="${img}" alt=""><div class="n"><b>${name}</b><span>${lascars(r.musclesCount || 0)}<br>Escort : ${r.hasProstituteInTransit ? 'oui' : 'non'}<br>Chien : ${r.hasStrayDog ? 'oui' : 'non'}</span></div><i class="${on ? 'ph-fill' : 'ph-bold'} ph-crosshair fight-aim"></i></button>`;
   };
@@ -311,8 +315,11 @@ function renderFightChoice() {
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible attaquable cette manche</div>' : ''}
     <div class="ally-picks mt-3">${rivals.map(pick).join('')}</div>
-    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closeFightScreen()">Annuler</button><button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="initiateCombatEngagement()" ${target ? '' : 'disabled'}>Engager le combat</button></div>
-    ${qgRaidButtonHtml()}`;
+    ${rivals.length ? `<div class="fight-mode mt-3"><button type="button" class="${qg ? '' : 'on'}" onclick="setFightMode('caid')"><i class="ph-fill ph-sword"></i> Le Caïd</button><button type="button" class="${qg ? 'on' : ''}" onclick="setFightMode('qg')"><i class="ph-fill ph-house-line"></i> Son QG</button></div>
+    <div class="fight-mode-sub ${qg && !raid.ok ? 'warn' : ''}">${qg ? raid.sub : 'Duel contre le Caïd : une seule attaque par joueur et par tour'}</div>` : ''}
+    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-3"><button type="button" class="btn-close ally-ghost" onclick="closeFightScreen()">Annuler</button>${qg
+      ? `<button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="startQgRaid()" ${target && raid.ok ? '' : 'disabled'}>Attaquer son QG</button>`
+      : `<button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="initiateCombatEngagement()" ${target ? '' : 'disabled'}>Engager le combat</button>`}</div>`;
   return fightRender('choix', 'atk', 'combat', stage, bottom);
 }
 

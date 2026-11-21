@@ -1672,3 +1672,11 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .wait-sheet, .qg-raid { --accent: #fbbf24; }
 .wait-sheet .police-row .aft, .qg-raid .police-row .aft { color: #fff; text-align: right; }
 .wait-sheet .police-row .aft small { color: #94a3b8; font-weight: 700; }
+
+/* Combat : après le joueur, on choisit le Caïd ou son QG */
+.fight-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 16px; background: rgba(255,255,255,.06); }
+.fight-mode button { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 0; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase; color: #94a3b8; }
+.fight-mode button.on { color: #fff; background: linear-gradient(90deg, #e11d48, #be123c); }
+.fight-mode button:last-child.on { background: linear-gradient(90deg, #ea580c, #c2410c); }
+.fight-mode-sub { margin-top: 6px; text-align: center; font-size: 11px; font-weight: 700; color: #94a3b8; }
+.fight-mode-sub.warn { color: #fb923c; }
