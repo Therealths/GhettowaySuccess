@@ -131,9 +131,11 @@ test('combat et patrouille en direct : le 3e joueur suit le duel et la patrouill
   assert.strictEqual((await waitFor(c, 'combat_live', d => d.stage === 'ready')).ready.length, 1);
   b.emit('combat_set_ready', { currentStat: 1 });
   const hit = await waitFor(c, 'combat_live', d => d.stage === 'hit');
-  assert.deepStrictEqual([hit.atk, hit.def], [4, 1]);
+  // Le spectateur ne voit aucune stat
+  assert.deepStrictEqual([hit.atk, hit.def, hit.dmgNet], [undefined, undefined, undefined]);
   const res = await waitFor(c, 'combat_live', d => d.stage === 'result');
   assert.strictEqual(res.winners.length, 1);
+  assert.deepStrictEqual([res.dmgNet, res.hearts], [undefined, undefined]);
   a.emit('execute_pillage_choice', { category: 'drugs' });
   const racket = await waitFor(c, 'combat_live', d => d.stage === 'racket');
   assert.strictEqual(racket.category, 'drugs');

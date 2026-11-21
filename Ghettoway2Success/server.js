@@ -1103,7 +1103,7 @@ io.on('connection', (socket) => {
       }
       io.to(p.socketId).emit('combat_ready_state_reset');
     });
-    combatLive(room, combat, 'items', { actor: actor.caidName, itemNames });
+    combatLive(room, combat, 'items', { actor: actor.caidName, count: (itemNames || []).length || 1 });
   });
 
   socket.on('combat_set_ready', ({ currentStat, ready }) => {
@@ -1147,8 +1147,8 @@ io.on('connection', (socket) => {
     const totalAtk = combat.attackerTokens.reduce((sum, tok) => sum + (Number.isFinite(combat.statsByToken[tok]) ? combat.statsByToken[tok] : 1), 0);
     const totalDef = combat.targetDef || 0;
     const dmgNet = totalAtk - totalDef;
-    // Les spectateurs découvrent l'Attaque et la Défense au moment du choc
-    combatLive(room, combat, dmgNet > 0 ? 'hit' : 'blocked', { atk: totalAtk, def: totalDef });
+    // Les spectateurs voient seulement si ça passe ou non (aucune stat)
+    combatLive(room, combat, dmgNet > 0 ? 'hit' : 'blocked');
 
     if (combat.phase === 1) {
       if (dmgNet > 0) {
@@ -1310,7 +1310,7 @@ io.on('connection', (socket) => {
 
     combatLive(room, room.activeCombat, 'result', {
       winners: winnerTokens.map(t => (room.players.find(p => p.playerToken === t) || {}).caidName || 'Vainqueur'),
-      loser: loserP.caidName, dmgNet, hearts: loserP.hearts
+      loser: loserP.caidName
     });
     room.activeCombat = null;
   }

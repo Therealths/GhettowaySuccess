@@ -608,19 +608,19 @@ const LIVE_RACKET = {
   none: d => `${d.thief} laisse filer ${d.loser}`
 };
 function onCombatLive(d) {
-  if (!liveFight || liveFight.id !== d.id) liveFight = { id: d.id, closed: false, log: [], atk: null, def: null, status: 'COMBAT !', tone: '', winners: [], loser: '' };
+  if (!liveFight || liveFight.id !== d.id) liveFight = { id: d.id, closed: false, log: [], clash: false, status: 'COMBAT !', tone: '', winners: [], loser: '' };
   const f = liveFight, A = allyListNames((d.attackers || []).map(allyShort)), D = allyShort(d.defender);
   if (d.attackers && d.attackers.length) { f.attackers = d.attackers; f.defender = d.defender; }
   f.ready = d.ready || [];
   const log = t => f.log.push(t);
   switch (d.stage) {
     case 'start': f.status = 'COMBAT !'; log(`${A} attaque ${D}`); break;
-    case 'items': log(`${allyShort(d.actor)} joue : ${(d.itemNames || []).join(', ')}`); break;
+    case 'items': log(`${allyShort(d.actor)} joue ${d.count > 1 ? `${d.count} objets` : 'un objet'}`); break;
     case 'ready': log(`${allyShort(d.actor)} est prêt`); break;
     case 'unready': log(`${allyShort(d.actor)} n’est plus prêt`); break;
-    case 'hit': f.atk = d.atk; f.def = d.def; f.status = 'ÇA PASSE !'; f.tone = 'hit'; log(`Attaque ${d.atk} contre Défense ${d.def}`); break;
-    case 'blocked': f.atk = d.atk; f.def = d.def; f.status = 'BLOQUÉ !'; f.tone = 'block'; log(`Attaque ${d.atk} contre Défense ${d.def} : la défense tient`); break;
-    case 'riposte': f.atk = null; f.def = null; f.status = 'RIPOSTE !'; f.tone = ''; f.ready = []; log(`${A} contre-attaque ${D}`); break;
+    case 'hit': f.clash = true; f.status = 'ÇA PASSE !'; f.tone = 'hit'; log('L’attaque passe la défense'); break;
+    case 'blocked': f.clash = true; f.status = 'BLOQUÉ !'; f.tone = 'block'; log('La défense tient'); break;
+    case 'riposte': f.clash = false; f.status = 'RIPOSTE !'; f.tone = ''; f.ready = []; log(`${A} contre-attaque ${D}`); break;
     case 'draw': f.status = 'MATCH NUL'; f.tone = 'block'; log('Contre-attaque bloquée aussi : personne ne perd rien'); break;
     case 'result': f.status = 'K.O. !'; f.tone = 'ko'; f.winners = d.winners || []; f.loser = d.loser; log(`${allyListNames(f.winners.map(allyShort))} gagne : ${allyShort(d.loser)} perd 1 cœur`); break;
     case 'racket': f.status = 'RACKET'; f.tone = 'ko'; log((LIVE_RACKET[d.category] || LIVE_RACKET.none)({ ...d, thief: allyShort(d.thief), loser: allyShort(d.loser) })); break;
@@ -634,13 +634,12 @@ function renderLiveFight() {
   if (!f || !scr) return;
   const side = (names, cls) => `<div class="lf-side ${cls}">${(names || []).map(n => {
     const lost = f.loser && n === f.loser, won = f.winners.includes(n), ready = f.ready.includes(n);
-    return `<div class="lf-fighter ${lost ? 'lost' : ''} ${won ? 'won' : ''}"><img src="${fightImg(n)}" alt=""><b>${escapeHtml(allyShort(n))}</b>${ready && !f.atk ? '<em><i class="ph-bold ph-check"></i> prêt</em>' : ''}</div>`;
+    return `<div class="lf-fighter ${lost ? 'lost' : ''} ${won ? 'won' : ''}"><img src="${fightImg(n)}" alt=""><b>${escapeHtml(allyShort(n))}</b>${ready && !f.clash ? '<em><i class="ph-bold ph-check"></i> prêt</em>' : ''}</div>`;
   }).join('')}</div>`;
   scr.dataset.tone = f.tone;
   document.getElementById('lfRound').innerText = currentSession.round || 1;
   document.getElementById('lfStatus').innerText = f.status;
   document.getElementById('lfStage').innerHTML = side(f.attackers, 'l') + '<div class="lf-vs">VS</div>' + side([f.defender], 'r');
-  document.getElementById('lfNums').innerHTML = `<div><small>Attaque</small><b>${f.atk ?? '?'}</b></div><div><small>Défense</small><b>${f.def ?? '?'}</b></div>`;
   document.getElementById('lfLog').innerHTML = f.log.slice(-5).map((t, i, a) => `<div class="${i === a.length - 1 ? 'new' : ''}">${escapeHtml(t)}</div>`).join('');
   if (!f.closed && scr.classList.contains('hidden')) scr.classList.remove('hidden');
 }
