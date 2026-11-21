@@ -670,6 +670,19 @@ function playFightFx(kind, leftImgs, rightImgs) {
     document.getElementById('ffxWord').innerText = words[Math.floor(Math.random() * words.length)];
     scr.dataset.kind = kind;
     scr.classList.remove('hidden', 'play');
+    // Un poing par attaquant : il part de sa photo et file vers le défenseur (légèrement décalés les uns des autres)
+    const fists = document.getElementById('ffxFists');
+    fists.innerHTML = '';
+    if (kind !== 'intro') {
+      const box = scr.getBoundingClientRect(), mid = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top, r.width]; };
+      const def = document.querySelector('#ffxR img');
+      const [x1, y1, w1] = def ? mid(def) : [box.width * 0.72, box.height * 0.47, 100];
+      fists.innerHTML = [...document.querySelectorAll('#ffxL img')].map((img, i) => {
+        const [x0, y0, w0] = mid(img);
+        const sx = x0 + w0 / 2, ex = x1 - w1 / 2 + 6, rot = Math.atan2(y1 - y0, ex - sx) * 180 / Math.PI;
+        return `<span class="ffx-fist" style="--x0:${sx}px;--y0:${y0}px;--x1:${ex}px;--y1:${y1}px;--rot:${rot.toFixed(1)}deg;animation-delay:${0.4 + i * 0.12}s"><i class="ffx-trail"></i>🤜</span>`;
+      }).join('');
+    }
     void scr.offsetWidth;
     scr.classList.add('play');
     if (kind !== 'intro') setTimeout(() => buzz(kind === 'hit' ? [60, 40, 90] : 50), reduce ? 0 : 900);
