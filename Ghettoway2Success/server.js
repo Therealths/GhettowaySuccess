@@ -1870,6 +1870,13 @@ io.on('connection', (socket) => {
     const d = ['left', 'right', 'straight'].includes(dir) ? dir : (left ? 'left' : 'right');
     socket.to(socket.roomId).emit('patrol_show', { roll: Math.max(1, Math.min(20, Math.round(Number(roll) || 1))), dir: d, left: d === 'left', uturn: !!uturn, rigged: !!rigged, caid: me.caidName || 'un Caïd' });
   });
+  // Voiture obligée de tourner : le lanceur retire une direction, les autres la voient
+  socket.on('patrol_redir', ({ dir } = {}) => {
+    const room = rooms[socket.roomId];
+    const me = room && room.players.find(p => p.socketId === socket.id);
+    if (!room || !me || !room.gameStarted || !['left', 'right', 'straight'].includes(dir)) return;
+    socket.to(socket.roomId).emit('patrol_redir_show', { dir });
+  });
   socket.on('take_patrol_rig', (ack) => {
     const room = rooms[socket.roomId];
     const rig = room && room.patrolRig || null;

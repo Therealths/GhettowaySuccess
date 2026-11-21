@@ -519,6 +519,8 @@ input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radi
 .patrol-big { font-family: 'Anton', sans-serif; font-size: 52px; line-height: 1; color: #fff; }
 .patrol-big span { font-size: 22px; }
 .patrol-note { min-height: 2.8em; line-height: 1.4; }
+.patrol-redir { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 8px; padding: 7px 10px; border-radius: 10px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; color: #93c5fd; background: rgba(96,165,250,0.1); border: 1px dashed rgba(96,165,250,0.5); }
+.patrol-redir:active { transform: scale(0.97); }
 .patrol-screen .police-panel { height: 280px; display: flex; flex-direction: column; }
 .patrol-screen .police-cta { margin-top: auto; }
 .patrol-radio { font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: #f59e0b; color: #1c1300; }

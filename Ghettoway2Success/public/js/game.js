@@ -580,6 +580,25 @@ const drawPatrolRoll = () => PATROL_MIN + Math.floor(Math.random() * (PATROL_MAX
 const drawPatrolDir = () => { const r = Math.random(); return r < 0.5 ? 'straight' : r < 0.75 ? 'left' : 'right'; };
 const patrolDirOf = rig => rig.dir || (rig.left ? 'left' : 'right');
 const PATROL_DIR_TXT = { left: 'vers la gauche', right: 'vers la droite', straight: 'tout droit' };
+// Nouvelle direction quand la voiture ne peut pas suivre la sienne : on retire parmi les deux autres (mêmes poids)
+let patrolNow = null;
+function redrawPatrolDir() {
+  if (!patrolNow) return;
+  const others = ['straight', 'left', 'right'].filter(d => d !== patrolNow.dir);
+  const w = { straight: 2, left: 1, right: 1 };
+  let r = Math.random() * (w[others[0]] + w[others[1]]);
+  patrolNow.dir = (r -= w[others[0]]) < 0 ? others[0] : others[1];
+  buzz(25);
+  patrolNow.render(patrolNow.dir, true);
+  if (socket) socket.emit('patrol_redir', { dir: patrolNow.dir });
+}
+// Vue des autres joueurs : la direction retirée par le lanceur remplace l'ancienne
+function showPatrolRedir({ dir } = {}) {
+  const scr = document.getElementById('patrolScreen');
+  if (!patrolNow || scr.dataset.spectate !== '1' || scr.classList.contains('hidden') || !PATROL_DIR_TXT[dir]) return;
+  patrolNow.dir = dir;
+  patrolNow.render(dir, true);
+}
 // spec : patrouille lancée par un autre joueur, regardée en direct ({ roll, left, uturn, rigged, caid }) ; rien à faire, juste « Fermer »
 function showPatrolScreen(spec = null) {
   const scr = document.getElementById('patrolScreen');
@@ -599,6 +618,7 @@ function showPatrolScreen(spec = null) {
   document.getElementById('patrolPick').classList.add('hidden');
   cta.classList.remove('hidden');
   patrolPicked = new Set();
+  patrolNow = null;
 
   // Trop de criminalité : deux voitures, qui avancent du même lancer
   const two = (currentSession.policeCars || 1) > 1;
@@ -640,7 +660,13 @@ function showPatrolScreen(spec = null) {
     info.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest text-sky-300">Déplacement</div><div class="patrol-big">${finalMove} <span>case${finalMove > 1 ? 's' : ''}</span></div>`
       + (radioExtra > 0 ? `<div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 mt-1">${baseRoll} case${baseRoll > 1 ? 's' : ''} <span class="patrol-radio">+${radioExtra} Radio</span></div>` : '');
     const moveTxt = `${two ? 'les 2 pions' : 'le pion'} de la patrouille de ${finalMove} case${finalMove > 1 ? 's' : ''} ${PATROL_DIR_TXT[dir]} (au croisement) sur le plateau`;
-    dirBox.innerHTML = dirCells(dir, uturn, uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`);
+    const note = uturn ? `${two ? 'Les 2 patrouilles font' : 'La patrouille fait'} d’abord demi-tour, puis avance ${moveTxt}.` : `Avance ${moveTxt}.`;
+    // Voiture obligée de tourner en route (impasse, virage) : « Nouvelle direction » en retire une, sans celle qui bloque
+    patrolNow = { dir, two, render: (d, again) => {
+      dirBox.innerHTML = dirCells(d, uturn, again ? `Nouvelle direction : ${two ? 'les patrouilles tournent' : 'la patrouille tourne'} ${PATROL_DIR_TXT[d]} et ${two ? 'finissent leur' : 'finit son'} déplacement de ${finalMove} cases.` : note)
+        + (spec ? '' : '<button type="button" class="patrol-redir" onclick="redrawPatrolDir()"><i class="ph-bold ph-shuffle"></i> Obligée de tourner ? Nouvelle direction</button>');
+    } };
+    patrolNow.render(dir, false);
     // La patrouille a bougé : elle a peut-être croisé un Caïd sur le plateau (c'est le joueur actif qui répond)
     if (spec) return;
     cta.classList.add('hidden');

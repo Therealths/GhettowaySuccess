@@ -310,6 +310,7 @@ if (socket) {
   socket.on('combat_live', d => onCombatLive(d));
   // Patrouille d'un autre joueur : on la regarde en direct
   socket.on('patrol_show', spec => showPatrolScreen(spec));
+  socket.on('patrol_redir_show', d => showPatrolRedir(d));
 
   // --- ÉVÉNEMENTS DE COMBAT EN 2 PHASES & PILLAGE ---
   socket.on('combat_duel_opened', async ({ phase, role, isAlliedAttack, allyCaid, allyAtk, allies, opponentCaid, opponentSocketId, targetMusclesCount, targetHasProstitute, targetHasStrayDog, weaponNullified }) => {

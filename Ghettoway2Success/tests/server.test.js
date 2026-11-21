@@ -154,6 +154,11 @@ test('combat et patrouille en direct : le 3e joueur suit le duel et la patrouill
   // Ancien téléphone (sans « dir ») : gauche ou droite comme avant
   a.emit('patrol_rolled', { roll: 2, left: true, uturn: true });
   assert.strictEqual((await waitFor(b, 'patrol_show')).dir, 'left');
+  // Voiture obligée de tourner : la nouvelle direction est relayée aux autres (direction inconnue ignorée)
+  a.emit('patrol_redir', { dir: 'nowhere' });
+  await never(b, 'patrol_redir_show', 50);
+  a.emit('patrol_redir', { dir: 'right' });
+  for (const s of [b, c]) assert.deepStrictEqual(await waitFor(s, 'patrol_redir_show'), { dir: 'right' });
   // Talkie : la direction « tout droit » est gardée pour le prochain lancer
   a.emit('rig_patrol', { roll: 6, dir: 'straight', uturn: false });
   await new Promise(r => setTimeout(r, 50));
