@@ -842,7 +842,7 @@
             <button type="button" data-res="def" onclick="switchTransferResource('def')"><i class="ph-bold ph-shield"></i> Défense</button>
           </div>
           <div class="qg-duo mt-3">
-            <div class="qg-side"><div id="qgMeIll" class="qg-ill"></div><b>Sur toi</b><div id="qgMeVal" class="qg-val">0</div><div id="qgMeAfter" class="qg-after"></div></div>
+            <div class="qg-side"><div id="qgMeIll" class="qg-ill"></div><b id="qgMeLabel">Sur toi</b><div id="qgMeVal" class="qg-val">0</div><div id="qgMeAfter" class="qg-after"></div></div>
             <button type="button" id="qgArrow" class="qg-arrow" onclick="toggleTransferDirection()"><span><i class="ph-bold ph-arrow-right"></i></span><em id="qgArrowLabel">Déposer</em><small id="qgArrowHint">toucher pour inverser</small></button>
             <div class="qg-side"><div class="qg-ill"><img src="qg-coffre.webp" alt="Coffre-fort du QG"></div><b>Au QG</b><div id="qgSafeVal" class="qg-val">0</div><div id="qgSafeAfter" class="qg-after"></div></div>
           </div>
@@ -854,8 +854,8 @@
             </div>
             <input type="range" id="transferRangeSlider" class="w-full mt-3" min="0" max="0" value="0" oninput="setTransferAmount(+this.value)">
             <div class="flex gap-2 mt-3">
-              <button type="button" class="gros-quick" onclick="setTransferFraction(0.25)">¼</button>
-              <button type="button" class="gros-quick" onclick="setTransferFraction(0.5)">½</button>
+              <button type="button" id="qgQuarter" class="gros-quick" onclick="setTransferFraction(0.25)">¼</button>
+              <button type="button" id="qgHalf" class="gros-quick" onclick="setTransferFraction(0.5)">½</button>
               <button type="button" class="gros-quick" onclick="setTransferFraction(1)">Tout</button>
             </div>
           </div>

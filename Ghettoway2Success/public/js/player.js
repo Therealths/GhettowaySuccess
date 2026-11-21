@@ -483,7 +483,7 @@ const QG_DEF_PRICE = 2000;
 function switchTransferResource(res) {
   currentTransferResource = res;
   if (oneWayRes(res)) currentTransferMode = 'deposit';
-  transferAmount = 0;
+  transferAmount = res === 'def' ? Math.min(1, getTransferMaxLimit()) : 0;
   updateTransferUI();
 }
 function toggleTransferDirection() {
@@ -493,12 +493,14 @@ function toggleTransferDirection() {
   updateTransferUI();
 }
 function getTransferMaxLimit() {
+  // Défense du QG : autant de points que l'argent (poche + coffre) le permet
+  if (currentTransferResource === 'def') return Math.floor((localPlayer.pocketCash + localPlayer.safeCash) / QG_DEF_PRICE);
   return currentTransferResource === 'cash'
     ? (currentTransferMode === 'deposit' ? localPlayer.pocketCash : localPlayer.safeCash)
     : (currentTransferMode === 'deposit' ? localPlayer.drugs : (localPlayer.safeDrugs || 0));
 }
 function transferStep() { return currentTransferResource === 'cash' ? 500 : 1; }
-function fmtTransfer(v) { return currentTransferResource === 'cash' ? `${v.toLocaleString()} €` : `${v} kg`; }
+function fmtTransfer(v) { return currentTransferResource === 'cash' ? `${v.toLocaleString()} €` : currentTransferResource === 'def' ? `${v} pt${v > 1 ? 's' : ''}` : `${v} kg`; }
 function setTransferAmount(v) {
   transferAmount = Math.max(0, Math.min(getTransferMaxLimit(), Math.round(v)));
   updateTransferUI(true);
@@ -522,10 +524,14 @@ function updateTransferUI(amountOnly) {
   const meIll = document.getElementById('qgMeIll');
   const hint = document.getElementById('qgHint');
   const cta = document.getElementById('qgCta');
-  document.getElementById('qgAmountBox').classList.toggle('hidden', oneWayRes(res));
+  document.getElementById('qgAmountBox').classList.toggle('hidden', oneWayRes(res) && res !== 'def');
+  // Défense : boutons − / + / 50 % / Tout (pas de ¼)
+  document.getElementById('qgQuarter').classList.toggle('hidden', res === 'def');
+  document.getElementById('qgHalf').innerText = res === 'def' ? '50 %' : '½';
   document.getElementById('qgEscortBox').classList.toggle('hidden', res !== 'escort');
   document.getElementById('qgLabBox').classList.toggle('hidden', res !== 'lab');
   document.getElementById('qgDefBox').classList.toggle('hidden', res !== 'def');
+  document.getElementById('qgMeLabel').innerText = res === 'def' ? 'Coût' : 'Sur toi';
   document.getElementById('qgArrowHint').innerText = oneWayRes(res) ? 'aller simple' : 'toucher pour inverser';
   document.getElementById('qgArrowLabel').innerText = res === 'def' ? 'Renforcer' : oneWayRes(res) ? 'Installer' : (dep ? 'Déposer' : 'Retirer');
 
@@ -558,18 +564,24 @@ function updateTransferUI(amountOnly) {
   }
 
   if (res === 'def') {
-    const d = localPlayer.qgDef || 0, funds = localPlayer.pocketCash + localPlayer.safeCash;
+    const d = localPlayer.qgDef || 0, max = getTransferMaxLimit();
+    transferAmount = Math.max(0, Math.min(transferAmount, max));
+    const n = transferAmount, cost = n * QG_DEF_PRICE;
     meIll.innerHTML = '<img src="pay-cash.webp" alt="Portefeuille">';
-    document.getElementById('qgMeVal').innerText = `${QG_DEF_PRICE.toLocaleString()} €`;
-    document.getElementById('qgMeAfter').innerText = 'par point';
+    document.getElementById('qgMeVal').innerText = `${cost.toLocaleString()} €`;
+    document.getElementById('qgMeAfter').innerText = `${QG_DEF_PRICE.toLocaleString()} € / point`;
     document.getElementById('qgSafeVal').innerText = `${d} Déf`;
-    document.getElementById('qgSafeAfter').innerText = `→ ${d + 1} Déf`;
-    document.getElementById('qgDefBox').innerHTML = `<div class="qg-escort-head"><b>Défense du QG : ${d}</b><span>+1 point pour ${QG_DEF_PRICE.toLocaleString()} €</span></div>
+    document.getElementById('qgSafeAfter').innerText = `→ ${d + n} Déf`;
+    document.getElementById('qgAmount').innerText = `+${n} Déf`;
+    document.getElementById('qgMax').innerText = max ? `max +${max} (${(max * QG_DEF_PRICE).toLocaleString()} €)` : 'pas assez d’argent';
+    const range = document.getElementById('transferRangeSlider');
+    range.max = max; range.step = 1; range.value = n;
+    document.getElementById('qgDefBox').innerHTML = `<div class="qg-escort-head"><b>Défense du QG : ${d}</b><span>${QG_DEF_PRICE.toLocaleString()} € le point</span></div>
       <div class="qg-slots-cap">Pour forcer ton QG, l'Attaque des assaillants doit dépasser cette Défense. Elle reste toute la partie.</div>`;
     document.getElementById('qgHeadline').innerHTML = 'BARRICADÉ.';
     hint.innerHTML = '<i class="ph-fill ph-shield-check"></i> Payé avec ton cash ou ta CB (coffre)';
-    cta.innerText = funds < QG_DEF_PRICE ? 'Pas assez d’argent' : `Renforcer : ${QG_DEF_PRICE.toLocaleString()} €`;
-    cta.disabled = funds < QG_DEF_PRICE;
+    cta.innerText = !max ? 'Pas assez d’argent' : `Renforcer +${n} : ${cost.toLocaleString()} €`;
+    cta.disabled = n <= 0;
     return;
   }
   if (res === 'escort') {
@@ -634,9 +646,10 @@ async function confirmTransferAction() {
   if (!isMyTurnToPlay) return;
   const res = currentTransferResource, dep = currentTransferMode === 'deposit';
   if (res === 'def') {
-    if (localPlayer.pocketCash + localPlayer.safeCash < QG_DEF_PRICE) return;
+    const n = transferAmount, cost = n * QG_DEF_PRICE;
+    if (n <= 0 || localPlayer.pocketCash + localPlayer.safeCash < cost) return;
     closeModal('modalTransfer');
-    return openPaymentChoiceModal({ type: 'qgdef', cost: QG_DEF_PRICE, name: 'Défense du QG +1', shop: 'QG' });
+    return openPaymentChoiceModal({ type: 'qgdef', cost, data: { n }, name: `Défense du QG +${n}`, shop: 'QG' });
   }
   if (res === 'escort') {
     if (!localPlayer.prostituteInTransit || localPlayer.prostitutesAtSafeList.length >= QG_ESCORT_SLOTS) return;
