@@ -1668,3 +1668,7 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .lf-stage.lf-thud { animation: lfThud .35s ease-out; }
 @keyframes lfThud { 0%, 100% { transform: none; } 25% { transform: translateY(5px) scale(.985); } 55% { transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .lf-drop-card, .lf-drop-fx, .lf-drop-dust, .lf-stage.lf-thud { animation-duration: .01s !important; animation-delay: 0s !important; } }
+/* Lignes (police-row) hors des écrans qui définissent une couleur d'accent : Mon Caïd, Attaque de QG */
+.wait-sheet, .qg-raid { --accent: #fbbf24; }
+.wait-sheet .police-row .aft, .qg-raid .police-row .aft { color: #fff; text-align: right; }
+.wait-sheet .police-row .aft small { color: #94a3b8; font-weight: 700; }
