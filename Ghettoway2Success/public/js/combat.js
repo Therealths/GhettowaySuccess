@@ -615,7 +615,7 @@ function onCombatLive(d) {
   const log = t => f.log.push(t);
   switch (d.stage) {
     case 'start': f.status = 'COMBAT !'; log(`${A} attaque ${D}`); if (!f.closed) playFightFx('intro', fxImgsOf(d.attackers), fxImgsOf(d.defender)); break;
-    case 'items': log(`${allyShort(d.actor)} joue ${d.count > 1 ? `${d.count} objets` : 'un objet'}`); break;
+    case 'items': log(`${allyShort(d.actor)} joue : ${(d.itemNames || []).join(', ')}`); queueLiveCards(d); break;
     case 'ready': log(`${allyShort(d.actor)} est prêt`); break;
     case 'unready': log(`${allyShort(d.actor)} n’est plus prêt`); break;
     case 'hit': f.clash = true; f.status = 'ÇA PASSE !'; f.tone = 'hit'; log('L’attaque passe la défense'); if (!f.closed) playFightFx('hit', fxImgsOf(d.attackers), fxImgsOf(d.defender)); break;
@@ -642,6 +642,38 @@ function renderLiveFight() {
   document.getElementById('lfStage').innerHTML = side(f.attackers, 'l') + '<div class="lf-vs">VS</div>' + side([f.defender], 'r');
   document.getElementById('lfLog').innerHTML = f.log.slice(-5).map((t, i, a) => `<div class="${i === a.length - 1 ? 'new' : ''}">${escapeHtml(t)}</div>`).join('');
   if (!f.closed && scr.classList.contains('hidden')) scr.classList.remove('hidden');
+}
+// Carte jouée pendant le duel : elle tombe (en petit) sur le portrait de celui qui la joue, avec un choc, puis son effet
+const LIVE_CARD_FX = {
+  double_muscles_atk: 'Ses Lascars comptent double', double_weapon_atk: 'Bonus de son arme à feu doublé', null_enemy_weapon: 'Arme adverse réduite à 0',
+  def_malus_round: '−1 Défense pour l’adversaire', heal: '+1 Cœur de Vie', stray_dog: 'Le Chien Errant le rejoint (+2 / +2)', bonus_combat_atk: 'Bonus d’Attaque pour ce combat'
+};
+const liveCardEff = name => {
+  const it = (FOUILLE_TABLE.find(([, x]) => x.name === name) || [])[1];
+  return it ? (isHealItem(it) ? LIVE_CARD_FX.heal : LIVE_CARD_FX[it.eff] || it.desc || '') : (/kebab/i.test(name) ? LIVE_CARD_FX.heal : '');
+};
+let liveCardChain = Promise.resolve();
+function queueLiveCards(d) {
+  const f = liveFight;
+  if (!f || f.closed) return;
+  const side = (f.attackers || []).includes(d.actor) ? 'l' : 'r';
+  (d.itemNames || []).forEach(name => { liveCardChain = liveCardChain.then(() => dropLiveCard(name, side, d.actor)); });
+}
+function dropLiveCard(name, side, actor) {
+  return new Promise(done => {
+    const host = document.getElementById('lfDrops'), scr = document.getElementById('liveFight');
+    if (!host || scr.classList.contains('hidden')) return done();
+    const art = itemArt({ name });
+    const el = document.createElement('div');
+    el.className = `lf-drop ${side}`;
+    el.innerHTML = `<div class="lf-drop-card">${art ? `<img src="${art}" alt="">` : `<div class="deck-face-txt"><span>${itemEmoji({ name })}</span><h4>${escapeHtml(name)}</h4></div>`}<i class="lf-drop-dust"></i></div>
+      <div class="lf-drop-fx"><b>${escapeHtml(allyShort(actor))} · ${escapeHtml(name)}</b><span>${escapeHtml(liveCardEff(name))}</span></div>`;
+    host.appendChild(el);
+    // Le choc : le portrait encaisse et l'écran tremble
+    setTimeout(() => { buzz(40); const st = document.getElementById('lfStage'); st.classList.remove('lf-thud'); void st.offsetWidth; st.classList.add('lf-thud'); }, 420);
+    // La carte suivante tombe quand celle-ci a disparu (sinon elles se superposent)
+    setTimeout(() => { el.remove(); done(); }, 2850);
+  });
 }
 function closeLiveFight() {
   if (liveFight) liveFight.closed = true;

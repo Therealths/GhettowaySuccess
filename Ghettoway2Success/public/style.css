@@ -1636,3 +1636,25 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .fight-fx.play[data-kind="intro"] .ffx-word { animation: ffxWord .8s .45s cubic-bezier(.2,1.6,.4,1) both; }
 @keyframes ffxWord { 0% { opacity: 0; transform: translate(-50%, 0) scale(3) rotate(-14deg); } 30% { opacity: 1; transform: translate(-50%, 0) scale(.9) rotate(-6deg); } 45% { transform: translate(-50%, 0) scale(1.05) rotate(-6deg); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -12px) scale(1) rotate(-6deg); } }
 @media (prefers-reduced-motion: reduce) { .fight-fx.play *, .fight-fx.play { animation-duration: .01s !important; animation-delay: 0s !important; } .fight-fx.play .ffx-word { opacity: 1; } }
+
+/* Combat en direct : carte jouée qui tombe sur le portrait du joueur, avec un choc, puis son effet */
+.lf-drops { position: absolute; inset: -40px 0 -70px; pointer-events: none; }
+.lf-drop { position: absolute; top: 0; width: 46%; display: flex; flex-direction: column; align-items: center; }
+.lf-drop.l { left: 0; } .lf-drop.r { right: 0; }
+.lf-drop-card { position: relative; width: 92px; aspect-ratio: 768 / 1226; border-radius: 10px; overflow: visible; animation: lfDrop .55s cubic-bezier(.5,0,.75,0) both, lfDropOut .5s 2.3s ease-in both; }
+.lf-drop.r .lf-drop-card { --tilt: 9deg; } .lf-drop.l .lf-drop-card { --tilt: -9deg; }
+.lf-drop-card img, .lf-drop-card .deck-face-txt { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; box-shadow: 0 14px 28px rgba(0,0,0,.75); border: 2px solid rgba(253,224,71,.7); }
+.lf-drop-card .deck-face-txt { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1f2937; color: #fff; font-size: 11px; text-align: center; padding: 6px; }
+@keyframes lfDrop { 0% { transform: translateY(-260px) rotate(calc(var(--tilt) * -3)) scale(1.5); opacity: 0; } 25% { opacity: 1; } 78% { transform: translateY(6px) rotate(var(--tilt)) scale(1); } 88% { transform: translateY(-8px) rotate(var(--tilt)) scale(1.06, .94); } 100% { transform: translateY(0) rotate(var(--tilt)) scale(1); } }
+@keyframes lfDropOut { to { transform: translateY(10px) rotate(var(--tilt)) scale(.9); opacity: 0; } }
+/* Nuage de poussière au point de chute */
+.lf-drop-dust { position: absolute; left: 50%; bottom: -8px; width: 170px; height: 36px; transform: translateX(-50%) scale(.2); opacity: 0; border-radius: 50%; background: radial-gradient(ellipse, rgba(253,224,71,.6), rgba(148,163,184,.35) 45%, transparent 70%); animation: lfDust .6s .42s ease-out both; }
+@keyframes lfDust { 0% { opacity: 0; transform: translateX(-50%) scale(.2); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) scale(1.4, 1.1); } }
+/* L'effet de la carte */
+.lf-drop-fx { margin-top: 8px; max-width: 160px; padding: 6px 10px; border-radius: 12px; text-align: center; background: rgba(0,0,0,.82); border: 1px solid rgba(253,224,71,.5); animation: lfFxIn .35s .5s cubic-bezier(.2,1.5,.4,1) both, lfDropOut .5s 2.3s ease-in both; --tilt: 0deg; }
+.lf-drop-fx b { display: block; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #fde047; letter-spacing: .04em; }
+.lf-drop-fx span { display: block; font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; margin-top: 2px; }
+@keyframes lfFxIn { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
+.lf-stage.lf-thud { animation: lfThud .35s ease-out; }
+@keyframes lfThud { 0%, 100% { transform: none; } 25% { transform: translateY(5px) scale(.985); } 55% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .lf-drop-card, .lf-drop-fx, .lf-drop-dust, .lf-stage.lf-thud { animation-duration: .01s !important; animation-delay: 0s !important; } }

@@ -1103,7 +1103,8 @@ io.on('connection', (socket) => {
       }
       io.to(p.socketId).emit('combat_ready_state_reset');
     });
-    combatLive(room, combat, 'items', { actor: actor.caidName, count: (itemNames || []).length || 1 });
+    // Les cartes jouées se voient en direct (leur effet, mais jamais les stats des combattants)
+    combatLive(room, combat, 'items', { actor: actor.caidName, itemNames: (Array.isArray(itemNames) ? itemNames : []).slice(0, 6).map(n => String(n).slice(0, 60)) });
   });
 
   socket.on('combat_set_ready', ({ currentStat, ready }) => {

@@ -127,6 +127,10 @@ test('combat et patrouille en direct : le 3e joueur suit le duel et la patrouill
   a.emit('start_combat_engagement', { targetPlayerToken: b.token });
   const start = await waitFor(c, 'combat_live', d => d.stage === 'start');
   assert.strictEqual(start.defender, (await waitFor(b, 'combat_duel_opened')) && start.defender);
+  // Carte jouée pendant le duel : le spectateur la voit (nom de la carte, pas la stat)
+  a.emit('combat_play_items', { itemNames: ['Pot de Protéine'], newTotalStat: 4 });
+  const items = await waitFor(c, 'combat_live', d => d.stage === 'items');
+  assert.deepStrictEqual([items.itemNames, items.newTotalStat], [['Pot de Protéine'], undefined]);
   a.emit('combat_set_ready', { currentStat: 4 });
   assert.strictEqual((await waitFor(c, 'combat_live', d => d.stage === 'ready')).ready.length, 1);
   b.emit('combat_set_ready', { currentStat: 1 });
