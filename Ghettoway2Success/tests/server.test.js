@@ -291,6 +291,7 @@ test('objets joués en combat : l’adversaire est prévenu et doit revalider «
   a.emit('start_combat_engagement', { targetPlayerToken: b.token, attackerCaid: 'Burger Queen' });
   await waitFor(b, 'combat_duel_opened');
   b.emit('combat_set_ready', { currentStat: 0 });
+  await waitFor(a, 'combat_opponent_is_ready'); // le « Prêt » de b est arrivé avant la carte de a
   a.emit('combat_play_items', { itemNames: ['Vieille canette'], newTotalStat: 2 });
   assert.deepStrictEqual((await waitFor(b, 'combat_opponent_played_items')).itemNames, ['Vieille canette']);
   await waitFor(b, 'combat_ready_state_reset');
