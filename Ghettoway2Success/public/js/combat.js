@@ -663,16 +663,17 @@ function playFightFx(kind, leftImgs, rightImgs) {
     if (!scr) return done();
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const pile = imgs => (imgs || []).slice(0, 3).map(src => `<img src="${src}" alt="">`).join('');
-    document.getElementById('ffxL').innerHTML = pile(leftImgs);
-    document.getElementById('ffxR').innerHTML = pile(rightImgs);
+    // Étiquettes : qui attaque (à gauche, le poing part de lui) et qui se défend
+    document.getElementById('ffxL').innerHTML = `${pile(leftImgs)}<b class="ffx-tag atk">⚔ Attaque</b>`;
+    document.getElementById('ffxR').innerHTML = `${pile(rightImgs)}<b class="ffx-tag def">🛡 Défense</b>`;
     const words = kind === 'hit' ? FX_HIT_WORDS : kind === 'block' ? FX_BLOCK_WORDS : ['FIGHT !'];
     document.getElementById('ffxWord').innerText = words[Math.floor(Math.random() * words.length)];
     scr.dataset.kind = kind;
     scr.classList.remove('hidden', 'play');
     void scr.offsetWidth;
     scr.classList.add('play');
-    if (kind !== 'intro') setTimeout(() => buzz(kind === 'hit' ? [60, 40, 90] : 50), reduce ? 0 : 620);
-    setTimeout(() => { scr.classList.add('hidden'); scr.classList.remove('play'); done(); }, reduce ? 500 : kind === 'intro' ? 1350 : 1750);
+    if (kind !== 'intro') setTimeout(() => buzz(kind === 'hit' ? [60, 40, 90] : 50), reduce ? 0 : 900);
+    setTimeout(() => { scr.classList.add('hidden'); scr.classList.remove('play'); done(); }, reduce ? 500 : kind === 'intro' ? 1450 : 2250);
   });
   fightFxChain = fightFxChain.then(run, run);
   return fightFxChain;
