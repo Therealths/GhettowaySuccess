@@ -385,10 +385,12 @@
         </div>
         <!-- STATS -->
         <div id="hudStatsBar" class="hud-stats">
-          <div class="hud-stat"><span id="hudHearts" class="select-none">❤️❤️❤️</span></div>
+          <div class="hud-stat hearts"><span id="hudHearts" class="select-none">❤️❤️❤️</span></div>
+          <div class="hud-stat" title="Défense du QG"><i class="ph-fill ph-castle-turret text-orange-400"></i><b id="hudQgDef">0</b></div>
           <div class="hud-stat"><i class="ph-bold ph-sword text-rose-400"></i><b id="hudAtk">1</b></div>
           <div class="hud-stat"><i class="ph-bold ph-shield text-sky-400"></i><b id="hudDef">0</b></div>
-          <div class="hud-stat"><i class="ph-bold ph-sneaker-move text-emerald-400"></i><b id="hudCurrentPm">8</b><small>PM</small><span id="hudPmNote" class="hidden text-[9px] font-mono font-bold text-rose-300" title="2 PM par action (attaque, Yencli, braquage, achat, objet ramassé)"></span></div>
+          <!-- PM : un appui = 1 case avancée sur le plateau (les actions en retirent 2) ; appui long = annuler 1 -->
+          <button type="button" id="hudPmBtn" class="hud-stat pm" aria-label="Utiliser 1 point de déplacement"><i class="ph-bold ph-sneaker-move text-emerald-400"></i><b id="hudCurrentPm">8</b><small>PM</small></button>
         </div>
         <!-- LASCARS & PROSTITUÉE EN TRANSIT -->
         <div class="hud-crew">

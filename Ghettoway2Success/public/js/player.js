@@ -37,6 +37,42 @@ function spendActionPm() {
   refreshHud();
 }
 
+// Case PM : un appui = 1 case avancée sur le plateau ; appui long = rendre 1 PM (appui de trop)
+function pmFloat(txt, cls) {
+  const btn = document.getElementById('hudPmBtn');
+  const f = document.createElement('span');
+  f.className = `pm-float ${cls}`;
+  f.innerText = txt;
+  btn.appendChild(f);
+  setTimeout(() => f.remove(), 800);
+}
+function stepPm(back) {
+  if (!isMyTurnToPlay) return showAppAlert("Ce n'est pas ton tour !", "Tour Inactif");
+  const btn = document.getElementById('hudPmBtn');
+  if (back) {
+    if (pmSpentThisTurn <= 0) return;
+    pmSpentThisTurn -= 1;
+    pmFloat('+1', 'up');
+  } else {
+    if (getTotalPm() - pmSpentThisTurn <= 0) { btn.classList.remove('empty'); void btn.offsetWidth; btn.classList.add('empty'); buzz(80); return; }
+    pmSpentThisTurn += 1;
+    pmFloat('−1', 'down');
+    buzz(15);
+  }
+  refreshHud();
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('hudPmBtn');
+  if (!btn) return;
+  let timer = null, long = false;
+  btn.addEventListener('pointerdown', () => { long = false; timer = setTimeout(() => { long = true; stepPm(true); }, 550); });
+  const end = e => { clearTimeout(timer); if (e.type === 'pointerup' && !long) stepPm(false); };
+  btn.addEventListener('pointerup', end);
+  btn.addEventListener('pointerleave', () => clearTimeout(timer));
+  btn.addEventListener('pointercancel', () => clearTimeout(timer));
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+});
+
 function getTotalPm() {
   // Malus Burger Queen : démarrage poussif, 0 PM pendant la manche 1 (les Vieilles baskets comptent quand même)
   if (localPlayer.caidId === 'caid_1' && currentSession.round === 1) return pmBonusThisTurn;
@@ -259,11 +295,9 @@ function refreshHud() {
   document.getElementById('hudDogBadge').classList.toggle('hidden', !localPlayer.strayDogActive);
   document.getElementById('hudAtk').innerText = getTotalAtk();
   document.getElementById('hudDef').innerText = getTotalDef();
-  // Aide-mémoire : PM restants après les actions du tour (2 PM par action, à décompter aussi sur le plateau)
+  // PM restants : 1 par case avancée (appui sur la case PM), 2 par action (attaque, Yencli, braquage, achat, objet ramassé)
   document.getElementById('hudCurrentPm').innerText = Math.max(0, getTotalPm() - pmSpentThisTurn);
-  const pmNote = document.getElementById('hudPmNote');
-  pmNote.innerText = pmSpentThisTurn > 0 ? `(−${pmSpentThisTurn})` : '';
-  pmNote.classList.toggle('hidden', pmSpentThisTurn <= 0);
+  document.getElementById('hudQgDef').innerText = localPlayer.qgDef || 0;
   if (currentSession.currentRadioEvent) {
     document.getElementById('hudRadioRoundTag').innerText = currentSession.round;
     document.getElementById('hudRadioReminderTitle').innerText = currentSession.currentRadioEvent.title;

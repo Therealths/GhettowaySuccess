@@ -1269,10 +1269,19 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .hud-turn-av { width: 30px; height: 30px; flex: none; border-radius: 99px; overflow: hidden; border: 2px solid rgba(255,255,255,0.55); }
 .hud-turn-av img { width: 100%; height: 100%; object-fit: cover; }
 .hud-turnbar .ph-caret-right { color: #94a3b8; font-size: 12px; }
-.hud-stats { flex: none; display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 6px; }
-.hud-stat { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 4px; border-radius: 14px; background: #11131c; border: 1px solid #232637; font-size: 15px; }
-.hud-stat i { font-size: 16px; }
-.hud-stat b { font-size: 18px; font-weight: 900; color: #fff; }
+.hud-stats { flex: none; display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr 1.15fr; gap: 5px; }
+.hud-stat { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 2px; border-radius: 14px; background: #11131c; border: 1px solid #232637; font-size: 15px; min-width: 0; }
+.hud-stat.hearts { font-size: 12px; letter-spacing: -1px; }
+.hud-stat i { font-size: 15px; }
+.hud-stat b { font-size: 17px; font-weight: 900; color: #fff; }
+/* Case PM : se touche pour décompter 1 case */
+.hud-stat.pm { position: relative; border-color: rgba(52,211,153,.45); background: linear-gradient(180deg, rgba(52,211,153,.12), #11131c); box-shadow: 0 0 0 1px rgba(52,211,153,.08) inset; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+.hud-stat.pm:active { transform: scale(.94); background: rgba(52,211,153,.22); }
+.hud-stat.pm.empty { animation: pmEmpty .35s ease; border-color: #f43f5e; }
+@keyframes pmEmpty { 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+.pm-float { position: absolute; z-index: 60; left: 50%; top: 0; transform: translate(-50%, -10%); font-size: 15px; font-weight: 900; pointer-events: none; animation: pmFloat .8s ease-out forwards; }
+.pm-float.down { color: #fb7185; } .pm-float.up { color: #34d399; }
+@keyframes pmFloat { from { opacity: 1; transform: translate(-50%, -10%); } to { opacity: 0; transform: translate(-50%, -140%); } }
 .hud-stat small { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; }
 .hud-crew { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
 .hud-box.p { gap: 10px; }
