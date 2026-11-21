@@ -614,6 +614,19 @@
         <button type="button" class="lf-close" onclick="closeLiveFight()">Fermer</button>
       </div>
     </div>
+    <!-- Animations de combat : entrée en scène, coup qui passe, coup bloqué -->
+    <div id="fightFx" class="hidden absolute inset-0 z-[57] fight-fx" data-kind="intro" aria-hidden="true">
+      <i class="ffx-flash"></i>
+      <div class="ffx-stage">
+        <div id="ffxL" class="ffx-side ffx-l"></div>
+        <div id="ffxR" class="ffx-side ffx-r"></div>
+        <span class="ffx-fist">👊</span>
+        <span class="ffx-shield">🛡️</span>
+        <i class="ffx-burst"></i>
+        <i class="ffx-sparks"></i>
+        <div id="ffxWord" class="ffx-word font-anton">FIGHT !</div>
+      </div>
+    </div>
     <!-- Roulette du racket : part du cash ou de la drogue prise (30 à 60 %) -->
     <div id="racketRoulette" class="hidden absolute inset-0 z-[55] racket-roul" data-cat="cash">
       <div class="rr-card">

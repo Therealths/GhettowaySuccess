@@ -325,6 +325,9 @@ if (socket) {
     if (myWeaponNullified) fightLog(`🗑️ Couvercle de poubelle adverse : ton arme compte pour 0 dans ce combat !`);
     closeModal('modalCombatItemSelector');
     renderFightDuel(true);
+    // Entrée en scène : attaquants à gauche
+    if (role === 'attacker') playFightFx('intro', fxMine(), fxImgsOf(opponentCaid));
+    else playFightFx('intro', fxImgsOf(opponentCaid), fxMine());
 
     // J-Lo Gramme agressée : Prière Miraculeuse (50% d'annuler l'agression), recharge en 4 manches
     if (role === 'defender' && (phase || 1) === 1 && localPlayer.caidId === 'caid_5' && specialReady()) {
@@ -355,14 +358,18 @@ if (socket) {
   });
 
   // Attaque coordonnée bloquée : les attaquants attendent que le défenseur choisisse sa cible
-  socket.on('combat_waiting_defender_riposte_choice', ({ defenderCaid }) => {
+  socket.on('combat_waiting_defender_riposte_choice', async ({ defenderCaid }) => {
+    fightRiposteShown = true;
+    await playFightFx('block', fxMine(), fxImgsOf(defenderCaid));
     closeModal('modalCombatItemSelector');
     fightWaiting = `${defenderCaid || 'Le défenseur'} choisit qui reçoit sa contre-attaque…`;
     fightLog(`🛡️ L'assaut a été bloqué ! <b>${escapeHtml(defenderCaid)}</b> choisit sa cible pour contre-attaquer…`);
     renderFightDuel(true);
   });
 
-  socket.on('combat_choose_riposte_target', ({ targets }) => {
+  socket.on('combat_choose_riposte_target', async ({ targets }) => {
+    fightRiposteShown = true;
+    await playFightFx('block', (targets || []).map(t => fightImg(t.caidName)), [getMyCaid().imageFile]);
     closeModal('modalCombatItemSelector');
     fightRiposteTargets = targets || [];
     fightRipostePick = null;
@@ -379,6 +386,12 @@ if (socket) {
   });
 
   socket.on('combat_phase2_started', async ({ role, opponentCaid, weaponNullified }) => {
+    // L'assaut vient d'être bloqué (sauf en alliance, déjà joué au choix de la cible) : coup bloqué, puis la riposte
+    if (!fightRiposteShown) {
+      if (role === 'attacker') await playFightFx('block', fxImgsOf(opponentCaid), [getMyCaid().imageFile]);
+      else await playFightFx('block', fxMine(), fxImgsOf(opponentCaid));
+    }
+    fightRiposteShown = false;
     myWeaponNullified = !!weaponNullified;
     currentDuelInfo = { phase: 2, role, isAlliedAttack: false, allyCaid: null, allyAtk: 0, allies: [], opponentCaid };
     isCombatReady = false;
@@ -417,6 +430,9 @@ if (socket) {
 
   socket.on('combat_finished_draw', async ({ message }) => {
     const last = fightLast;
+    // Contre-attaque bloquée aussi
+    if (last && last.role === 'attacker') await playFightFx('block', [getMyCaid().imageFile], fxImgsOf(last.opponentCaid));
+    else if (last) await playFightFx('block', fxImgsOf(last.opponentCaid), [getMyCaid().imageFile]);
     endSingleCombatEffects();
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
@@ -434,6 +450,11 @@ if (socket) {
     closeModal('modalCombatItemSelector');
     currentDuelInfo = null;
     await msgIdle(); // l'écran de résultat attend que les messages en cours soient lus
+    // Le coup qui passe : vainqueurs à gauche, perdant à droite (pas pour un message rattrapé hors ligne)
+    if (!late) {
+      if (outcome === 'loser') await playFightFx('hit', fxImgsOf(opponentCaid), [getMyCaid().imageFile]);
+      else await playFightFx('hit', fightResultSides(last).map(s => s.img), fxImgsOf(opponentCaid));
+    }
 
     if (outcome === 'loser') {
       const heartsBefore = late ? localPlayer.hearts + 1 : localPlayer.hearts;

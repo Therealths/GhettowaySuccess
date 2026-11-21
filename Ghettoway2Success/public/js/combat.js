@@ -614,12 +614,12 @@ function onCombatLive(d) {
   f.ready = d.ready || [];
   const log = t => f.log.push(t);
   switch (d.stage) {
-    case 'start': f.status = 'COMBAT !'; log(`${A} attaque ${D}`); break;
+    case 'start': f.status = 'COMBAT !'; log(`${A} attaque ${D}`); if (!f.closed) playFightFx('intro', fxImgsOf(d.attackers), fxImgsOf(d.defender)); break;
     case 'items': log(`${allyShort(d.actor)} joue ${d.count > 1 ? `${d.count} objets` : 'un objet'}`); break;
     case 'ready': log(`${allyShort(d.actor)} est prêt`); break;
     case 'unready': log(`${allyShort(d.actor)} n’est plus prêt`); break;
-    case 'hit': f.clash = true; f.status = 'ÇA PASSE !'; f.tone = 'hit'; log('L’attaque passe la défense'); break;
-    case 'blocked': f.clash = true; f.status = 'BLOQUÉ !'; f.tone = 'block'; log('La défense tient'); break;
+    case 'hit': f.clash = true; f.status = 'ÇA PASSE !'; f.tone = 'hit'; log('L’attaque passe la défense'); if (!f.closed) playFightFx('hit', fxImgsOf(d.attackers), fxImgsOf(d.defender)); break;
+    case 'blocked': f.clash = true; f.status = 'BLOQUÉ !'; f.tone = 'block'; log('La défense tient'); if (!f.closed) playFightFx('block', fxImgsOf(d.attackers), fxImgsOf(d.defender)); break;
     case 'riposte': f.clash = false; f.status = 'RIPOSTE !'; f.tone = ''; f.ready = []; log(`${A} contre-attaque ${D}`); break;
     case 'draw': f.status = 'MATCH NUL'; f.tone = 'block'; log('Contre-attaque bloquée aussi : personne ne perd rien'); break;
     case 'result': f.status = 'K.O. !'; f.tone = 'ko'; f.winners = d.winners || []; f.loser = d.loser; log(`${allyListNames(f.winners.map(allyShort))} gagne : ${allyShort(d.loser)} perd 1 cœur`); break;
@@ -647,3 +647,35 @@ function closeLiveFight() {
   if (liveFight) liveFight.closed = true;
   document.getElementById('liveFight').classList.add('hidden');
 }
+
+// =========================================================================
+// ANIMATIONS DE COMBAT (combattants et spectateurs) : entrée en scène, coup qui passe, coup bloqué
+// Les attaquants sont toujours à gauche. Les animations s'enchaînent sans se chevaucher.
+// =========================================================================
+let fightRiposteShown = false; // coup bloqué déjà joué au choix de la cible (alliance)
+const FX_HIT_WORDS = ['BAM !', 'POW !', 'CRAC !', 'PAF !', 'BOUM !'];
+const FX_BLOCK_WORDS = ['BLOQUÉ !', 'PARÉ !', 'ENCAISSÉ !'];
+let fightFxChain = Promise.resolve();
+const fxImgsOf = names => fightNames(Array.isArray(names) ? names.join(' & ') : names).map(fightImg);
+function playFightFx(kind, leftImgs, rightImgs) {
+  const run = () => new Promise(done => {
+    const scr = document.getElementById('fightFx');
+    if (!scr) return done();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pile = imgs => (imgs || []).slice(0, 3).map(src => `<img src="${src}" alt="">`).join('');
+    document.getElementById('ffxL').innerHTML = pile(leftImgs);
+    document.getElementById('ffxR').innerHTML = pile(rightImgs);
+    const words = kind === 'hit' ? FX_HIT_WORDS : kind === 'block' ? FX_BLOCK_WORDS : ['FIGHT !'];
+    document.getElementById('ffxWord').innerText = words[Math.floor(Math.random() * words.length)];
+    scr.dataset.kind = kind;
+    scr.classList.remove('hidden', 'play');
+    void scr.offsetWidth;
+    scr.classList.add('play');
+    if (kind !== 'intro') setTimeout(() => buzz(kind === 'hit' ? [60, 40, 90] : 50), reduce ? 0 : 620);
+    setTimeout(() => { scr.classList.add('hidden'); scr.classList.remove('play'); done(); }, reduce ? 500 : kind === 'intro' ? 1350 : 1750);
+  });
+  fightFxChain = fightFxChain.then(run, run);
+  return fightFxChain;
+}
+// Combattant : mes images et celles d'en face, attaquants à gauche
+const fxMine = () => [getMyCaid().imageFile, ...((currentDuelInfo && currentDuelInfo.role === 'attacker' && currentDuelInfo.allies) || []).map(a => fightImg(a.caidName))];
