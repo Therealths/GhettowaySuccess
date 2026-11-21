@@ -1589,21 +1589,22 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 @keyframes ffxInL { from { transform: translate(-170%, -50%); } to { transform: translate(0, -50%); } }
 @keyframes ffxInR { from { transform: translate(170%, -50%); } to { transform: translate(0, -50%); } }
 /* L'attaquant prend son élan (recule) puis fonce vers la droite */
-.fight-fx.play[data-kind="hit"] .ffx-l, .fight-fx.play[data-kind="block"] .ffx-l { animation: ffxInL .35s cubic-bezier(.2,1.4,.4,1) both, ffxLunge .75s .35s ease-in-out both; }
+.fight-fx.play[data-kind="hit"] .ffx-l { animation: ffxInL .35s cubic-bezier(.2,1.4,.4,1) both, ffxLunge .75s .35s ease-in-out forwards; }
 @keyframes ffxLunge { 0% { transform: translate(0, -50%); } 35% { transform: translate(-16%, -50%) rotate(-8deg); } 70% { transform: translate(36%, -50%) rotate(8deg); } 100% { transform: translate(0, -50%); } }
-.fight-fx.play[data-kind="block"] .ffx-l { animation: ffxInL .35s cubic-bezier(.2,1.4,.4,1) both, ffxLunge .75s .35s ease-in-out both, ffxRecoil .45s 1.1s ease-out both; }
-@keyframes ffxRecoil { 0% { transform: translate(0, -50%); } 40% { transform: translate(-22%, -50%) rotate(-10deg); } 100% { transform: translate(0, -50%); } }
+.fight-fx.play[data-kind="block"] .ffx-l { animation: ffxInL .35s cubic-bezier(.2,1.4,.4,1) both, ffxLungeRecoil 1.2s .35s ease-in-out forwards; }
+/* Élan, coup dans le bouclier (0,9 s), puis l'attaquant est repoussé */
+@keyframes ffxLungeRecoil { 0% { transform: translate(0, -50%); } 22% { transform: translate(-16%, -50%) rotate(-8deg); } 44% { transform: translate(36%, -50%) rotate(8deg); } 62% { transform: translate(-22%, -50%) rotate(-10deg); } 100% { transform: translate(0, -50%); } }
 /* Le défenseur encaisse : secoué, rougi, repoussé vers la droite */
-.fight-fx.play[data-kind="hit"] .ffx-r { animation: ffxInR .35s cubic-bezier(.2,1.4,.4,1) both, ffxHurt .8s .9s ease-out both; }
+.fight-fx.play[data-kind="hit"] .ffx-r { animation: ffxInR .35s cubic-bezier(.2,1.4,.4,1) both, ffxHurt .8s .9s ease-out forwards; }
 @keyframes ffxHurt { 0% { transform: translate(0, -50%); filter: none; } 15% { transform: translate(24%, -50%) rotate(14deg); filter: sepia(1) saturate(6) hue-rotate(-40deg) brightness(1.2); } 45% { transform: translate(10%, -50%) rotate(-6deg); } 100% { transform: translate(6%, -50%) rotate(4deg); filter: grayscale(.5) brightness(.75); } }
 /* Le poing (de profil) part de l'attaquant et file vers le défenseur, avec sa traînée */
 .ffx-fist { position: absolute; top: 47%; left: 30%; font-size: 66px; line-height: 1; opacity: 0; transform: translate(-50%, -50%); filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
 .ffx-trail { position: absolute; right: 70%; top: 50%; width: 0; height: 26px; transform: translateY(-50%); border-radius: 999px; background: linear-gradient(90deg, transparent, rgba(253,224,71,.15) 20%, rgba(253,224,71,.85)); }
-.fight-fx.play[data-kind="hit"] .ffx-fist { animation: ffxFist .5s .4s cubic-bezier(.55,0,.9,.45) both, ffxFistOut .3s .9s ease-out both; }
+.fight-fx.play[data-kind="hit"] .ffx-fist { animation: ffxFist .8s .4s linear both; }
 .fight-fx.play[data-kind="hit"] .ffx-trail, .fight-fx.play[data-kind="block"] .ffx-trail { animation: ffxTrail .5s .4s ease-in both; }
 .fight-fx.play[data-kind="block"] .ffx-fist { animation: ffxFistBlock .8s .4s ease-in-out both; }
-@keyframes ffxFist { from { left: 30%; opacity: 1; transform: translate(-50%, -50%) scale(.75); } to { left: 70%; opacity: 1; transform: translate(-50%, -50%) scale(1.35); } }
-@keyframes ffxFistOut { from { left: 70%; opacity: 1; transform: translate(-50%, -50%) scale(1.35); } to { left: 73%; opacity: 0; transform: translate(-50%, -50%) scale(2); } }
+/* Un seul trajet : départ de l'attaquant, accélération, impact sur le défenseur (0,9 s), puis il s'efface */
+@keyframes ffxFist { 0% { left: 30%; opacity: 1; transform: translate(-50%, -50%) scale(.75); animation-timing-function: cubic-bezier(.55,0,.9,.45); } 62% { left: 70%; opacity: 1; transform: translate(-50%, -50%) scale(1.35); animation-timing-function: ease-out; } 100% { left: 73%; opacity: 0; transform: translate(-50%, -50%) scale(2); } }
 @keyframes ffxTrail { 0% { width: 0; } 70% { width: 150px; } 100% { width: 0; } }
 @keyframes ffxFistBlock { 0% { left: 30%; opacity: 1; transform: translate(-50%, -50%) scale(.75); } 60% { left: 57%; opacity: 1; transform: translate(-50%, -50%) scale(1.25); } 78% { left: 50%; transform: translate(-50%, -50%) scale(1.1) rotate(-35deg); } 100% { left: 38%; opacity: 0; transform: translate(-50%, -50%) scale(.8) rotate(-70deg); } }
 /* Bouclier devant le défenseur */
