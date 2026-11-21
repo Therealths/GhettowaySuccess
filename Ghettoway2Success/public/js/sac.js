@@ -255,6 +255,7 @@ function openWaitProfile() {
     <div class="wp-head"><img src="${c.imageFile}" alt=""><div><small>Mon Caïd</small><b>${escapeHtml(c.name)}</b></div></div>
     <div class="wp-stats">
       <div><span class="wp-hearts">${hearts}</span><small>Cœurs</small></div>
+      <div><b class="text-orange-400"><i class="ph-fill ph-castle-turret"></i>${lp.qgDef || 0}</b><small>Déf. QG</small></div>
       <div><b class="text-rose-400">${getTotalAtk()}</b><small>Attaque</small></div>
       <div><b class="text-sky-400">${getTotalDef()}</b><small>Défense</small></div>
       <div><b class="text-emerald-400">${getTotalPm()}</b><small>PM</small></div>
@@ -265,7 +266,6 @@ function openWaitProfile() {
       ${row('ph-high-heel', 'Escort en transit', lp.prostituteInTransit ? escapeHtml(lp.prostituteInTransit.name || 'Prostituée') : 'aucune')}
       ${row('ph-vault', 'Prostituées au QG', atQg.length ? `${atQg.length} · +${rent.toLocaleString()} € / manche` : 'aucune')}
       ${row('ph-dog', 'Chien errant', lp.strayDogActive ? 'avec toi (+2 / +2)' : 'non')}
-      ${row('ph-shield', 'Défense du QG', `${lp.qgDef || 0}`)}
     </div>
     <div class="ws-label">Capacité spéciale</div>
     <div class="wp-skill ${used ? 'used' : ''}"><b><i class="ph-fill ph-lightning"></i> ${escapeHtml(c.skillName)}</b><p>${escapeHtml(c.skillDesc)}</p><em>${used ? `en recharge · prête à la manche ${specialReadyRound()}` : 'prête pour ton tour'}</em></div>

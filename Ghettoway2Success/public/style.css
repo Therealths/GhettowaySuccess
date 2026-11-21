@@ -1541,11 +1541,12 @@ body.msg-open *:not(.msg-screen, .msg-screen *, .played-screen, .played-screen *
 .wp-head img { width: 64px; height: 64px; border-radius: 18px; object-fit: cover; border: 2px solid rgba(253,224,71,.5); }
 .wp-head small { display: block; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .14em; color: #94a3b8; }
 .wp-head b { font-family: 'Anton', sans-serif; font-size: 26px; font-weight: 400; color: #fff; text-transform: uppercase; line-height: 1.05; }
-.wp-stats { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 6px; margin-top: 14px; }
+.wp-stats { display: grid; grid-template-columns: 1.3fr 1.05fr 1fr 1fr 1fr; gap: 5px; margin-top: 14px; }
+.wp-stats b i { font-size: 16px; margin-right: 2px; vertical-align: -1px; }
 .wp-stats div { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); }
 .wp-stats b { font-family: 'Anton', sans-serif; font-size: 24px; font-weight: 400; line-height: 1; }
 .wp-stats small { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: #94a3b8; margin-top: 3px; }
-.wp-hearts { color: #fb7185; font-size: 16px; display: flex; gap: 1px; } .wp-hearts .off { color: #334155; }
+.wp-hearts { color: #fb7185; font-size: 13px; display: flex; gap: 1px; } .wp-hearts .off { color: #334155; }
 .wp-skill { padding: 10px 12px; border-radius: 14px; background: rgba(250,204,21,.08); border: 1px solid rgba(250,204,21,.35); }
 .wp-skill b { color: #fde047; font-size: 13px; font-weight: 900; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
 .wp-skill p { font-size: 12px; color: #e2e8f0; margin-top: 3px; }
