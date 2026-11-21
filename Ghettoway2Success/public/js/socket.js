@@ -290,6 +290,22 @@ if (socket) {
     syncMultiplayerTargets();
   });
 
+  // Attaque de QG : résultat pour les assaillants, alerte et butin perdu pour le propriétaire
+  socket.on('qg_raid_result', d => showQgRaidResult(d));
+  socket.on('qg_raid_attempt', async ({ success, atk, def, by, late }) => {
+    const who = allyListNames((by || []).map(allyShort));
+    if (success) await showAppAlert(`${who} ${by.length > 1 ? 'ont' : 'a'} forcé ton QG (Attaque ${atk} contre ta Défense ${def}) !\n${by.length > 1 ? 'Ils choisissent ce qu’ils prennent' : 'Il choisit ce qu’il prend'}…`, '🏠 QG attaqué');
+    else await showAppAlert(`${who} ${by.length > 1 ? 'ont' : 'a'} attaqué ton QG, mais ta Défense (${def}) a tenu face à une Attaque de ${atk} !`, '🏠 QG défendu');
+  });
+  socket.on('qg_looted', async ({ category, pct, amount, by, late }) => {
+    if (!late) {
+      if (category === 'cash') localPlayer.safeCash = Math.max(0, localPlayer.safeCash - (amount || 0));
+      else localPlayer.safeDrugs = Math.max(0, (localPlayer.safeDrugs || 0) - (amount || 0));
+      refreshHud();
+      return showRacketRoulette({ category, pct, amount, who: by, role: 'victim', qg: true });
+    }
+    await showAppAlert(`${by} a pris ${pct} % ${category === 'cash' ? 'du cash' : 'de la drogue'} de ton QG (${category === 'cash' ? `${(amount || 0).toLocaleString()} €` : `${amount || 0} kg`}).`, '🏠 QG pillé');
+  });
   // Combat entre d'autres joueurs : on le suit en direct
   socket.on('combat_live', d => onCombatLive(d));
   // Patrouille d'un autre joueur : on la regarde en direct
@@ -463,19 +479,19 @@ if (socket) {
   });
 
   // Racket en alliance : le butin part au partage, mais chaque vainqueur voit la roulette
-  socket.on('racket_roll', ({ category, pct, amount, loserCaid }) => showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief' }));
+  socket.on('racket_roll', ({ category, pct, amount, loserCaid, qg }) => showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief', qg }));
 
-  socket.on('pillage_gain_applied', async ({ category, amount, pct, items, prostituteObj, loserCaid, late }) => {
+  socket.on('pillage_gain_applied', async ({ category, amount, pct, qg, items, prostituteObj, loserCaid, late }) => {
     if (category === 'cash') {
       if (!late) localPlayer.pocketCash += (amount || 0);
       refreshHud();
-      if (pct && !late) return showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief' });
-      await showAppAlert(`Tu as pris +${(amount || 0).toLocaleString()} € en cash sur ${loserCaid} !`, "💰 Butin Récupéré");
+      if (pct && !late) return showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief', qg });
+      await showAppAlert(`Tu as pris +${(amount || 0).toLocaleString()} € en cash ${qg ? 'dans le QG de' : 'sur'} ${loserCaid} !`, "💰 Butin Récupéré");
     } else if (category === 'drugs') {
       if (!late) localPlayer.drugs += (amount || 0);
       refreshHud();
-      if (pct && !late) return showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief' });
-      await showAppAlert(`Tu as pris +${amount || 0} kg de drogue sur ${loserCaid} !`, "🌿 Butin Récupéré");
+      if (pct && !late) return showRacketRoulette({ category, pct, amount, who: loserCaid, role: 'thief', qg });
+      await showAppAlert(`Tu as pris +${amount || 0} kg de drogue ${qg ? 'dans le QG de' : 'sur'} ${loserCaid} !`, "🌿 Butin Récupéré");
     } else if (category === 'prostitute') {
       localPlayer.prostituteInTransit = prostituteObj || { id: 'pr_' + Date.now(), type: 'PROSTITUTE', level: 1, name: 'Prostituée Niv. 1', revenue: prostituteRent(1) };
       refreshHud();

@@ -337,6 +337,8 @@ function refreshHud() {
       firstWeaponDoubled: localPlayer.firstWeaponDoubled,
       specialUsedThisTurn: localPlayer.specialUsedThisTurn,
       specialUsedRound: localPlayer.specialUsedRound || 0,
+      qgDef: localPlayer.qgDef || 0,
+      qgRaidRound: localPlayer.qgRaidRound || 0,
       jloDoubledKgBought: localPlayer.jloDoubledKgBought || 0,
       freeItemsClaimed: localPlayer.freeItemsClaimed || [],
       roundSeen: localPlayer.roundSeen || 0,
@@ -475,7 +477,9 @@ async function openTransferModal(mode, res) {
   updateTransferUI();
 }
 // Escort et matériel de labo : aller simple vers le QG
-const oneWayRes = res => res === 'escort' || res === 'lab';
+const oneWayRes = res => res === 'escort' || res === 'lab' || res === 'def';
+// Défense du QG : achetée au QG, gardée toute la partie ; une attaque de QG doit la dépasser
+const QG_DEF_PRICE = 2000;
 function switchTransferResource(res) {
   currentTransferResource = res;
   if (oneWayRes(res)) currentTransferMode = 'deposit';
@@ -521,8 +525,9 @@ function updateTransferUI(amountOnly) {
   document.getElementById('qgAmountBox').classList.toggle('hidden', oneWayRes(res));
   document.getElementById('qgEscortBox').classList.toggle('hidden', res !== 'escort');
   document.getElementById('qgLabBox').classList.toggle('hidden', res !== 'lab');
+  document.getElementById('qgDefBox').classList.toggle('hidden', res !== 'def');
   document.getElementById('qgArrowHint').innerText = oneWayRes(res) ? 'aller simple' : 'toucher pour inverser';
-  document.getElementById('qgArrowLabel').innerText = oneWayRes(res) ? 'Installer' : (dep ? 'Déposer' : 'Retirer');
+  document.getElementById('qgArrowLabel').innerText = res === 'def' ? 'Renforcer' : oneWayRes(res) ? 'Installer' : (dep ? 'Déposer' : 'Retirer');
 
   // Onglet Labo : l'illustration du labo (celui qui arrive, sinon celui installé) passe en fond
   const gearLab = labLevelInfo(localPlayer.labGearInTransit), curLab = labLevelInfo(localPlayer.labLevel || 0);
@@ -552,6 +557,21 @@ function updateTransferUI(amountOnly) {
     return;
   }
 
+  if (res === 'def') {
+    const d = localPlayer.qgDef || 0, funds = localPlayer.pocketCash + localPlayer.safeCash;
+    meIll.innerHTML = '<img src="pay-cash.webp" alt="Portefeuille">';
+    document.getElementById('qgMeVal').innerText = `${QG_DEF_PRICE.toLocaleString()} €`;
+    document.getElementById('qgMeAfter').innerText = 'par point';
+    document.getElementById('qgSafeVal').innerText = `${d} Déf`;
+    document.getElementById('qgSafeAfter').innerText = `→ ${d + 1} Déf`;
+    document.getElementById('qgDefBox').innerHTML = `<div class="qg-escort-head"><b>Défense du QG : ${d}</b><span>+1 point pour ${QG_DEF_PRICE.toLocaleString()} €</span></div>
+      <div class="qg-slots-cap">Pour forcer ton QG, l'Attaque des assaillants doit dépasser cette Défense. Elle reste toute la partie.</div>`;
+    document.getElementById('qgHeadline').innerHTML = 'BARRICADÉ.';
+    hint.innerHTML = '<i class="ph-fill ph-shield-check"></i> Payé avec ton cash ou ta CB (coffre)';
+    cta.innerText = funds < QG_DEF_PRICE ? 'Pas assez d’argent' : `Renforcer : ${QG_DEF_PRICE.toLocaleString()} €`;
+    cta.disabled = funds < QG_DEF_PRICE;
+    return;
+  }
   if (res === 'escort') {
     const pr = localPlayer.prostituteInTransit;
     const list = localPlayer.prostitutesAtSafeList || [];
@@ -613,6 +633,11 @@ function playTransferFly(icon, toRight) {
 async function confirmTransferAction() {
   if (!isMyTurnToPlay) return;
   const res = currentTransferResource, dep = currentTransferMode === 'deposit';
+  if (res === 'def') {
+    if (localPlayer.pocketCash + localPlayer.safeCash < QG_DEF_PRICE) return;
+    closeModal('modalTransfer');
+    return openPaymentChoiceModal({ type: 'qgdef', cost: QG_DEF_PRICE, name: 'Défense du QG +1', shop: 'QG' });
+  }
   if (res === 'escort') {
     if (!localPlayer.prostituteInTransit || localPlayer.prostitutesAtSafeList.length >= QG_ESCORT_SLOTS) return;
     playTransferFly('💃', true);

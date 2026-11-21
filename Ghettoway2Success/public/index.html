@@ -594,6 +594,16 @@
         <button type="button" class="lf-close" onclick="closeWaitSheet('waitShops')">Fermer</button>
       </div>
     </div>
+    <!-- Attaque de QG : résultat pour les assaillants (et choix du butin) -->
+    <div id="qgRaidScreen" class="hidden absolute inset-0 z-[45] live-fight qg-raid" data-tone="">
+      <div class="lf-card">
+        <div class="lf-top"><span class="lf-live qg"><i class="ph-fill ph-house-line"></i> Attaque de QG</span></div>
+        <h2 id="qrrStatus" class="font-anton lf-status">QG FORCÉ !</h2>
+        <div id="qrrSub" class="text-center text-xs font-bold text-slate-300 mt-1"></div>
+        <div id="qrrNums" class="lf-nums"></div>
+        <div id="qrrBody" class="mt-3"></div>
+      </div>
+    </div>
     <!-- Combat en direct (joueurs qui ne combattent pas) -->
     <div id="liveFight" class="hidden absolute inset-0 z-[45] live-fight" data-tone="">
       <div class="lf-card">
@@ -817,6 +827,7 @@
             <button type="button" data-res="drugs" onclick="switchTransferResource('drugs')"><i class="ph-bold ph-leaf"></i> Drogue</button>
             <button type="button" data-res="escort" onclick="switchTransferResource('escort')"><i class="ph-bold ph-sparkle"></i> Escort</button>
             <button type="button" data-res="lab" onclick="switchTransferResource('lab')"><i class="ph-bold ph-flask"></i> Labo</button>
+            <button type="button" data-res="def" onclick="switchTransferResource('def')"><i class="ph-bold ph-shield"></i> Défense</button>
           </div>
           <div class="qg-duo mt-3">
             <div class="qg-side"><div id="qgMeIll" class="qg-ill"></div><b>Sur toi</b><div id="qgMeVal" class="qg-val">0</div><div id="qgMeAfter" class="qg-after"></div></div>
@@ -838,6 +849,7 @@
           </div>
           <div id="qgEscortBox" class="qg-escort hidden"></div>
           <div id="qgLabBox" class="qg-escort qg-lab hidden"></div>
+          <div id="qgDefBox" class="qg-escort qg-def hidden"></div>
           <div id="qgHint" class="qg-hint mt-3"></div>
           <button type="button" id="qgCta" class="qg-cta mt-3" onclick="confirmTransferAction()">Déposer</button>
         </div>

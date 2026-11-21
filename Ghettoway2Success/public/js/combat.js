@@ -228,6 +228,62 @@ function fightPactUntil(token) {
 
 // Caïds déjà attaqués pendant ce tour (une seule attaque par cible et par tour ; le serveur le vérifie aussi)
 let attackedThisTurn = [];
+// =========================================================================
+// ATTAQUE DE QG : 3 Lascars au moins (avec ceux des alliés du tour), devant le QG, une fois par manche
+// =========================================================================
+const QG_RAID_LASCARS = 3;
+const qgRaidAllies = () => (localPlayer.allianceActive ? (localPlayer.activeAllies || []) : []);
+const allyLascars = a => ((connectedRivals || []).find(r => r.playerToken === a.allyToken) || {}).musclesCount || 0;
+function qgRaidButtonHtml() {
+  const rivals = (connectedRivals || []).filter(r => !r.away && !isRivalProtectedByPact(r.playerToken));
+  if (!rivals.length) return '';
+  const mine = localPlayer.musclesOnPerson.length, withAllies = mine + qgRaidAllies().reduce((n, a) => n + allyLascars(a), 0);
+  const done = localPlayer.qgRaidRound === (currentSession.round || 1);
+  const sub = done ? 'déjà fait cette manche' : withAllies >= QG_RAID_LASCARS ? `${withAllies} Lascars avec toi${withAllies > mine ? ' et tes alliés' : ''}` : `3 Lascars requis (tu en as ${withAllies})`;
+  return `<button type="button" class="qg-raid-btn" onclick="startQgRaid()" ${done || withAllies < QG_RAID_LASCARS ? 'disabled' : ''}><i class="ph-fill ph-house-line"></i><span><b>Attaquer son QG</b><small>${sub}</small></span><i class="ph-bold ph-caret-right"></i></button>`;
+}
+async function startQgRaid() {
+  const target = (connectedRivals || []).find(r => r.playerToken === fightTargetToken);
+  if (!target || !isMyTurnToPlay) return;
+  const name = allyRivalName(target);
+  if (localPlayer.qgRaidRound === (currentSession.round || 1)) return showAppAlert('Une seule attaque de QG par manche.', '🏠 Attaque de QG');
+  const allies = qgRaidAllies().filter(a => a.allyToken !== target.playerToken && !pactBetween(a.allyToken, target.playerToken));
+  const mine = localPlayer.musclesOnPerson.length;
+  let useAlliance = false;
+  if (allies.length && mine < QG_RAID_LASCARS) useAlliance = true;
+  else if (allies.length) useAlliance = await showAppConfirm(`Attaquer le QG de ${name} seul ou avec ${formatAllyNames(allies)} ?\n\nEn alliance, vos Lascars et vos Attaques s'additionnent, et le butin se partage.`, '🏠 Seul ou en Alliance ?', '🤝 En Alliance', 'Seul');
+  const lascars = mine + (useAlliance ? allies.reduce((n, a) => n + allyLascars(a), 0) : 0);
+  if (lascars < QG_RAID_LASCARS) return showAppAlert(`Il faut au moins 3 Lascars pour attaquer un QG : tu en as ${lascars}.`, '🏠 Attaque de QG');
+  if (!await showAppConfirm(`Ton pion est-il bien sur la case en face du QG de ${name} ?\n\nTes Lascars risquent d'y rester : 25 % chacun si ça passe, 50 % si la défense tient.`, '🏠 Attaque de QG', "Oui, on y va", 'Pas encore')) return;
+  localPlayer.qgRaidRound = currentSession.round || 1;
+  closeFightScreen();
+  spendActionPm();
+  if (socket) socket.emit('qg_raid', { targetPlayerToken: target.playerToken, useAlliance });
+}
+// Résultat pour chaque assaillant : Attaque contre Défense du QG, Lascars perdus, puis le butin (premier assaillant)
+function showQgRaidResult({ success, atk, def, lost, targetCaid, raiders, picker, late }) {
+  if (lost && !late) localPlayer.musclesOnPerson.splice(Math.max(0, localPlayer.musclesOnPerson.length - lost), lost);
+  refreshHud();
+  const scr = document.getElementById('qgRaidScreen');
+  scr.dataset.tone = success ? 'ko' : 'block';
+  document.getElementById('qrrStatus').innerText = success ? 'QG FORCÉ !' : 'LA DÉFENSE TIENT';
+  document.getElementById('qrrSub').innerText = `QG de ${targetCaid}${(raiders || []).length > 1 ? ` · ${allyListNames(raiders.map(allyShort))}` : ''}`;
+  document.getElementById('qrrNums').innerHTML = `<div><small>Votre attaque</small><b>${atk}</b></div><div><small>Défense du QG</small><b>${def}</b></div>`;
+  const rows = fightRow('ph-barbell', 'Lascars tombés', lost ? `−${lost}` : 'aucun')
+    + fightRow('ph-skull', 'Risque pour chaque Lascar', success ? '25 %' : '50 %');
+  const btns = success && picker && !late
+    ? `<div class="ws-label text-center">Qu'est-ce que tu prends ? (la roulette décide de la part : 30 à 60 %)</div>
+       <div class="grid grid-cols-2 gap-2"><button type="button" class="qrr-pick cash" onclick="takeQgRaid('cash')">💰 Le coffre<small>cash du QG</small></button><button type="button" class="qrr-pick drugs" onclick="takeQgRaid('drugs')">🌿 La drogue<small>stock du QG</small></button></div>`
+    : `${success ? `<div class="text-center text-[11px] font-bold text-slate-400 mt-2">${picker ? '' : 'Ton allié choisit le butin, puis vous le partagez'}</div>` : '<div class="text-center text-[11px] font-bold text-slate-400 mt-2">Vous repartez les mains vides</div>'}
+       <button type="button" class="lf-close" onclick="document.getElementById('qgRaidScreen').classList.add('hidden')">OK</button>`;
+  document.getElementById('qrrBody').innerHTML = `<div class="flex flex-col gap-1.5">${rows}</div>${btns}`;
+  scr.classList.remove('hidden');
+}
+function takeQgRaid(category) {
+  document.getElementById('qgRaidScreen').classList.add('hidden');
+  if (socket) socket.emit('qg_raid_take', { category });
+}
+
 function renderFightChoice() {
   const rivals = connectedRivals || [];
   const isOff = r => !!r.inHospital || !!r.away || isRivalProtectedByPact(r.playerToken) || attackedThisTurn.includes(r.playerToken);
@@ -255,7 +311,8 @@ function renderFightChoice() {
     ${rivals.length ? '' : '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucun Caïd rival dans la partie</div>'}
     ${rivals.length && !free.length ? '<div class="text-center text-[11px] font-bold text-slate-400 mt-1">Aucune cible attaquable cette manche</div>' : ''}
     <div class="ally-picks mt-3">${rivals.map(pick).join('')}</div>
-    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closeFightScreen()">Annuler</button><button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="initiateCombatEngagement()" ${target ? '' : 'disabled'}>Engager le combat</button></div>`;
+    <div class="grid grid-cols-[1fr_1.6fr] gap-2 mt-4"><button type="button" class="btn-close ally-ghost" onclick="closeFightScreen()">Annuler</button><button type="button" id="btnInitiateFightAction" class="ally-cta" onclick="initiateCombatEngagement()" ${target ? '' : 'disabled'}>Engager le combat</button></div>
+    ${qgRaidButtonHtml()}`;
   return fightRender('choix', 'atk', 'combat', stage, bottom);
 }
 
@@ -423,12 +480,12 @@ function buildRacketWheel() {
   }).join('')}<circle cx="100" cy="100" r="${r}" class="rr-rim"/><circle cx="100" cy="100" r="16" class="rr-hub"/></svg>`;
 }
 // role : 'thief' (tu prends) ou 'victim' (on te prend) ; who : l'autre Caïd
-function showRacketRoulette({ category, pct, amount, who, role }) {
+function showRacketRoulette({ category, pct, amount, who, role, qg }) {
   return new Promise(done => {
     const scr = document.getElementById('racketRoulette'), wheel = document.getElementById('rrWheel');
     buildRacketWheel();
     const cash = category === 'cash', amt = cash ? `${(amount || 0).toLocaleString()} €` : `${amount || 0} kg`;
-    document.getElementById('rrKicker').innerText = `Racket · ${cash ? 'cash en poche' : 'drogue en poche'}`;
+    document.getElementById('rrKicker').innerText = qg ? `Attaque du QG · ${cash ? 'coffre' : 'drogue du QG'}` : `Racket · ${cash ? 'cash en poche' : 'drogue en poche'}`;
     document.getElementById('rrTitle').innerText = 'LA ROULETTE TOURNE…';
     document.getElementById('rrResult').innerHTML = '';
     const btn = document.getElementById('rrCta');
@@ -448,8 +505,9 @@ function showRacketRoulette({ category, pct, amount, who, role }) {
       scr.classList.add('landed');
       buzz(80);
       document.getElementById('rrTitle').innerText = `${pct} %`;
-      const line = role === 'thief' ? `Tu prends <b>${amt}</b> à ${escapeHtml(who)}` : `${escapeHtml(who)} te prend <b>${amt}</b>`;
-      document.getElementById('rrResult').innerHTML = amount ? line : `${role === 'thief' ? escapeHtml(who) + ' n’avait' : 'Tu n’avais'} rien sur ${role === 'thief' ? 'lui' : 'toi'} !`;
+      const line = role === 'thief' ? `Tu prends <b>${amt}</b> ${qg ? 'dans le QG de' : 'à'} ${escapeHtml(who)}` : `${escapeHtml(who)} te prend <b>${amt}</b>${qg ? ' dans ton QG' : ''}`;
+      const empty = qg ? (role === 'thief' ? `Le QG de ${escapeHtml(who)} était vide !` : 'Ton QG était vide !') : `${role === 'thief' ? escapeHtml(who) + ' n’avait' : 'Tu n’avais'} rien sur ${role === 'thief' ? 'lui' : 'toi'} !`;
+      document.getElementById('rrResult').innerHTML = amount ? line : empty;
       btn.classList.remove('hidden');
     }, reduce ? 300 : 3800);
   });

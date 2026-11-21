@@ -193,6 +193,49 @@ test('ordre des tours : le même à chaque manche (1, 2, 3, puis 1, 2, 3)', asyn
   assert.ok(next);
 });
 
+test('attaque de QG : 3 Lascars requis, Attaque contre Défense du QG, butin à la roulette, une fois par manche', async () => {
+  const { players } = await startGame([['caid_1', 'Burger Queen'], ['caid_7', 'Jamel Pépouze'], ['caid_3', 'Nelson Sativa']]);
+  const turn = await waitFor(players[0], 'turn_state_updated');
+  const a = players.find(s => s.token === turn.activePlayerToken), [b, c] = players.filter(s => s !== a);
+  b.emit('sync_player', { safeCash: 10000, safeDrugs: 4, qgDef: 3 });
+  a.emit('sync_player', { musclesCount: 2, atk: 9 });
+  await new Promise(r => setTimeout(r, 80));
+  a.emit('qg_raid', { targetPlayerToken: b.token });
+  assert.match(await waitFor(a, 'error_msg'), /3 Lascars/);
+  // Défense trop forte : rien de pris, les Lascars risquent 50 %
+  a.emit('sync_player', { musclesCount: 3, atk: 3 });
+  await new Promise(r => setTimeout(r, 80));
+  a.emit('qg_raid', { targetPlayerToken: b.token });
+  const fail = await waitFor(a, 'qg_raid_result');
+  assert.deepStrictEqual([fail.success, fail.atk, fail.def], [false, 3, 3]);
+  assert.ok(fail.lost >= 0 && fail.lost <= 3);
+  assert.strictEqual((await waitFor(b, 'qg_raid_attempt')).success, false);
+  // Une seule attaque de QG par manche
+  a.emit('qg_raid', { targetPlayerToken: c.token });
+  assert.match(await waitFor(a, 'error_msg'), /une seule attaque de QG/);
+  // Manche suivante : Attaque 9 contre Défense 3, cash du coffre à la roulette
+  for (const s of [a, b, c]) {
+    const t = players.find(x => x.events.filter(e => e.event === 'turn_state_updated').pop().data.activePlayerToken === x.token);
+    (t || s).emit('next_player_turn');
+    await new Promise(r => setTimeout(r, 80));
+  }
+  await new Promise(r => setTimeout(r, 150));
+  const now = a.events.filter(e => e.event === 'turn_state_updated').pop().data;
+  const atk = players.find(s => s.token === now.activePlayerToken), vic = players.find(s => s !== atk && s.token === b.token) || players.find(s => s !== atk);
+  vic.emit('sync_player', { safeCash: 10000, safeDrugs: 4, qgDef: 3 });
+  atk.emit('sync_player', { musclesCount: 4, atk: 9 });
+  await new Promise(r => setTimeout(r, 80));
+  atk.events.length = 0; vic.events.length = 0;
+  atk.emit('qg_raid', { targetPlayerToken: vic.token });
+  const win = await waitFor(atk, 'qg_raid_result');
+  assert.deepStrictEqual([win.success, win.atk, win.def, win.picker], [true, 9, 3, true]);
+  atk.emit('qg_raid_take', { category: 'cash' });
+  const lost = await waitFor(vic, 'qg_looted'), got = await waitFor(atk, 'pillage_gain_applied');
+  assert.ok([30, 35, 40, 45, 50, 55, 60].includes(lost.pct));
+  assert.strictEqual(lost.amount, 10000 * lost.pct / 100);
+  assert.deepStrictEqual([got.amount, got.qg], [lost.amount, true]);
+});
+
 test('racket : le vainqueur prend jusqu’à 3 objets de Fouille au hasard, jamais l’équipement', async () => {
   const { players: [a, b] } = await startGame();
   const objets = ['Kebab', 'Sifflet', 'Botox', 'Canette'].map((name, i) => ({ id: `o${i}`, type: 'ITEM_CARD', name }));

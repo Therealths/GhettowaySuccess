@@ -896,6 +896,11 @@ async function finalizePurchaseExecution(pData) {
   }
   if (pData.voucher) useVoucher(pData.voucher);
   spendActionPm();
+  if (type === 'qgdef') {
+    localPlayer.qgDef = (localPlayer.qgDef || 0) + 1;
+    refreshHud();
+    return showCardPlayed({ name: 'Défense du QG' }, [['ph-shield', 'Défense du QG', `${localPlayer.qgDef - 1} → ${localPlayer.qgDef}`], ['ph-coins', 'Payé', `${pData.cost.toLocaleString()} €`]], 'QG RENFORCÉ', { kicker: 'Défense', stamp: 'ph-shield-check' });
+  }
   if (type === 'eq') {
     const slot = data.sl === 'arme' ? 'WEAPON' : (data.sl === 'prot' ? 'ARMOR' : 'VEHICLE');
     const bonus = data.atk || data.def || data.pm || 1;

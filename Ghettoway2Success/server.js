@@ -1315,6 +1315,88 @@ io.on('connection', (socket) => {
     room.activeCombat = null;
   }
 
+  // ATTAQUE DE QG : 3 Lascars au moins (seul, ou en comptant les alliés du tour), devant le QG visé, une fois par manche.
+  // Attaque des assaillants contre la Défense achetée du QG ; chaque Lascar a 25 % (réussite) ou 50 % (échec) d'y rester.
+  // Réussite : le premier assaillant choisit à l'aveugle le cash ou la drogue du coffre, la roulette décide de la part (30 à 60 %).
+  socket.on('qg_raid', ({ targetPlayerToken, useAlliance } = {}) => {
+    const room = rooms[socket.roomId];
+    if (!room || !room.gameStarted || room.gameOver) return;
+    const attacker = room.players.find(p => p.socketId === socket.id);
+    const target = room.players.find(p => p.playerToken === targetPlayerToken);
+    if (!attacker || !target || attacker === target) return;
+    const activeNow = getActivePlayer(room);
+    if (!room.isTestRoom && activeNow && activeNow.playerToken !== attacker.playerToken && !(room.currentTurnAlliedTokens || []).includes(attacker.playerToken)) {
+      return socket.emit('error_msg', "Ce n'est pas ton tour.");
+    }
+    if (target.away) return socket.emit('error_msg', `${target.caidName || 'Ce Caïd'} a quitté la partie : son QG est intouchable tant qu'il est absent.`);
+    if (arePlayersInNonAggressionPact(room, attacker.playerToken, target.playerToken)) {
+      return socket.emit('error_msg', "Pacte de non-agression avec ce Caïd : impossible d'attaquer son QG jusqu'à la fin du pacte.");
+    }
+    if (!room.qgRaids || room.qgRaids.round !== room.round) room.qgRaids = { round: room.round, tokens: [] };
+    if (room.qgRaids.tokens.includes(attacker.playerToken)) return socket.emit('error_msg', 'Tu as déjà attaqué un QG cette manche : une seule attaque de QG par manche.');
+    const allies = useAlliance && (room.currentTurnAlliedTokens || []).includes(attacker.playerToken)
+      ? room.currentTurnAlliedTokens.filter(t => t !== attacker.playerToken && t !== target.playerToken && !room.qgRaids.tokens.includes(t) && !arePlayersInNonAggressionPact(room, t, target.playerToken))
+          .map(t => room.players.find(p => p.playerToken === t)).filter(Boolean)
+      : [];
+    const raiders = [attacker, ...allies];
+    const lascars = raiders.reduce((n, p) => n + (p.musclesCount || 0), 0);
+    if (lascars < 3) return socket.emit('error_msg', `Il faut au moins 3 Lascars pour attaquer un QG (${lascars} avec toi${allies.length ? ' et tes alliés' : ''}).`);
+    room.qgRaids.tokens.push(...raiders.map(p => p.playerToken));
+    const atk = raiders.reduce((n, p) => n + (Number(p.atk) || 1), 0);
+    const def = Math.max(0, Number(target.qgDef) || 0);
+    const success = atk > def;
+    const deathChance = success ? 0.25 : 0.5;
+    const names = raiders.map(p => p.caidName || 'Caïd');
+    raiders.forEach(p => {
+      let lost = 0;
+      for (let i = 0; i < (p.musclesCount || 0); i++) if (Math.random() < deathChance) lost++;
+      p.musclesCount = Math.max(0, (p.musclesCount || 0) - lost);
+      sendToPlayer(p, 'qg_raid_result', { success, atk, def, lost, targetCaid: target.caidName || 'Ce Caïd', raiders: names, picker: p === attacker });
+    });
+    sendToPlayer(target, 'qg_raid_attempt', { success, atk, def, by: names });
+    room.pendingQgRaid = success ? { raiderTokens: raiders.map(p => p.playerToken), targetToken: target.playerToken } : null;
+    saveRooms();
+  });
+
+  socket.on('qg_raid_take', ({ category } = {}) => {
+    const room = rooms[socket.roomId];
+    const raid = room && room.pendingQgRaid;
+    const picker = room && room.players.find(p => p.socketId === socket.id);
+    if (!raid || !picker || picker.playerToken !== raid.raiderTokens[0] || !['cash', 'drugs'].includes(category)) return;
+    room.pendingQgRaid = null;
+    const target = room.players.find(p => p.playerToken === raid.targetToken);
+    if (!target) return;
+    const pct = RACKET_PCTS[Math.floor(Math.random() * RACKET_PCTS.length)];
+    let amount;
+    if (category === 'cash') {
+      amount = Math.round(Math.max(0, target.safeCash || 0) * pct / 100);
+      target.safeCash = Math.max(0, (target.safeCash || 0) - amount);
+    } else {
+      const had = Math.max(0, target.safeDrugs || 0);
+      amount = had ? Math.max(1, Math.round(had * pct / 100)) : 0;
+      target.safeDrugs = had - amount;
+    }
+    sendToPlayer(target, 'qg_looted', { category, pct, amount, by: picker.caidName || 'Un Caïd' });
+    const raiders = raid.raiderTokens.map(t => room.players.find(p => p.playerToken === t)).filter(Boolean);
+    const title = `Attaque du QG de ${target.caidName || 'un Caïd'} (${category === 'cash' ? 'Cash' : 'Drogue'})`;
+    if (raiders.length > 1 && amount > 0) {
+      raiders.forEach(p => sendToPlayer(p, 'racket_roll', { category, pct, amount, loserCaid: target.caidName, qg: true }));
+      const cash = category === 'cash' ? amount : 0, kg = category === 'drugs' ? amount : 0;
+      if (raiders.length === 2) {
+        openLootShareSession(room, socket.roomId, { sourceType: 'combat', title, totalCash: cash, totalDrugs: kg,
+          leftToken: raiders[0].playerToken, rightToken: raiders[1].playerToken, leftName: raiders[0].caidName, rightName: raiders[1].caidName });
+      } else {
+        openGroupSplit(room, { sourceType: 'combat', title, totalCash: cash, totalDrugs: kg, tokens: raiders.map(p => p.playerToken) });
+      }
+    } else {
+      if (category === 'cash') picker.pocketCash = (picker.pocketCash || 0) + amount;
+      else picker.drugs = (picker.drugs || 0) + amount;
+      sendToPlayer(picker, 'pillage_gain_applied', { category, amount, pct, qg: true, loserCaid: target.caidName || 'un Caïd' });
+      checkVictory(room, socket.roomId);
+    }
+    saveRooms();
+  });
+
   socket.on('execute_pillage_choice', ({ category, recipientToken }) => {
     const room = rooms[socket.roomId];
     if (!room || !room.pendingPillage) return;
