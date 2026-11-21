@@ -521,8 +521,9 @@ async function endCurrentPlayerTurn(forced = false) {
   if (!isMyTurnToPlay) return;
   const isAllyHelping = activeTurnPlayerToken && activeTurnPlayerToken !== myPlayerToken;
   // Bouton "Tour terminé" : on demande confirmation (la garde à vue, elle, met fin au tour d'office)
+  const last = !isAllyHelping && isLastTurnOfRound();
   if (!forced && !await showAppConfirm(
-    isAllyHelping ? "Terminer ta participation à ce tour ?\nTu ne pourras plus agir avant la manche suivante." : "Terminer ton tour ?\nLa main passera au joueur suivant.",
+    isAllyHelping ? "Terminer ta participation à ce tour ?\nTu ne pourras plus agir avant la manche suivante." : last ? "Terminer ton tour ?\nTu es le dernier de la manche : tu lances la patrouille." : "Terminer ton tour ?\nLa main passera au joueur suivant.",
     "⏭️ Fin de tour"
   )) return;
   // Allié qui joue pendant le tour d'un autre : il termine sa participation, le joueur actif garde la main (et lance le dé de patrouille)
@@ -531,13 +532,15 @@ async function endCurrentPlayerTurn(forced = false) {
     showAppAlert("Ta participation à ce tour est terminée.\nTu rejoueras à la manche suivante.", "🤝 Fin de ton tour");
     return;
   }
+  // Une seule patrouille par manche : c'est le dernier joueur de la manche qui la lance
+  if (!last) { if (socket) socket.emit('next_player_turn'); return; }
   showPatrolScreen();
 }
 
 // Patrouille de fin de tour : le compteur s'emballe, puis on indique de combien de cases et dans quel sens avancer le pion.
-// Compteur de vitesse (0 à 10, repères 0, 5 et 10 ; la voiture fait 8 cases au plus) : graduations du tirage en bleu,
+// Compteur de vitesse (0 à 20, repères 0, 10 et 20 ; la voiture fait 17 cases au plus) : graduations du tirage en bleu,
 // bonus radio en orange, le 0 toujours en rouge, aiguille sur le nombre de cases. Aussi sur l'écran du Talkie-walkie.
-const GAUGE = { max: 10, cx: 66, cy: 72, r: 50 };
+const GAUGE = { max: 20, cx: 66, cy: 72, r: 50 };
 const gaugeAt = (n, r) => { const a = Math.PI * (1 - n / GAUGE.max); return [GAUGE.cx + Math.cos(a) * r, GAUGE.cy - Math.sin(a) * r].map(v => v.toFixed(1)); };
 function buildGauge(el) {
   if (el.firstChild) return;
@@ -547,7 +550,7 @@ function buildGauge(el) {
     const [x1, y1] = gaugeAt(i, r - 9), [x2, y2] = gaugeAt(i, r);
     ticks += `<line data-i="${i}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
   }
-  [0, 5, 10].forEach(i => { const [x, y] = gaugeAt(i, r + 11); labels += `<text x="${x}" y="${+y + 4}">${i}</text>`; });
+  [0, 10, 20].forEach(i => { const [x, y] = gaugeAt(i, r + 11); labels += `<text x="${x}" y="${+y + 4}">${i}</text>`; });
   el.innerHTML = `<svg viewBox="0 0 132 84">${ticks}${labels}<line class="needle" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r + 13}"/><circle cx="${cx}" cy="${cy}" r="6"/></svg>`;
 }
 function setGauge(el, n, dice = n) {
@@ -556,22 +559,23 @@ function setGauge(el, n, dice = n) {
   el.querySelector('.needle').style.transform = `rotate(${(Math.min(n, GAUGE.max) / GAUGE.max) * 180 - 90}deg)`;
 }
 const setPatrolGauge = (n, dice) => setGauge(document.getElementById('patrolGauge'), n, dice);
-// Prochain joueur de la manche (celui qui n'a pas encore joué et n'est pas allié ce tour)
-function nextPlayerLabel() {
+// Prochain joueur de la manche (celui qui n'a pas encore joué et n'est pas allié ce tour), comme advanceTurn côté serveur
+function nextPlayerOfRound() {
   const order = lastTurnOrder || [];
   const i = order.findIndex(p => p.token === activeTurnPlayerToken);
-  const next = order.slice(i + 1).find(p => !p.played && !p.away && !(lastAlliedTokens || []).includes(p.token));
+  return order.slice(i + 1).find(p => !p.played && !p.away && !(lastAlliedTokens || []).includes(p.token)) || null;
+}
+const isLastTurnOfRound = () => !nextPlayerOfRound();
+function nextPlayerLabel() {
+  const next = nextPlayerOfRound();
   return next ? `Passer la main à ${next.token === myPlayerToken ? 'toi' : next.caidName}` : 'Passer à la manche suivante';
 }
 // Demi-tour : une option tirée en plus (20 %), qui n'annule pas la direction. Gauche ou droite (50/50) sert
 // toujours : sur le plateau, la voiture doit savoir de quel côté tourner au prochain croisement.
 const PATROL_UTURN_CHANCE = 0.2;
-// Tirage favorisant les grands déplacements : poids des faces 1 à 6 (1 et 2 rares, 6 le plus fréquent)
-const PATROL_ROLL_WEIGHTS = [1, 1, 2, 3, 4, 5];
-function drawPatrolRoll() {
-  let r = Math.random() * PATROL_ROLL_WEIGHTS.reduce((a, b) => a + b, 0);
-  return PATROL_ROLL_WEIGHTS.findIndex(w => (r -= w) < 0) + 1 || 6;
-}
+// Une seule patrouille par manche, qui avance de 10 à 15 cases (tirage uniforme ; le Talkie choisit dans la même plage)
+const PATROL_MIN = 10, PATROL_MAX = 15;
+const drawPatrolRoll = () => PATROL_MIN + Math.floor(Math.random() * (PATROL_MAX - PATROL_MIN + 1));
 // Direction au prochain croisement : tout droit 50 %, gauche 25 %, droite 25 %
 const drawPatrolDir = () => { const r = Math.random(); return r < 0.5 ? 'straight' : r < 0.75 ? 'left' : 'right'; };
 const patrolDirOf = rig => rig.dir || (rig.left ? 'left' : 'right');
@@ -580,7 +584,7 @@ const PATROL_DIR_TXT = { left: 'vers la gauche', right: 'vers la droite', straig
 function showPatrolScreen(spec = null) {
   const scr = document.getElementById('patrolScreen');
   scr.dataset.spectate = spec ? '1' : '';
-  document.getElementById('patrolWho').innerText = spec ? `tour de ${spec.caid || 'un rival'}` : 'fin de tour';
+  document.getElementById('patrolWho').innerText = spec ? `lancée par ${spec.caid || 'un rival'}` : 'fin de manche';
   const cta = document.getElementById('patrolCta');
   const info = document.getElementById('patrolInfo');
   const dirBox = document.getElementById('patrolDirection');
@@ -670,7 +674,7 @@ function showPatrolScreen(spec = null) {
     const tick = () => {
       const t = Date.now() - t0;
       if (k >= 10 && t >= hold) return land();
-      setPatrolGauge(1 + Math.floor(Math.random() * 6));
+      setPatrolGauge(drawPatrolRoll());
       k++;
       // Le dé roule vite tant qu'on attend le talkie, puis ralentit avant de tomber
       setTimeout(tick, t < hold - 700 ? 90 : 70 + Math.min(k, 10) * 12);

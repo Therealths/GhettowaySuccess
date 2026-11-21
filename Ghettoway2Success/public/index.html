@@ -422,7 +422,7 @@
           <button type="button" onclick="openQrScannerModal()" class="hud-scan" aria-label="Scanner"><i class="ph-bold ph-qr-code"></i><b>Scanner</b></button>
         </div>
         <div class="hud-bars">
-          <button type="button" onclick="endCurrentPlayerTurn()" class="hud-bar end"><i class="ph-bold ph-police-car"></i>Fin de tour · patrouille</button>
+          <button type="button" onclick="endCurrentPlayerTurn()" class="hud-bar end"><i class="ph-bold ph-police-car"></i>Fin de tour</button>
         </div>
       </div>
     </div>
@@ -940,7 +940,7 @@
       <div class="police-shade"></div>
       <div class="police-content">
         <div class="flex items-center justify-between px-4 pt-4 text-[11px] font-bold uppercase tracking-widest text-slate-200">
-          <span>Manche <span id="patrolRound">1</span> · <span id="patrolWho">fin de tour</span></span>
+          <span>Manche <span id="patrolRound">1</span> · <span id="patrolWho">fin de manche</span></span>
           <span class="px-2.5 py-1 rounded-full bg-blue-600 text-white text-[10px] font-black"><i class="ph-fill ph-siren"></i> Patrouille</span>
         </div>
         <h2 id="patrolHeadline" class="font-anton police-headline px-4 mt-2"></h2>
@@ -1042,7 +1042,7 @@
         <div class="pass-card-wrap"><img id="talkiePic" src="" alt="" class="talkie-pic"></div>
         <div class="police-panel">
           <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mb-2">Cases de la patrouille</div>
-          <div class="flex items-center gap-4"><div id="talkieGauge" class="patrol-gauge talkie-gauge"></div><div><div id="talkieVal" class="patrol-big"></div><div class="text-[11px] font-bold text-slate-400 mt-1">Fais tourner l’aiguille au doigt (1 à 6)</div></div></div>
+          <div class="flex items-center gap-4"><div id="talkieGauge" class="patrol-gauge talkie-gauge"></div><div><div id="talkieVal" class="patrol-big"></div><div class="text-[11px] font-bold text-slate-400 mt-1">Fais tourner l’aiguille au doigt (10 à 15)</div></div></div>
           <div class="text-[10px] font-black uppercase tracking-widest text-sky-300 mt-3 mb-2">Direction</div>
           <div id="talkieDirs" class="talkie-dirs"></div>
           <div class="grid grid-cols-[1fr_1.7fr] gap-2 mt-3"><button type="button" class="btn-close ally-ghost" onclick="closeTalkie()">Annuler</button><button type="button" id="talkieGo" class="police-cta" style="margin-top:0" onclick="sendTalkieOrder()">Envoyer l’ordre</button></div>

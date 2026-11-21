@@ -526,7 +526,7 @@ function confirmCombatItems() {
 // =========================================================================
 // TALKIE-WALKIE DE FLIC : on choisit en secret le dé et la direction de la prochaine patrouille
 // =========================================================================
-let talkieItem = null, talkieRoll = 3, talkieDir = 'straight', talkieUturn = false;
+let talkieItem = null, talkieRoll = 12, talkieDir = 'straight', talkieUturn = false;
 function openTalkie(it) {
   talkieItem = it;
   const scr = document.getElementById('talkieScreen');
@@ -546,7 +546,7 @@ function renderTalkie() {
   document.getElementById('talkieDirs').innerHTML = dir('left', '⬅ Gauche') + dir('straight', '⬆ Tout droit') + dir('right', 'Droite ➡')
     + `<button type="button" class="opt ${talkieUturn ? 'on' : ''}" onclick="talkieUturn=!talkieUturn;renderTalkie()">🔄 Demi-tour d’abord : <small>${talkieUturn ? 'Oui' : 'Non'}</small></button>`;
 }
-// Compteur du Talkie : on fait tourner l'aiguille au doigt, de 1 à 6 cases (le bonus radio s'ajoute au lancer)
+// Compteur du Talkie : on fait tourner l'aiguille au doigt, de 10 à 15 cases (le bonus radio s'ajoute au lancer)
 function bindTalkieGauge() {
   const el = document.getElementById('talkieGauge');
   if (el.dataset.bound) return;
@@ -555,7 +555,7 @@ function bindTalkieGauge() {
   const pick = e => {
     const box = el.querySelector('svg').getBoundingClientRect(), k = 132 / box.width;
     const x = (e.clientX - box.left) * k - GAUGE.cx, y = GAUGE.cy - (e.clientY - box.top) * k;
-    const n = Math.max(1, Math.min(6, Math.round((1 - Math.atan2(Math.max(y, 0), x) / Math.PI) * GAUGE.max)));
+    const n = Math.max(PATROL_MIN, Math.min(PATROL_MAX, Math.round((1 - Math.atan2(Math.max(y, 0), x) / Math.PI) * GAUGE.max)));
     if (n === talkieRoll) return;
     talkieRoll = n;
     buzz(8);
