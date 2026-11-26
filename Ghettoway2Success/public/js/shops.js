@@ -5,15 +5,15 @@
 // =========================================================================
 let ARMORY_CATALOG = [
   { id: "wp_poing", categorie: "arme", slot: "WEAPON", nom: "Poing Américain", prix: 1000, bonusVal: 2, bonusLabel: "+2 Attaque", isFirearm: false, image: "arme-poing.jpg", desc: "Patate de forain !" },
-  { id: "wp_knife", categorie: "arme", slot: "WEAPON", nom: "Cran d'arrêt", prix: 2000, bonusVal: 4, bonusLabel: "+4 Attaque", isFirearm: false, image: "arme-knife.jpg", desc: "Idéal pour intimider au corps à corps." },
-  { id: "wp_axe", categorie: "arme", slot: "WEAPON", nom: "Hache", prix: 5000, bonusVal: 6, bonusLabel: "+6 Attaque", isFirearm: false, image: "arme-axe.jpg", desc: "On peut même couper du bois avec..." },
-  { id: "wp_gun", categorie: "arme", slot: "WEAPON", nom: "Revolver", prix: 8000, bonusVal: 8, bonusLabel: "+8 Attaque", isFirearm: true, image: "arme-gun.jpg", desc: "Pan ! Pan ! Pan !" },
-  { id: "wp_pompe", categorie: "arme", slot: "WEAPON", nom: "Fusil à pompe", prix: 12000, bonusVal: 10, bonusLabel: "+10 Attaque", isFirearm: true, image: "arme-pompe.jpg", desc: "Hasta la vista baby !" },
+  { id: "wp_knife", categorie: "arme", slot: "WEAPON", nom: "Cran d'arrêt", prix: 2500, bonusVal: 4, bonusLabel: "+4 Attaque", isFirearm: false, image: "arme-knife.jpg", desc: "Idéal pour intimider au corps à corps." },
+  { id: "wp_axe", categorie: "arme", slot: "WEAPON", nom: "Hache", prix: 7000, bonusVal: 6, bonusLabel: "+6 Attaque", isFirearm: false, image: "arme-axe.jpg", desc: "On peut même couper du bois avec..." },
+  { id: "wp_gun", categorie: "arme", slot: "WEAPON", nom: "Revolver", prix: 18000, bonusVal: 8, bonusLabel: "+8 Attaque", isFirearm: true, image: "arme-gun.jpg", desc: "Pan ! Pan ! Pan !" },
+  { id: "wp_pompe", categorie: "arme", slot: "WEAPON", nom: "Fusil à pompe", prix: 35000, bonusVal: 10, bonusLabel: "+10 Attaque", isFirearm: true, image: "arme-pompe.jpg", desc: "Hasta la vista baby !" },
   { id: "ar_duck", categorie: "equipement", slot: "ARMOR", nom: "Bouée canard", prix: 0, bonusVal: 1, bonusLabel: "+1 Défense", isFirearm: false, image: "equip-duck.jpg", desc: "Coin !? Qu'est-ce qu'il y a !?" },
   { id: "ar_roller", categorie: "equipement", slot: "ARMOR", nom: "Protections Rollers", prix: 2000, bonusVal: 3, bonusLabel: "+3 Défense", isFirearm: false, image: "equip-roller.jpg", desc: "Paré à la chute !" },
-  { id: "ar_hat", categorie: "equipement", slot: "ARMOR", nom: "Casque de soldat", prix: 5000, bonusVal: 5, bonusLabel: "+5 Défense", isFirearm: false, image: "equip-hat.jpg", desc: "J'ai la tête dure !" },
-  { id: "ar_gilet", categorie: "equipement", slot: "ARMOR", nom: "Gilet pare-balles", prix: 8000, bonusVal: 8, bonusLabel: "+8 Défense", isFirearm: false, image: "equip-gilet.jpg", desc: "J'ai mis une petite laine" },
-  { id: "ar_crs", categorie: "equipement", slot: "ARMOR", nom: "Armure de CRS", prix: 12000, bonusVal: 10, bonusLabel: "+10 Défense", isFirearm: false, image: "equip-crs.jpg", desc: "Robocop style" }
+  { id: "ar_hat", categorie: "equipement", slot: "ARMOR", nom: "Casque de soldat", prix: 7000, bonusVal: 5, bonusLabel: "+5 Défense", isFirearm: false, image: "equip-hat.jpg", desc: "J'ai la tête dure !" },
+  { id: "ar_gilet", categorie: "equipement", slot: "ARMOR", nom: "Gilet pare-balles", prix: 18000, bonusVal: 8, bonusLabel: "+8 Défense", isFirearm: false, image: "equip-gilet.jpg", desc: "J'ai mis une petite laine" },
+  { id: "ar_crs", categorie: "equipement", slot: "ARMOR", nom: "Armure de CRS", prix: 35000, bonusVal: 10, bonusLabel: "+10 Défense", isFirearm: false, image: "equip-crs.jpg", desc: "Robocop style" }
 ];
 
 let NIGHTCLUB_CATALOG = [
@@ -28,9 +28,9 @@ let SPORTCLUB_CATALOG = [
 
 let DEALER_CATALOG = [
   { id: "vh_roller", categorie: "vehicule", slot: "VEHICLE", nom: "Paire de rollers", prix: 1500, bonusVal: 2, isMotorized: false, bonusLabel: "+2 PM", image: "veh-roller.jpg", desc: "Ça roule ma poule !" },
-  { id: "vh_trott", categorie: "vehicule", slot: "VEHICLE", nom: "Trottinette", prix: 3000, bonusVal: 4, isMotorized: false, bonusLabel: "+4 PM", image: "veh-trott.jpg", desc: "Pratique pour couper par les ruelles." },
-  { id: "vh_scooter", categorie: "vehicule", slot: "VEHICLE", nom: "Scooter", prix: 6000, bonusVal: 6, isMotorized: true, bonusLabel: "+6 PM", image: "veh-scooter.jpg", desc: "Ça cabre dans toute la cité !" },
-  { id: "vh_moto", categorie: "vehicule", slot: "VEHICLE", nom: "Grosse cylindrée", prix: 10000, bonusVal: 8, isMotorized: true, bonusLabel: "+8 PM", image: "veh-moto.jpg", desc: "Intouchable sur le périph' !" }
+  { id: "vh_trott", categorie: "vehicule", slot: "VEHICLE", nom: "Trottinette", prix: 4000, bonusVal: 4, isMotorized: false, bonusLabel: "+4 PM", image: "veh-trott.jpg", desc: "Pratique pour couper par les ruelles." },
+  { id: "vh_scooter", categorie: "vehicule", slot: "VEHICLE", nom: "Scooter", prix: 12000, bonusVal: 6, isMotorized: true, bonusLabel: "+6 PM", image: "veh-scooter.jpg", desc: "Ça cabre dans toute la cité !" },
+  { id: "vh_moto", categorie: "vehicule", slot: "VEHICLE", nom: "Grosse cylindrée", prix: 28000, bonusVal: 8, isMotorized: true, bonusLabel: "+8 PM", image: "veh-moto.jpg", desc: "Intouchable sur le périph' !" }
 ];
 
 fetch('/catalog.json')
