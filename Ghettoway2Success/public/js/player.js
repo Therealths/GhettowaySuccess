@@ -31,9 +31,10 @@ function getTotalDef() {
   return Math.max(0, def);
 }
 
-// Une action (attaque, Yencli, braquage, achat, objet ramassé) coûte 2 PM : simple décompte affiché, rien n'est bloqué
-function spendActionPm() {
-  pmSpentThisTurn += 2;
+// Une action (attaque, Yencli, braquage, achat) coûte 2 PM, un objet ramassé 1 PM : simple décompte affiché, rien n'est bloqué
+const LOOT_PM = 1;
+function spendActionPm(n = 2) {
+  pmSpentThisTurn += n;
   refreshHud();
 }
 

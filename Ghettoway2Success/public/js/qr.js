@@ -515,14 +515,14 @@ async function processQrPayload(payload) {
   if (type === 'obj') {
     if (data.eff === 'cash') {
       const v = data.val || 1000;
-      return openLootDiscoveryModal({ name: data.n || 'Cash', eff: 'cash', val: v, desc: `+${v.toLocaleString()} €` }, "Récupérer", () => { localPlayer.pocketCash += v; spendActionPm(); });
+      return openLootDiscoveryModal({ name: data.n || 'Cash', eff: 'cash', val: v, desc: `+${v.toLocaleString()} €` }, "Récupérer", () => { localPlayer.pocketCash += v; spendActionPm(LOOT_PM); });
     }
     if (data.eff === 'drug') {
       const v = data.val || 1;
-      return openLootDiscoveryModal({ name: data.n || 'Drogue', eff: 'drug', val: v, desc: `+${v} kg` }, "Récupérer", () => { localPlayer.drugs += v; spendActionPm(); });
+      return openLootDiscoveryModal({ name: data.n || 'Drogue', eff: 'drug', val: v, desc: `+${v} kg` }, "Récupérer", () => { localPlayer.drugs += v; spendActionPm(LOOT_PM); });
     }
     const it = { id: 'obj_' + Date.now(), type: 'ITEM_CARD', name: data.n || 'Objet', eff: data.eff || 'none', val: data.val || 0, dur: data.dur || 'instant', desc: data.desc || "Objet" };
-    return openLootDiscoveryModal(it, "Ajouter au sac", () => { localPlayer.inventory.push(it); spendActionPm(); });
+    return openLootDiscoveryModal(it, "Ajouter au sac", () => { localPlayer.inventory.push(it); spendActionPm(LOOT_PM); });
   }
 
   if (type === 'eq' || type === 'gb' || type === 'pr') {
